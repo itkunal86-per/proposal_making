@@ -29,5 +29,9 @@ export function createServer() {
   // Analytics
   app.get("/api/analytics", handleAnalytics);
 
+  // GoHighLevel integration helpers (server-side validation only)
+  app.post("/api/integrations/ghl/test", handleGhlTest);
+  app.post("/api/integrations/ghl/sync", handleGhlSync);
+
   return app;
 }
