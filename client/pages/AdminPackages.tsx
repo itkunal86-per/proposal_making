@@ -426,7 +426,7 @@ export default function AdminPackages() {
                   <Label htmlFor="features">Key features</Label>
                   <Textarea
                     id="features"
-                    placeholder("One feature per line")
+                    placeholder="One feature per line"
                     value={form.features}
                     onChange={(event) =>
                       setForm((prev) => ({ ...prev, features: event.target.value }))
