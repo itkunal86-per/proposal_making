@@ -48,6 +48,7 @@ const App = () => (
             <Route path="/p/:token" element={<ProposalView />} />
             <Route path="/clients" element={<Clients />} />
             <Route path="/user" element={<User />} />
+            <Route path="/admin/packages" element={<AdminPackages />} />
             <Route path="/invite/:token" element={<AcceptInvite />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
