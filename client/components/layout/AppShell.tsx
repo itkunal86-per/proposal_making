@@ -10,63 +10,110 @@ import {
   SidebarMenuButton,
   SidebarInset,
   SidebarRail,
+  SidebarFooter,
 } from "@/components/ui/sidebar";
-import { Fragment, ReactNode } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Fragment, ReactNode, useMemo } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import type { UserRole } from "@/data/users";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+interface NavItem {
+  href: string;
+  label: string;
+}
+
+const navByRole: Record<UserRole, NavItem[]> = {
+  admin: [
+    { href: "/dashboard", label: "Dashboard" },
+    { href: "/admin/users", label: "Users" },
+    { href: "/admin/packages", label: "Packages" },
+    { href: "/admin/templates", label: "Templates" },
+    { href: "/admin/settings", label: "Settings" },
+  ],
+  subscriber: [
+    { href: "/my/proposals", label: "My Proposals" },
+    { href: "/my/clients", label: "My Clients" },
+    { href: "/my/settings", label: "Settings" },
+  ],
+};
 
 export default function AppShell({ children }: { children: ReactNode }) {
+  const { user, signOut } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const navItems = useMemo(() => {
+    return user ? navByRole[user.role] : [];
+  }, [user]);
+
+  const handleSignOut = () => {
+    signOut();
+    navigate("/login", { replace: true });
+  };
+
   return (
     <SidebarProvider>
       <div className="flex min-h-screen">
         <Sidebar collapsible="offcanvas" className="border-r">
           <SidebarHeader>
-            <div className="flex items-center gap-2 px-2 py-1.5">
-              <div className="h-6 w-6 rounded-md bg-gradient-to-br from-primary to-cyan-500" />
-              <span className="text-sm font-semibold">Proposal AI</span>
+            <div className="flex items-center justify-between gap-2 px-2 py-1.5">
+              <div className="flex items-center gap-2">
+                <div className="h-6 w-6 rounded-md bg-gradient-to-br from-primary to-cyan-500" />
+                <span className="text-sm font-semibold">Proposal AI</span>
+              </div>
+              {user && (
+                <span className="rounded-full bg-sidebar-accent px-2 py-0.5 text-xs font-medium text-sidebar-accent-foreground">
+                  {user.role === "admin" ? "Admin" : "Subscriber"}
+                </span>
+              )}
             </div>
           </SidebarHeader>
           <SidebarContent>
             <SidebarGroup>
               <SidebarGroupLabel>Menu</SidebarGroupLabel>
               <SidebarMenu>
-                <SidebarMenuItem>
-                  <a href="/dashboard" className="block">
-                    <SidebarMenuButton asChild>
-                      <span>Dashboard</span>
-                    </SidebarMenuButton>
-                  </a>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <a href="/user" className="block">
-                    <SidebarMenuButton asChild>
-                      <span>Users</span>
-                    </SidebarMenuButton>
-                  </a>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <a href="/admin/packages" className="block">
-                    <SidebarMenuButton asChild>
-                      <span>Packages</span>
-                    </SidebarMenuButton>
-                  </a>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <a href="/proposals" className="block">
-                    <SidebarMenuButton asChild>
-                      <span>Proposals</span>
-                    </SidebarMenuButton>
-                  </a>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <a href="/clients" className="block">
-                    <SidebarMenuButton asChild>
-                      <span>Clients</span>
-                    </SidebarMenuButton>
-                  </a>
-                </SidebarMenuItem>
+                {navItems.map((item) => {
+                  const active =
+                    location.pathname === item.href ||
+                    location.pathname.startsWith(`${item.href}/`);
+                  return (
+                    <SidebarMenuItem key={item.href}>
+                      <SidebarMenuButton asChild>
+                        <Link
+                          to={item.href}
+                          className={cn(
+                            "flex items-center gap-2",
+                            active && "bg-sidebar-accent text-sidebar-accent-foreground",
+                          )}
+                          aria-current={active ? "page" : undefined}
+                        >
+                          <span>{item.label}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
               </SidebarMenu>
             </SidebarGroup>
           </SidebarContent>
+          {user && (
+            <SidebarFooter>
+              <div className="rounded-lg border bg-background p-3 text-xs">
+                <div className="font-medium text-foreground">{user.name}</div>
+                {user.company && (
+                  <div className="text-muted-foreground">{user.company}</div>
+                )}
+                <div className="mt-3 flex items-center justify-between gap-2">
+                  <span className="text-muted-foreground">{user.email}</span>
+                  <Button variant="outline" size="sm" onClick={handleSignOut}>
+                    Sign out
+                  </Button>
+                </div>
+              </div>
+            </SidebarFooter>
+          )}
           <SidebarRail />
         </Sidebar>
         <SidebarInset className="flex min-h-screen w-full flex-col">
