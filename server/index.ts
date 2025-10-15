@@ -4,6 +4,7 @@ import cors from "cors";
 import { handleDemo } from "./routes/demo";
 import { handleLogin } from "./routes/auth";
 import { handleAnalytics } from "./routes/analytics";
+import { handleGhlTest, handleGhlSync } from "./routes/ghl";
 
 export function createServer() {
   const app = express();
