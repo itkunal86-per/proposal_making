@@ -4,6 +4,7 @@ import cors from "cors";
 import { handleDemo } from "./routes/demo";
 import { handleLogin } from "./routes/auth";
 import { handleAnalytics } from "./routes/analytics";
+import { handleGhlTest, handleGhlSync } from "./routes/ghl";
 
 export function createServer() {
   const app = express();
@@ -27,6 +28,10 @@ export function createServer() {
 
   // Analytics
   app.get("/api/analytics", handleAnalytics);
+
+  // GoHighLevel integration helpers (server-side validation only)
+  app.post("/api/integrations/ghl/test", handleGhlTest);
+  app.post("/api/integrations/ghl/sync", handleGhlSync);
 
   return app;
 }

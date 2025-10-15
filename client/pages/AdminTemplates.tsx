@@ -35,7 +35,6 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import {
   Proposal,
