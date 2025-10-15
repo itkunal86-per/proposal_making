@@ -33,7 +33,7 @@ export default function Login() {
     return Object.keys(next).length === 0;
   };
 
-  const onSubmit = async (e: React.FormEvent) => {
+  const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!validate()) return;
     setLoading(true);
