@@ -35,6 +35,8 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 import {
   Proposal,
   ProposalStatus,
@@ -46,7 +48,8 @@ import {
   toggleShare,
 } from "@/lib/proposalsStore";
 
-export default function Proposals() {
+export default function AdminTemplates() {
+  const { user } = useAuth();
   const nav = useNavigate();
   const [rows, setRows] = useState<Proposal[]>([]);
   const [search, setSearch] = useState("");
@@ -88,21 +91,25 @@ export default function Proposals() {
   }
 
   function onCreate() {
-    const p = createProposal();
-    toast({ title: "Proposal created" });
+    const p = createProposal({
+      createdBy: user?.email ?? "admin@example.com",
+      title: "New Template",
+      client: "",
+    });
+    toast({ title: "Template created" });
     refresh();
     nav(`/proposals/${p.id}/edit`);
   }
 
   function onDelete(id: string) {
     deleteProposal(id);
-    toast({ title: "Proposal deleted" });
+    toast({ title: "Template deleted" });
     refresh();
   }
 
   function onDuplicate(id: string) {
     const p = duplicateProposal(id);
-    if (p) toast({ title: "Proposal duplicated" });
+    if (p) toast({ title: "Template duplicated" });
     refresh();
   }
 
@@ -118,13 +125,13 @@ export default function Proposals() {
       <section className="container py-6">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-bold">Proposals</h1>
+            <h1 className="text-2xl font-bold">Templates</h1>
             <p className="text-muted-foreground">
-              Create, manage and export proposals.
+              Centralized library of reusable proposal templates.
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Button onClick={onCreate}>New proposal</Button>
+            <Button onClick={onCreate}>New template</Button>
           </div>
         </div>
 
@@ -208,7 +215,7 @@ export default function Proposals() {
                   <TableHead>Title</TableHead>
                   <TableHead>Client</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Created by</TableHead>
+                  <TableHead>Owner</TableHead>
                   <TableHead>Last modified</TableHead>
                   <TableHead className="w-[1%] whitespace-nowrap text-right">
                     Actions
@@ -305,7 +312,7 @@ export default function Proposals() {
               <div className="space-y-4">
                 <h2 className="text-xl font-semibold">{preview.title}</h2>
                 <div className="text-sm text-muted-foreground">
-                  Client: {preview.client || "��"} • Status: {preview.status}
+                  Status: {preview.status} • Owner: {preview.createdBy}
                 </div>
                 <Separator />
                 {preview.sections.map((s) => (
