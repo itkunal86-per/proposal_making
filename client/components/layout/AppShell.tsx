@@ -39,7 +39,14 @@ export default function AppShell({ children }: { children: ReactNode }) {
                 <SidebarMenuItem>
                   <a href="/user" className="block">
                     <SidebarMenuButton asChild>
-                      <span>User</span>
+                      <span>Users</span>
+                    </SidebarMenuButton>
+                  </a>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <a href="/admin/packages" className="block">
+                    <SidebarMenuButton asChild>
+                      <span>Packages</span>
                     </SidebarMenuButton>
                   </a>
                 </SidebarMenuItem>
