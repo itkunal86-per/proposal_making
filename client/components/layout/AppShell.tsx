@@ -165,6 +165,8 @@ function formatSegmentLabel(segment: string, index: number) {
     admin: "Admin",
     packages: "Packages",
     settings: "Settings",
+    templates: "Templates",
+    my: "My Workspace",
     edit: "Edit",
     view: "View",
     invite: "Invite",
