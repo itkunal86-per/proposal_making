@@ -4,12 +4,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
-import type { LoginResponse } from "@shared/api";
+import { useAuth } from "@/hooks/useAuth";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export default function Login() {
+  const { signIn } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(true);
+  const fromState = location.state as { from?: string } | null;
+  const redirectTo = fromState?.from;
   const [errors, setErrors] = useState<{
     email?: string;
     password?: string;
@@ -32,24 +38,15 @@ export default function Login() {
     setLoading(true);
     setErrors({});
     try {
-      // const res = await fetch("/auth/login", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({ email, password, remember }),
-      // });
-      // const data = (await res.json()) as LoginResponse | { error?: string };
-      // if (!res.ok) {
-      //   setErrors({ form: (data as any).error || "Login failed" });
-      //   return;
-      // }
-      // const token = (data as LoginResponse).token;
-
-      //const token = (data as LoginResponse).token;
-      const storage = remember ? localStorage : sessionStorage;
-      //storage.setItem("auth_token", token);
-      storage.setItem("auth_email", email);
+      const result = await signIn({ email, password, remember });
+      if (!result.success) {
+        setErrors({ form: result.error || "Login failed" });
+        return;
+      }
       toast({ title: "Welcome back", description: "Login successful" });
-      window.location.href = "/dashboard";
+      const destination =
+        redirectTo || (result.user?.role === "admin" ? "/dashboard" : "/my/proposals");
+      navigate(destination, { replace: true });
     } catch (err) {
       setErrors({ form: "Network error" });
     } finally {
