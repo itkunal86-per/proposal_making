@@ -1,7 +1,6 @@
 import { useAuth } from "@/hooks/useAuth";
 import type { UserRole } from "@/data/users";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 
 function LoadingScreen() {
   return (
