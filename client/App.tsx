@@ -21,6 +21,7 @@ import ProposalView from "./pages/ProposalView";
 import Clients from "./pages/Clients";
 import User from "./pages/User";
 import AcceptInvite from "./pages/AcceptInvite";
+import AdminPackages from "./pages/AdminPackages";
 
 const queryClient = new QueryClient();
 
