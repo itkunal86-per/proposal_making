@@ -5,12 +5,11 @@ import Footer from "./Footer";
 
 export default function Layout({ children }: { children: ReactNode }) {
   const { pathname } = useLocation();
-  const hideHeader = pathname.startsWith("/dashboard") || pathname.startsWith("/user");
+  const appShellPrefixes = ["/dashboard", "/user", "/admin"];
+  const usesAppShell = appShellPrefixes.some((prefix) => pathname.startsWith(prefix));
+  const hideHeader = usesAppShell;
   const hideFooter =
-    pathname.startsWith("/dashboard") ||
-    pathname.startsWith("/user") ||
-    pathname.startsWith("/proposals") ||
-    pathname.startsWith("/p");
+    usesAppShell || pathname.startsWith("/proposals") || pathname.startsWith("/p");
   return (
     <div className="flex min-h-screen flex-col">
       {!hideHeader && <Header />}
