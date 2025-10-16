@@ -1,51 +1,26 @@
-import { useEffect, useMemo, useState } from "react";
 import AppShell from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useEffect, useMemo, useState } from "react";
 import {
-  Proposal,
-  ProposalStatus,
+  type Proposal,
+  type ProposalStatus,
   createProposal,
   deleteProposal,
   duplicateProposal,
-  loadProposals,
-  saveProposals,
+  listProposals,
   toggleShare,
-} from "@/lib/proposalsStore";
+} from "@/services/proposalsService";
 
 export default function AdminTemplates() {
   const { user } = useAuth();
@@ -58,11 +33,8 @@ export default function AdminTemplates() {
   const [pageSize, setPageSize] = useState(10);
   const [preview, setPreview] = useState<Proposal | null>(null);
 
-  useEffect(() => {
-    setRows(loadProposals());
-  }, []);
+  useEffect(() => { (async () => setRows(await listProposals()))(); }, []);
 
-  // Distinct clients for filter
   const clients = useMemo(() => {
     return Array.from(new Set(rows.map((r) => r.client).filter(Boolean)));
   }, [rows]);
@@ -75,9 +47,8 @@ export default function AdminTemplates() {
       .filter((r) =>
         !q
           ? true
-          : [r.title, r.client, r.createdBy].some((v) =>
-              v.toLowerCase().includes(q),
-            ) || r.sections.some((s) => s.title.toLowerCase().includes(q)),
+          : [r.title, r.client, r.createdBy].some((v) => v.toLowerCase().includes(q)) ||
+            r.sections.some((s) => s.title.toLowerCase().includes(q)),
       )
       .sort((a, b) => b.updatedAt - a.updatedAt);
   }, [rows, status, client, search]);
@@ -85,36 +56,31 @@ export default function AdminTemplates() {
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const pageRows = filtered.slice((page - 1) * pageSize, page * pageSize);
 
-  function refresh() {
-    setRows(loadProposals());
+  async function refresh() {
+    setRows(await listProposals());
   }
 
-  function onCreate() {
-    const p = createProposal({
-      createdBy: user?.email ?? "admin@example.com",
-      title: "New Template",
-      client: "",
-    });
+  async function onCreate() {
+    const p = await createProposal({ createdBy: user?.email ?? "admin@example.com", title: "New Template", client: "" });
     toast({ title: "Template created" });
-    refresh();
+    await refresh();
     nav(`/proposals/${p.id}/edit`);
   }
 
-  function onDelete(id: string) {
-    deleteProposal(id);
+  async function onDelete(id: string) {
+    await deleteProposal(id);
     toast({ title: "Template deleted" });
-    refresh();
+    await refresh();
   }
 
-  function onDuplicate(id: string) {
-    const p = duplicateProposal(id);
+  async function onDuplicate(id: string) {
+    const p = await duplicateProposal(id);
     if (p) toast({ title: "Template duplicated" });
-    refresh();
+    await refresh();
   }
 
-  function onExportPDF(p: Proposal) {
-    const shared = toggleShare(p, true);
-    saveProposals(loadProposals());
+  async function onExportPDF(p: Proposal) {
+    const shared = await toggleShare(p, true);
     const url = `${window.location.origin}/p/${shared.settings.sharing.token}?print=1`;
     window.open(url, "_blank");
   }
@@ -125,9 +91,7 @@ export default function AdminTemplates() {
         <div className="flex items-start justify-between gap-3">
           <div>
             <h1 className="text-2xl font-bold">Templates</h1>
-            <p className="text-muted-foreground">
-              Centralized library of reusable proposal templates.
-            </p>
+            <p className="text-muted-foreground">Centralized library of reusable proposal templates.</p>
           </div>
           <div className="flex items-center gap-2">
             <Button onClick={onCreate}>New template</Button>
@@ -139,19 +103,10 @@ export default function AdminTemplates() {
             <Input
               placeholder="Search title, client, author, section"
               value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setPage(1);
-              }}
+              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
               className="w-72"
             />
-            <Select
-              value={status}
-              onValueChange={(v: any) => {
-                setStatus(v);
-                setPage(1);
-              }}
-            >
+            <Select value={status} onValueChange={(v: any) => { setStatus(v); setPage(1); }}>
               <SelectTrigger className="w-44">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
@@ -163,44 +118,26 @@ export default function AdminTemplates() {
                 <SelectItem value="declined">Declined</SelectItem>
               </SelectContent>
             </Select>
-            <Select
-              value={client}
-              onValueChange={(v: any) => {
-                setClient(v);
-                setPage(1);
-              }}
-            >
+            <Select value={client} onValueChange={(v: any) => { setClient(v); setPage(1); }}>
               <SelectTrigger className="w-44">
                 <SelectValue placeholder="Client" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All clients</SelectItem>
                 {clients.map((c) => (
-                  <SelectItem key={c} value={c}>
-                    {c}
-                  </SelectItem>
+                  <SelectItem key={c} value={c}>{c}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
             <div className="ml-auto flex items-center gap-2">
-              <Label htmlFor="ps" className="text-xs text-muted-foreground">
-                Rows
-              </Label>
-              <Select
-                value={String(pageSize)}
-                onValueChange={(v) => {
-                  setPageSize(Number(v));
-                  setPage(1);
-                }}
-              >
+              <Label htmlFor="ps" className="text-xs text-muted-foreground">Rows</Label>
+              <Select value={String(pageSize)} onValueChange={(v) => { setPageSize(Number(v)); setPage(1); }}>
                 <SelectTrigger id="ps" className="w-24">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {[5, 10, 20, 50].map((n) => (
-                    <SelectItem key={n} value={String(n)}>
-                      {n}
-                    </SelectItem>
+                    <SelectItem key={n} value={String(n)}>{n}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -216,9 +153,7 @@ export default function AdminTemplates() {
                   <TableHead>Status</TableHead>
                   <TableHead>Owner</TableHead>
                   <TableHead>Last modified</TableHead>
-                  <TableHead className="w-[1%] whitespace-nowrap text-right">
-                    Actions
-                  </TableHead>
+                  <TableHead className="w-[1%] whitespace-nowrap text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -228,45 +163,13 @@ export default function AdminTemplates() {
                     <TableCell>{r.client || "—"}</TableCell>
                     <TableCell className="capitalize">{r.status}</TableCell>
                     <TableCell>{r.createdBy}</TableCell>
-                    <TableCell>
-                      {new Date(r.updatedAt).toLocaleString()}
-                    </TableCell>
+                    <TableCell>{new Date(r.updatedAt).toLocaleString()}</TableCell>
                     <TableCell className="text-right space-x-1 whitespace-nowrap">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setPreview(r)}
-                      >
-                        Preview
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => nav(`/proposals/${r.id}/edit`)}
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onDuplicate(r.id)}
-                      >
-                        Duplicate
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onExportPDF(r)}
-                      >
-                        Export PDF
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => onDelete(r.id)}
-                      >
-                        Delete
-                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => setPreview(r)}>Preview</Button>
+                      <Button variant="outline" size="sm" onClick={() => nav(`/proposals/${r.id}/edit`)}>Edit</Button>
+                      <Button variant="outline" size="sm" onClick={() => onDuplicate(r.id)}>Duplicate</Button>
+                      <Button variant="outline" size="sm" onClick={() => onExportPDF(r)}>Export PDF</Button>
+                      <Button variant="destructive" size="sm" onClick={() => onDelete(r.id)}>Delete</Button>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -276,27 +179,13 @@ export default function AdminTemplates() {
           <Pagination className="mt-4">
             <PaginationContent>
               <PaginationItem>
-                <PaginationPrevious
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setPage((p) => Math.max(1, p - 1));
-                  }}
-                />
+                <PaginationPrevious href="#" onClick={(e) => { e.preventDefault(); setPage((p) => Math.max(1, p - 1)); }} />
               </PaginationItem>
               <PaginationItem>
-                <span className="px-3 text-sm text-muted-foreground">
-                  Page {page} of {totalPages}
-                </span>
+                <span className="px-3 text-sm text-muted-foreground">Page {page} of {totalPages}</span>
               </PaginationItem>
               <PaginationItem>
-                <PaginationNext
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setPage((p) => Math.min(totalPages, p + 1));
-                  }}
-                />
+                <PaginationNext href="#" onClick={(e) => { e.preventDefault(); setPage((p) => Math.min(totalPages, p + 1)); }} />
               </PaginationItem>
             </PaginationContent>
           </Pagination>
@@ -310,16 +199,12 @@ export default function AdminTemplates() {
             {preview && (
               <div className="space-y-4">
                 <h2 className="text-xl font-semibold">{preview.title}</h2>
-                <div className="text-sm text-muted-foreground">
-                  Status: {preview.status} • Owner: {preview.createdBy}
-                </div>
+                <div className="text-sm text-muted-foreground">Status: {preview.status} • Owner: {preview.createdBy}</div>
                 <Separator />
                 {preview.sections.map((s) => (
                   <div key={s.id} className="space-y-1">
                     <h3 className="font-medium">{s.title}</h3>
-                    <p className="whitespace-pre-wrap text-sm text-muted-foreground">
-                      {s.content}
-                    </p>
+                    <p className="whitespace-pre-wrap text-sm text-muted-foreground">{s.content}</p>
                   </div>
                 ))}
               </div>
