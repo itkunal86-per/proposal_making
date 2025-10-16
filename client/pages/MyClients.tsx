@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/hooks/use-toast";
 import { useEffect, useMemo, useState } from "react";
-import { ClientRecord, ClientStatus, createClient, deleteClient, loadClients, updateClient } from "@/lib/clientsStore";
+import { type ClientRecord, type ClientStatus, listClients, createClient, updateClient, deleteClient } from "@/services/clientsService";
 
 export default function MyClients() {
   const [rows, setRows] = useState<ClientRecord[]>([]);
@@ -19,47 +19,43 @@ export default function MyClients() {
   const [openEdit, setOpenEdit] = useState<null | ClientRecord>(null);
   const [openAdd, setOpenAdd] = useState(false);
 
-  useEffect(() => {
-    setRows(loadClients());
-  }, []);
+  useEffect(() => { (async () => setRows(await listClients()))(); }, []);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     const list = rows
       .filter((r) => (status === "all" ? true : r.status === status))
-      .filter((r) =>
-        !q ? true : [r.name, r.email, r.company ?? ""].some((v) => v.toLowerCase().includes(q)),
-      )
+      .filter((r) => (!q ? true : [r.name, r.email, r.company ?? ""].some((v) => v.toLowerCase().includes(q))))
       .sort((a, b) => b.updatedAt - a.updatedAt);
     return list;
   }, [rows, search, status]);
 
-  function refresh() {
-    setRows(loadClients());
+  async function refresh() {
+    setRows(await listClients());
   }
 
-  function onAdd(payload: { name: string; email: string; company?: string; status: ClientStatus }) {
+  async function onAdd(payload: { name: string; email: string; company?: string; status: ClientStatus }) {
     if (!payload.name.trim() || !payload.email.trim()) {
       toast({ title: "Name and email are required", variant: "destructive" });
       return;
     }
-    createClient(payload);
+    await createClient(payload);
     toast({ title: "Client added" });
     setOpenAdd(false);
-    refresh();
+    await refresh();
   }
 
-  function onSave(rec: ClientRecord) {
-    updateClient(rec);
+  async function onSave(rec: ClientRecord) {
+    await updateClient(rec);
     toast({ title: "Client updated" });
     setOpenEdit(null);
-    refresh();
+    await refresh();
   }
 
-  function onDelete(id: string) {
-    deleteClient(id);
+  async function onDelete(id: string) {
+    await deleteClient(id);
     toast({ title: "Client deleted" });
-    refresh();
+    await refresh();
   }
 
   return (

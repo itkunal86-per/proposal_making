@@ -6,10 +6,16 @@ import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { useAuth } from "@/hooks/useAuth";
-import { Proposal, createProposal, deleteProposal, duplicateProposal, loadProposals } from "@/lib/proposalsStore";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
+import {
+  type Proposal,
+  createProposal,
+  deleteProposal,
+  duplicateProposal,
+  listProposals,
+} from "@/services/proposalsService";
 
 export default function MyProposals() {
   const { user } = useAuth();
@@ -20,7 +26,7 @@ export default function MyProposals() {
   const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
-    setRows(loadProposals());
+    (async () => setRows(await listProposals()))();
   }, []);
 
   const mine = useMemo(() => {
@@ -36,27 +42,27 @@ export default function MyProposals() {
   const totalPages = Math.max(1, Math.ceil(mine.length / pageSize));
   const pageRows = mine.slice((page - 1) * pageSize, page * pageSize);
 
-  function refresh() {
-    setRows(loadProposals());
+  async function refresh() {
+    setRows(await listProposals());
   }
 
-  function onCreate() {
-    const p = createProposal({ createdBy: user?.email ?? "you@example.com", title: "New Proposal" });
+  async function onCreate() {
+    const p = await createProposal({ createdBy: user?.email ?? "you@example.com", title: "New Proposal" });
     toast({ title: "Proposal created" });
-    refresh();
+    await refresh();
     nav(`/proposals/${p.id}/edit`);
   }
 
-  function onDelete(id: string) {
-    deleteProposal(id);
+  async function onDelete(id: string) {
+    await deleteProposal(id);
     toast({ title: "Proposal deleted" });
-    refresh();
+    await refresh();
   }
 
-  function onDuplicate(id: string) {
-    const p = duplicateProposal(id);
+  async function onDuplicate(id: string) {
+    const p = await duplicateProposal(id);
     if (p) toast({ title: "Proposal duplicated" });
-    refresh();
+    await refresh();
   }
 
   return (

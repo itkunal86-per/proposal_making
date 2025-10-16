@@ -16,9 +16,9 @@ import {
 } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import {
-  Proposal,
-  ProposalSection,
-  ProposalStatus,
+  type Proposal,
+  type ProposalSection,
+  type ProposalStatus,
   addComment,
   addSection,
   getProposal,
@@ -26,7 +26,7 @@ import {
   removeSection,
   updateProposal,
   valueTotal,
-} from "@/lib/proposalsStore";
+} from "@/services/proposalsService";
 
 export default function ProposalEditor() {
   const { id = "" } = useParams();
@@ -37,12 +37,14 @@ export default function ProposalEditor() {
   const saveTimer = useRef<number | null>(null);
 
   useEffect(() => {
-    const found = getProposal(id);
-    if (!found) {
-      nav("/proposals");
-      return;
-    }
-    setP(found);
+    (async () => {
+      const found = await getProposal(id);
+      if (!found) {
+        nav("/proposals");
+        return;
+      }
+      setP(found);
+    })();
   }, [id]);
 
   function commit(next: Proposal, keepVersion = false, note?: string) {
@@ -50,7 +52,7 @@ export default function ProposalEditor() {
     setSaving(true);
     if (saveTimer.current) window.clearTimeout(saveTimer.current);
     saveTimer.current = window.setTimeout(() => {
-      updateProposal(next, { keepVersion, note });
+      void updateProposal(next, { keepVersion, note });
       setSaving(false);
     }, 400);
   }
@@ -154,10 +156,11 @@ export default function ProposalEditor() {
             <div className="mt-3 flex gap-2">
               <Button
                 size="sm"
-                onClick={() => {
+                onClick={async () => {
                   const title = `Section ${p.sections.length + 1}`;
-                  addSection(p, title);
-                  setP(getProposal(p.id)!);
+                  await addSection(p, title);
+                  const np = await getProposal(p.id);
+                  if (np) setP(np);
                   setCurrent(p.sections.length);
                 }}
               >
@@ -166,8 +169,8 @@ export default function ProposalEditor() {
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() =>
-                  current > 0 && reorderSection(p, current, current - 1)
+                onClick={async () =>
+                  current > 0 && (await reorderSection(p, current, current - 1))
                 }
               >
                 Up
@@ -175,9 +178,9 @@ export default function ProposalEditor() {
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() =>
+                onClick={async () =>
                   current < p.sections.length - 1 &&
-                  reorderSection(p, current, current + 1)
+                  (await reorderSection(p, current, current + 1))
                 }
               >
                 Down
@@ -187,11 +190,11 @@ export default function ProposalEditor() {
               <Button
                 size="sm"
                 variant="destructive"
-                onClick={() => {
+                onClick={async () => {
                   const id = p.sections[current].id;
-                  removeSection(p, id);
-                  const np = getProposal(p.id)!;
-                  setP(np);
+                  await removeSection(p, id);
+                  const np = await getProposal(p.id);
+                  if (np) setP(np);
                   setCurrent(Math.max(0, current - 1));
                 }}
               >
@@ -413,13 +416,14 @@ export default function ProposalEditor() {
             <div className="mt-2 flex gap-2">
               <Input id="cmt" placeholder="Add a comment" />
               <Button
-                onClick={() => {
+                onClick={async () => {
                   const el = document.getElementById("cmt") as HTMLInputElement;
                   const v = el.value.trim();
                   if (v) {
-                    addComment(p, section.id, "you", v);
+                    await addComment(p, section.id, "you", v);
                     el.value = "";
-                    setP(getProposal(p.id)!);
+                    const np = await getProposal(p.id);
+                    if (np) setP(np);
                   }
                 }}
               >
@@ -461,9 +465,10 @@ export default function ProposalEditor() {
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => {
-                      updateProposal(v.data);
-                      setP(getProposal(v.data.id)!);
+                    onClick={async () => {
+                      await updateProposal(v.data);
+                      const np = await getProposal(v.data.id);
+                      if (np) setP(np);
                       toast({ title: "Version restored" });
                     }}
                   >
