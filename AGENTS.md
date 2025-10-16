@@ -16,7 +16,7 @@ While the starter comes with a express server, only create endpoint when strictl
 
 ```
 client/                   # React SPA frontend
-���── pages/                # Route components (Index.tsx = home)
+├── pages/                # Route components (Index.tsx = home)
 ├── components/ui/        # Pre-built UI component library
 ├── App.tsx                # App entry point and with SPA routing setup
 └── global.css            # TailwindCSS 3 theming and global styles
@@ -237,6 +237,79 @@ const data: MyRouteResponse = await response.json();
 2. Add route in `client/App.tsx`:
 ```typescript
 <Route path="/my-page" element={<MyPage />} />
+```
+
+## Environment Variables
+
+### Development
+
+Create a `.env` file in the root directory for local development:
+
+```
+# Example .env
+VITE_API_URL=http://localhost:8080
+NODE_ENV=development
+```
+
+### Production
+
+Set environment variables in your deployment platform:
+- Netlify: Site settings > Environment > Environment variables
+- Vercel: Settings > Environment Variables
+- Self-hosted: Set via your hosting platform or shell
+
+## Troubleshooting
+
+### Common Issues
+
+#### Module Not Found Error
+**Error**: `Cannot find module 'dist/server/node-build.mjs'`
+- **Cause**: Production build hasn't been created
+- **Solution**: Run `pnpm build` before `pnpm start`
+
+#### Port Already in Use
+**Error**: `Error: listen EADDRINUSE: address already in use :::8080`
+- **Cause**: Port 8080 is already occupied
+- **Solution**:
+  - Kill the process using port 8080
+  - Or change the port in `vite.config.ts`
+
+#### Dependencies Not Installed
+**Error**: `Cannot find module 'react'`
+- **Cause**: Dependencies weren't installed
+- **Solution**: Run `pnpm install` and verify `node_modules/` exists
+
+#### TypeScript Errors
+**Error**: Type errors during development
+- **Solution**:
+  - Run `pnpm typecheck` to see all errors
+  - Check that all imports use correct paths (`@/` or `@shared/`)
+  - Ensure all components have proper type annotations
+
+#### Hot Reload Not Working
+**Cause**: Vite dev server isn't detecting changes
+- **Solution**:
+  - Restart the dev server: `pnpm dev`
+  - Check file permissions
+  - Verify your editor isn't in a read-only mode
+
+### Debugging
+
+#### Enable Debug Logging
+Set `DEBUG` environment variable:
+
+```bash
+DEBUG=* pnpm dev
+```
+
+#### Test Your Build
+Verify everything works before deployment:
+
+```bash
+pnpm build           # Build
+pnpm typecheck       # Check types
+pnpm test            # Run tests
+pnpm start           # Test production build
 ```
 
 ## Production Deployment
