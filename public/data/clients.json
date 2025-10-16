@@ -1,0 +1,29 @@
+[
+  {
+    "id": "c-1",
+    "name": "Acme Corp",
+    "email": "ops@acme.com",
+    "company": "Acme",
+    "status": "active",
+    "createdAt": 1710100000000,
+    "updatedAt": 1710100000000
+  },
+  {
+    "id": "c-2",
+    "name": "Globex Ltd",
+    "email": "hello@globex.com",
+    "company": "Globex",
+    "status": "inactive",
+    "createdAt": 1710103600000,
+    "updatedAt": 1710103600000
+  },
+  {
+    "id": "c-3",
+    "name": "Initech",
+    "email": "contact@initech.com",
+    "company": "Initech",
+    "status": "active",
+    "createdAt": 1710110000000,
+    "updatedAt": 1710110000000
+  }
+]

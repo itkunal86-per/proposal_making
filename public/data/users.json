@@ -1,0 +1,20 @@
+[
+  {
+    "id": "admin-1",
+    "name": "Avery Morgan",
+    "email": "admin@example.com",
+    "password": "admin123",
+    "role": "admin",
+    "company": "Proposal AI",
+    "createdAt": 1710000000000
+  },
+  {
+    "id": "subscriber-1",
+    "name": "Quinn Carter",
+    "email": "subscriber@example.com",
+    "password": "subscriber123",
+    "role": "subscriber",
+    "company": "Carter Creative",
+    "createdAt": 1710003600000
+  }
+]
