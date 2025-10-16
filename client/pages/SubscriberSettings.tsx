@@ -68,10 +68,10 @@ export default function SubscriberSettings() {
       return;
     }
     try {
-      const { loadProposals } = await import("@/lib/proposalsStore");
-      const { loadClients } = await import("@/lib/clientsStore");
-      const proposals = data.crm?.syncProposals ? loadProposals().length : 0;
-      const clients = data.crm?.syncClients ? loadClients().length : 0;
+      const { listProposals } = await import("@/services/proposalsService");
+      const { listClients } = await import("@/services/clientsService");
+      const proposals = data.crm?.syncProposals ? (await listProposals()).length : 0;
+      const clients = data.crm?.syncClients ? (await listClients()).length : 0;
       const res = await fetch("/api/integrations/ghl/sync", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -119,60 +119,52 @@ export default function SubscriberSettings() {
             <Input id="email" type="email" value={data.email} onChange={(e) => setData((d) => ({ ...d, email: e.target.value }))} />
           </div>
           <Separator />
-          <div className="flex justify-end">
-            <Button onClick={save}>Save changes</Button>
-          </div>
-        </Card>
 
-        {/* GoHighLevel CRM Integration */}
-        <Card className="mt-6 p-4 space-y-4">
-          <div>
-            <h2 className="text-lg font-semibold">GoHighLevel CRM</h2>
-            <p className="text-sm text-muted-foreground">Connect your GHL account to sync clients and proposals. Each user can connect their own account.</p>
+          {/* CRM */}
+          <div className="space-y-2">
+            <h2 className="text-lg font-semibold">CRM Integration</h2>
+            <div className="grid gap-2">
+              <Label>GHL API key</Label>
+              <Input value={data.crm?.ghlApiKey ?? ""} onChange={(e) => setData((d) => ({ ...d, crm: { ...(d.crm ?? { ghlApiKey: "", ghlLocationId: "", syncClients: true, syncProposals: true }), ghlApiKey: e.target.value } }))} />
+            </div>
+            <div className="grid gap-2">
+              <Label>Location ID</Label>
+              <Input value={data.crm?.ghlLocationId ?? ""} onChange={(e) => setData((d) => ({ ...d, crm: { ...(d.crm ?? { ghlApiKey: "", ghlLocationId: "", syncClients: true, syncProposals: true }), ghlLocationId: e.target.value } }))} />
+            </div>
+            <div className="flex items-center gap-2">
+              <label className="text-sm"><input type="checkbox" className="mr-2" checked={data.crm?.syncClients ?? true} onChange={(e) => setData((d) => ({ ...d, crm: { ...(d.crm ?? { ghlApiKey: "", ghlLocationId: "", syncClients: true, syncProposals: true }), syncClients: e.target.checked } }))} /> Sync clients</label>
+              <label className="text-sm"><input type="checkbox" className="mr-2" checked={data.crm?.syncProposals ?? true} onChange={(e) => setData((d) => ({ ...d, crm: { ...(d.crm ?? { ghlApiKey: "", ghlLocationId: "", syncClients: true, syncProposals: true }), syncProposals: e.target.checked } }))} /> Sync proposals</label>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={testConnection}>Test connection</Button>
+              <Button onClick={syncNow}>Sync now</Button>
+            </div>
+            {data.crm?.lastSyncedAt && (
+              <div className="text-xs text-muted-foreground">Last synced: {new Date(data.crm.lastSyncedAt).toLocaleString()}</div>
+            )}
           </div>
-          <div className="grid gap-2">
-            <Label htmlFor="ghlKey">API Key</Label>
-            <Input id="ghlKey" type="password" value={data.crm?.ghlApiKey ?? ""} onChange={(e) => setData((d) => ({ ...d, crm: { ...(d.crm ?? { ghlLocationId: "", syncClients: true, syncProposals: true }), ghlApiKey: e.target.value } }))} placeholder="Paste your GHL API key" />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="ghlLoc">Location ID</Label>
-            <Input id="ghlLoc" value={data.crm?.ghlLocationId ?? ""} onChange={(e) => setData((d) => ({ ...d, crm: { ...(d.crm ?? { ghlApiKey: "", syncClients: true, syncProposals: true }), ghlLocationId: e.target.value } }))} placeholder="e.g. abc123" />
-          </div>
-          <div className="flex flex-wrap items-center gap-4">
-            <label className="inline-flex items-center gap-2 text-sm"><input type="checkbox" checked={data.crm?.syncClients ?? true} onChange={(e) => setData((d) => ({ ...d, crm: { ...(d.crm ?? { ghlApiKey: "", ghlLocationId: "", syncProposals: true }), syncClients: e.target.checked } }))} /> Sync clients</label>
-            <label className="inline-flex items-center gap-2 text-sm"><input type="checkbox" checked={data.crm?.syncProposals ?? true} onChange={(e) => setData((d) => ({ ...d, crm: { ...(d.crm ?? { ghlApiKey: "", ghlLocationId: "", syncClients: true }), syncProposals: e.target.checked } }))} /> Sync proposals</label>
-          </div>
-          <div className="text-xs text-muted-foreground">
-            {data.crm?.lastSyncedAt ? `Last sync: ${new Date(data.crm.lastSyncedAt).toLocaleString()}` : "Not synced yet"}
-          </div>
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={testConnection}>Test connection</Button>
-            <Button onClick={syncNow}>Sync now</Button>
-            <Button onClick={save}>Save</Button>
-          </div>
-        </Card>
 
-        {/* Subscription */}
-        <Card className="mt-6 p-4 space-y-4">
-          <div>
-            <h2 className="text-lg font-semibold">Subscription</h2>
-            <p className="text-sm text-muted-foreground">Manage your plan. Changes apply to your user account (multi-tenant).</p>
-          </div>
-          <div className="grid gap-2 max-w-sm">
-            <Label>Plan</Label>
-            <select
-              className="h-9 rounded-md border bg-background px-3 text-sm"
-              value={data.subscription?.plan ?? "free"}
-              onChange={(e) => updatePlan(e.target.value as any)}
-            >
-              <option value="free">Free</option>
-              <option value="pro">Pro</option>
-              <option value="business">Business</option>
-            </select>
-          </div>
           <Separator />
-          <div className="flex justify-end gap-2">
-            <Button onClick={save}>Update subscription</Button>
+
+          {/* Subscription */}
+          <div className="space-y-2">
+            <h2 className="text-lg font-semibold">Subscription</h2>
+            <div className="flex gap-2">
+              {(["free", "pro", "business"] as const).map((p) => (
+                <Button key={p} variant={data.subscription?.plan === p ? "default" : "outline"} onClick={() => updatePlan(p)}>
+                  {p}
+                </Button>
+              ))}
+            </div>
+            {data.subscription?.updatedAt && (
+              <div className="text-xs text-muted-foreground">Updated: {new Date(data.subscription.updatedAt).toLocaleString()}</div>
+            )}
+          </div>
+
+          <Separator />
+
+          <div className="flex justify-end">
+            <Button onClick={save}>Save Settings</Button>
           </div>
         </Card>
       </section>
