@@ -6,6 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocation, useNavigate } from "react-router-dom";
+import { AUTH_USERS } from "@/data/users";
 
 export default function Login() {
   const { signIn } = useAuth();
@@ -123,6 +124,19 @@ export default function Login() {
               Create an account
             </a>
           </p>
+          <div className="mt-6 rounded-md bg-muted/30 p-4 text-xs text-muted-foreground">
+            <div className="mb-2 font-medium text-foreground">Demo credentials</div>
+            <ul className="space-y-1">
+              {AUTH_USERS.map((u) => (
+                <li key={u.id} className="flex items-center justify-between">
+                  <span>
+                    <span className="font-medium">{u.role.toUpperCase()}</span>: {u.email}
+                  </span>
+                  <span className="ml-2">Password: <span className="font-mono">{u.password}</span></span>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
     </section>
