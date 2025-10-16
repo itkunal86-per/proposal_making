@@ -4,13 +4,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { AUTH_USERS } from "@/data/users";
+import { listUsers, createUser, type UserRecord } from "@/services/usersService";
 import { useMemo, useState } from "react";
 import { toast } from "@/hooks/use-toast";
 
 export default function AdminUsers() {
   const [query, setQuery] = useState("");
-  const [rows, setRows] = useState(AUTH_USERS);
+  const [rows, setRows] = useState<UserRecord[]>([]);
+
+  useEffect(() => { (async () => setRows(await listUsers()))(); }, []);
 
   const filtered = useMemo(() => {
     const q = query.toLowerCase().trim();
@@ -18,7 +20,7 @@ export default function AdminUsers() {
     return rows.filter((u) => [u.name, u.email, u.company, u.role].some((v) => (v ?? "").toLowerCase().includes(q)));
   }, [rows, query]);
 
-  function addUser() {
+  async function addUser() {
     const name = prompt("Full name");
     const email = name ? prompt("Email") : null;
     if (!name || !email) return;
@@ -30,7 +32,8 @@ export default function AdminUsers() {
       role: "subscriber" as const,
       company: "",
     };
-    setRows((r) => [next, ...r]);
+    await createUser({ name, email, role: "subscriber", company: "" });
+    setRows(await listUsers());
     toast({ title: "User added", description: `${name} (${email})` });
   }
 
