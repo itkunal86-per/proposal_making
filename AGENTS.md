@@ -318,6 +318,220 @@ pnpm start           # Test production build
 - **Binary**: Self-contained executables (Linux, macOS, Windows)
 - **Cloud Deployment**: Use either Netlify or Vercel via their MCP integrations for easy deployment. Both providers work well with this starter template.
 
+## cPanel Deployment Guide
+
+### Prerequisites
+- cPanel/WHM access with Node.js and npm support
+- SSH access to your cPanel server
+- Domain/subdomain pointed to your cPanel server
+- Node.js installed on the server (v18 or higher recommended)
+
+### Step 1: Prepare the Application Locally
+
+Build the production files on your local machine:
+
+```bash
+pnpm install
+pnpm build
+pnpm typecheck
+```
+
+Verify the build succeeded. You should have these directories:
+- `dist/spa/` - Frontend bundle (React SPA)
+- `dist/server/` - Backend Express server
+
+### Step 2: Upload Files to cPanel Server
+
+Using SSH or cPanel File Manager, upload the project to a directory. We recommend creating a dedicated directory:
+
+```bash
+# Via SSH
+scp -r . user@your-cpanel-server.com:/home/username/apps/proposal-app/
+```
+
+Or use cPanel File Manager to upload files to `/home/username/public_html/` or a custom directory like `/home/username/apps/proposal-app/`.
+
+### Step 3: SSH into Your cPanel Server
+
+Connect via SSH:
+
+```bash
+ssh user@your-cpanel-server.com
+```
+
+Navigate to your application directory:
+
+```bash
+cd /home/username/apps/proposal-app
+```
+
+### Step 4: Install Dependencies
+
+Install PNPM and dependencies:
+
+```bash
+# Install PNPM globally
+npm install -g pnpm
+
+# Install project dependencies
+pnpm install
+```
+
+### Step 5: Configure Environment Variables
+
+Create a `.env` file in the root directory:
+
+```bash
+nano .env
+```
+
+Add the following environment variables:
+
+```env
+NODE_ENV=production
+PORT=3000
+VITE_API_URL=https://your-domain.com
+PING_MESSAGE=pong
+```
+
+Adjust the PORT if 3000 is already in use on your server. Common alternatives: 3001, 3002, 8080, 8081, etc.
+
+### Step 6: Verify the Production Build
+
+Test that the build runs correctly:
+
+```bash
+pnpm start
+```
+
+You should see output like:
+```
+🚀 Fusion Starter server running on port 3000
+📱 Frontend: http://localhost:3000
+🔧 API: http://localhost:3000/api
+```
+
+Press `Ctrl+C` to stop the server.
+
+### Step 7: Set Up a Process Manager (PM2)
+
+PM2 keeps your Node.js application running and automatically restarts it:
+
+```bash
+# Install PM2 globally
+npm install -g pm2
+
+# Start the app with PM2
+pm2 start dist/server/node-build.mjs --name "proposal-app"
+
+# Save PM2 config to restart on server reboot
+pm2 startup
+pm2 save
+```
+
+Verify it's running:
+
+```bash
+pm2 status
+```
+
+### Step 8: Configure cPanel Proxy
+
+In cPanel, set up a reverse proxy to forward traffic to your Node.js app:
+
+1. Log into cPanel
+2. Go to **Addon Domains** or **Parked Domains** (if using a subdomain)
+3. Configure the domain to point to your application directory
+4. In **EasyApache** or **cPanel Settings**, ensure proxy modules are enabled
+5. Create a `.htaccess` file in your application's public directory with:
+
+```apache
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^(.*)$ http://localhost:3000/$1 [P,L]
+</IfModule>
+```
+
+### Step 9: Configure SSL/HTTPS
+
+Use AutoSSL in cPanel to enable HTTPS:
+
+1. In cPanel, go to **AutoSSL**
+2. Select your domain
+3. Click **Check for SSL** or **Run AutoSSL**
+
+Once SSL is configured, update your `.env` file to use `https://`:
+
+```env
+VITE_API_URL=https://your-domain.com
+```
+
+### Step 10: Monitor and Maintain
+
+Check logs and application status:
+
+```bash
+# View logs
+pm2 logs proposal-app
+
+# Monitor in real-time
+pm2 monit
+
+# Restart the app if needed
+pm2 restart proposal-app
+
+# Stop the app
+pm2 stop proposal-app
+
+# Delete from PM2
+pm2 delete proposal-app
+```
+
+### Updating the Application
+
+To deploy updates:
+
+```bash
+# Pull latest code
+git pull origin main
+
+# Reinstall and rebuild
+pnpm install
+pnpm build
+
+# Restart the app
+pm2 restart proposal-app
+```
+
+### Troubleshooting cPanel Deployment
+
+**Port Already in Use**: Change the PORT in `.env` to an available port (3001, 3002, etc.)
+
+**PM2 Not Found**: Ensure Node.js and npm are properly installed:
+```bash
+node --version
+npm --version
+```
+
+**Module Not Found Error**: Ensure `dist/` folder exists after build:
+```bash
+ls -la dist/
+```
+
+**Static Files Not Serving**: Verify `dist/spa/` contains the frontend build:
+```bash
+ls -la dist/spa/
+```
+
+**SSL/HTTPS Issues**: Test with HTTP first, then enable HTTPS once everything works.
+
+**Memory Issues**: If the server runs out of memory, increase swap or optimize Node.js:
+```bash
+pm2 start dist/server/node-build.mjs --name "proposal-app" --max-memory-restart 500M
+```
+
 ## Architecture Notes
 
 - Single-port development with Vite + Express integration
