@@ -43,13 +43,20 @@ function uuid() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }
 
+function normalizeUser(raw: z.infer<typeof userSchema>): UserRecord {
+  return {
+    ...raw,
+    company: raw.company ?? "",
+  };
+}
+
 function readStored(): UserRecord[] | null {
   if (!isBrowser()) return null;
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw);
-    return userListSchema.parse(parsed);
+    return userListSchema.parse(parsed).map(normalizeUser);
   } catch {
     return null;
   }
@@ -64,7 +71,7 @@ async function fetchSeed(): Promise<UserRecord[]> {
   const res = await fetch(USERS_ENDPOINT, { cache: "no-store" });
   if (!res.ok) throw new Error("Unable to load users");
   const json = await res.json();
-  const list = userListSchema.parse(json);
+  const list = userListSchema.parse(json).map(normalizeUser);
   persist(list);
   return list;
 }
