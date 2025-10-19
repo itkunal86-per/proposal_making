@@ -45,8 +45,13 @@ function uuid() {
 
 function normalizeUser(raw: z.infer<typeof userSchema>): UserRecord {
   return {
-    ...raw,
+    id: raw.id!,
+    name: raw.name!,
+    email: raw.email!,
+    password: raw.password!,
+    role: raw.role!,
     company: raw.company ?? "",
+    createdAt: raw.createdAt!,
   };
 }
 
