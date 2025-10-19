@@ -44,8 +44,13 @@ function uuid() {
 
 function normalizeClient(raw: z.infer<typeof clientSchema>): ClientRecord {
   return {
-    ...raw,
+    id: raw.id!,
+    name: raw.name!,
+    email: raw.email!,
     company: raw.company ?? "",
+    status: raw.status!,
+    createdAt: raw.createdAt!,
+    updatedAt: raw.updatedAt!,
   };
 }
 
