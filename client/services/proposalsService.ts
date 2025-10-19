@@ -82,13 +82,23 @@ function uuid() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }
 
+function normalizeProposal(raw: z.infer<typeof proposalSchema>): Proposal {
+  return {
+    ...raw,
+    sections: raw.sections,
+    pricing: raw.pricing,
+    settings: raw.settings,
+    versions: raw.versions,
+  };
+}
+
 function readStored(): Proposal[] | null {
   if (!isBrowser()) return null;
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw);
-    return proposalListSchema.parse(parsed);
+    return proposalListSchema.parse(parsed).map(normalizeProposal);
   } catch {
     return null;
   }
@@ -103,7 +113,7 @@ async function fetchSeed(): Promise<Proposal[]> {
   const res = await fetch(PROPOSALS_ENDPOINT, { cache: "no-store" });
   if (!res.ok) throw new Error("Unable to load proposals");
   const json = await res.json();
-  const list = proposalListSchema.parse(json);
+  const list = proposalListSchema.parse(json).map(normalizeProposal);
   persist(list);
   return list;
 }
