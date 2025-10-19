@@ -74,7 +74,14 @@ function createId() {
 
 function normalizePlan(raw: z.infer<typeof packagePlanBaseSchema>): PackagePlan {
   return {
-    ...raw,
+    id: raw.id,
+    code: raw.code,
+    name: raw.name,
+    description: raw.description,
+    price: raw.price,
+    currency: raw.currency,
+    billingCycle: raw.billingCycle,
+    features: raw.features,
     isPopular: raw.isPopular ?? false,
     status: raw.status ?? "active",
     createdAt: raw.createdAt ?? new Date().toISOString(),
