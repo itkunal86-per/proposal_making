@@ -45,8 +45,13 @@ function uuid() {
 
 function normalizeUser(raw: z.infer<typeof userSchema>): UserRecord {
   return {
-    ...raw,
+    id: raw.id!,
+    name: raw.name!,
+    email: raw.email!,
+    password: raw.password!,
+    role: raw.role!,
     company: raw.company ?? "",
+    createdAt: raw.createdAt!,
   };
 }
 
@@ -110,7 +115,7 @@ export async function updateUser(user: UserRecord): Promise<void> {
   const list = await getAll();
   const idx = list.findIndex((u) => u.id === user.id);
   if (idx === -1) throw new Error("User not found");
-  list[idx] = userSchema.parse(user);
+  list[idx] = normalizeUser(userSchema.parse(user));
   persist(list);
 }
 

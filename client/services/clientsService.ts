@@ -44,8 +44,13 @@ function uuid() {
 
 function normalizeClient(raw: z.infer<typeof clientSchema>): ClientRecord {
   return {
-    ...raw,
+    id: raw.id!,
+    name: raw.name!,
+    email: raw.email!,
     company: raw.company ?? "",
+    status: raw.status!,
+    createdAt: raw.createdAt!,
+    updatedAt: raw.updatedAt!,
   };
 }
 
@@ -109,7 +114,7 @@ export async function updateClient(rec: ClientRecord): Promise<void> {
   const idx = list.findIndex((c) => c.id === rec.id);
   if (idx === -1) throw new Error("Client not found");
   rec.updatedAt = Date.now();
-  list[idx] = clientSchema.parse(rec);
+  list[idx] = normalizeClient(clientSchema.parse(rec));
   persist(list);
 }
 
