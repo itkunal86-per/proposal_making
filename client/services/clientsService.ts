@@ -42,13 +42,20 @@ function uuid() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }
 
+function normalizeClient(raw: z.infer<typeof clientSchema>): ClientRecord {
+  return {
+    ...raw,
+    company: raw.company ?? "",
+  };
+}
+
 function readStored(): ClientRecord[] | null {
   if (!isBrowser()) return null;
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw);
-    return clientListSchema.parse(parsed);
+    return clientListSchema.parse(parsed).map(normalizeClient);
   } catch {
     return null;
   }
@@ -63,7 +70,7 @@ async function fetchSeed(): Promise<ClientRecord[]> {
   const res = await fetch(CLIENTS_ENDPOINT, { cache: "no-store" });
   if (!res.ok) throw new Error("Unable to load clients");
   const json = await res.json();
-  const list = clientListSchema.parse(json);
+  const list = clientListSchema.parse(json).map(normalizeClient);
   persist(list);
   return list;
 }
