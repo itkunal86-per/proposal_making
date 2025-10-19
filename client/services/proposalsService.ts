@@ -95,8 +95,16 @@ function normalizeProposal(raw: z.infer<typeof proposalSchema>): Proposal {
       id: s.id!,
       title: s.title!,
       content: s.content!,
-      media: s.media,
-      comments: s.comments,
+      media: (s.media ?? []).map((m) => ({
+        type: m.type!,
+        url: m.url!,
+      })),
+      comments: (s.comments ?? []).map((c) => ({
+        id: c.id!,
+        author: c.author!,
+        text: c.text!,
+        createdAt: c.createdAt!,
+      })),
     })),
     pricing: {
       currency: raw.pricing?.currency ?? "USD",
@@ -218,7 +226,7 @@ export async function updateProposal(p: Proposal, options?: { keepVersion?: bool
     p.versions = prev.versions;
   }
   p.updatedAt = Date.now();
-  list[idx] = proposalSchema.parse(p);
+  list[idx] = normalizeProposal(proposalSchema.parse(p));
   persist(list);
 }
 
