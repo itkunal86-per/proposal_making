@@ -84,11 +84,45 @@ function uuid() {
 
 function normalizeProposal(raw: z.infer<typeof proposalSchema>): Proposal {
   return {
-    ...raw,
-    sections: raw.sections,
-    pricing: raw.pricing,
-    settings: raw.settings,
-    versions: raw.versions,
+    id: raw.id!,
+    title: raw.title!,
+    client: raw.client!,
+    status: raw.status!,
+    createdBy: raw.createdBy!,
+    createdAt: raw.createdAt!,
+    updatedAt: raw.updatedAt!,
+    sections: (raw.sections ?? []).map((s) => ({
+      id: s.id!,
+      title: s.title!,
+      content: s.content!,
+      media: s.media,
+      comments: s.comments,
+    })),
+    pricing: {
+      currency: raw.pricing?.currency ?? "USD",
+      items: (raw.pricing?.items ?? []).map((i) => ({
+        id: i.id!,
+        label: i.label!,
+        qty: i.qty!,
+        price: i.price!,
+      })),
+      taxRate: raw.pricing?.taxRate ?? 0,
+    },
+    settings: {
+      dueDate: raw.settings?.dueDate,
+      approvalFlow: raw.settings?.approvalFlow,
+      sharing: {
+        public: raw.settings?.sharing?.public ?? false,
+        token: raw.settings?.sharing?.token,
+        allowComments: raw.settings?.sharing?.allowComments ?? true,
+      },
+    },
+    versions: (raw.versions ?? []).map((v) => ({
+      id: v.id!,
+      createdAt: v.createdAt!,
+      note: v.note,
+      data: v.data!,
+    })),
   };
 }
 
