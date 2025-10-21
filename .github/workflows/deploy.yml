@@ -48,13 +48,15 @@ jobs:
 
       - name: Deploy to FTP
         uses: milanmk/actions-file-deployer@master
-        with:
-          remote-url: ${{ secrets.FTPH }}
-          remote-user: ${{ secrets.FTPU }}
-          remote-password: ${{ secrets.FTPP }}
-          local-dir: ./dist/
-          remote-dir: /propai.hirenq.com/
-          sftp: false
+        with:         
+         remote-protocol: ftp
+         remote-host: ${{ secrets.FTPH }}
+         remote-port: 21
+         remote-user: ${{ secrets.FTPU }}
+         remote-password: ${{ secrets.FTPP }}
+         local-path: ./dist/
+         remote-path: /propai.hirenq.com/
+         sync: full
 
       - name: Deployment Success
         if: success()
