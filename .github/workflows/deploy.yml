@@ -54,7 +54,7 @@ jobs:
           password: ${{ secrets.FTPP }}
           port: 21
           protocol: ftp
-          local-dir: ./dist/
+          local-dir: ./dist/spa/
           server-dir: /propai.hirenq.com/
           log-level: verbose
 
