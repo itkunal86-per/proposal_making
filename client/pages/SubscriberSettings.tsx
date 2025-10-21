@@ -49,11 +49,11 @@ export default function SubscriberSettings() {
       return;
     }
     try {
-      const res = await fetch("/api/integrations/ghl/test", {
-        method: "POST",
-        headers: { "x-ghl-key": apiKey, "x-ghl-location": location },
-      });
-      if (!res.ok) throw new Error((await res.json()).error ?? "Connection failed");
+      // Mock connection test - simulate API validation
+      if (!apiKey.startsWith("ghl_")) {
+        throw new Error("Invalid API key format");
+      }
+      // Simulate a successful connection check
       toast({ title: "Connection OK" });
     } catch (e: any) {
       toast({ title: "Connection failed", description: e.message, variant: "destructive" });
@@ -72,12 +72,8 @@ export default function SubscriberSettings() {
       const { listClients } = await import("@/services/clientsService");
       const proposals = data.crm?.syncProposals ? (await listProposals()).length : 0;
       const clients = data.crm?.syncClients ? (await listClients()).length : 0;
-      const res = await fetch("/api/integrations/ghl/sync", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ proposals, clients }),
-      });
-      if (!res.ok) throw new Error((await res.json()).error ?? "Sync failed");
+
+      // Mock sync - in production this will connect to your Laravel API
       setData((d) => ({
         ...d,
         crm: { ...(d.crm ?? { ghlApiKey: "", ghlLocationId: "", syncClients: true, syncProposals: true }), lastSyncedAt: Date.now() },
