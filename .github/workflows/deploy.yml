@@ -46,17 +46,17 @@ jobs:
         env:
           VITE_API_URL: https://propai.hirenq.com
 
-      - name: Deploy to FTP
-        uses: milanmk/actions-file-deployer@master
-        with:         
-         remote-protocol: ftp
-         remote-host: ${{ secrets.FTPH }}
-         remote-port: 21
-         remote-user: ${{ secrets.FTPU }}
-         remote-password: ${{ secrets.FTPP }}
-         local-path: ./dist/
-         remote-path: /propai.hirenq.com/
-         sync: full
+      - name: 🚀 Deploy to cPanel via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTPH }}
+          username: ${{ secrets.FTPU }}
+          password: ${{ secrets.FTPP }}
+          port: 21
+          protocol: ftp
+          local-dir: ./dist/
+          server-dir: /propai.hirenq.com/
+          log-level: verbose
 
       - name: Deployment Success
         if: success()
