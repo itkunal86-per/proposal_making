@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { getStoredToken } from "@/lib/auth";
 
 export type ClientStatus = "active" | "inactive";
 
