@@ -41,15 +41,24 @@ export function getStoredAuth(): StoredAuthPayload | null {
 
 function writeToStorage(store: Storage, payload: StoredAuthPayload) {
   store.setItem(STORAGE_KEY, JSON.stringify(payload));
+  if (payload.token) {
+    store.setItem(TOKEN_KEY, payload.token);
+  }
 }
 
-export function persistAuth(user: AuthenticatedUser, remember: boolean) {
+export function persistAuth(user: AuthenticatedUser, token: string | undefined, remember: boolean) {
   if (!isBrowser()) return;
-  const payload: StoredAuthPayload = { user, persistedAt: Date.now() };
+  const payload: StoredAuthPayload = { user, token, persistedAt: Date.now() };
   const target = remember ? window.localStorage : window.sessionStorage;
   const other = remember ? window.sessionStorage : window.localStorage;
   writeToStorage(target, payload);
   other.removeItem(STORAGE_KEY);
+  other.removeItem(TOKEN_KEY);
+}
+
+export function getStoredToken(): string | null {
+  if (!isBrowser()) return null;
+  return window.localStorage.getItem(TOKEN_KEY) ?? window.sessionStorage.getItem(TOKEN_KEY);
 }
 
 export function clearAuth() {
