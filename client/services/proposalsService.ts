@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { getStoredToken, getStoredAuth } from "@/lib/auth";
 
 export type ProposalStatus = "draft" | "sent" | "accepted" | "declined";
 
