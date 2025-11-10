@@ -44,7 +44,19 @@ export interface Proposal {
 }
 
 const STORAGE_KEY = "app_proposals";
-const PROPOSALS_ENDPOINT = "/data/proposals.json";
+const PROPOSALS_ENDPOINT = "https://propai-api.hirenq.com/api/proposals";
+
+interface ApiProposalResponse {
+  id: string;
+  title: string;
+  client_id: string;
+  status: ProposalStatus;
+  created_at: string;
+  client: {
+    id: string;
+    name: string;
+  };
+}
 
 const idSchema = z.string();
 const sectionSchema = z.object({
