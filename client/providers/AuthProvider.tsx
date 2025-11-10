@@ -3,6 +3,7 @@ import {
   getStoredAuth,
   persistAuth,
   apiAuthenticate,
+  apiRegister,
   type AuthenticatedUser,
 } from "@/lib/auth";
 import type { ReactNode } from "react";
@@ -14,10 +15,18 @@ interface SignInResult {
   user?: AuthenticatedUser;
 }
 
+interface SignUpResult {
+  success: boolean;
+  error?: string;
+  user?: AuthenticatedUser;
+  fieldErrors?: Record<string, string[]>;
+}
+
 interface AuthContextValue {
   status: "loading" | "ready";
   user: AuthenticatedUser | null;
   signIn: (params: { email: string; password: string; remember: boolean }) => Promise<SignInResult>;
+  signUp: (params: { name: string; email: string; password: string; company: string; phone: string; remember: boolean }) => Promise<SignUpResult>;
   signOut: () => void;
 }
 
