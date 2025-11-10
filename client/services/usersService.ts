@@ -141,7 +141,7 @@ export async function createUser(input: CreateUserInput): Promise<UserRecord> {
   const name = input.name?.trim();
   const email = input.email?.trim().toLowerCase();
   if (!name || !email) throw new Error("Name and email are required");
-  const list = await getAll();
+  const list = await listUsers();
   if (list.some((u) => u.email.toLowerCase() === email)) {
     throw new Error("A user with this email already exists");
   }
@@ -160,7 +160,7 @@ export async function createUser(input: CreateUserInput): Promise<UserRecord> {
 }
 
 export async function updateUser(user: UserRecord): Promise<void> {
-  const list = await getAll();
+  const list = await listUsers();
   const idx = list.findIndex((u) => u.id === user.id);
   if (idx === -1) throw new Error("User not found");
   list[idx] = normalizeUser(userSchema.parse(user));
@@ -168,6 +168,6 @@ export async function updateUser(user: UserRecord): Promise<void> {
 }
 
 export async function deleteUser(id: string): Promise<void> {
-  const list = await getAll();
+  const list = await listUsers();
   persist(list.filter((u) => u.id !== id));
 }
