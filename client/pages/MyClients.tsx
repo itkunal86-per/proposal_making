@@ -155,7 +155,7 @@ export default function MyClients() {
       </section>
 
       <AddDialog open={openAdd} onOpenChange={setOpenAdd} onSubmit={(p, cb) => onAdd({ ...p, onError: cb })} />
-      <EditDialog open={!!openEdit} record={openEdit} onOpenChange={() => setOpenEdit(null)} onSubmit={onSave} />
+      <EditDialog open={!!openEdit} record={openEdit} onOpenChange={() => setOpenEdit(null)} onSubmit={(rec, cb) => onSave(rec, cb)} />
     </AppShell>
   );
 }
