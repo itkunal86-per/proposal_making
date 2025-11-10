@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { getStoredToken } from "@/lib/auth";
 
 export type UserRole = "admin" | "subscriber";
 
@@ -21,7 +22,7 @@ export type CreateUserInput = {
 };
 
 const STORAGE_KEY = "app_users";
-const USERS_ENDPOINT = "/data/users.json";
+const API_ENDPOINT = "https://propai-api.hirenq.com/api/users";
 
 const userSchema = z.object({
   id: z.string(),
@@ -33,6 +34,24 @@ const userSchema = z.object({
   createdAt: z.number().int().nonnegative(),
 });
 const userListSchema = z.array(userSchema);
+
+interface ApiUserResponse {
+  id: number;
+  name: string;
+  email: string;
+  role: UserRole;
+  created_at: string;
+  details: {
+    user_details_id: string;
+    user_id: string;
+    name: string;
+    email: string;
+    phone: string;
+    company: string;
+    created_at: string;
+    updated_at: string;
+  };
+}
 
 function isBrowser() {
   return typeof window !== "undefined" && typeof window.localStorage !== "undefined";
@@ -55,6 +74,19 @@ function normalizeUser(raw: z.infer<typeof userSchema>): UserRecord {
   };
 }
 
+function convertApiUserToRecord(user: ApiUserResponse): UserRecord {
+  const createdAt = new Date(user.created_at).getTime() || Date.now();
+  return {
+    id: String(user.id),
+    name: user.details?.name || user.name,
+    email: user.details?.email || user.email,
+    password: "changeme",
+    role: user.role,
+    company: user.details?.company || "",
+    createdAt,
+  };
+}
+
 function readStored(): UserRecord[] | null {
   if (!isBrowser()) return null;
   try {
@@ -72,21 +104,37 @@ function persist(list: UserRecord[]) {
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
 }
 
-async function fetchSeed(): Promise<UserRecord[]> {
-  const res = await fetch(USERS_ENDPOINT, { cache: "no-store" });
-  if (!res.ok) throw new Error("Unable to load users");
-  const json = await res.json();
-  const list = userListSchema.parse(json).map(normalizeUser);
+async function fetchFromApi(): Promise<UserRecord[]> {
+  const token = getStoredToken();
+  if (!token) {
+    throw new Error("No authentication token available");
+  }
+
+  const res = await fetch(API_ENDPOINT, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    throw new Error(`Failed to fetch users: ${res.statusText}`);
+  }
+
+  const json: ApiUserResponse[] = await res.json();
+  const list = json.map(convertApiUserToRecord);
   persist(list);
   return list;
 }
 
-async function getAll(): Promise<UserRecord[]> {
-  return readStored() ?? (await fetchSeed());
-}
-
 export async function listUsers(): Promise<UserRecord[]> {
-  return getAll();
+  try {
+    return await fetchFromApi();
+  } catch (err) {
+    return readStored() ?? [];
+  }
 }
 
 export async function createUser(input: CreateUserInput): Promise<UserRecord> {
