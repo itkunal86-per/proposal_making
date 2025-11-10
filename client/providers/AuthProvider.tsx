@@ -40,20 +40,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     password,
     remember,
   }) => {
-    const record = authenticate(email, password);
-    if (!record) {
-      return { success: false, error: "Invalid email or password" };
+    const { user, token, error } = await apiAuthenticate(email, password);
+    if (!user || error) {
+      return { success: false, error: error || "Login failed" };
     }
-    const authUser: AuthenticatedUser = {
-      id: record.id,
-      name: record.name,
-      email: record.email,
-      role: record.role,
-      company: record.company,
-    };
-    persistAuth(authUser, remember);
-    setUser(authUser);
-    return { success: true, user: authUser };
+    persistAuth(user, token ?? undefined, remember);
+    setUser(user);
+    return { success: true, user };
   }, []);
 
   const signOut = useCallback(() => {
