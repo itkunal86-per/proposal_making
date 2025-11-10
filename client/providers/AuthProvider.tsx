@@ -58,13 +58,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { success: true, user };
   }, []);
 
+  const signUp = useCallback<AuthContextValue["signUp"]>(async ({
+    name,
+    email,
+    password,
+    company,
+    phone,
+    remember,
+  }) => {
+    const { user, token, error, fieldErrors } = await apiRegister({
+      name,
+      email,
+      password,
+      company,
+      phone,
+    });
+    if (!user || error) {
+      return {
+        success: false,
+        error: error || "Registration failed",
+        fieldErrors,
+      };
+    }
+    persistAuth(user, token ?? undefined, remember);
+    setUser(user);
+    return { success: true, user };
+  }, []);
+
   const signOut = useCallback(() => {
     clearAuth();
     setUser(null);
   }, []);
 
-  const value = useMemo<AuthContextValue>(() => ({ status, user, signIn, signOut }), [
+  const value = useMemo<AuthContextValue>(() => ({ status, user, signIn, signUp, signOut }), [
     signIn,
+    signUp,
     signOut,
     status,
     user,
