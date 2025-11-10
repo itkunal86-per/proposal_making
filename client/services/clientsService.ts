@@ -33,6 +33,23 @@ interface ApiClientResponse {
   updated_at: string;
 }
 
+interface ApiCreateClientResponse {
+  userId: string;
+  name: string;
+  email: string;
+  company: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateClientResult {
+  success: boolean;
+  data?: ClientRecord;
+  error?: string;
+  fieldErrors?: Record<string, string[]>;
+}
+
 const clientSchema = z.object({
   id: z.string(),
   name: z.string().min(1),
