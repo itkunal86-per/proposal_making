@@ -19,6 +19,7 @@ export default function MyClients() {
   const [status, setStatus] = useState<ClientStatus | "all">("all");
   const [openEdit, setOpenEdit] = useState<null | ClientRecord>(null);
   const [openAdd, setOpenAdd] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; clientId: string; clientName: string }>({ open: false, clientId: "", clientName: "" });
 
   useEffect(() => { (async () => setRows(await listClients()))(); }, []);
 
