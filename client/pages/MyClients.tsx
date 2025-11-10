@@ -267,33 +267,78 @@ function AddDialog({ open, onOpenChange, onSubmit }: { open: boolean; onOpenChan
   );
 }
 
-function EditDialog({ open, record, onOpenChange, onSubmit }: { open: boolean; record: ClientRecord | null; onOpenChange: () => void; onSubmit: (rec: ClientRecord) => void }) {
+function EditDialog({ open, record, onOpenChange, onSubmit }: { open: boolean; record: ClientRecord | null; onOpenChange: () => void; onSubmit: (rec: ClientRecord, onError: (errors: Record<string, string | string[]>) => void) => void }) {
   const [draft, setDraft] = useState<ClientRecord | null>(null);
+  const [errors, setErrors] = useState<Record<string, string | string[]>>({});
 
   useEffect(() => {
     setDraft(record ? { ...record } : null);
-  }, [record]);
+    setErrors({});
+  }, [record, open]);
 
   if (!draft) return null;
 
+  function submit() {
+    setErrors({});
+    onSubmit(draft, (fieldErrors) => {
+      setErrors(fieldErrors);
+    });
+  }
+
   return (
-    <Dialog open={open} onOpenChange={() => onOpenChange()}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit client</DialogTitle>
         </DialogHeader>
         <div className="space-y-3">
+          {errors.form && (
+            <div className="rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive-foreground">
+              {Array.isArray(errors.form) ? errors.form[0] : errors.form}
+            </div>
+          )}
           <div className="grid gap-2">
             <Label htmlFor="name">Name</Label>
-            <Input id="name" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
+            <Input
+              id="name"
+              value={draft.name}
+              onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+              aria-invalid={!!errors.name}
+            />
+            {errors.name && (
+              <p className="text-xs text-destructive">
+                {Array.isArray(errors.name) ? errors.name[0] : errors.name}
+              </p>
+            )}
           </div>
           <div className="grid gap-2">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" value={draft.email} onChange={(e) => setDraft({ ...draft, email: e.target.value })} />
+            <Input
+              id="email"
+              type="email"
+              value={draft.email}
+              onChange={(e) => setDraft({ ...draft, email: e.target.value })}
+              aria-invalid={!!errors.email}
+            />
+            {errors.email && (
+              <p className="text-xs text-destructive">
+                {Array.isArray(errors.email) ? errors.email[0] : errors.email}
+              </p>
+            )}
           </div>
           <div className="grid gap-2">
             <Label htmlFor="company">Company</Label>
-            <Input id="company" value={draft.company ?? ""} onChange={(e) => setDraft({ ...draft, company: e.target.value })} />
+            <Input
+              id="company"
+              value={draft.company ?? ""}
+              onChange={(e) => setDraft({ ...draft, company: e.target.value })}
+              aria-invalid={!!errors.company}
+            />
+            {errors.company && (
+              <p className="text-xs text-destructive">
+                {Array.isArray(errors.company) ? errors.company[0] : errors.company}
+              </p>
+            )}
           </div>
           <div className="grid gap-2">
             <Label>Status</Label>
@@ -306,11 +351,16 @@ function EditDialog({ open, record, onOpenChange, onSubmit }: { open: boolean; r
                 <SelectItem value="inactive">Inactive</SelectItem>
               </SelectContent>
             </Select>
+            {errors.status && (
+              <p className="text-xs text-destructive">
+                {Array.isArray(errors.status) ? errors.status[0] : errors.status}
+              </p>
+            )}
           </div>
           <Separator />
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={() => onOpenChange()}>Cancel</Button>
-            <Button onClick={() => draft && onSubmit(draft)}>Save</Button>
+            <Button onClick={submit}>Save</Button>
           </div>
         </div>
       </DialogContent>
