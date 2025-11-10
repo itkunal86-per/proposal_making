@@ -63,8 +63,18 @@ export default function MyClients() {
     await refresh();
   }
 
-  async function onSave(rec: ClientRecord) {
-    await updateClient(rec);
+  async function onSave(rec: ClientRecord, onError?: (errors: Record<string, string | string[]>) => void) {
+    const result = await updateClient(rec);
+    if (!result.success) {
+      if (result.fieldErrors) {
+        if (onError) {
+          onError(result.fieldErrors);
+        }
+      } else {
+        toast({ title: result.error || "Failed to update client", variant: "destructive" });
+      }
+      return;
+    }
     toast({ title: "Client updated" });
     setOpenEdit(null);
     await refresh();
