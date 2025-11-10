@@ -157,26 +157,25 @@ function AddDialog({ open, onOpenChange, onSubmit }: { open: boolean; onOpenChan
   const [status, setStatus] = useState<ClientStatus>("active");
   const [errors, setErrors] = useState<Record<string, string | string[]>>({});
 
+  useEffect(() => {
+    if (!open) {
+      setErrors({});
+      setName("");
+      setEmail("");
+      setCompany("");
+      setStatus("active");
+    }
+  }, [open]);
+
   function submit() {
     setErrors({});
-    let hasErrors = false;
     onSubmit({ name, email, company, status }, (fieldErrors) => {
-      hasErrors = true;
       setErrors(fieldErrors);
     });
-    // Note: errors will be set if there are validation issues
-    // The onSubmit function passed to us will call the error callback which sets errors
   }
 
-  const getErrorMessage = (field: string): string | null => {
-    const error = errors[field];
-    if (!error) return null;
-    if (Array.isArray(error)) return error[0];
-    return error;
-  };
-
   return (
-    <Dialog open={open} onOpenChange={() => { setErrors({}); onOpenChange(false); }}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add client</DialogTitle>
