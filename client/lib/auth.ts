@@ -77,6 +77,18 @@ interface ApiLoginResponse {
   };
 }
 
+interface ApiRegisterResponse {
+  token: string;
+  user: {
+    id: number;
+    name: string;
+    email: string;
+    role: UserRole;
+    company: string;
+    phone: string;
+  };
+}
+
 export async function apiAuthenticate(email: string, password: string): Promise<{
   user: AuthenticatedUser | null;
   token: string | null;
@@ -106,6 +118,70 @@ export async function apiAuthenticate(email: string, password: string): Promise<
       id: data.user.email,
       email: data.user.email,
       role: data.user.role,
+    };
+
+    return {
+      user: authUser,
+      token: data.token,
+      error: null,
+    };
+  } catch (err) {
+    return {
+      user: null,
+      token: null,
+      error: "Network error. Please try again.",
+    };
+  }
+}
+
+export async function apiRegister(params: {
+  name: string;
+  email: string;
+  password: string;
+  company: string;
+  phone: string;
+}): Promise<{
+  user: AuthenticatedUser | null;
+  token: string | null;
+  error: string | null;
+  fieldErrors?: Record<string, string[]>;
+}> {
+  try {
+    const response = await fetch("https://propai-api.hirenq.com/api/auth/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(params),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+
+      if (errorData.issues) {
+        return {
+          user: null,
+          token: null,
+          error: errorData.error || "Registration failed",
+          fieldErrors: errorData.issues,
+        };
+      }
+
+      return {
+        user: null,
+        token: null,
+        error: errorData.error || "Registration failed",
+      };
+    }
+
+    const data: ApiRegisterResponse = await response.json();
+
+    const authUser: AuthenticatedUser = {
+      id: String(data.user.id),
+      email: data.user.email,
+      role: data.user.role,
+      name: data.user.name,
+      company: data.user.company,
     };
 
     return {
