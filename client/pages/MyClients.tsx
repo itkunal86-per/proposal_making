@@ -81,7 +81,11 @@ export default function MyClients() {
   }
 
   async function onDelete(id: string) {
-    await deleteClient(id);
+    const result = await deleteClient(id);
+    if (!result.success) {
+      toast({ title: result.error || "Failed to delete client", variant: "destructive" });
+      return;
+    }
     toast({ title: "Client deleted" });
     await refresh();
   }
