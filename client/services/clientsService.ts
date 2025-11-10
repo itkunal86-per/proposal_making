@@ -21,7 +21,17 @@ export type CreateClientInput = {
 };
 
 const STORAGE_KEY = "app_clients";
-const CLIENTS_ENDPOINT = "/data/clients.json";
+const CLIENTS_ENDPOINT = "https://propai-api.hirenq.com/api/clients";
+
+interface ApiClientResponse {
+  id: string;
+  name: string;
+  email: string;
+  company: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
 
 const clientSchema = z.object({
   id: z.string(),
