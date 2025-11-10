@@ -64,6 +64,11 @@ export interface UpdateClientResult {
   fieldErrors?: Record<string, string[]>;
 }
 
+export interface DeleteClientResult {
+  success: boolean;
+  error?: string;
+}
+
 const clientSchema = z.object({
   id: z.string(),
   name: z.string().min(1),
