@@ -1,14 +1,19 @@
 import { AUTH_USERS, type AuthUserRecord, type UserRole } from "@/data/users";
 
-export type AuthenticatedUser = Pick<
-  AuthUserRecord,
-  "id" | "name" | "email" | "role" | "company"
->;
+export type AuthenticatedUser = {
+  id: string;
+  email: string;
+  role: UserRole;
+  name?: string;
+  company?: string;
+};
 
 const STORAGE_KEY = "proposal_ai_auth_user";
+const TOKEN_KEY = "proposal_ai_auth_token";
 
 type StoredAuthPayload = {
   user: AuthenticatedUser;
+  token?: string;
   persistedAt: number;
 };
 
