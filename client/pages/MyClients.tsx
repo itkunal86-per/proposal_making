@@ -248,7 +248,7 @@ function AddDialog({ open, onOpenChange, onSubmit }: { open: boolean; onOpenChan
           </div>
           <Separator />
           <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => { setErrors({}); onOpenChange(false); }}>Cancel</Button>
+            <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
             <Button onClick={submit}>Add</Button>
           </div>
         </div>
