@@ -260,13 +260,80 @@ export async function createClient(input: CreateClientInput): Promise<CreateClie
   }
 }
 
-export async function updateClient(rec: ClientRecord): Promise<void> {
-  const list = await getAll();
-  const idx = list.findIndex((c) => c.id === rec.id);
-  if (idx === -1) throw new Error("Client not found");
-  rec.updatedAt = Date.now();
-  list[idx] = normalizeClient(clientSchema.parse(rec));
-  persist(list);
+export async function updateClient(rec: ClientRecord): Promise<UpdateClientResult> {
+  const token = getStoredToken();
+  if (!token) {
+    return {
+      success: false,
+      error: "No authentication token available",
+    };
+  }
+
+  const name = rec.name?.trim();
+  const email = rec.email?.trim().toLowerCase();
+  if (!name || !email) {
+    return {
+      success: false,
+      error: "Name and email are required",
+    };
+  }
+
+  try {
+    const statusLabel = rec.status === "active" ? "Active" : "Inactive";
+
+    const res = await fetch(`${CLIENTS_ENDPOINT}/${rec.id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        name,
+        email,
+        company: rec.company?.trim() || "",
+        status: statusLabel,
+      }),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+
+      if (errorData.issues) {
+        return {
+          success: false,
+          error: errorData.error || "Validation failed",
+          fieldErrors: errorData.issues,
+        };
+      }
+
+      return {
+        success: false,
+        error: errorData.error || "Failed to update client",
+      };
+    }
+
+    const data: ApiUpdateClientResponse = await res.json();
+    const clientStatus = (data.status.toLowerCase() === "active" ? "active" : "inactive") as ClientStatus;
+
+    const updatedRec: ClientRecord = {
+      ...rec,
+      name: data.name,
+      email: data.email,
+      company: data.company || "",
+      status: clientStatus,
+      updatedAt: Date.now(),
+    };
+
+    return {
+      success: true,
+      data: updatedRec,
+    };
+  } catch (err) {
+    return {
+      success: false,
+      error: "Network error. Please try again.",
+    };
+  }
 }
 
 export async function deleteClient(id: string): Promise<void> {
