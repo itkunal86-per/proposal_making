@@ -150,38 +150,87 @@ export default function MyClients() {
   );
 }
 
-function AddDialog({ open, onOpenChange, onSubmit }: { open: boolean; onOpenChange: (v: boolean) => void; onSubmit: (p: { name: string; email: string; company?: string; status: ClientStatus }) => void }) {
+function AddDialog({ open, onOpenChange, onSubmit }: { open: boolean; onOpenChange: (v: boolean) => void; onSubmit: (p: { name: string; email: string; company?: string; status: ClientStatus }, onError: (errors: Record<string, string | string[]>) => void) => void }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [company, setCompany] = useState("");
   const [status, setStatus] = useState<ClientStatus>("active");
+  const [errors, setErrors] = useState<Record<string, string | string[]>>({});
 
   function submit() {
-    onSubmit({ name, email, company, status });
-    setName("");
-    setEmail("");
-    setCompany("");
-    setStatus("active");
+    setErrors({});
+    onSubmit({ name, email, company, status }, (fieldErrors) => {
+      setErrors(fieldErrors);
+    });
+    if (!errors || Object.keys(errors).length === 0) {
+      setName("");
+      setEmail("");
+      setCompany("");
+      setStatus("active");
+    }
   }
 
+  const getErrorMessage = (field: string): string | null => {
+    const error = errors[field];
+    if (!error) return null;
+    if (Array.isArray(error)) return error[0];
+    return error;
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={() => { setErrors({}); onOpenChange(false); }}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add client</DialogTitle>
         </DialogHeader>
         <div className="space-y-3">
+          {errors.form && (
+            <div className="rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive-foreground">
+              {Array.isArray(errors.form) ? errors.form[0] : errors.form}
+            </div>
+          )}
           <div className="grid gap-2">
             <Label htmlFor="name">Name</Label>
-            <Input id="name" value={name} onChange={(e) => setName(e.target.value)} />
+            <Input
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              aria-invalid={!!errors.name}
+            />
+            {errors.name && (
+              <p className="text-xs text-destructive">
+                {Array.isArray(errors.name) ? errors.name[0] : errors.name}
+              </p>
+            )}
           </div>
           <div className="grid gap-2">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+            <Input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              aria-invalid={!!errors.email}
+            />
+            {errors.email && (
+              <p className="text-xs text-destructive">
+                {Array.isArray(errors.email) ? errors.email[0] : errors.email}
+              </p>
+            )}
           </div>
           <div className="grid gap-2">
             <Label htmlFor="company">Company</Label>
-            <Input id="company" value={company} onChange={(e) => setCompany(e.target.value)} />
+            <Input
+              id="company"
+              value={company}
+              onChange={(e) => setCompany(e.target.value)}
+              aria-invalid={!!errors.company}
+            />
+            {errors.company && (
+              <p className="text-xs text-destructive">
+                {Array.isArray(errors.company) ? errors.company[0] : errors.company}
+              </p>
+            )}
           </div>
           <div className="grid gap-2">
             <Label>Status</Label>
@@ -194,10 +243,15 @@ function AddDialog({ open, onOpenChange, onSubmit }: { open: boolean; onOpenChan
                 <SelectItem value="inactive">Inactive</SelectItem>
               </SelectContent>
             </Select>
+            {errors.status && (
+              <p className="text-xs text-destructive">
+                {Array.isArray(errors.status) ? errors.status[0] : errors.status}
+              </p>
+            )}
           </div>
           <Separator />
           <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => { setErrors({}); onOpenChange(false); }}>Cancel</Button>
             <Button onClick={submit}>Add</Button>
           </div>
         </div>
