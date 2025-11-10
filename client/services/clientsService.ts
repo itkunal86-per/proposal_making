@@ -65,6 +65,22 @@ function normalizeClient(raw: z.infer<typeof clientSchema>): ClientRecord {
   };
 }
 
+function convertApiClientToRecord(client: ApiClientResponse): ClientRecord {
+  const createdAtMs = new Date(client.created_at).getTime() || Date.now();
+  const updatedAtMs = new Date(client.updated_at).getTime() || Date.now();
+  const status = (client.status.toLowerCase() === "active" ? "active" : "inactive") as ClientStatus;
+
+  return {
+    id: client.id,
+    name: client.name,
+    email: client.email,
+    company: client.company || "",
+    status,
+    createdAt: createdAtMs,
+    updatedAt: updatedAtMs,
+  };
+}
+
 function readStored(): ClientRecord[] | null {
   if (!isBrowser()) return null;
   try {
