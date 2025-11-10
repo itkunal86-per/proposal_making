@@ -341,7 +341,39 @@ export async function updateClient(rec: ClientRecord): Promise<UpdateClientResul
   }
 }
 
-export async function deleteClient(id: string): Promise<void> {
-  const list = await getAll();
-  persist(list.filter((c) => c.id !== id));
+export async function deleteClient(id: string): Promise<DeleteClientResult> {
+  const token = getStoredToken();
+  if (!token) {
+    return {
+      success: false,
+      error: "No authentication token available",
+    };
+  }
+
+  try {
+    const res = await fetch(`${CLIENTS_ENDPOINT}/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      return {
+        success: false,
+        error: errorData.error || "Failed to delete client",
+      };
+    }
+
+    return {
+      success: true,
+    };
+  } catch (err) {
+    return {
+      success: false,
+      error: "Network error. Please try again.",
+    };
+  }
 }
