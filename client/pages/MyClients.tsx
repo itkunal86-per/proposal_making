@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/hooks/use-toast";
 import { useEffect, useMemo, useState } from "react";
-import { type ClientRecord, type ClientStatus, type CreateClientResult, type UpdateClientResult, listClients, createClient, updateClient, deleteClient } from "@/services/clientsService";
+import { type ClientRecord, type ClientStatus, type CreateClientResult, type UpdateClientResult, type DeleteClientResult, listClients, createClient, updateClient, deleteClient } from "@/services/clientsService";
 
 export default function MyClients() {
   const [rows, setRows] = useState<ClientRecord[]>([]);
