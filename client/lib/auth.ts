@@ -65,6 +65,61 @@ export function clearAuth() {
   if (!isBrowser()) return;
   window.localStorage.removeItem(STORAGE_KEY);
   window.sessionStorage.removeItem(STORAGE_KEY);
+  window.localStorage.removeItem(TOKEN_KEY);
+  window.sessionStorage.removeItem(TOKEN_KEY);
+}
+
+interface ApiLoginResponse {
+  token: string;
+  user: {
+    email: string;
+    role: UserRole;
+  };
+}
+
+export async function apiAuthenticate(email: string, password: string): Promise<{
+  user: AuthenticatedUser | null;
+  token: string | null;
+  error: string | null;
+}> {
+  try {
+    const response = await fetch("https://propai-api.hirenq.com/api/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      return {
+        user: null,
+        token: null,
+        error: errorData.error || "Invalid email or password",
+      };
+    }
+
+    const data: ApiLoginResponse = await response.json();
+
+    const authUser: AuthenticatedUser = {
+      id: data.user.email,
+      email: data.user.email,
+      role: data.user.role,
+    };
+
+    return {
+      user: authUser,
+      token: data.token,
+      error: null,
+    };
+  } catch (err) {
+    return {
+      user: null,
+      token: null,
+      error: "Network error. Please try again.",
+    };
+  }
 }
 
 export function authenticate(email: string, password: string): AuthUserRecord | null {
