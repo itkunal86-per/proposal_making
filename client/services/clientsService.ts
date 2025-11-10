@@ -98,17 +98,50 @@ function persist(list: ClientRecord[]) {
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
 }
 
-async function fetchSeed(): Promise<ClientRecord[]> {
-  const res = await fetch(CLIENTS_ENDPOINT, { cache: "no-store" });
-  if (!res.ok) throw new Error("Unable to load clients");
-  const json = await res.json();
-  const list = clientListSchema.parse(json).map(normalizeClient);
+async function fetchFromApi(): Promise<ClientRecord[]> {
+  const token = getStoredToken();
+  if (!token) {
+    throw new Error("No authentication token available");
+  }
+
+  const res = await fetch(CLIENTS_ENDPOINT, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    throw new Error(`Failed to fetch clients: ${res.statusText}`);
+  }
+
+  const json: ApiClientResponse[] = await res.json();
+  const list = json.map(convertApiClientToRecord);
   persist(list);
   return list;
 }
 
+async function fetchSeed(): Promise<ClientRecord[]> {
+  try {
+    return await fetchFromApi();
+  } catch {
+    const res = await fetch("/data/clients.json", { cache: "no-store" });
+    if (!res.ok) throw new Error("Unable to load clients");
+    const json = await res.json();
+    const list = clientListSchema.parse(json).map(normalizeClient);
+    persist(list);
+    return list;
+  }
+}
+
 async function getAll(): Promise<ClientRecord[]> {
-  return readStored() ?? (await fetchSeed());
+  try {
+    return await fetchFromApi();
+  } catch {
+    return readStored() ?? (await fetchSeed());
+  }
 }
 
 export async function listClients(): Promise<ClientRecord[]> {
