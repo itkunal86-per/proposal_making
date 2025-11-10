@@ -34,12 +34,30 @@ export default function MyClients() {
     setRows(await listClients());
   }
 
-  async function onAdd(payload: { name: string; email: string; company?: string; status: ClientStatus }) {
+  async function onAdd(payload: { name: string; email: string; company?: string; status: ClientStatus; onError?: (errors: Record<string, string | string[]>) => void }) {
     if (!payload.name.trim() || !payload.email.trim()) {
+      if (payload.onError) {
+        payload.onError({ form: "Name and email are required" });
+      }
       toast({ title: "Name and email are required", variant: "destructive" });
       return;
     }
-    await createClient(payload);
+    const result = await createClient({
+      name: payload.name,
+      email: payload.email,
+      company: payload.company,
+      status: payload.status,
+    });
+    if (!result.success) {
+      if (result.fieldErrors) {
+        if (payload.onError) {
+          payload.onError(result.fieldErrors);
+        }
+      } else {
+        toast({ title: result.error || "Failed to add client", variant: "destructive" });
+      }
+      return;
+    }
     toast({ title: "Client added" });
     setOpenAdd(false);
     await refresh();
