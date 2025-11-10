@@ -1,8 +1,8 @@
 import {
-  authenticate,
   clearAuth,
   getStoredAuth,
   persistAuth,
+  apiAuthenticate,
   type AuthenticatedUser,
 } from "@/lib/auth";
 import type { ReactNode } from "react";
