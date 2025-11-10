@@ -155,7 +155,7 @@ export default function MyClients() {
                     <TableCell>{new Date(r.createdAt).toLocaleDateString()}</TableCell>
                     <TableCell className="text-right space-x-1 whitespace-nowrap">
                       <Button variant="outline" size="sm" onClick={() => setOpenEdit(r)}>Edit</Button>
-                      <Button variant="destructive" size="sm" onClick={() => onDelete(r.id)}>Delete</Button>
+                      <Button variant="destructive" size="sm" onClick={() => showDeleteConfirm(r.id, r.name)}>Delete</Button>
                     </TableCell>
                   </TableRow>
                 ))}
