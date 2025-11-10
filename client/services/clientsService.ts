@@ -166,24 +166,84 @@ export async function listClients(): Promise<ClientRecord[]> {
   return list.sort((a, b) => b.updatedAt - a.updatedAt);
 }
 
-export async function createClient(input: CreateClientInput): Promise<ClientRecord> {
+export async function createClient(input: CreateClientInput): Promise<CreateClientResult> {
+  const token = getStoredToken();
+  if (!token) {
+    return {
+      success: false,
+      error: "No authentication token available",
+    };
+  }
+
   const name = input.name?.trim();
   const email = input.email?.trim().toLowerCase();
-  if (!name || !email) throw new Error("Name and email are required");
-  const list = await getAll();
-  const now = Date.now();
-  const rec: ClientRecord = {
-    id: uuid(),
-    name,
-    email,
-    company: input.company?.trim() || "",
-    status: input.status ?? "active",
-    createdAt: now,
-    updatedAt: now,
-  };
-  const next = [rec, ...list];
-  persist(next);
-  return rec;
+  if (!name || !email) {
+    return {
+      success: false,
+      error: "Name and email are required",
+    };
+  }
+
+  try {
+    const status = input.status ?? "active";
+    const statusLabel = status === "active" ? "Active" : "Inactive";
+
+    const res = await fetch(CLIENTS_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        name,
+        email,
+        company: input.company?.trim() || "",
+        status: statusLabel,
+      }),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+
+      if (errorData.issues) {
+        return {
+          success: false,
+          error: errorData.error || "Validation failed",
+          fieldErrors: errorData.issues,
+        };
+      }
+
+      return {
+        success: false,
+        error: errorData.error || "Failed to create client",
+      };
+    }
+
+    const data: ApiCreateClientResponse = await res.json();
+    const createdAtMs = new Date(data.created_at).getTime() || Date.now();
+    const updatedAtMs = new Date(data.updated_at).getTime() || Date.now();
+    const clientStatus = (data.status.toLowerCase() === "active" ? "active" : "inactive") as ClientStatus;
+
+    const rec: ClientRecord = {
+      id: data.userId,
+      name: data.name,
+      email: data.email,
+      company: data.company || "",
+      status: clientStatus,
+      createdAt: createdAtMs,
+      updatedAt: updatedAtMs,
+    };
+
+    return {
+      success: true,
+      data: rec,
+    };
+  } catch (err) {
+    return {
+      success: false,
+      error: "Network error. Please try again.",
+    };
+  }
 }
 
 export async function updateClient(rec: ClientRecord): Promise<void> {
