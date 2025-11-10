@@ -159,15 +159,13 @@ function AddDialog({ open, onOpenChange, onSubmit }: { open: boolean; onOpenChan
 
   function submit() {
     setErrors({});
+    let hasErrors = false;
     onSubmit({ name, email, company, status }, (fieldErrors) => {
+      hasErrors = true;
       setErrors(fieldErrors);
     });
-    if (!errors || Object.keys(errors).length === 0) {
-      setName("");
-      setEmail("");
-      setCompany("");
-      setStatus("active");
-    }
+    // Note: errors will be set if there are validation issues
+    // The onSubmit function passed to us will call the error callback which sets errors
   }
 
   const getErrorMessage = (field: string): string | null => {
