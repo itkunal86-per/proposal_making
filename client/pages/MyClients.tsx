@@ -82,8 +82,13 @@ export default function MyClients() {
     await refresh();
   }
 
-  async function onDelete(id: string) {
-    const result = await deleteClient(id);
+  function showDeleteConfirm(id: string, name: string) {
+    setDeleteConfirm({ open: true, clientId: id, clientName: name });
+  }
+
+  async function confirmDelete() {
+    const result = await deleteClient(deleteConfirm.clientId);
+    setDeleteConfirm({ open: false, clientId: "", clientName: "" });
     if (!result.success) {
       toast({ title: result.error || "Failed to delete client", variant: "destructive" });
       return;
