@@ -43,7 +43,21 @@ interface ApiCreateClientResponse {
   updated_at: string;
 }
 
+interface ApiUpdateClientResponse {
+  name: string;
+  email: string;
+  company: string;
+  status: string;
+}
+
 export interface CreateClientResult {
+  success: boolean;
+  data?: ClientRecord;
+  error?: string;
+  fieldErrors?: Record<string, string[]>;
+}
+
+export interface UpdateClientResult {
   success: boolean;
   data?: ClientRecord;
   error?: string;
