@@ -287,6 +287,79 @@ export async function getProposalByToken(token: string): Promise<Proposal | unde
   return list.find((p) => p.settings.sharing.token === token);
 }
 
+export async function createProposalApi(input: CreateProposalInput): Promise<CreateProposalResult> {
+  const token = getStoredToken();
+  if (!token) {
+    return {
+      success: false,
+      error: "No authentication token available",
+    };
+  }
+
+  const title = input.title?.trim();
+  const client_id = input.client_id?.trim();
+  if (!title || !client_id) {
+    return {
+      success: false,
+      error: "Title and client ID are required",
+    };
+  }
+
+  try {
+    const payload: Record<string, unknown> = {
+      title,
+      client_id,
+      status: input.status ?? "draft",
+      due_date: input.due_date ?? "",
+      approval_flow: input.approval_flow ?? "",
+      sharing_public: input.sharing_public ? 1 : 0,
+      sharing_token: input.sharing_token ?? "",
+      sharing_allow_comments: input.sharing_allow_comments ? 1 : 0,
+    };
+
+    const res = await fetch(PROPOSALS_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+
+      if (errorData.issues) {
+        return {
+          success: false,
+          error: errorData.error || "Validation failed",
+          fieldErrors: errorData.issues,
+        };
+      }
+
+      return {
+        success: false,
+        error: errorData.error || "Failed to create proposal",
+      };
+    }
+
+    const data: ApiProposalResponse = await res.json();
+    const proposal = convertApiProposalToProposal(data);
+    const list = await getAll();
+    persist([proposal, ...list]);
+
+    return {
+      success: true,
+      data: proposal,
+    };
+  } catch (err) {
+    return {
+      success: false,
+      error: "Network error. Please try again.",
+    };
+  }
+}
+
 export async function createProposal(partial?: Partial<Proposal>): Promise<Proposal> {
   const now = Date.now();
   const p: Proposal = {
