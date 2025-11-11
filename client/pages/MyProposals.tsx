@@ -134,7 +134,7 @@ export default function MyProposals() {
             <h1 className="text-2xl font-bold">My Proposals</h1>
             <p className="text-muted-foreground">Create and manage proposals you own.</p>
           </div>
-          <Button onClick={() => setIsCreateDialogOpen(true)}>New proposal</Button>
+          <Button onClick={handleOpenCreateDialog}>New proposal</Button>
         </div>
 
         <Card className="mt-4 p-4">
