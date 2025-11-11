@@ -35,6 +35,8 @@ export default function ProposalEditor() {
   const [p, setP] = useState<Proposal | null>(null);
   const [current, setCurrent] = useState(0);
   const [saving, setSaving] = useState(false);
+  const [clients, setClients] = useState<ClientRecord[]>([]);
+  const [isLoadingClients, setIsLoadingClients] = useState(false);
   const saveTimer = useRef<number | null>(null);
 
   useEffect(() => {
@@ -45,8 +47,18 @@ export default function ProposalEditor() {
         return;
       }
       setP(found);
+
+      try {
+        setIsLoadingClients(true);
+        const clientsList = await listClients();
+        setClients(clientsList);
+      } catch (error) {
+        console.error("Failed to load clients:", error);
+      } finally {
+        setIsLoadingClients(false);
+      }
     })();
-  }, [id]);
+  }, [id, nav]);
 
   function commit(next: Proposal, keepVersion = false, note?: string) {
     setP(next);
