@@ -63,11 +63,33 @@ export default function ProposalSettings() {
             <TabsContent value="general" className="mt-4 space-y-3">
               <div className="grid gap-2">
                 <Label htmlFor="title">Title</Label>
-                <Input id="title" value={p.title} onChange={(e) => void updateProposal({ ...p, title: e.target.value })} />
+                <Input id="title" value={p.title} onChange={(e) => void updateProposalViaApi({ ...p, title: e.target.value })} />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="client">Client</Label>
-                <Input id="client" value={p.client} onChange={(e) => void updateProposal({ ...p, client: e.target.value })} />
+                <Select
+                  value={p.client_id || ""}
+                  onValueChange={(v) => {
+                    const selectedClient = clients.find((c) => c.id === v);
+                    void updateProposalViaApi({
+                      ...p,
+                      client_id: v,
+                      client: selectedClient?.name || "",
+                    });
+                  }}
+                  disabled={isLoadingClients}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a client" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {clients.map((client) => (
+                      <SelectItem key={client.id} value={client.id}>
+                        {client.name} ({client.company || "No company"})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="due">Due date</Label>
