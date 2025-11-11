@@ -45,6 +45,23 @@ export default function MyProposals() {
     (async () => setRows(await listProposals()))();
   }, []);
 
+  async function loadClients() {
+    try {
+      setIsLoadingClients(true);
+      const clientsList = await listClients();
+      setClients(clientsList);
+    } catch (error) {
+      toast({ title: "Failed to load clients", variant: "destructive" });
+    } finally {
+      setIsLoadingClients(false);
+    }
+  }
+
+  const handleOpenCreateDialog = async () => {
+    await loadClients();
+    setIsCreateDialogOpen(true);
+  };
+
   const mine = useMemo(() => {
     const email = user?.email?.toLowerCase();
     const list = rows.filter((p) => (email ? p.createdBy.toLowerCase() === email : true));
