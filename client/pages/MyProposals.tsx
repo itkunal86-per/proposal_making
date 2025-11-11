@@ -34,6 +34,8 @@ export default function MyProposals() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
   const [clients, setClients] = useState<ClientRecord[]>([]);
   const [isLoadingClients, setIsLoadingClients] = useState(false);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [formData, setFormData] = useState<CreateProposalInput>({
     title: "",
     client_id: "",
