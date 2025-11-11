@@ -133,7 +133,7 @@ export default function ProposalSettings() {
             <TabsContent value="approval" className="mt-4 space-y-3">
               <div className="grid gap-2">
                 <Label>Approval flow</Label>
-                <Input value={p.settings.approvalFlow || ""} onChange={(e) => void updateProposal({ ...p, settings: { ...p.settings, approvalFlow: e.target.value } })} />
+                <Input value={p.settings.approvalFlow || ""} onChange={(e) => void updateProposalViaApi({ ...p, settings: { ...p.settings, approvalFlow: e.target.value } })} />
               </div>
             </TabsContent>
 
