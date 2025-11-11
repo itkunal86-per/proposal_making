@@ -116,10 +116,23 @@ export default function MyProposals() {
     }
   }
 
-  async function onDelete(id: string) {
-    await deleteProposal(id);
-    toast({ title: "Proposal deleted" });
-    await refresh();
+  function onDeleteClick(id: string) {
+    setDeleteConfirmId(id);
+  }
+
+  async function confirmDelete() {
+    if (!deleteConfirmId) return;
+    try {
+      setIsDeleting(true);
+      await deleteProposal(deleteConfirmId);
+      toast({ title: "Proposal deleted" });
+      await refresh();
+    } catch (error) {
+      toast({ title: "Failed to delete proposal", variant: "destructive" });
+    } finally {
+      setIsDeleting(false);
+      setDeleteConfirmId(null);
+    }
   }
 
   async function onDuplicate(id: string) {
