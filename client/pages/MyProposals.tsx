@@ -26,6 +26,16 @@ export default function MyProposals() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
+  const [formData, setFormData] = useState<CreateProposalInput>({
+    title: "",
+    client_id: "",
+    status: "draft",
+    due_date: "",
+  });
 
   useEffect(() => {
     (async () => setRows(await listProposals()))();
@@ -48,11 +58,39 @@ export default function MyProposals() {
     setRows(await listProposals());
   }
 
-  async function onCreate() {
-    const p = await createProposal({ createdBy: user?.email ?? "you@example.com", title: "New Proposal" });
-    toast({ title: "Proposal created" });
+  function handleFormChange(field: keyof CreateProposalInput, value: string) {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (fieldErrors[field]) {
+      setFieldErrors((prev) => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    }
+  }
+
+  async function handleCreateProposal() {
+    setCreateError(null);
+    setFieldErrors({});
+    setIsCreating(true);
+
+    const result = await createProposalApi(formData);
+
+    if (!result.success) {
+      setCreateError(result.error || "Failed to create proposal");
+      setFieldErrors(result.fieldErrors || {});
+      setIsCreating(false);
+      return;
+    }
+
+    toast({ title: "Proposal created successfully" });
+    setFormData({ title: "", client_id: "", status: "draft", due_date: "" });
+    setIsCreateDialogOpen(false);
     await refresh();
-    nav(`/proposals/${p.id}/edit`);
+
+    if (result.data) {
+      nav(`/proposals/${result.data.id}/edit`);
+    }
   }
 
   async function onDelete(id: string) {
