@@ -52,10 +52,37 @@ interface ApiProposalResponse {
   client_id: string;
   status: ProposalStatus;
   created_at: string;
-  client: {
+  created_by?: string;
+  due_date?: string;
+  approval_flow?: string;
+  sharing_public?: number;
+  sharing_token?: string;
+  sharing_allow_comments?: number;
+  currency?: string;
+  tax_rate?: number;
+  updated_at?: string;
+  client?: {
     id: string;
     name: string;
   };
+}
+
+export interface CreateProposalInput {
+  title: string;
+  client_id: string;
+  status?: ProposalStatus;
+  due_date?: string;
+  approval_flow?: string;
+  sharing_public?: boolean;
+  sharing_token?: string;
+  sharing_allow_comments?: boolean;
+}
+
+export interface CreateProposalResult {
+  success: boolean;
+  data?: Proposal;
+  error?: string;
+  fieldErrors?: Record<string, string[]>;
 }
 
 const idSchema = z.string();
