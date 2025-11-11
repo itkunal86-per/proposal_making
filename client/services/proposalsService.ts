@@ -417,6 +417,23 @@ export async function updateProposal(p: Proposal, options?: { keepVersion?: bool
 }
 
 export async function deleteProposal(id: string) {
+  const token = getStoredToken();
+  if (!token) {
+    throw new Error("No authentication token available");
+  }
+
+  const res = await fetch(`${PROPOSALS_ENDPOINT}/${id}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error(`Failed to delete proposal: ${res.statusText}`);
+  }
+
   const list = await getAll();
   persist(list.filter((p) => p.id !== id));
 }
