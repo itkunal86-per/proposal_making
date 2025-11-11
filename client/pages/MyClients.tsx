@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/hooks/use-toast";
@@ -18,6 +19,7 @@ export default function MyClients() {
   const [status, setStatus] = useState<ClientStatus | "all">("all");
   const [openEdit, setOpenEdit] = useState<null | ClientRecord>(null);
   const [openAdd, setOpenAdd] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; clientId: string; clientName: string }>({ open: false, clientId: "", clientName: "" });
 
   useEffect(() => { (async () => setRows(await listClients()))(); }, []);
 
@@ -80,8 +82,13 @@ export default function MyClients() {
     await refresh();
   }
 
-  async function onDelete(id: string) {
-    const result = await deleteClient(id);
+  function showDeleteConfirm(id: string, name: string) {
+    setDeleteConfirm({ open: true, clientId: id, clientName: name });
+  }
+
+  async function confirmDelete() {
+    const result = await deleteClient(deleteConfirm.clientId);
+    setDeleteConfirm({ open: false, clientId: "", clientName: "" });
     if (!result.success) {
       toast({ title: result.error || "Failed to delete client", variant: "destructive" });
       return;
@@ -148,7 +155,7 @@ export default function MyClients() {
                     <TableCell>{new Date(r.createdAt).toLocaleDateString()}</TableCell>
                     <TableCell className="text-right space-x-1 whitespace-nowrap">
                       <Button variant="outline" size="sm" onClick={() => setOpenEdit(r)}>Edit</Button>
-                      <Button variant="destructive" size="sm" onClick={() => onDelete(r.id)}>Delete</Button>
+                      <Button variant="destructive" size="sm" onClick={() => showDeleteConfirm(r.id, r.name)}>Delete</Button>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -160,6 +167,22 @@ export default function MyClients() {
 
       <AddDialog open={openAdd} onOpenChange={setOpenAdd} onSubmit={(p, cb) => onAdd({ ...p, onError: cb })} />
       <EditDialog open={!!openEdit} record={openEdit} onOpenChange={() => setOpenEdit(null)} onSubmit={(rec, cb) => onSave(rec, cb)} />
+      <AlertDialog open={deleteConfirm.open} onOpenChange={(v) => setDeleteConfirm({ ...deleteConfirm, open: v })}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete client</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete <span className="font-semibold">{deleteConfirm.clientName}</span>? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="flex justify-end gap-2">
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
     </AppShell>
   );
 }
