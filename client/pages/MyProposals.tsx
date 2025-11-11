@@ -34,6 +34,8 @@ export default function MyProposals() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
   const [clients, setClients] = useState<ClientRecord[]>([]);
   const [isLoadingClients, setIsLoadingClients] = useState(false);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [formData, setFormData] = useState<CreateProposalInput>({
     title: "",
     client_id: "",
@@ -114,10 +116,23 @@ export default function MyProposals() {
     }
   }
 
-  async function onDelete(id: string) {
-    await deleteProposal(id);
-    toast({ title: "Proposal deleted" });
-    await refresh();
+  function onDeleteClick(id: string) {
+    setDeleteConfirmId(id);
+  }
+
+  async function confirmDelete() {
+    if (!deleteConfirmId) return;
+    try {
+      setIsDeleting(true);
+      await deleteProposal(deleteConfirmId);
+      toast({ title: "Proposal deleted" });
+      await refresh();
+    } catch (error) {
+      toast({ title: "Failed to delete proposal", variant: "destructive" });
+    } finally {
+      setIsDeleting(false);
+      setDeleteConfirmId(null);
+    }
   }
 
   async function onDuplicate(id: string) {
@@ -164,7 +179,7 @@ export default function MyProposals() {
                     <TableCell className="text-right space-x-1 whitespace-nowrap">
                       <Button variant="outline" size="sm" onClick={() => nav(`/proposals/${r.id}/edit`)}>Edit</Button>
                       <Button variant="outline" size="sm" onClick={() => onDuplicate(r.id)}>Duplicate</Button>
-                      <Button variant="destructive" size="sm" onClick={() => onDelete(r.id)}>Delete</Button>
+                      <Button variant="destructive" size="sm" onClick={() => onDeleteClick(r.id)}>Delete</Button>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -275,6 +290,33 @@ export default function MyProposals() {
                 {isCreating ? "Creating..." : "Create Proposal"}
               </Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={deleteConfirmId !== null} onOpenChange={(open) => !open && setDeleteConfirmId(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Proposal</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this proposal? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex gap-3 justify-end pt-4">
+            <Button
+              variant="outline"
+              onClick={() => setDeleteConfirmId(null)}
+              disabled={isDeleting}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmDelete}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Deleting..." : "Delete"}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
