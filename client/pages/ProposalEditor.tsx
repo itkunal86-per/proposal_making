@@ -27,6 +27,7 @@ import {
   updateProposal,
   valueTotal,
 } from "@/services/proposalsService";
+import { type ClientRecord, listClients } from "@/services/clientsService";
 
 export default function ProposalEditor() {
   const { id = "" } = useParams();
