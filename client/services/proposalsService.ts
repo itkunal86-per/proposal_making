@@ -52,10 +52,37 @@ interface ApiProposalResponse {
   client_id: string;
   status: ProposalStatus;
   created_at: string;
-  client: {
+  created_by?: string;
+  due_date?: string;
+  approval_flow?: string;
+  sharing_public?: number;
+  sharing_token?: string;
+  sharing_allow_comments?: number;
+  currency?: string;
+  tax_rate?: number;
+  updated_at?: string;
+  client?: {
     id: string;
     name: string;
   };
+}
+
+export interface CreateProposalInput {
+  title: string;
+  client_id: string;
+  status?: ProposalStatus;
+  due_date?: string;
+  approval_flow?: string;
+  sharing_public?: boolean;
+  sharing_token?: string;
+  sharing_allow_comments?: boolean;
+}
+
+export interface CreateProposalResult {
+  success: boolean;
+  data?: Proposal;
+  error?: string;
+  fieldErrors?: Record<string, string[]>;
 }
 
 const idSchema = z.string();
@@ -166,31 +193,36 @@ function persist(list: Proposal[]) {
 
 function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmail?: string): Proposal {
   const createdAtMs = new Date(apiProposal.created_at).getTime() || Date.now();
+  const updatedAtMs = apiProposal.updated_at ? new Date(apiProposal.updated_at).getTime() : createdAtMs;
   return {
     id: apiProposal.id,
     title: apiProposal.title,
     client: apiProposal.client?.name || "",
     status: apiProposal.status,
-    createdBy: userEmail || "you@example.com",
+    createdBy: apiProposal.created_by || userEmail || "you@example.com",
     createdAt: createdAtMs,
-    updatedAt: createdAtMs,
+    updatedAt: updatedAtMs,
     sections: [
       { id: uuid(), title: "Overview", content: "Project overview...", media: [], comments: [] },
       { id: uuid(), title: "Scope", content: "Scope of work...", media: [], comments: [] },
       { id: uuid(), title: "Timeline", content: "Timeline...", media: [], comments: [] },
     ],
     pricing: {
-      currency: "USD",
-      taxRate: 0.1,
+      currency: apiProposal.currency || "USD",
+      taxRate: apiProposal.tax_rate ?? 0.1,
       items: [
         { id: uuid(), label: "Design", qty: 1, price: 3000 },
         { id: uuid(), label: "Development", qty: 1, price: 9000 },
       ],
     },
     settings: {
-      dueDate: undefined,
-      approvalFlow: "Single approver",
-      sharing: { public: false, token: undefined, allowComments: true },
+      dueDate: apiProposal.due_date || undefined,
+      approvalFlow: apiProposal.approval_flow || "Single approver",
+      sharing: {
+        public: (apiProposal.sharing_public ?? 0) === 1,
+        token: apiProposal.sharing_token || undefined,
+        allowComments: (apiProposal.sharing_allow_comments ?? 0) === 1,
+      },
     },
     versions: [],
   };
@@ -258,6 +290,79 @@ export async function getProposal(id: string): Promise<Proposal | undefined> {
 export async function getProposalByToken(token: string): Promise<Proposal | undefined> {
   const list = await getAll();
   return list.find((p) => p.settings.sharing.token === token);
+}
+
+export async function createProposalApi(input: CreateProposalInput): Promise<CreateProposalResult> {
+  const token = getStoredToken();
+  if (!token) {
+    return {
+      success: false,
+      error: "No authentication token available",
+    };
+  }
+
+  const title = input.title?.trim();
+  const client_id = input.client_id?.trim();
+  if (!title || !client_id) {
+    return {
+      success: false,
+      error: "Title and client ID are required",
+    };
+  }
+
+  try {
+    const payload: Record<string, unknown> = {
+      title,
+      client_id,
+      status: input.status ?? "draft",
+      due_date: input.due_date ?? "",
+      approval_flow: input.approval_flow ?? "",
+      sharing_public: input.sharing_public ? 1 : 0,
+      sharing_token: input.sharing_token ?? "",
+      sharing_allow_comments: input.sharing_allow_comments ? 1 : 0,
+    };
+
+    const res = await fetch(PROPOSALS_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+
+      if (errorData.issues) {
+        return {
+          success: false,
+          error: errorData.error || "Validation failed",
+          fieldErrors: errorData.issues,
+        };
+      }
+
+      return {
+        success: false,
+        error: errorData.error || "Failed to create proposal",
+      };
+    }
+
+    const data: ApiProposalResponse = await res.json();
+    const proposal = convertApiProposalToProposal(data);
+    const list = await getAll();
+    persist([proposal, ...list]);
+
+    return {
+      success: true,
+      data: proposal,
+    };
+  } catch (err) {
+    return {
+      success: false,
+      error: "Network error. Please try again.",
+    };
+  }
 }
 
 export async function createProposal(partial?: Partial<Proposal>): Promise<Proposal> {

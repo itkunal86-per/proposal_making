@@ -5,13 +5,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
 import {
   type Proposal,
-  createProposal,
+  createProposalApi,
+  type CreateProposalInput,
   deleteProposal,
   duplicateProposal,
   listProposals,
@@ -24,6 +26,16 @@ export default function MyProposals() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
+  const [formData, setFormData] = useState<CreateProposalInput>({
+    title: "",
+    client_id: "",
+    status: "draft",
+    due_date: "",
+  });
 
   useEffect(() => {
     (async () => setRows(await listProposals()))();
@@ -46,11 +58,39 @@ export default function MyProposals() {
     setRows(await listProposals());
   }
 
-  async function onCreate() {
-    const p = await createProposal({ createdBy: user?.email ?? "you@example.com", title: "New Proposal" });
-    toast({ title: "Proposal created" });
+  function handleFormChange(field: keyof CreateProposalInput, value: string) {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (fieldErrors[field]) {
+      setFieldErrors((prev) => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    }
+  }
+
+  async function handleCreateProposal() {
+    setCreateError(null);
+    setFieldErrors({});
+    setIsCreating(true);
+
+    const result = await createProposalApi(formData);
+
+    if (!result.success) {
+      setCreateError(result.error || "Failed to create proposal");
+      setFieldErrors(result.fieldErrors || {});
+      setIsCreating(false);
+      return;
+    }
+
+    toast({ title: "Proposal created successfully" });
+    setFormData({ title: "", client_id: "", status: "draft", due_date: "" });
+    setIsCreateDialogOpen(false);
     await refresh();
-    nav(`/proposals/${p.id}/edit`);
+
+    if (result.data) {
+      nav(`/proposals/${result.data.id}/edit`);
+    }
   }
 
   async function onDelete(id: string) {
@@ -73,7 +113,7 @@ export default function MyProposals() {
             <h1 className="text-2xl font-bold">My Proposals</h1>
             <p className="text-muted-foreground">Create and manage proposals you own.</p>
           </div>
-          <Button onClick={onCreate}>New proposal</Button>
+          <Button onClick={() => setIsCreateDialogOpen(true)}>New proposal</Button>
         </div>
 
         <Card className="mt-4 p-4">
@@ -126,6 +166,89 @@ export default function MyProposals() {
           </Pagination>
         </Card>
       </section>
+
+      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New Proposal</DialogTitle>
+            <DialogDescription>
+              Fill in the details below to create a new proposal.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {createError && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-800">
+                {createError}
+              </div>
+            )}
+
+            <div>
+              <Label htmlFor="title" className="text-sm font-medium">
+                Proposal Title <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="title"
+                placeholder="e.g., Website Redesign Project"
+                value={formData.title}
+                onChange={(e) => handleFormChange("title", e.target.value)}
+                disabled={isCreating}
+                className={fieldErrors.title ? "border-red-500" : ""}
+              />
+              {fieldErrors.title && (
+                <p className="text-sm text-red-500 mt-1">{fieldErrors.title[0]}</p>
+              )}
+            </div>
+
+            <div>
+              <Label htmlFor="client_id" className="text-sm font-medium">
+                Client ID <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="client_id"
+                placeholder="e.g., 1"
+                value={formData.client_id}
+                onChange={(e) => handleFormChange("client_id", e.target.value)}
+                disabled={isCreating}
+                className={fieldErrors.client_id ? "border-red-500" : ""}
+              />
+              {fieldErrors.client_id && (
+                <p className="text-sm text-red-500 mt-1">{fieldErrors.client_id[0]}</p>
+              )}
+            </div>
+
+            <div>
+              <Label htmlFor="due_date" className="text-sm font-medium">
+                Due Date (Optional)
+              </Label>
+              <Input
+                id="due_date"
+                type="date"
+                placeholder="YYYY-MM-DD"
+                value={formData.due_date}
+                onChange={(e) => handleFormChange("due_date", e.target.value)}
+                disabled={isCreating}
+              />
+            </div>
+
+            <div className="flex gap-3 justify-end pt-4">
+              <Button
+                variant="outline"
+                onClick={() => setIsCreateDialogOpen(false)}
+                disabled={isCreating}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleCreateProposal}
+                disabled={isCreating || !formData.title || !formData.client_id}
+              >
+                {isCreating ? "Creating..." : "Create Proposal"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </AppShell>
   );
 }
