@@ -6,11 +6,12 @@ import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/hooks/use-toast";
 import { useEffect, useMemo, useState } from "react";
-import { type ClientRecord, type ClientStatus, listClients, createClient, updateClient, deleteClient } from "@/services/clientsService";
+import { type ClientRecord, type ClientStatus, type CreateClientResult, type UpdateClientResult, type DeleteClientResult, listClients, createClient, updateClient, deleteClient } from "@/services/clientsService";
 
 export default function MyClients() {
   const [rows, setRows] = useState<ClientRecord[]>([]);
@@ -18,6 +19,7 @@ export default function MyClients() {
   const [status, setStatus] = useState<ClientStatus | "all">("all");
   const [openEdit, setOpenEdit] = useState<null | ClientRecord>(null);
   const [openAdd, setOpenAdd] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; clientId: string; clientName: string }>({ open: false, clientId: "", clientName: "" });
 
   useEffect(() => { (async () => setRows(await listClients()))(); }, []);
 
@@ -34,26 +36,63 @@ export default function MyClients() {
     setRows(await listClients());
   }
 
-  async function onAdd(payload: { name: string; email: string; company?: string; status: ClientStatus }) {
+  async function onAdd(payload: { name: string; email: string; company?: string; status: ClientStatus; onError?: (errors: Record<string, string | string[]>) => void }) {
     if (!payload.name.trim() || !payload.email.trim()) {
+      if (payload.onError) {
+        payload.onError({ form: "Name and email are required" });
+      }
       toast({ title: "Name and email are required", variant: "destructive" });
       return;
     }
-    await createClient(payload);
+    const result = await createClient({
+      name: payload.name,
+      email: payload.email,
+      company: payload.company,
+      status: payload.status,
+    });
+    if (!result.success) {
+      if (result.fieldErrors) {
+        if (payload.onError) {
+          payload.onError(result.fieldErrors);
+        }
+      } else {
+        toast({ title: result.error || "Failed to add client", variant: "destructive" });
+      }
+      return;
+    }
     toast({ title: "Client added" });
     setOpenAdd(false);
     await refresh();
   }
 
-  async function onSave(rec: ClientRecord) {
-    await updateClient(rec);
+  async function onSave(rec: ClientRecord, onError?: (errors: Record<string, string | string[]>) => void) {
+    const result = await updateClient(rec);
+    if (!result.success) {
+      if (result.fieldErrors) {
+        if (onError) {
+          onError(result.fieldErrors);
+        }
+      } else {
+        toast({ title: result.error || "Failed to update client", variant: "destructive" });
+      }
+      return;
+    }
     toast({ title: "Client updated" });
     setOpenEdit(null);
     await refresh();
   }
 
-  async function onDelete(id: string) {
-    await deleteClient(id);
+  function showDeleteConfirm(id: string, name: string) {
+    setDeleteConfirm({ open: true, clientId: id, clientName: name });
+  }
+
+  async function confirmDelete() {
+    const result = await deleteClient(deleteConfirm.clientId);
+    setDeleteConfirm({ open: false, clientId: "", clientName: "" });
+    if (!result.success) {
+      toast({ title: result.error || "Failed to delete client", variant: "destructive" });
+      return;
+    }
     toast({ title: "Client deleted" });
     await refresh();
   }
@@ -116,7 +155,7 @@ export default function MyClients() {
                     <TableCell>{new Date(r.createdAt).toLocaleDateString()}</TableCell>
                     <TableCell className="text-right space-x-1 whitespace-nowrap">
                       <Button variant="outline" size="sm" onClick={() => setOpenEdit(r)}>Edit</Button>
-                      <Button variant="destructive" size="sm" onClick={() => onDelete(r.id)}>Delete</Button>
+                      <Button variant="destructive" size="sm" onClick={() => showDeleteConfirm(r.id, r.name)}>Delete</Button>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -126,24 +165,50 @@ export default function MyClients() {
         </Card>
       </section>
 
-      <AddDialog open={openAdd} onOpenChange={setOpenAdd} onSubmit={onAdd} />
-      <EditDialog open={!!openEdit} record={openEdit} onOpenChange={() => setOpenEdit(null)} onSubmit={onSave} />
+      <AddDialog open={openAdd} onOpenChange={setOpenAdd} onSubmit={(p, cb) => onAdd({ ...p, onError: cb })} />
+      <EditDialog open={!!openEdit} record={openEdit} onOpenChange={() => setOpenEdit(null)} onSubmit={(rec, cb) => onSave(rec, cb)} />
+      <AlertDialog open={deleteConfirm.open} onOpenChange={(v) => setDeleteConfirm({ ...deleteConfirm, open: v })}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete client</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete <span className="font-semibold">{deleteConfirm.clientName}</span>? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="flex justify-end gap-2">
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
     </AppShell>
   );
 }
 
-function AddDialog({ open, onOpenChange, onSubmit }: { open: boolean; onOpenChange: (v: boolean) => void; onSubmit: (p: { name: string; email: string; company?: string; status: ClientStatus }) => void }) {
+function AddDialog({ open, onOpenChange, onSubmit }: { open: boolean; onOpenChange: (v: boolean) => void; onSubmit: (p: { name: string; email: string; company?: string; status: ClientStatus }, onError: (errors: Record<string, string | string[]>) => void) => void }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [company, setCompany] = useState("");
   const [status, setStatus] = useState<ClientStatus>("active");
+  const [errors, setErrors] = useState<Record<string, string | string[]>>({});
+
+  useEffect(() => {
+    if (!open) {
+      setErrors({});
+      setName("");
+      setEmail("");
+      setCompany("");
+      setStatus("active");
+    }
+  }, [open]);
 
   function submit() {
-    onSubmit({ name, email, company, status });
-    setName("");
-    setEmail("");
-    setCompany("");
-    setStatus("active");
+    setErrors({});
+    onSubmit({ name, email, company, status }, (fieldErrors) => {
+      setErrors(fieldErrors);
+    });
   }
 
   return (
@@ -153,17 +218,53 @@ function AddDialog({ open, onOpenChange, onSubmit }: { open: boolean; onOpenChan
           <DialogTitle>Add client</DialogTitle>
         </DialogHeader>
         <div className="space-y-3">
+          {errors.form && (
+            <div className="rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive-foreground">
+              {Array.isArray(errors.form) ? errors.form[0] : errors.form}
+            </div>
+          )}
           <div className="grid gap-2">
             <Label htmlFor="name">Name</Label>
-            <Input id="name" value={name} onChange={(e) => setName(e.target.value)} />
+            <Input
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              aria-invalid={!!errors.name}
+            />
+            {errors.name && (
+              <p className="text-xs text-destructive">
+                {Array.isArray(errors.name) ? errors.name[0] : errors.name}
+              </p>
+            )}
           </div>
           <div className="grid gap-2">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+            <Input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              aria-invalid={!!errors.email}
+            />
+            {errors.email && (
+              <p className="text-xs text-destructive">
+                {Array.isArray(errors.email) ? errors.email[0] : errors.email}
+              </p>
+            )}
           </div>
           <div className="grid gap-2">
             <Label htmlFor="company">Company</Label>
-            <Input id="company" value={company} onChange={(e) => setCompany(e.target.value)} />
+            <Input
+              id="company"
+              value={company}
+              onChange={(e) => setCompany(e.target.value)}
+              aria-invalid={!!errors.company}
+            />
+            {errors.company && (
+              <p className="text-xs text-destructive">
+                {Array.isArray(errors.company) ? errors.company[0] : errors.company}
+              </p>
+            )}
           </div>
           <div className="grid gap-2">
             <Label>Status</Label>
@@ -176,6 +277,11 @@ function AddDialog({ open, onOpenChange, onSubmit }: { open: boolean; onOpenChan
                 <SelectItem value="inactive">Inactive</SelectItem>
               </SelectContent>
             </Select>
+            {errors.status && (
+              <p className="text-xs text-destructive">
+                {Array.isArray(errors.status) ? errors.status[0] : errors.status}
+              </p>
+            )}
           </div>
           <Separator />
           <div className="flex justify-end gap-2">
@@ -188,33 +294,78 @@ function AddDialog({ open, onOpenChange, onSubmit }: { open: boolean; onOpenChan
   );
 }
 
-function EditDialog({ open, record, onOpenChange, onSubmit }: { open: boolean; record: ClientRecord | null; onOpenChange: () => void; onSubmit: (rec: ClientRecord) => void }) {
+function EditDialog({ open, record, onOpenChange, onSubmit }: { open: boolean; record: ClientRecord | null; onOpenChange: () => void; onSubmit: (rec: ClientRecord, onError: (errors: Record<string, string | string[]>) => void) => void }) {
   const [draft, setDraft] = useState<ClientRecord | null>(null);
+  const [errors, setErrors] = useState<Record<string, string | string[]>>({});
 
   useEffect(() => {
     setDraft(record ? { ...record } : null);
-  }, [record]);
+    setErrors({});
+  }, [record, open]);
 
   if (!draft) return null;
 
+  function submit() {
+    setErrors({});
+    onSubmit(draft, (fieldErrors) => {
+      setErrors(fieldErrors);
+    });
+  }
+
   return (
-    <Dialog open={open} onOpenChange={() => onOpenChange()}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit client</DialogTitle>
         </DialogHeader>
         <div className="space-y-3">
+          {errors.form && (
+            <div className="rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive-foreground">
+              {Array.isArray(errors.form) ? errors.form[0] : errors.form}
+            </div>
+          )}
           <div className="grid gap-2">
             <Label htmlFor="name">Name</Label>
-            <Input id="name" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
+            <Input
+              id="name"
+              value={draft.name}
+              onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+              aria-invalid={!!errors.name}
+            />
+            {errors.name && (
+              <p className="text-xs text-destructive">
+                {Array.isArray(errors.name) ? errors.name[0] : errors.name}
+              </p>
+            )}
           </div>
           <div className="grid gap-2">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" value={draft.email} onChange={(e) => setDraft({ ...draft, email: e.target.value })} />
+            <Input
+              id="email"
+              type="email"
+              value={draft.email}
+              onChange={(e) => setDraft({ ...draft, email: e.target.value })}
+              aria-invalid={!!errors.email}
+            />
+            {errors.email && (
+              <p className="text-xs text-destructive">
+                {Array.isArray(errors.email) ? errors.email[0] : errors.email}
+              </p>
+            )}
           </div>
           <div className="grid gap-2">
             <Label htmlFor="company">Company</Label>
-            <Input id="company" value={draft.company ?? ""} onChange={(e) => setDraft({ ...draft, company: e.target.value })} />
+            <Input
+              id="company"
+              value={draft.company ?? ""}
+              onChange={(e) => setDraft({ ...draft, company: e.target.value })}
+              aria-invalid={!!errors.company}
+            />
+            {errors.company && (
+              <p className="text-xs text-destructive">
+                {Array.isArray(errors.company) ? errors.company[0] : errors.company}
+              </p>
+            )}
           </div>
           <div className="grid gap-2">
             <Label>Status</Label>
@@ -227,11 +378,16 @@ function EditDialog({ open, record, onOpenChange, onSubmit }: { open: boolean; r
                 <SelectItem value="inactive">Inactive</SelectItem>
               </SelectContent>
             </Select>
+            {errors.status && (
+              <p className="text-xs text-destructive">
+                {Array.isArray(errors.status) ? errors.status[0] : errors.status}
+              </p>
+            )}
           </div>
           <Separator />
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={() => onOpenChange()}>Cancel</Button>
-            <Button onClick={() => draft && onSubmit(draft)}>Save</Button>
+            <Button onClick={submit}>Save</Button>
           </div>
         </div>
       </DialogContent>

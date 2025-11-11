@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { getStoredToken } from "@/lib/auth";
 
 export type ClientStatus = "active" | "inactive";
 
@@ -20,7 +21,53 @@ export type CreateClientInput = {
 };
 
 const STORAGE_KEY = "app_clients";
-const CLIENTS_ENDPOINT = "/data/clients.json";
+const CLIENTS_ENDPOINT = "https://propai-api.hirenq.com/api/clients";
+
+interface ApiClientResponse {
+  id: string;
+  name: string;
+  email: string;
+  company: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface ApiCreateClientResponse {
+  userId: string;
+  name: string;
+  email: string;
+  company: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface ApiUpdateClientResponse {
+  name: string;
+  email: string;
+  company: string;
+  status: string;
+}
+
+export interface CreateClientResult {
+  success: boolean;
+  data?: ClientRecord;
+  error?: string;
+  fieldErrors?: Record<string, string[]>;
+}
+
+export interface UpdateClientResult {
+  success: boolean;
+  data?: ClientRecord;
+  error?: string;
+  fieldErrors?: Record<string, string[]>;
+}
+
+export interface DeleteClientResult {
+  success: boolean;
+  error?: string;
+}
 
 const clientSchema = z.object({
   id: z.string(),
@@ -54,6 +101,22 @@ function normalizeClient(raw: z.infer<typeof clientSchema>): ClientRecord {
   };
 }
 
+function convertApiClientToRecord(client: ApiClientResponse): ClientRecord {
+  const createdAtMs = new Date(client.created_at).getTime() || Date.now();
+  const updatedAtMs = new Date(client.updated_at).getTime() || Date.now();
+  const status = (client.status.toLowerCase() === "active" ? "active" : "inactive") as ClientStatus;
+
+  return {
+    id: client.id,
+    name: client.name,
+    email: client.email,
+    company: client.company || "",
+    status,
+    createdAt: createdAtMs,
+    updatedAt: updatedAtMs,
+  };
+}
+
 function readStored(): ClientRecord[] | null {
   if (!isBrowser()) return null;
   try {
@@ -71,17 +134,50 @@ function persist(list: ClientRecord[]) {
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
 }
 
-async function fetchSeed(): Promise<ClientRecord[]> {
-  const res = await fetch(CLIENTS_ENDPOINT, { cache: "no-store" });
-  if (!res.ok) throw new Error("Unable to load clients");
-  const json = await res.json();
-  const list = clientListSchema.parse(json).map(normalizeClient);
+async function fetchFromApi(): Promise<ClientRecord[]> {
+  const token = getStoredToken();
+  if (!token) {
+    throw new Error("No authentication token available");
+  }
+
+  const res = await fetch(CLIENTS_ENDPOINT, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    throw new Error(`Failed to fetch clients: ${res.statusText}`);
+  }
+
+  const json: ApiClientResponse[] = await res.json();
+  const list = json.map(convertApiClientToRecord);
   persist(list);
   return list;
 }
 
+async function fetchSeed(): Promise<ClientRecord[]> {
+  try {
+    return await fetchFromApi();
+  } catch {
+    const res = await fetch("/data/clients.json", { cache: "no-store" });
+    if (!res.ok) throw new Error("Unable to load clients");
+    const json = await res.json();
+    const list = clientListSchema.parse(json).map(normalizeClient);
+    persist(list);
+    return list;
+  }
+}
+
 async function getAll(): Promise<ClientRecord[]> {
-  return readStored() ?? (await fetchSeed());
+  try {
+    return await fetchFromApi();
+  } catch {
+    return readStored() ?? (await fetchSeed());
+  }
 }
 
 export async function listClients(): Promise<ClientRecord[]> {
@@ -89,36 +185,195 @@ export async function listClients(): Promise<ClientRecord[]> {
   return list.sort((a, b) => b.updatedAt - a.updatedAt);
 }
 
-export async function createClient(input: CreateClientInput): Promise<ClientRecord> {
+export async function createClient(input: CreateClientInput): Promise<CreateClientResult> {
+  const token = getStoredToken();
+  if (!token) {
+    return {
+      success: false,
+      error: "No authentication token available",
+    };
+  }
+
   const name = input.name?.trim();
   const email = input.email?.trim().toLowerCase();
-  if (!name || !email) throw new Error("Name and email are required");
-  const list = await getAll();
-  const now = Date.now();
-  const rec: ClientRecord = {
-    id: uuid(),
-    name,
-    email,
-    company: input.company?.trim() || "",
-    status: input.status ?? "active",
-    createdAt: now,
-    updatedAt: now,
-  };
-  const next = [rec, ...list];
-  persist(next);
-  return rec;
+  if (!name || !email) {
+    return {
+      success: false,
+      error: "Name and email are required",
+    };
+  }
+
+  try {
+    const status = input.status ?? "active";
+    const statusLabel = status === "active" ? "Active" : "Inactive";
+
+    const res = await fetch(CLIENTS_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        name,
+        email,
+        company: input.company?.trim() || "",
+        status: statusLabel,
+      }),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+
+      if (errorData.issues) {
+        return {
+          success: false,
+          error: errorData.error || "Validation failed",
+          fieldErrors: errorData.issues,
+        };
+      }
+
+      return {
+        success: false,
+        error: errorData.error || "Failed to create client",
+      };
+    }
+
+    const data: ApiCreateClientResponse = await res.json();
+    const createdAtMs = new Date(data.created_at).getTime() || Date.now();
+    const updatedAtMs = new Date(data.updated_at).getTime() || Date.now();
+    const clientStatus = (data.status.toLowerCase() === "active" ? "active" : "inactive") as ClientStatus;
+
+    const rec: ClientRecord = {
+      id: data.userId,
+      name: data.name,
+      email: data.email,
+      company: data.company || "",
+      status: clientStatus,
+      createdAt: createdAtMs,
+      updatedAt: updatedAtMs,
+    };
+
+    return {
+      success: true,
+      data: rec,
+    };
+  } catch (err) {
+    return {
+      success: false,
+      error: "Network error. Please try again.",
+    };
+  }
 }
 
-export async function updateClient(rec: ClientRecord): Promise<void> {
-  const list = await getAll();
-  const idx = list.findIndex((c) => c.id === rec.id);
-  if (idx === -1) throw new Error("Client not found");
-  rec.updatedAt = Date.now();
-  list[idx] = normalizeClient(clientSchema.parse(rec));
-  persist(list);
+export async function updateClient(rec: ClientRecord): Promise<UpdateClientResult> {
+  const token = getStoredToken();
+  if (!token) {
+    return {
+      success: false,
+      error: "No authentication token available",
+    };
+  }
+
+  const name = rec.name?.trim();
+  const email = rec.email?.trim().toLowerCase();
+  if (!name || !email) {
+    return {
+      success: false,
+      error: "Name and email are required",
+    };
+  }
+
+  try {
+    const statusLabel = rec.status === "active" ? "Active" : "Inactive";
+
+    const res = await fetch(`${CLIENTS_ENDPOINT}/${rec.id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        name,
+        email,
+        company: rec.company?.trim() || "",
+        status: statusLabel,
+      }),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+
+      if (errorData.issues) {
+        return {
+          success: false,
+          error: errorData.error || "Validation failed",
+          fieldErrors: errorData.issues,
+        };
+      }
+
+      return {
+        success: false,
+        error: errorData.error || "Failed to update client",
+      };
+    }
+
+    const data: ApiUpdateClientResponse = await res.json();
+    const clientStatus = (data.status.toLowerCase() === "active" ? "active" : "inactive") as ClientStatus;
+
+    const updatedRec: ClientRecord = {
+      ...rec,
+      name: data.name,
+      email: data.email,
+      company: data.company || "",
+      status: clientStatus,
+      updatedAt: Date.now(),
+    };
+
+    return {
+      success: true,
+      data: updatedRec,
+    };
+  } catch (err) {
+    return {
+      success: false,
+      error: "Network error. Please try again.",
+    };
+  }
 }
 
-export async function deleteClient(id: string): Promise<void> {
-  const list = await getAll();
-  persist(list.filter((c) => c.id !== id));
+export async function deleteClient(id: string): Promise<DeleteClientResult> {
+  const token = getStoredToken();
+  if (!token) {
+    return {
+      success: false,
+      error: "No authentication token available",
+    };
+  }
+
+  try {
+    const res = await fetch(`${CLIENTS_ENDPOINT}/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      return {
+        success: false,
+        error: errorData.error || "Failed to delete client",
+      };
+    }
+
+    return {
+      success: true,
+    };
+  } catch (err) {
+    return {
+      success: false,
+      error: "Network error. Please try again.",
+    };
+  }
 }

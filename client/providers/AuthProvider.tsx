@@ -3,6 +3,7 @@ import {
   getStoredAuth,
   persistAuth,
   apiAuthenticate,
+  apiRegister,
   type AuthenticatedUser,
 } from "@/lib/auth";
 import type { ReactNode } from "react";
@@ -14,10 +15,18 @@ interface SignInResult {
   user?: AuthenticatedUser;
 }
 
+interface SignUpResult {
+  success: boolean;
+  error?: string;
+  user?: AuthenticatedUser;
+  fieldErrors?: Record<string, string[]>;
+}
+
 interface AuthContextValue {
   status: "loading" | "ready";
   user: AuthenticatedUser | null;
   signIn: (params: { email: string; password: string; remember: boolean }) => Promise<SignInResult>;
+  signUp: (params: { name: string; email: string; password: string; company: string; phone: string; remember: boolean }) => Promise<SignUpResult>;
   signOut: () => void;
 }
 
@@ -49,13 +58,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { success: true, user };
   }, []);
 
+  const signUp = useCallback<AuthContextValue["signUp"]>(async ({
+    name,
+    email,
+    password,
+    company,
+    phone,
+    remember,
+  }) => {
+    const { user, token, error, fieldErrors } = await apiRegister({
+      name,
+      email,
+      password,
+      company,
+      phone,
+    });
+    if (!user || error) {
+      return {
+        success: false,
+        error: error || "Registration failed",
+        fieldErrors,
+      };
+    }
+    persistAuth(user, token ?? undefined, remember);
+    setUser(user);
+    return { success: true, user };
+  }, []);
+
   const signOut = useCallback(() => {
     clearAuth();
     setUser(null);
   }, []);
 
-  const value = useMemo<AuthContextValue>(() => ({ status, user, signIn, signOut }), [
+  const value = useMemo<AuthContextValue>(() => ({ status, user, signIn, signUp, signOut }), [
     signIn,
+    signUp,
     signOut,
     status,
     user,

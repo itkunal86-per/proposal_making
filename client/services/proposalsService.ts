@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { getStoredToken, getStoredAuth } from "@/lib/auth";
 
 export type ProposalStatus = "draft" | "sent" | "accepted" | "declined";
 
@@ -43,7 +44,19 @@ export interface Proposal {
 }
 
 const STORAGE_KEY = "app_proposals";
-const PROPOSALS_ENDPOINT = "/data/proposals.json";
+const PROPOSALS_ENDPOINT = "https://propai-api.hirenq.com/api/proposals";
+
+interface ApiProposalResponse {
+  id: string;
+  title: string;
+  client_id: string;
+  status: ProposalStatus;
+  created_at: string;
+  client: {
+    id: string;
+    name: string;
+  };
+}
 
 const idSchema = z.string();
 const sectionSchema = z.object({
@@ -151,17 +164,85 @@ function persist(list: Proposal[]) {
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
 }
 
-async function fetchSeed(): Promise<Proposal[]> {
-  const res = await fetch(PROPOSALS_ENDPOINT, { cache: "no-store" });
-  if (!res.ok) throw new Error("Unable to load proposals");
-  const json = await res.json();
-  const list = proposalListSchema.parse(json).map(normalizeProposal);
+function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmail?: string): Proposal {
+  const createdAtMs = new Date(apiProposal.created_at).getTime() || Date.now();
+  return {
+    id: apiProposal.id,
+    title: apiProposal.title,
+    client: apiProposal.client?.name || "",
+    status: apiProposal.status,
+    createdBy: userEmail || "you@example.com",
+    createdAt: createdAtMs,
+    updatedAt: createdAtMs,
+    sections: [
+      { id: uuid(), title: "Overview", content: "Project overview...", media: [], comments: [] },
+      { id: uuid(), title: "Scope", content: "Scope of work...", media: [], comments: [] },
+      { id: uuid(), title: "Timeline", content: "Timeline...", media: [], comments: [] },
+    ],
+    pricing: {
+      currency: "USD",
+      taxRate: 0.1,
+      items: [
+        { id: uuid(), label: "Design", qty: 1, price: 3000 },
+        { id: uuid(), label: "Development", qty: 1, price: 9000 },
+      ],
+    },
+    settings: {
+      dueDate: undefined,
+      approvalFlow: "Single approver",
+      sharing: { public: false, token: undefined, allowComments: true },
+    },
+    versions: [],
+  };
+}
+
+async function fetchFromApi(): Promise<Proposal[]> {
+  const token = getStoredToken();
+  if (!token) {
+    throw new Error("No authentication token available");
+  }
+
+  const res = await fetch(PROPOSALS_ENDPOINT, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    throw new Error(`Failed to fetch proposals: ${res.statusText}`);
+  }
+
+  const json: ApiProposalResponse[] = await res.json();
+  const auth = getStoredAuth();
+  const userEmail = auth?.user?.email;
+
+  const list = json.map((p) => convertApiProposalToProposal(p, userEmail));
   persist(list);
   return list;
 }
 
+async function fetchSeed(): Promise<Proposal[]> {
+  try {
+    return await fetchFromApi();
+  } catch {
+    const res = await fetch("/data/proposals.json", { cache: "no-store" });
+    if (!res.ok) throw new Error("Unable to load proposals");
+    const json = await res.json();
+    const list = proposalListSchema.parse(json).map(normalizeProposal);
+    persist(list);
+    return list;
+  }
+}
+
 async function getAll(): Promise<Proposal[]> {
-  return readStored() ?? (await fetchSeed());
+  try {
+    return await fetchFromApi();
+  } catch {
+    return readStored() ?? (await fetchSeed());
+  }
 }
 
 export async function listProposals(): Promise<Proposal[]> {
