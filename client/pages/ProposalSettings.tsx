@@ -112,7 +112,7 @@ export default function ProposalSettings() {
             <TabsContent value="pricing" className="mt-4 space-y-3">
               <div className="grid gap-2">
                 <Label>Currency</Label>
-                <Input value={p.pricing.currency} onChange={(e) => void updateProposal({ ...p, pricing: { ...p.pricing, currency: e.target.value } })} />
+                <Input value={p.pricing.currency} onChange={(e) => void updateProposalViaApi({ ...p, pricing: { ...p.pricing, currency: e.target.value } })} />
               </div>
               <div className="grid gap-2">
                 <Label>Tax rate</Label>
@@ -120,7 +120,7 @@ export default function ProposalSettings() {
                   type="number"
                   step="0.01"
                   value={p.pricing.taxRate}
-                  onChange={(e) => void updateProposal({
+                  onChange={(e) => void updateProposalViaApi({
                     ...p,
                     pricing: { ...p.pricing, taxRate: Number(e.target.value) },
                   })}
