@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -18,6 +19,7 @@ import {
   duplicateProposal,
   listProposals,
 } from "@/services/proposalsService";
+import { type ClientRecord, listClients } from "@/services/clientsService";
 
 export default function MyProposals() {
   const { user } = useAuth();
@@ -30,6 +32,8 @@ export default function MyProposals() {
   const [isCreating, setIsCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
+  const [clients, setClients] = useState<ClientRecord[]>([]);
+  const [isLoadingClients, setIsLoadingClients] = useState(false);
   const [formData, setFormData] = useState<CreateProposalInput>({
     title: "",
     client_id: "",
@@ -40,6 +44,23 @@ export default function MyProposals() {
   useEffect(() => {
     (async () => setRows(await listProposals()))();
   }, []);
+
+  async function loadClients() {
+    try {
+      setIsLoadingClients(true);
+      const clientsList = await listClients();
+      setClients(clientsList);
+    } catch (error) {
+      toast({ title: "Failed to load clients", variant: "destructive" });
+    } finally {
+      setIsLoadingClients(false);
+    }
+  }
+
+  const handleOpenCreateDialog = async () => {
+    await loadClients();
+    setIsCreateDialogOpen(true);
+  };
 
   const mine = useMemo(() => {
     const email = user?.email?.toLowerCase();
@@ -113,7 +134,7 @@ export default function MyProposals() {
             <h1 className="text-2xl font-bold">My Proposals</h1>
             <p className="text-muted-foreground">Create and manage proposals you own.</p>
           </div>
-          <Button onClick={() => setIsCreateDialogOpen(true)}>New proposal</Button>
+          <Button onClick={handleOpenCreateDialog}>New proposal</Button>
         </div>
 
         <Card className="mt-4 p-4">
@@ -201,17 +222,25 @@ export default function MyProposals() {
             </div>
 
             <div>
-              <Label htmlFor="client_id" className="text-sm font-medium">
-                Client ID <span className="text-red-500">*</span>
+              <Label className="text-sm font-medium">
+                Client <span className="text-red-500">*</span>
               </Label>
-              <Input
-                id="client_id"
-                placeholder="e.g., 1"
+              <Select
                 value={formData.client_id}
-                onChange={(e) => handleFormChange("client_id", e.target.value)}
-                disabled={isCreating}
-                className={fieldErrors.client_id ? "border-red-500" : ""}
-              />
+                onValueChange={(value) => handleFormChange("client_id", value)}
+                disabled={isCreating || isLoadingClients}
+              >
+                <SelectTrigger className={fieldErrors.client_id ? "border-red-500" : ""}>
+                  <SelectValue placeholder="Select a client" />
+                </SelectTrigger>
+                <SelectContent>
+                  {clients.map((client) => (
+                    <SelectItem key={client.id} value={client.id}>
+                      {client.name} ({client.company || "No company"})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               {fieldErrors.client_id && (
                 <p className="text-sm text-red-500 mt-1">{fieldErrors.client_id[0]}</p>
               )}
