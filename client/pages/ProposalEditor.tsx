@@ -36,6 +36,8 @@ export default function ProposalEditor() {
   const [p, setP] = useState<Proposal | null>(null);
   const [current, setCurrent] = useState(0);
   const [saving, setSaving] = useState(false);
+  const [clients, setClients] = useState<ClientRecord[]>([]);
+  const [isLoadingClients, setIsLoadingClients] = useState(false);
   const saveTimer = useRef<number | null>(null);
 
   useEffect(() => {
