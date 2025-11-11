@@ -126,12 +126,29 @@ export default function ProposalEditor() {
                   onChange={(e) => commit({ ...p, title: e.target.value })}
                   className="w-[28rem]"
                 />
-                <Input
-                  placeholder="Client"
-                  value={p.client}
-                  onChange={(e) => commit({ ...p, client: e.target.value })}
-                  className="w-64"
-                />
+                <Select
+                  value={p.client_id || ""}
+                  onValueChange={(v) => {
+                    const selectedClient = clients.find((c) => c.id === v);
+                    commit({
+                      ...p,
+                      client_id: v,
+                      client: selectedClient?.name || "",
+                    });
+                  }}
+                  disabled={isLoadingClients}
+                >
+                  <SelectTrigger className="w-64">
+                    <SelectValue placeholder="Select a client" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {clients.map((client) => (
+                      <SelectItem key={client.id} value={client.id}>
+                        {client.name} ({client.company || "No company"})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <Select
                   value={p.status}
                   onValueChange={(v: ProposalStatus) =>
