@@ -401,19 +401,57 @@ export async function createProposal(partial?: Partial<Proposal>): Promise<Propo
 }
 
 export async function updateProposal(p: Proposal, options?: { keepVersion?: boolean; note?: string }) {
-  const list = await getAll();
-  const idx = list.findIndex((x) => x.id === p.id);
-  if (idx === -1) return;
-  const prev = list[idx];
-  if (options?.keepVersion) {
-    const snap: ProposalVersionSnapshot = { id: uuid(), createdAt: Date.now(), note: options?.note, data: prev };
-    p.versions = [snap, ...prev.versions];
-  } else {
-    p.versions = prev.versions;
+  const token = getStoredToken();
+  if (!token) {
+    throw new Error("No authentication token available");
   }
-  p.updatedAt = Date.now();
-  list[idx] = normalizeProposal(proposalSchema.parse(p));
-  persist(list);
+
+  try {
+    const payload: Record<string, unknown> = {
+      title: p.title,
+      client_id: p.client,
+      status: p.status,
+      due_date: p.settings.dueDate ?? "",
+      approval_flow: p.settings.approvalFlow ?? "",
+      sharing_public: p.settings.sharing.public ? 1 : 0,
+      sharing_token: p.settings.sharing.token ?? "",
+      sharing_allow_comments: p.settings.sharing.allowComments ? 1 : 0,
+      versions: p.versions,
+      options: {
+        keepVersion: options?.keepVersion ?? false,
+        note: options?.note,
+      },
+    };
+
+    const res = await fetch(`${PROPOSALS_ENDPOINT}/${p.id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.error || `Failed to update proposal: ${res.statusText}`);
+    }
+
+    const data: ApiProposalResponse = await res.json();
+    const updatedProposal = convertApiProposalToProposal(data);
+
+    const list = await getAll();
+    const idx = list.findIndex((x) => x.id === p.id);
+    if (idx === -1) {
+      persist([updatedProposal, ...list]);
+    } else {
+      list[idx] = updatedProposal;
+      persist(list);
+    }
+  } catch (err) {
+    console.error("Failed to update proposal:", err);
+    throw err;
+  }
 }
 
 export async function deleteProposal(id: string) {

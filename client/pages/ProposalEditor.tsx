@@ -27,6 +27,7 @@ import {
   updateProposal,
   valueTotal,
 } from "@/services/proposalsService";
+import { type ClientRecord, listClients } from "@/services/clientsService";
 
 export default function ProposalEditor() {
   const { id = "" } = useParams();
@@ -34,6 +35,8 @@ export default function ProposalEditor() {
   const [p, setP] = useState<Proposal | null>(null);
   const [current, setCurrent] = useState(0);
   const [saving, setSaving] = useState(false);
+  const [clients, setClients] = useState<ClientRecord[]>([]);
+  const [isLoadingClients, setIsLoadingClients] = useState(false);
   const saveTimer = useRef<number | null>(null);
 
   useEffect(() => {
@@ -44,8 +47,18 @@ export default function ProposalEditor() {
         return;
       }
       setP(found);
+
+      try {
+        setIsLoadingClients(true);
+        const clientsList = await listClients();
+        setClients(clientsList);
+      } catch (error) {
+        console.error("Failed to load clients:", error);
+      } finally {
+        setIsLoadingClients(false);
+      }
     })();
-  }, [id]);
+  }, [id, nav]);
 
   function commit(next: Proposal, keepVersion = false, note?: string) {
     setP(next);
@@ -107,12 +120,22 @@ export default function ProposalEditor() {
                   onChange={(e) => commit({ ...p, title: e.target.value })}
                   className="w-[28rem]"
                 />
-                <Input
-                  placeholder="Client"
+                <Select
                   value={p.client}
-                  onChange={(e) => commit({ ...p, client: e.target.value })}
-                  className="w-64"
-                />
+                  onValueChange={(value) => commit({ ...p, client: value })}
+                  disabled={isLoadingClients}
+                >
+                  <SelectTrigger className="w-64">
+                    <SelectValue placeholder="Select a client" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {clients.map((client) => (
+                      <SelectItem key={client.id} value={client.name}>
+                        {client.name} ({client.company || "No company"})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <Select
                   value={p.status}
                   onValueChange={(v: ProposalStatus) =>
