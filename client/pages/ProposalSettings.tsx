@@ -22,9 +22,23 @@ import { type ClientRecord, listClients } from "@/services/clientsService";
 export default function ProposalSettings() {
   const { id = "" } = useParams();
   const [p, setP] = useState<Proposal | null>(null);
+  const [clients, setClients] = useState<ClientRecord[]>([]);
+  const [isLoadingClients, setIsLoadingClients] = useState(false);
 
   useEffect(() => {
-    (async () => setP((await getProposal(id)) ?? null))();
+    (async () => {
+      setP((await getProposal(id)) ?? null);
+
+      setIsLoadingClients(true);
+      try {
+        const clientsList = await listClients();
+        setClients(clientsList);
+      } catch (error) {
+        console.error("Failed to load clients:", error);
+      } finally {
+        setIsLoadingClients(false);
+      }
+    })();
   }, [id]);
   if (!p) return null;
 
