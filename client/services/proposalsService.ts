@@ -417,6 +417,49 @@ export async function updateProposal(p: Proposal, options?: { keepVersion?: bool
   persist(list);
 }
 
+export async function updateProposalViaApi(p: Proposal, options?: { keepVersion?: boolean; note?: string }) {
+  const token = getStoredToken();
+  if (!token) {
+    throw new Error("No authentication token available");
+  }
+
+  const payload = {
+    title: p.title,
+    client_id: p.client_id || "",
+    status: p.status,
+    due_date: p.settings.dueDate || "",
+    approval_flow: p.settings.approvalFlow || "",
+    sharing_public: p.settings.sharing.public ? 1 : 0,
+    sharing_token: p.settings.sharing.token || "",
+    sharing_allow_comments: p.settings.sharing.allowComments ? 1 : 0,
+    versions: p.versions,
+    options: {
+      keepVersion: options?.keepVersion ?? false,
+      note: options?.note,
+    },
+  };
+
+  const res = await fetch(`${PROPOSALS_ENDPOINT}/${p.id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    throw new Error(`Failed to update proposal: ${res.statusText}`);
+  }
+
+  const list = await getAll();
+  const idx = list.findIndex((x) => x.id === p.id);
+  if (idx !== -1) {
+    list[idx] = normalizeProposal(proposalSchema.parse(p));
+    persist(list);
+  }
+}
+
 export async function deleteProposal(id: string) {
   const token = getStoredToken();
   if (!token) {
