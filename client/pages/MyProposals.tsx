@@ -166,6 +166,89 @@ export default function MyProposals() {
           </Pagination>
         </Card>
       </section>
+
+      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New Proposal</DialogTitle>
+            <DialogDescription>
+              Fill in the details below to create a new proposal.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {createError && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-800">
+                {createError}
+              </div>
+            )}
+
+            <div>
+              <Label htmlFor="title" className="text-sm font-medium">
+                Proposal Title <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="title"
+                placeholder="e.g., Website Redesign Project"
+                value={formData.title}
+                onChange={(e) => handleFormChange("title", e.target.value)}
+                disabled={isCreating}
+                className={fieldErrors.title ? "border-red-500" : ""}
+              />
+              {fieldErrors.title && (
+                <p className="text-sm text-red-500 mt-1">{fieldErrors.title[0]}</p>
+              )}
+            </div>
+
+            <div>
+              <Label htmlFor="client_id" className="text-sm font-medium">
+                Client ID <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="client_id"
+                placeholder="e.g., 1"
+                value={formData.client_id}
+                onChange={(e) => handleFormChange("client_id", e.target.value)}
+                disabled={isCreating}
+                className={fieldErrors.client_id ? "border-red-500" : ""}
+              />
+              {fieldErrors.client_id && (
+                <p className="text-sm text-red-500 mt-1">{fieldErrors.client_id[0]}</p>
+              )}
+            </div>
+
+            <div>
+              <Label htmlFor="due_date" className="text-sm font-medium">
+                Due Date (Optional)
+              </Label>
+              <Input
+                id="due_date"
+                type="date"
+                placeholder="YYYY-MM-DD"
+                value={formData.due_date}
+                onChange={(e) => handleFormChange("due_date", e.target.value)}
+                disabled={isCreating}
+              />
+            </div>
+
+            <div className="flex gap-3 justify-end pt-4">
+              <Button
+                variant="outline"
+                onClick={() => setIsCreateDialogOpen(false)}
+                disabled={isCreating}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleCreateProposal}
+                disabled={isCreating || !formData.title || !formData.client_id}
+              >
+                {isCreating ? "Creating..." : "Create Proposal"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </AppShell>
   );
 }
