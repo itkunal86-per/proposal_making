@@ -222,17 +222,25 @@ export default function MyProposals() {
             </div>
 
             <div>
-              <Label htmlFor="client_id" className="text-sm font-medium">
-                Client ID <span className="text-red-500">*</span>
+              <Label className="text-sm font-medium">
+                Client <span className="text-red-500">*</span>
               </Label>
-              <Input
-                id="client_id"
-                placeholder="e.g., 1"
+              <Select
                 value={formData.client_id}
-                onChange={(e) => handleFormChange("client_id", e.target.value)}
-                disabled={isCreating}
-                className={fieldErrors.client_id ? "border-red-500" : ""}
-              />
+                onValueChange={(value) => handleFormChange("client_id", value)}
+                disabled={isCreating || isLoadingClients}
+              >
+                <SelectTrigger className={fieldErrors.client_id ? "border-red-500" : ""}>
+                  <SelectValue placeholder="Select a client" />
+                </SelectTrigger>
+                <SelectContent>
+                  {clients.map((client) => (
+                    <SelectItem key={client.id} value={client.id}>
+                      {client.name} ({client.company || "No company"})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               {fieldErrors.client_id && (
                 <p className="text-sm text-red-500 mt-1">{fieldErrors.client_id[0]}</p>
               )}
