@@ -65,8 +65,13 @@ export default function ProposalEditor() {
     setP(next);
     setSaving(true);
     if (saveTimer.current) window.clearTimeout(saveTimer.current);
-    saveTimer.current = window.setTimeout(() => {
-      void updateProposal(next, { keepVersion, note });
+    saveTimer.current = window.setTimeout(async () => {
+      try {
+        await updateProposalViaApi(next, { keepVersion, note });
+      } catch (error) {
+        console.error("Failed to save proposal:", error);
+        await updateProposal(next, { keepVersion, note });
+      }
       setSaving(false);
     }, 400);
   }
