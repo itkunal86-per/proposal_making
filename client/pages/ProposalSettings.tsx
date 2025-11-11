@@ -7,9 +7,17 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { useEffect, useState } from "react";
-import { getProposal, toggleShare, updateProposal, valueTotal, type Proposal } from "@/services/proposalsService";
+import { getProposal, toggleShare, updateProposal, updateProposalViaApi, valueTotal, type Proposal } from "@/services/proposalsService";
+import { type ClientRecord, listClients } from "@/services/clientsService";
 
 export default function ProposalSettings() {
   const { id = "" } = useParams();
