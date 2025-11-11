@@ -193,31 +193,36 @@ function persist(list: Proposal[]) {
 
 function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmail?: string): Proposal {
   const createdAtMs = new Date(apiProposal.created_at).getTime() || Date.now();
+  const updatedAtMs = apiProposal.updated_at ? new Date(apiProposal.updated_at).getTime() : createdAtMs;
   return {
     id: apiProposal.id,
     title: apiProposal.title,
     client: apiProposal.client?.name || "",
     status: apiProposal.status,
-    createdBy: userEmail || "you@example.com",
+    createdBy: apiProposal.created_by || userEmail || "you@example.com",
     createdAt: createdAtMs,
-    updatedAt: createdAtMs,
+    updatedAt: updatedAtMs,
     sections: [
       { id: uuid(), title: "Overview", content: "Project overview...", media: [], comments: [] },
       { id: uuid(), title: "Scope", content: "Scope of work...", media: [], comments: [] },
       { id: uuid(), title: "Timeline", content: "Timeline...", media: [], comments: [] },
     ],
     pricing: {
-      currency: "USD",
-      taxRate: 0.1,
+      currency: apiProposal.currency || "USD",
+      taxRate: apiProposal.tax_rate ?? 0.1,
       items: [
         { id: uuid(), label: "Design", qty: 1, price: 3000 },
         { id: uuid(), label: "Development", qty: 1, price: 9000 },
       ],
     },
     settings: {
-      dueDate: undefined,
-      approvalFlow: "Single approver",
-      sharing: { public: false, token: undefined, allowComments: true },
+      dueDate: apiProposal.due_date || undefined,
+      approvalFlow: apiProposal.approval_flow || "Single approver",
+      sharing: {
+        public: (apiProposal.sharing_public ?? 0) === 1,
+        token: apiProposal.sharing_token || undefined,
+        allowComments: (apiProposal.sharing_allow_comments ?? 0) === 1,
+      },
     },
     versions: [],
   };
