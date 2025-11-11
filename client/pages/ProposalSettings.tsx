@@ -97,7 +97,7 @@ export default function ProposalSettings() {
                   id="due"
                   type="date"
                   value={p.settings.dueDate || ""}
-                  onChange={(e) => void updateProposal({
+                  onChange={(e) => void updateProposalViaApi({
                     ...p,
                     settings: { ...p.settings, dueDate: e.target.value },
                   })}
