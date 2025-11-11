@@ -48,6 +48,16 @@ export default function ProposalEditor() {
         return;
       }
       setP(found);
+
+      setIsLoadingClients(true);
+      try {
+        const clientsList = await listClients();
+        setClients(clientsList);
+      } catch (error) {
+        console.error("Failed to load clients:", error);
+      } finally {
+        setIsLoadingClients(false);
+      }
     })();
   }, [id]);
 
