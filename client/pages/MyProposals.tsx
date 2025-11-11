@@ -179,7 +179,7 @@ export default function MyProposals() {
                     <TableCell className="text-right space-x-1 whitespace-nowrap">
                       <Button variant="outline" size="sm" onClick={() => nav(`/proposals/${r.id}/edit`)}>Edit</Button>
                       <Button variant="outline" size="sm" onClick={() => onDuplicate(r.id)}>Duplicate</Button>
-                      <Button variant="destructive" size="sm" onClick={() => onDelete(r.id)}>Delete</Button>
+                      <Button variant="destructive" size="sm" onClick={() => onDeleteClick(r.id)}>Delete</Button>
                     </TableCell>
                   </TableRow>
                 ))}
