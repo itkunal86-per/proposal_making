@@ -28,8 +28,6 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   onUpdateProposal,
   onRemoveMedia,
 }) => {
-  const [elementStyles, setElementStyles] = useState<ElementStyle>({});
-
   if (!selectedElementId || !selectedElementType) {
     return (
       <Card className="p-4">
@@ -40,7 +38,16 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     );
   }
 
+  const updateTitleStyles = (styles: Partial<ElementStyle>) => {
+    const updated = {
+      ...proposal,
+      titleStyles: { ...proposal.titleStyles, ...styles }
+    };
+    onUpdateProposal(updated as any);
+  };
+
   if (selectedElementType === "title") {
+    const titleStyles = (proposal as any).titleStyles || {};
     return (
       <Card className="p-4 space-y-4">
         <div>
@@ -62,16 +69,16 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             <div className="flex gap-2 mt-2">
               <Input
                 type="color"
-                value={elementStyles.color || "#000000"}
+                value={titleStyles.color || "#000000"}
                 onChange={(e) =>
-                  setElementStyles({ ...elementStyles, color: e.target.value })
+                  updateTitleStyles({ color: e.target.value })
                 }
                 className="w-16 h-10 p-1 cursor-pointer"
               />
               <Input
-                value={elementStyles.color || "#000000"}
+                value={titleStyles.color || "#000000"}
                 onChange={(e) =>
-                  setElementStyles({ ...elementStyles, color: e.target.value })
+                  updateTitleStyles({ color: e.target.value })
                 }
                 className="flex-1"
               />
@@ -85,12 +92,9 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                 type="number"
                 min="12"
                 max="72"
-                value={parseInt(elementStyles.fontSize || "32")}
+                value={parseInt(titleStyles.fontSize || "32")}
                 onChange={(e) =>
-                  setElementStyles({
-                    ...elementStyles,
-                    fontSize: e.target.value,
-                  })
+                  updateTitleStyles({ fontSize: e.target.value })
                 }
                 className="flex-1"
               />
@@ -107,14 +111,11 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                 <Button
                   key={align}
                   variant={
-                    elementStyles.textAlign === align ? "default" : "outline"
+                    titleStyles.textAlign === align ? "default" : "outline"
                   }
                   size="sm"
                   onClick={() =>
-                    setElementStyles({
-                      ...elementStyles,
-                      textAlign: align,
-                    })
+                    updateTitleStyles({ textAlign: align })
                   }
                   className="capitalize flex-1"
                 >
