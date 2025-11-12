@@ -137,7 +137,11 @@ export default function ProposalEditor() {
                 </div>
               )}
               <Button
-                onClick={() => setAIDialogOpen(true)}
+                onClick={() => {
+                  setAIElementId(undefined);
+                  setAIElementType(undefined);
+                  setAIDialogOpen(true);
+                }}
                 variant="outline"
                 size="sm"
               >
