@@ -56,6 +56,7 @@ export default function ProposalEditor() {
   const [activePanel, setActivePanel] = useState<PanelType>("properties");
   const [documentSettings, setDocumentSettings] = useState<DocumentSettings>({});
   const [signatureRecipient, setSignatureRecipient] = useState("");
+  const [textFormatting, setTextFormatting] = useState<Record<string, any>>({});
   const saveTimer = useRef<number | null>(null);
 
   useEffect(() => {
