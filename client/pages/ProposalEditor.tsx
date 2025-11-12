@@ -1,12 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import AppShell from "@/components/layout/AppShell";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -17,19 +14,17 @@ import {
 import { toast } from "@/hooks/use-toast";
 import {
   type Proposal,
-  type ProposalSection,
   type ProposalStatus,
-  addComment,
-  addSection,
   getProposal,
-  reorderSection,
-  removeSection,
   updateProposal,
   valueTotal,
 } from "@/services/proposalsService";
 import { type ClientRecord, listClients } from "@/services/clientsService";
 import { ProposalPreview } from "@/components/ProposalPreview";
 import { PropertiesPanel } from "@/components/PropertiesPanel";
+import { ProposalEditorSidebar } from "@/components/ProposalEditorSidebar";
+import { SectionsDialog } from "@/components/SectionsDialog";
+import { AIAssistantDialog } from "@/components/AIAssistantDialog";
 
 export default function ProposalEditor() {
   const { id = "" } = useParams();
