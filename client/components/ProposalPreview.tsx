@@ -90,7 +90,11 @@ const SelectableElement: React.FC<ElementProps> = ({
     return (
       <div
         onClick={onSelect}
-        className={`${baseClasses} ${selectedClasses} rounded border overflow-hidden`}
+        className={`${baseClasses} ${selectedClasses} overflow-hidden`}
+        style={{
+          borderRadius: borderRadius ? `${borderRadius}px` : "4px",
+          border: getBorderStyle(),
+        }}
       >
         {children}
         {onAI && (
@@ -119,7 +123,7 @@ const SelectableElement: React.FC<ElementProps> = ({
   return (
     <div
       onClick={onSelect}
-      className={`${baseClasses} ${selectedClasses} p-2 rounded`}
+      className={`${baseClasses} ${selectedClasses}`}
       style={styleOverrides}
     >
       <div className={(textClasses as any)[type] || ""}>
