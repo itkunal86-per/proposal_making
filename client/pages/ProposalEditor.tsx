@@ -193,6 +193,8 @@ export default function ProposalEditor() {
 
         {/* Text Formatting Toolbar */}
         <TextFormattingToolbar
+          sections={p.sections.map((s) => ({ id: s.id, title: s.title }))}
+          onSectionSelect={handleSectionNavigate}
           onFormatChange={(format, value) => {
             setTextFormatting((prev) => ({ ...prev, [format]: value }));
             if (selectedElementId && selectedElementType) {
