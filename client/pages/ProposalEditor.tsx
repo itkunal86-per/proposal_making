@@ -234,44 +234,11 @@ export default function ProposalEditor() {
         <TextFormattingToolbar
           sections={p.sections.map((s) => ({ id: s.id, title: s.title }))}
           onSectionSelect={handleSectionNavigate}
+          selectedElementId={selectedElementId}
+          selectedElementType={selectedElementType}
+          onApplyFormatting={applyTextFormatting}
           onFormatChange={(format, value) => {
             setTextFormatting((prev) => ({ ...prev, [format]: value }));
-            if (selectedElementId && selectedElementType) {
-              if (selectedElementType === "title") {
-                const updated = { ...p, titleStyles: { ...(p as any).titleStyles, [format]: value } };
-                commit(updated);
-              } else if (selectedElementType === "section-title") {
-                const parts = selectedElementId.split("-");
-                const sectionId = parts[2];
-                const section = p.sections.find((s) => s.id === sectionId);
-                if (section) {
-                  const updated = {
-                    ...p,
-                    sections: p.sections.map((s) =>
-                      s.id === sectionId
-                        ? { ...s, titleStyles: { ...(s as any).titleStyles, [format]: value } }
-                        : s
-                    ),
-                  };
-                  commit(updated);
-                }
-              } else if (selectedElementType === "section-content") {
-                const parts = selectedElementId.split("-");
-                const sectionId = parts[2];
-                const section = p.sections.find((s) => s.id === sectionId);
-                if (section) {
-                  const updated = {
-                    ...p,
-                    sections: p.sections.map((s) =>
-                      s.id === sectionId
-                        ? { ...s, contentStyles: { ...(s as any).contentStyles, [format]: value } }
-                        : s
-                    ),
-                  };
-                  commit(updated);
-                }
-              }
-            }
           }}
         />
 
