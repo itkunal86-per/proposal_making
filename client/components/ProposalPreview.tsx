@@ -34,6 +34,15 @@ const SelectableElement: React.FC<ElementProps> = ({
   color,
   fontSize,
   textAlign,
+  backgroundColor,
+  borderColor,
+  borderWidth,
+  borderRadius,
+  borderStyle,
+  paddingTop,
+  paddingRight,
+  paddingBottom,
+  paddingLeft,
 }) => {
   const baseClasses =
     "cursor-pointer transition-all duration-200 outline-2 outline-offset-2 relative group";
@@ -49,10 +58,30 @@ const SelectableElement: React.FC<ElementProps> = ({
 
   const defaultFontSize = (defaultFontSizes as any)[type] || "16";
 
+  const getBorderStyle = () => {
+    if (!borderWidth || parseInt(borderWidth) === 0) return "none";
+    const width = `${borderWidth}px`;
+    const color = borderColor || "#000000";
+
+    if (borderStyle === "top") return `${width} solid ${color} 0 0 0`;
+    if (borderStyle === "right") return `0 ${width} solid ${color} 0 0`;
+    if (borderStyle === "bottom") return `0 0 ${width} solid ${color} 0`;
+    if (borderStyle === "left") return `0 0 0 ${width} solid ${color}`;
+
+    return `${width} solid ${color}`;
+  };
+
   const styleOverrides: React.CSSProperties = {
     color: color || "inherit",
     fontSize: fontSize ? `${fontSize}px` : `${defaultFontSize}px`,
     textAlign: (textAlign as any) || "left",
+    backgroundColor: backgroundColor || "transparent",
+    border: getBorderStyle(),
+    borderRadius: borderRadius ? `${borderRadius}px` : "0px",
+    paddingTop: paddingTop ? `${paddingTop}px` : "0px",
+    paddingRight: paddingRight ? `${paddingRight}px` : "0px",
+    paddingBottom: paddingBottom ? `${paddingBottom}px` : "0px",
+    paddingLeft: paddingLeft ? `${paddingLeft}px` : "0px",
   };
 
   const isTextElement = type !== "image" && type !== "video";
