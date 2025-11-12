@@ -206,6 +206,8 @@ export default function ProposalEditor() {
         onOpenChange={setAIDialogOpen}
         proposal={p}
         sectionId={section?.id}
+        elementId={aiElementId}
+        elementType={aiElementType}
         onUpdateProposal={(updated) => {
           setP(updated);
           commit(updated);
