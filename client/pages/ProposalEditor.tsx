@@ -31,6 +31,13 @@ import { UploadsPanel } from "@/components/UploadsPanel";
 import { SignaturesPanel } from "@/components/SignaturesPanel";
 import { VariablesPanel } from "@/components/VariablesPanel";
 
+interface DocumentSettings {
+  company?: string;
+  contact?: string;
+  sender?: string;
+  currency?: string;
+}
+
 export default function ProposalEditor() {
   const { id = "" } = useParams();
   const nav = useNavigate();
@@ -45,6 +52,9 @@ export default function ProposalEditor() {
   const [aiDialogOpen, setAIDialogOpen] = useState(false);
   const [aiElementId, setAIElementId] = useState<string | undefined>(undefined);
   const [aiElementType, setAIElementType] = useState<string | undefined>(undefined);
+  const [activePanel, setActivePanel] = useState<PanelType>("properties");
+  const [documentSettings, setDocumentSettings] = useState<DocumentSettings>({});
+  const [signatureRecipient, setSignatureRecipient] = useState("");
   const saveTimer = useRef<number | null>(null);
 
   useEffect(() => {
