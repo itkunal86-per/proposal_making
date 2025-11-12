@@ -171,6 +171,15 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
         color={(proposal as any).titleStyles?.color}
         fontSize={(proposal as any).titleStyles?.fontSize}
         textAlign={(proposal as any).titleStyles?.textAlign}
+        backgroundColor={(proposal as any).titleStyles?.backgroundColor}
+        borderColor={(proposal as any).titleStyles?.borderColor}
+        borderWidth={(proposal as any).titleStyles?.borderWidth}
+        borderRadius={(proposal as any).titleStyles?.borderRadius}
+        borderStyle={(proposal as any).titleStyles?.borderStyle}
+        paddingTop={(proposal as any).titleStyles?.paddingTop}
+        paddingRight={(proposal as any).titleStyles?.paddingRight}
+        paddingBottom={(proposal as any).titleStyles?.paddingBottom}
+        paddingLeft={(proposal as any).titleStyles?.paddingLeft}
       >
         {proposal.title}
       </SelectableElement>
