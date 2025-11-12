@@ -164,9 +164,9 @@ export default function ProposalEditor() {
           </div>
         </div>
 
-        <div className="mt-4 grid gap-4 lg:grid-cols-[260px_1fr_320px]">
+        <div className="mt-4 grid gap-4 lg:grid-cols-[260px_1fr_380px]">
           {/* Left nav */}
-          <Card className="p-3">
+          <Card className="p-3 h-fit">
             <div className="text-xs font-semibold">Sections</div>
             <Separator className="my-2" />
             <div className="space-y-1">
@@ -247,264 +247,31 @@ export default function ProposalEditor() {
             </div>
           </Card>
 
-          {/* Editor */}
-          <Card className="p-4">
-            <div className="flex items-center justify-between gap-2">
-              <Input
-                value={section.title}
-                onChange={(e) => {
-                  const next: Proposal = {
-                    ...p,
-                    sections: p.sections.map((x, i) =>
-                      i === current ? { ...section, title: e.target.value } : x,
-                    ),
-                  };
-                  commit(next);
-                }}
-                className="w-80"
-              />
-              <div className="text-sm">
-                Total: ${valueTotal(p).toLocaleString()}
-              </div>
-            </div>
-            <Textarea
-              value={section.content}
-              onChange={(e) => {
-                const next: Proposal = {
-                  ...p,
-                  sections: p.sections.map((x, i) =>
-                    i === current ? { ...section, content: e.target.value } : x,
-                  ),
-                };
-                commit(next);
+          {/* Visual Editor Preview */}
+          <div className="overflow-y-auto max-h-[calc(100vh-200px)]">
+            <ProposalPreview
+              proposal={p}
+              selectedElementId={selectedElementId}
+              onSelectElement={(id, type) => {
+                setSelectedElementId(id);
+                setSelectedElementType(type);
               }}
-              className="mt-3 min-h-[360px]"
             />
-            <div className="mt-3 grid gap-2 md:grid-cols-2">
-              <div className="grid gap-2">
-                <Label htmlFor="img">Insert image URL</Label>
-                <div className="flex gap-2">
-                  <Input
-                    id="img"
-                    placeholder="https://..."
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        const url = (e.target as HTMLInputElement).value.trim();
-                        if (url) {
-                          addMedia(url, "image");
-                          (e.target as HTMLInputElement).value = "";
-                        }
-                      }
-                    }}
-                  />
-                  <Button
-                    type="button"
-                    onClick={() => {
-                      const el = document.getElementById(
-                        "img",
-                      ) as HTMLInputElement;
-                      const url = el.value.trim();
-                      if (url) {
-                        addMedia(url, "image");
-                        el.value = "";
-                      }
-                    }}
-                  >
-                    Add
-                  </Button>
-                </div>
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="vid">Insert video URL</Label>
-                <div className="flex gap-2">
-                  <Input
-                    id="vid"
-                    placeholder="https://..."
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        const url = (e.target as HTMLInputElement).value.trim();
-                        if (url) {
-                          addMedia(url, "video");
-                          (e.target as HTMLInputElement).value = "";
-                        }
-                      }
-                    }}
-                  />
-                  <Button
-                    type="button"
-                    onClick={() => {
-                      const el = document.getElementById(
-                        "vid",
-                      ) as HTMLInputElement;
-                      const url = el.value.trim();
-                      if (url) {
-                        addMedia(url, "video");
-                        el.value = "";
-                      }
-                    }}
-                  >
-                    Add
-                  </Button>
-                </div>
-              </div>
-            </div>
+          </div>
 
-            {section.media && section.media.length > 0 && (
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                {section.media.map((m, i) => (
-                  <div key={i} className="rounded border p-2">
-                    <div className="text-xs text-muted-foreground">
-                      {m.type.toUpperCase()}
-                    </div>
-                    {m.type === "image" ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={m.url}
-                        alt="media"
-                        className="mt-1 h-40 w-full rounded object-cover"
-                      />
-                    ) : (
-                      <video
-                        src={m.url}
-                        controls
-                        className="mt-1 h-40 w-full rounded object-cover"
-                      />
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </Card>
-
-          {/* AI Assistant */}
-          <Card className="p-4">
-            <div className="text-sm font-semibold">AI Assistant</div>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Prompt-based content tools
-            </p>
-            <Separator className="my-2" />
-            <Textarea
-              id="prompt"
-              placeholder="Describe what you want..."
-              className="min-h-[120px]"
+          {/* Properties Panel */}
+          <div className="overflow-y-auto max-h-[calc(100vh-200px)]">
+            <PropertiesPanel
+              proposal={p}
+              selectedElementId={selectedElementId}
+              selectedElementType={selectedElementType}
+              onUpdateProposal={(updated) => commit(updated)}
+              onRemoveMedia={() => {
+                setSelectedElementId(null);
+                setSelectedElementType(null);
+              }}
             />
-            <div className="mt-2 grid grid-cols-2 gap-2">
-              <Button
-                onClick={() =>
-                  aiWrite(
-                    "generate",
-                    (document.getElementById("prompt") as HTMLTextAreaElement)
-                      .value,
-                  )
-                }
-              >
-                Generate
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() =>
-                  aiWrite(
-                    "rewrite",
-                    (document.getElementById("prompt") as HTMLTextAreaElement)
-                      .value,
-                  )
-                }
-              >
-                Rewrite
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() =>
-                  aiWrite(
-                    "summarize",
-                    (document.getElementById("prompt") as HTMLTextAreaElement)
-                      .value,
-                  )
-                }
-              >
-                Summarize
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() =>
-                  aiWrite(
-                    "translate",
-                    (document.getElementById("prompt") as HTMLTextAreaElement)
-                      .value,
-                  )
-                }
-              >
-                Translate
-              </Button>
-            </div>
-
-            <Separator className="my-3" />
-            <div className="text-sm font-semibold">Comments</div>
-            <div className="mt-2 flex gap-2">
-              <Input id="cmt" placeholder="Add a comment" />
-              <Button
-                onClick={async () => {
-                  const el = document.getElementById("cmt") as HTMLInputElement;
-                  const v = el.value.trim();
-                  if (v) {
-                    await addComment(p, section.id, "you", v);
-                    el.value = "";
-                    const np = await getProposal(p.id);
-                    if (np) setP(np);
-                  }
-                }}
-              >
-                Post
-              </Button>
-            </div>
-            <div className="mt-2 space-y-2">
-              {(section.comments ?? []).map((c) => (
-                <div key={c.id} className="rounded border p-2">
-                  <div className="text-xs text-muted-foreground">
-                    {new Date(c.createdAt).toLocaleString()} • {c.author}
-                  </div>
-                  <div className="text-sm">{c.text}</div>
-                </div>
-              ))}
-            </div>
-
-            <Separator className="my-3" />
-            <div className="text-sm font-semibold">Version history</div>
-            <div className="mt-2 space-y-2">
-              {p.versions.length === 0 && (
-                <div className="text-xs text-muted-foreground">
-                  No versions yet.
-                </div>
-              )}
-              {p.versions.map((v) => (
-                <div
-                  key={v.id}
-                  className="flex items-center justify-between rounded border p-2 text-sm"
-                >
-                  <div>
-                    <div className="font-medium">
-                      {new Date(v.createdAt).toLocaleString()}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {v.note || "Saved"}
-                    </div>
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={async () => {
-                      await updateProposal(v.data);
-                      const np = await getProposal(v.data.id);
-                      if (np) setP(np);
-                      toast({ title: "Version restored" });
-                    }}
-                  >
-                    Restore
-                  </Button>
-                </div>
-              ))}
-            </div>
-          </Card>
+          </div>
         </div>
       </section>
     </AppShell>
