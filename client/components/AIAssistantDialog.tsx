@@ -121,6 +121,9 @@ export const AIAssistantDialog: React.FC<AIAssistantDialogProps> = ({
     toast({ title: `${action} via AI assistant` });
   };
 
+  const elementPreview = getElementPreview();
+  const isEnabled = activeSection || targetElementType === "title";
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
@@ -128,23 +131,23 @@ export const AIAssistantDialog: React.FC<AIAssistantDialogProps> = ({
           <DialogTitle>AI Assistant</DialogTitle>
         </DialogHeader>
 
-        {!section && (
+        {!isEnabled && (
           <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
             <p className="text-sm text-amber-900">
-              No section selected. Please select a section from the Sections panel to use AI features.
+              No element selected. Please select an element from the proposal to use AI features.
             </p>
           </div>
         )}
 
-        {section && (
+        {isEnabled && elementPreview && (
           <div className="space-y-4">
-            <div>
-              <Label className="text-xs font-semibold">
-                Current Section: {section.title}
+            <div className="p-3 bg-slate-50 rounded border border-slate-200">
+              <Label className="text-xs font-semibold block text-slate-700">
+                {elementPreview.label}
               </Label>
-              <p className="text-xs text-muted-foreground mt-1">
-                {section.content.substring(0, 100)}
-                {section.content.length > 100 ? "..." : ""}
+              <p className="text-xs text-slate-600 mt-1 line-clamp-2">
+                {elementPreview.value.substring(0, 150)}
+                {elementPreview.value.length > 150 ? "..." : ""}
               </p>
             </div>
 
@@ -152,11 +155,17 @@ export const AIAssistantDialog: React.FC<AIAssistantDialogProps> = ({
 
             <div className="space-y-2">
               <Label htmlFor="ai-prompt" className="text-xs font-semibold">
-                Describe what you want...
+                Prompt
               </Label>
               <Textarea
                 id="ai-prompt"
-                placeholder="Tell the AI what you'd like to generate, rewrite, summarize, or translate..."
+                placeholder={
+                  targetElementType === "title"
+                    ? "Enter new title or describe what you want..."
+                    : targetElementType === "section-title"
+                    ? "Enter new section title or describe what you want..."
+                    : "Tell the AI what you'd like to generate, rewrite, summarize, or translate..."
+                }
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 className="min-h-[100px]"
@@ -166,31 +175,35 @@ export const AIAssistantDialog: React.FC<AIAssistantDialogProps> = ({
             <div className="grid grid-cols-2 gap-2">
               <Button
                 onClick={() => handleAIWrite("generate", prompt)}
-                disabled={!section}
+                disabled={!isEnabled}
               >
                 Generate
               </Button>
               <Button
                 variant="outline"
                 onClick={() => handleAIWrite("rewrite", prompt)}
-                disabled={!section}
+                disabled={!isEnabled}
               >
                 Rewrite
               </Button>
-              <Button
-                variant="outline"
-                onClick={() => handleAIWrite("summarize", prompt)}
-                disabled={!section}
-              >
-                Summarize
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => handleAIWrite("translate", prompt)}
-                disabled={!section}
-              >
-                Translate
-              </Button>
+              {targetElementType === "section-content" && (
+                <>
+                  <Button
+                    variant="outline"
+                    onClick={() => handleAIWrite("summarize", prompt)}
+                    disabled={!isEnabled}
+                  >
+                    Summarize
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => handleAIWrite("translate", prompt)}
+                    disabled={!isEnabled}
+                  >
+                    Translate
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         )}
