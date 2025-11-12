@@ -22,9 +22,22 @@ import {
 import { type ClientRecord, listClients } from "@/services/clientsService";
 import { ProposalPreview } from "@/components/ProposalPreview";
 import { PropertiesPanel } from "@/components/PropertiesPanel";
-import { ProposalEditorSidebar } from "@/components/ProposalEditorSidebar";
+import { ProposalEditorSidebar, type PanelType } from "@/components/ProposalEditorSidebar";
 import { SectionsDialog } from "@/components/SectionsDialog";
 import { AIAssistantDialog } from "@/components/AIAssistantDialog";
+import { DocumentPanel } from "@/components/DocumentPanel";
+import { BuildPanel } from "@/components/BuildPanel";
+import { UploadsPanel } from "@/components/UploadsPanel";
+import { SignaturesPanel } from "@/components/SignaturesPanel";
+import { VariablesPanel } from "@/components/VariablesPanel";
+import { TextFormattingToolbar } from "@/components/TextFormattingToolbar";
+
+interface DocumentSettings {
+  company?: string;
+  contact?: string;
+  sender?: string;
+  currency?: string;
+}
 
 export default function ProposalEditor() {
   const { id = "" } = useParams();
@@ -40,6 +53,11 @@ export default function ProposalEditor() {
   const [aiDialogOpen, setAIDialogOpen] = useState(false);
   const [aiElementId, setAIElementId] = useState<string | undefined>(undefined);
   const [aiElementType, setAIElementType] = useState<string | undefined>(undefined);
+  const [activePanel, setActivePanel] = useState<PanelType>("properties");
+  const [documentSettings, setDocumentSettings] = useState<DocumentSettings>({});
+  const [signatureRecipient, setSignatureRecipient] = useState("");
+  const [textFormatting, setTextFormatting] = useState<Record<string, any>>({});
+  const previewContainerRef = useRef<HTMLDivElement>(null);
   const saveTimer = useRef<number | null>(null);
 
   useEffect(() => {
@@ -73,6 +91,23 @@ export default function ProposalEditor() {
     }, 400);
   }
 
+  const handleSectionNavigate = (sectionId: string) => {
+    const sectionIndex = p?.sections.findIndex((s) => s.id === sectionId);
+    if (sectionIndex !== undefined && sectionIndex !== -1) {
+      setCurrent(sectionIndex);
+
+      // Scroll to the section element
+      setTimeout(() => {
+        const sectionElement = previewContainerRef.current?.querySelector(
+          `[data-section-id="${sectionId}"]`
+        );
+        if (sectionElement) {
+          sectionElement.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 100);
+    }
+  };
+
   if (!p) return null;
 
   const section = p.sections[current];
@@ -83,6 +118,8 @@ export default function ProposalEditor() {
         proposalId={p.id}
         onOpenSections={() => setSectionsDialogOpen(true)}
         onOpenAI={() => setAIDialogOpen(true)}
+        onSelectPanel={setActivePanel}
+        activePanel={activePanel}
       />
 
       <div className="flex-1 flex flex-col ml-16">
@@ -154,10 +191,55 @@ export default function ProposalEditor() {
           </div>
         </div>
 
+        {/* Text Formatting Toolbar */}
+        <TextFormattingToolbar
+          sections={p.sections.map((s) => ({ id: s.id, title: s.title }))}
+          onSectionSelect={handleSectionNavigate}
+          onFormatChange={(format, value) => {
+            setTextFormatting((prev) => ({ ...prev, [format]: value }));
+            if (selectedElementId && selectedElementType) {
+              if (selectedElementType === "title") {
+                const updated = { ...p, titleStyles: { ...(p as any).titleStyles, [format]: value } };
+                commit(updated);
+              } else if (selectedElementType === "section-title") {
+                const parts = selectedElementId.split("-");
+                const sectionId = parts[2];
+                const section = p.sections.find((s) => s.id === sectionId);
+                if (section) {
+                  const updated = {
+                    ...p,
+                    sections: p.sections.map((s) =>
+                      s.id === sectionId
+                        ? { ...s, titleStyles: { ...(s as any).titleStyles, [format]: value } }
+                        : s
+                    ),
+                  };
+                  commit(updated);
+                }
+              } else if (selectedElementType === "section-content") {
+                const parts = selectedElementId.split("-");
+                const sectionId = parts[2];
+                const section = p.sections.find((s) => s.id === sectionId);
+                if (section) {
+                  const updated = {
+                    ...p,
+                    sections: p.sections.map((s) =>
+                      s.id === sectionId
+                        ? { ...s, contentStyles: { ...(s as any).contentStyles, [format]: value } }
+                        : s
+                    ),
+                  };
+                  commit(updated);
+                }
+              }
+            }
+          }}
+        />
+
         {/* Main content area */}
         <div className="flex-1 overflow-hidden flex gap-4">
           {/* Editor Preview */}
-          <div className="flex-1 overflow-y-auto p-6">
+          <div ref={previewContainerRef} className="flex-1 overflow-y-auto p-6">
             <ProposalPreview
               proposal={p}
               selectedElementId={selectedElementId}
@@ -175,16 +257,63 @@ export default function ProposalEditor() {
 
           {/* Properties Panel */}
           <div className="w-96 overflow-y-auto p-6 border-l border-slate-200 bg-white">
-            <PropertiesPanel
-              proposal={p}
-              selectedElementId={selectedElementId}
-              selectedElementType={selectedElementType}
-              onUpdateProposal={(updated) => commit(updated)}
-              onRemoveMedia={() => {
-                setSelectedElementId(null);
-                setSelectedElementType(null);
-              }}
-            />
+            {activePanel === "properties" ? (
+              <PropertiesPanel
+                proposal={p}
+                selectedElementId={selectedElementId}
+                selectedElementType={selectedElementType}
+                onUpdateProposal={(updated) => commit(updated)}
+                onRemoveMedia={() => {
+                  setSelectedElementId(null);
+                  setSelectedElementType(null);
+                }}
+              />
+            ) : activePanel === "document" ? (
+              <DocumentPanel
+                documentSettings={documentSettings}
+                onUpdateSettings={(settings) => setDocumentSettings(settings)}
+              />
+            ) : activePanel === "build" ? (
+              <BuildPanel
+                onAddContent={(type) => {
+                  console.log("Add content:", type);
+                }}
+              />
+            ) : activePanel === "uploads" ? (
+              <UploadsPanel
+                documentMedia={[]}
+                libraryMedia={[]}
+                onUpload={(file, destination) => {
+                  console.log("Upload:", file, destination);
+                }}
+              />
+            ) : activePanel === "signatures" ? (
+              <SignaturesPanel
+                signatureRecipient={signatureRecipient}
+                onChangeRecipient={setSignatureRecipient}
+                onAddSignature={() => {
+                  console.log("Add signature");
+                }}
+              />
+            ) : activePanel === "variables" ? (
+              <VariablesPanel
+                variables={[
+                  { id: "1", name: "Name", value: "Landwise" },
+                  { id: "2", name: "Company Name", value: "" },
+                  { id: "3", name: "User Name", value: "Sams Roy" },
+                  { id: "4", name: "Company Name", value: "Hirenq" },
+                ]}
+                onAddVariable={(name) => {
+                  console.log("Add variable:", name);
+                }}
+                onUpdateVariable={(id, value) => {
+                  console.log("Update variable:", id, value);
+                }}
+                onRemoveVariable={(id) => {
+                  console.log("Remove variable:", id);
+                }}
+              />
+            ) : null}
           </div>
         </div>
       </div>

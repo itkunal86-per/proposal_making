@@ -14,6 +14,15 @@ interface ElementProps {
   color?: string;
   fontSize?: string;
   textAlign?: "left" | "center" | "right";
+  backgroundColor?: string;
+  borderColor?: string;
+  borderWidth?: string;
+  borderRadius?: string;
+  borderStyle?: "all" | "top" | "right" | "bottom" | "left";
+  paddingTop?: string;
+  paddingRight?: string;
+  paddingBottom?: string;
+  paddingLeft?: string;
 }
 
 const SelectableElement: React.FC<ElementProps> = ({
@@ -25,6 +34,15 @@ const SelectableElement: React.FC<ElementProps> = ({
   color,
   fontSize,
   textAlign,
+  backgroundColor,
+  borderColor,
+  borderWidth,
+  borderRadius,
+  borderStyle,
+  paddingTop,
+  paddingRight,
+  paddingBottom,
+  paddingLeft,
 }) => {
   const baseClasses =
     "cursor-pointer transition-all duration-200 outline-2 outline-offset-2 relative group";
@@ -40,10 +58,30 @@ const SelectableElement: React.FC<ElementProps> = ({
 
   const defaultFontSize = (defaultFontSizes as any)[type] || "16";
 
+  const getBorderStyle = () => {
+    if (!borderWidth || parseInt(borderWidth) === 0) return "none";
+    const width = `${borderWidth}px`;
+    const color = borderColor || "#000000";
+
+    if (borderStyle === "top") return `${width} solid ${color} 0 0 0`;
+    if (borderStyle === "right") return `0 ${width} solid ${color} 0 0`;
+    if (borderStyle === "bottom") return `0 0 ${width} solid ${color} 0`;
+    if (borderStyle === "left") return `0 0 0 ${width} solid ${color}`;
+
+    return `${width} solid ${color}`;
+  };
+
   const styleOverrides: React.CSSProperties = {
     color: color || "inherit",
     fontSize: fontSize ? `${fontSize}px` : `${defaultFontSize}px`,
     textAlign: (textAlign as any) || "left",
+    backgroundColor: backgroundColor || "transparent",
+    border: getBorderStyle(),
+    borderRadius: borderRadius ? `${borderRadius}px` : "0px",
+    paddingTop: paddingTop ? `${paddingTop}px` : "0px",
+    paddingRight: paddingRight ? `${paddingRight}px` : "0px",
+    paddingBottom: paddingBottom ? `${paddingBottom}px` : "0px",
+    paddingLeft: paddingLeft ? `${paddingLeft}px` : "0px",
   };
 
   const isTextElement = type !== "image" && type !== "video";
@@ -52,7 +90,11 @@ const SelectableElement: React.FC<ElementProps> = ({
     return (
       <div
         onClick={onSelect}
-        className={`${baseClasses} ${selectedClasses} rounded border overflow-hidden`}
+        className={`${baseClasses} ${selectedClasses} overflow-hidden`}
+        style={{
+          borderRadius: borderRadius ? `${borderRadius}px` : "4px",
+          border: getBorderStyle(),
+        }}
       >
         {children}
         {onAI && (
@@ -81,7 +123,7 @@ const SelectableElement: React.FC<ElementProps> = ({
   return (
     <div
       onClick={onSelect}
-      className={`${baseClasses} ${selectedClasses} p-2 rounded`}
+      className={`${baseClasses} ${selectedClasses}`}
       style={styleOverrides}
     >
       <div className={(textClasses as any)[type] || ""}>
@@ -129,6 +171,15 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
         color={(proposal as any).titleStyles?.color}
         fontSize={(proposal as any).titleStyles?.fontSize}
         textAlign={(proposal as any).titleStyles?.textAlign}
+        backgroundColor={(proposal as any).titleStyles?.backgroundColor}
+        borderColor={(proposal as any).titleStyles?.borderColor}
+        borderWidth={(proposal as any).titleStyles?.borderWidth}
+        borderRadius={(proposal as any).titleStyles?.borderRadius}
+        borderStyle={(proposal as any).titleStyles?.borderStyle}
+        paddingTop={(proposal as any).titleStyles?.paddingTop}
+        paddingRight={(proposal as any).titleStyles?.paddingRight}
+        paddingBottom={(proposal as any).titleStyles?.paddingBottom}
+        paddingLeft={(proposal as any).titleStyles?.paddingLeft}
       >
         {proposal.title}
       </SelectableElement>
@@ -142,7 +193,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
 
       <div className="border-t pt-4 space-y-6">
         {proposal.sections.map((section, index) => (
-          <div key={section.id} className="space-y-3">
+          <div key={section.id} data-section-id={section.id} className="space-y-3">
             <SelectableElement
               id={`section-title-${section.id}`}
               type="section-title"
@@ -155,6 +206,15 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
               color={(section as any).titleStyles?.color}
               fontSize={(section as any).titleStyles?.fontSize}
               textAlign={(section as any).titleStyles?.textAlign}
+              backgroundColor={(section as any).titleStyles?.backgroundColor}
+              borderColor={(section as any).titleStyles?.borderColor}
+              borderWidth={(section as any).titleStyles?.borderWidth}
+              borderRadius={(section as any).titleStyles?.borderRadius}
+              borderStyle={(section as any).titleStyles?.borderStyle}
+              paddingTop={(section as any).titleStyles?.paddingTop}
+              paddingRight={(section as any).titleStyles?.paddingRight}
+              paddingBottom={(section as any).titleStyles?.paddingBottom}
+              paddingLeft={(section as any).titleStyles?.paddingLeft}
             >
               {section.title}
             </SelectableElement>
@@ -171,6 +231,15 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
               color={(section as any).contentStyles?.color}
               fontSize={(section as any).contentStyles?.fontSize}
               textAlign={(section as any).contentStyles?.textAlign}
+              backgroundColor={(section as any).contentStyles?.backgroundColor}
+              borderColor={(section as any).contentStyles?.borderColor}
+              borderWidth={(section as any).contentStyles?.borderWidth}
+              borderRadius={(section as any).contentStyles?.borderRadius}
+              borderStyle={(section as any).contentStyles?.borderStyle}
+              paddingTop={(section as any).contentStyles?.paddingTop}
+              paddingRight={(section as any).contentStyles?.paddingRight}
+              paddingBottom={(section as any).contentStyles?.paddingBottom}
+              paddingLeft={(section as any).contentStyles?.paddingLeft}
             >
               {section.content}
             </SelectableElement>

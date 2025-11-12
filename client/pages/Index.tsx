@@ -1,7 +1,16 @@
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Index() {
+  const { user, status } = useAuth();
+
+  const getStartedHref = () => {
+    if (status === "ready" && user) {
+      return user.role === "admin" ? "/dashboard" : "/my/proposals";
+    }
+    return "/login";
+  };
   return (
     <div className="relative">
       <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(1400px_700px_at_50%_-200px,rgba(99,102,241,0.25),transparent),radial-gradient(900px_450px_at_80%_-150px,rgba(34,211,238,0.25),transparent)]" />
@@ -22,7 +31,7 @@ export default function Index() {
             pulls facts from your knowledge base.
           </p>
           <div className="mt-8 flex items-center justify-center gap-3">
-            <a href="/login">
+            <a href={getStartedHref()}>
               <Button
                 size="lg"
                 className="h-12 px-8 bg-gradient-to-r from-primary to-cyan-500 text-white shadow-lg hover:opacity-90"
@@ -123,7 +132,7 @@ export default function Index() {
               </li>
             </ul>
             <div className="mt-8">
-              <a href="/login">
+              <a href={getStartedHref()}>
                 <Button className="bg-gradient-to-r from-primary to-cyan-500 text-white shadow hover:opacity-90">
                   Start free
                 </Button>
@@ -159,7 +168,7 @@ export default function Index() {
                 Try the RAG‑powered workflow free.
               </p>
             </div>
-            <a href="/login">
+            <a href={getStartedHref()}>
               <Button
                 size="lg"
                 variant="secondary"
