@@ -124,6 +124,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
         type="title"
         selected={selectedElementId === "proposal-title"}
         onSelect={() => onSelectElement("proposal-title", "title")}
+        onAI={() => onAIElement?.("proposal-title", "title")}
         value={proposal.title}
         color={(proposal as any).titleStyles?.color}
         fontSize={(proposal as any).titleStyles?.fontSize}
@@ -149,6 +150,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
               onSelect={() =>
                 onSelectElement(`section-title-${section.id}`, "section-title")
               }
+              onAI={() => onAIElement?.(`section-title-${section.id}`, "section-title")}
               value={section.title}
               color={(section as any).titleStyles?.color}
               fontSize={(section as any).titleStyles?.fontSize}
@@ -164,6 +166,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
               onSelect={() =>
                 onSelectElement(`section-content-${section.id}`, "section-content")
               }
+              onAI={() => onAIElement?.(`section-content-${section.id}`, "section-content")}
               value={section.content}
               color={(section as any).contentStyles?.color}
               fontSize={(section as any).contentStyles?.fontSize}
@@ -183,6 +186,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                     onSelect={() =>
                       onSelectElement(`media-${section.id}-${mIndex}`, media.type)
                     }
+                    onAI={() => onAIElement?.(`media-${section.id}-${mIndex}`, media.type)}
                   >
                     {media.type === "image" ? (
                       <img
