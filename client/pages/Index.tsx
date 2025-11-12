@@ -168,7 +168,7 @@ export default function Index() {
                 Try the RAG‑powered workflow free.
               </p>
             </div>
-            <a href="/login">
+            <a href={getStartedHref()}>
               <Button
                 size="lg"
                 variant="secondary"
