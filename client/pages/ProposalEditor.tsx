@@ -91,6 +91,23 @@ export default function ProposalEditor() {
     }, 400);
   }
 
+  const handleSectionNavigate = (sectionId: string) => {
+    const sectionIndex = p?.sections.findIndex((s) => s.id === sectionId);
+    if (sectionIndex !== undefined && sectionIndex !== -1) {
+      setCurrent(sectionIndex);
+
+      // Scroll to the section element
+      setTimeout(() => {
+        const sectionElement = previewContainerRef.current?.querySelector(
+          `[data-section-id="${sectionId}"]`
+        );
+        if (sectionElement) {
+          sectionElement.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 100);
+    }
+  };
+
   if (!p) return null;
 
   const section = p.sections[current];
