@@ -12,6 +12,16 @@ interface ElementStyle {
   color?: string;
   fontSize?: string;
   textAlign?: "left" | "center" | "right";
+  backgroundColor?: string;
+  borderColor?: string;
+  borderWidth?: string;
+  borderRadius?: string;
+  borderStyle?: "all" | "top" | "right" | "bottom" | "left";
+  padding?: string;
+  paddingTop?: string;
+  paddingRight?: string;
+  paddingBottom?: string;
+  paddingLeft?: string;
 }
 
 interface PropertiesPanelProps {
