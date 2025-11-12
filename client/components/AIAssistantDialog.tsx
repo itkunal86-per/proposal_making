@@ -18,6 +18,8 @@ interface AIAssistantDialogProps {
   onOpenChange: (open: boolean) => void;
   proposal: Proposal;
   sectionId?: string;
+  elementId?: string;
+  elementType?: string;
   onUpdateProposal: (proposal: Proposal) => void;
 }
 
@@ -26,6 +28,8 @@ export const AIAssistantDialog: React.FC<AIAssistantDialogProps> = ({
   onOpenChange,
   proposal,
   sectionId,
+  elementId,
+  elementType,
   onUpdateProposal,
 }) => {
   const [prompt, setPrompt] = useState("");
@@ -33,6 +37,46 @@ export const AIAssistantDialog: React.FC<AIAssistantDialogProps> = ({
   const section = sectionId
     ? proposal.sections.find((s) => s.id === sectionId)
     : null;
+
+  // If elementId is provided, extract section from element ID
+  let activeSection = section;
+  let targetElementId = elementId;
+  let targetElementType = elementType;
+
+  if (elementId && !section) {
+    // Extract section ID from element ID (e.g., "section-content-abc123" -> "abc123")
+    if (elementId.includes("section-") || elementId.includes("media-")) {
+      const parts = elementId.split("-");
+      if (elementId.startsWith("section-")) {
+        const sid = elementId.replace(/^section-(title|content)-/, "");
+        activeSection = proposal.sections.find((s) => s.id === sid);
+      } else if (elementId.startsWith("media-")) {
+        const sid = elementId.split("-")[1];
+        activeSection = proposal.sections.find((s) => s.id === sid);
+      }
+    }
+  }
+
+  const getElementPreview = (): { label: string; value: string } | null => {
+    if (!targetElementType) return null;
+
+    if (targetElementType === "title") {
+      return { label: "Proposal Title", value: proposal.title };
+    }
+    if (targetElementType === "section-title" && activeSection) {
+      return { label: "Section Title", value: activeSection.title };
+    }
+    if (targetElementType === "section-content" && activeSection) {
+      return { label: "Section Content", value: activeSection.content };
+    }
+    if ((targetElementType === "image" || targetElementType === "video") && activeSection) {
+      return {
+        label: `${targetElementType.toUpperCase()} - ${activeSection.title}`,
+        value: "Media content",
+      };
+    }
+    return null;
+  };
 
   const handleAIWrite = (
     action: "generate" | "rewrite" | "summarize" | "translate",
@@ -43,27 +87,34 @@ export const AIAssistantDialog: React.FC<AIAssistantDialogProps> = ({
       return;
     }
 
-    if (!section) {
+    if (!activeSection) {
       toast({ title: "No section selected" });
       return;
     }
 
-    let content = section.content;
-    if (action === "generate") content = `${content}\n\nGenerated: ${promptText}`;
-    if (action === "rewrite") content = `${content}\n\nRewritten: ${promptText}`;
-    if (action === "summarize")
-      content =
-        content.slice(0, Math.max(80, Math.floor(content.length * 0.5))) +
-        "...";
-    if (action === "translate")
-      content = `${content}\n\n[Translated] ${promptText}`;
+    const updatedProposal = { ...proposal };
 
-    const updatedProposal = {
-      ...proposal,
-      sections: proposal.sections.map((s) =>
-        s.id === sectionId ? { ...s, content } : s
-      ),
-    };
+    if (targetElementType === "title") {
+      updatedProposal.title = promptText;
+    } else if (targetElementType === "section-title") {
+      updatedProposal.sections = proposal.sections.map((s) =>
+        s.id === activeSection!.id ? { ...s, title: promptText } : s
+      );
+    } else if (targetElementType === "section-content") {
+      let newContent = activeSection.content;
+      if (action === "generate") newContent = `${newContent}\n\nGenerated: ${promptText}`;
+      if (action === "rewrite") newContent = `${newContent}\n\nRewritten: ${promptText}`;
+      if (action === "summarize")
+        newContent =
+          newContent.slice(0, Math.max(80, Math.floor(newContent.length * 0.5))) +
+          "...";
+      if (action === "translate")
+        newContent = `${newContent}\n\n[Translated] ${promptText}`;
+
+      updatedProposal.sections = proposal.sections.map((s) =>
+        s.id === activeSection!.id ? { ...s, content: newContent } : s
+      );
+    }
 
     onUpdateProposal(updatedProposal);
     setPrompt("");
