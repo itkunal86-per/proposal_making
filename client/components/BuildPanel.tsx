@@ -36,7 +36,7 @@ export const BuildPanel: React.FC<BuildPanelProps> = ({ onAddContent }) => {
     {
       id: "shape",
       label: "Shape",
-      icon: Shape,
+      icon: Square,
       description: "Add a shape",
     },
   ];
