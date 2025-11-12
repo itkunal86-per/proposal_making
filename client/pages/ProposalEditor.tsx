@@ -30,6 +30,7 @@ import { BuildPanel } from "@/components/BuildPanel";
 import { UploadsPanel } from "@/components/UploadsPanel";
 import { SignaturesPanel } from "@/components/SignaturesPanel";
 import { VariablesPanel } from "@/components/VariablesPanel";
+import { TextFormattingToolbar } from "@/components/TextFormattingToolbar";
 
 interface DocumentSettings {
   company?: string;
