@@ -161,6 +161,11 @@ export default function ProposalEditor() {
                 setSelectedElementId(id);
                 setSelectedElementType(type);
               }}
+              onAIElement={(id, type) => {
+                setAIElementId(id);
+                setAIElementType(type);
+                setAIDialogOpen(true);
+              }}
             />
           </div>
 
