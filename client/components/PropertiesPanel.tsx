@@ -136,6 +136,176 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             </div>
           </div>
         </div>
+
+        <Separator />
+
+        <div className="space-y-3">
+          <h3 className="text-xs font-semibold">Background</h3>
+          <div>
+            <Label className="text-xs font-semibold">Color</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="color"
+                value={titleStyles.backgroundColor || "#ffffff"}
+                onChange={(e) =>
+                  updateTitleStyles({ backgroundColor: e.target.value })
+                }
+                className="w-16 h-10 p-1 cursor-pointer"
+              />
+              <Input
+                value={titleStyles.backgroundColor || "#ffffff"}
+                onChange={(e) =>
+                  updateTitleStyles({ backgroundColor: e.target.value })
+                }
+                className="flex-1"
+              />
+            </div>
+          </div>
+        </div>
+
+        <Separator />
+
+        <div className="space-y-3">
+          <h3 className="text-xs font-semibold">Borders</h3>
+          <div>
+            <Label className="text-xs font-semibold">Color</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="color"
+                value={titleStyles.borderColor || "#000000"}
+                onChange={(e) =>
+                  updateTitleStyles({ borderColor: e.target.value })
+                }
+                className="w-16 h-10 p-1 cursor-pointer"
+              />
+              <Input
+                value={titleStyles.borderColor || "#000000"}
+                onChange={(e) =>
+                  updateTitleStyles({ borderColor: e.target.value })
+                }
+                className="flex-1"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Borders</Label>
+            <select
+              value={titleStyles.borderStyle || "all"}
+              onChange={(e) =>
+                updateTitleStyles({ borderStyle: e.target.value as any })
+              }
+              className="w-full mt-2 px-3 py-2 border rounded-md text-sm"
+            >
+              <option value="all">All sides</option>
+              <option value="top">Top</option>
+              <option value="right">Right</option>
+              <option value="bottom">Bottom</option>
+              <option value="left">Left</option>
+            </select>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Border width</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="0"
+                max="10"
+                value={parseInt(titleStyles.borderWidth || "0")}
+                onChange={(e) =>
+                  updateTitleStyles({ borderWidth: e.target.value })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">
+                px
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Border radius</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="0"
+                max="50"
+                value={parseInt(titleStyles.borderRadius || "0")}
+                onChange={(e) =>
+                  updateTitleStyles({ borderRadius: e.target.value })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">
+                px
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <Separator />
+
+        <div className="space-y-3">
+          <h3 className="text-xs font-semibold">Spacing</h3>
+          <div>
+            <Label className="text-xs font-semibold">Padding</Label>
+            <div className="grid grid-cols-2 gap-2 mt-2">
+              <div>
+                <Label className="text-xs text-muted-foreground">Top</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={parseInt(titleStyles.paddingTop || "0")}
+                  onChange={(e) =>
+                    updateTitleStyles({ paddingTop: e.target.value })
+                  }
+                  className="mt-1"
+                  placeholder="0"
+                />
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Right</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={parseInt(titleStyles.paddingRight || "0")}
+                  onChange={(e) =>
+                    updateTitleStyles({ paddingRight: e.target.value })
+                  }
+                  className="mt-1"
+                  placeholder="0"
+                />
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Bottom</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={parseInt(titleStyles.paddingBottom || "0")}
+                  onChange={(e) =>
+                    updateTitleStyles({ paddingBottom: e.target.value })
+                  }
+                  className="mt-1"
+                  placeholder="0"
+                />
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Left</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={parseInt(titleStyles.paddingLeft || "0")}
+                  onChange={(e) =>
+                    updateTitleStyles({ paddingLeft: e.target.value })
+                  }
+                  className="mt-1"
+                  placeholder="0"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
       </Card>
     );
   }
