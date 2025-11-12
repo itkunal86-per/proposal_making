@@ -28,15 +28,17 @@ const SelectableElement: React.FC<ElementProps> = ({
     ? "outline outline-blue-500 bg-blue-50/50"
     : "hover:outline hover:outline-gray-300 hover:outline-offset-2";
 
-  const textClasses = {
-    title: "text-3xl font-bold",
-    "section-title": "text-2xl font-bold",
-    "section-content": "text-base",
+  const defaultFontSizes = {
+    title: "32",
+    "section-title": "24",
+    "section-content": "16",
   };
+
+  const defaultFontSize = (defaultFontSizes as any)[type] || "16";
 
   const styleOverrides: React.CSSProperties = {
     color: color || "inherit",
-    fontSize: fontSize ? `${fontSize}px` : "inherit",
+    fontSize: fontSize ? `${fontSize}px` : `${defaultFontSize}px`,
     textAlign: (textAlign as any) || "left",
   };
 
@@ -51,18 +53,21 @@ const SelectableElement: React.FC<ElementProps> = ({
     );
   }
 
+  const textClasses = {
+    title: type === "title" && !fontSize ? "font-bold" : "",
+    "section-title": type === "section-title" && !fontSize ? "font-bold" : "",
+    "section-content": "",
+  };
+
   return (
     <div
       onClick={onSelect}
       className={`${baseClasses} ${selectedClasses} p-2 rounded`}
       style={styleOverrides}
     >
-      {type in textClasses && (
-        <div className={(textClasses as any)[type]}>
-          {children}
-        </div>
-      )}
-      {!(type in textClasses) && children}
+      <div className={(textClasses as any)[type] || ""}>
+        {children}
+      </div>
     </div>
   );
 };
