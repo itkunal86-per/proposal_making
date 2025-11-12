@@ -1,11 +1,14 @@
 import React from "react";
 import { Proposal, ProposalSection } from "@/services/proposalsService";
+import { Button } from "@/components/ui/button";
+import { Sparkles } from "lucide-react";
 
 interface ElementProps {
   id: string;
   type: "title" | "section-title" | "section-content" | "image" | "video";
   selected: boolean;
   onSelect: () => void;
+  onAI?: () => void;
   children?: React.ReactNode;
   value?: string;
   color?: string;
