@@ -98,6 +98,8 @@ export default function ProposalEditor() {
         proposalId={p.id}
         onOpenSections={() => setSectionsDialogOpen(true)}
         onOpenAI={() => setAIDialogOpen(true)}
+        onSelectPanel={setActivePanel}
+        activePanel={activePanel}
       />
 
       <div className="flex-1 flex flex-col ml-16">
