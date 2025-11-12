@@ -31,15 +31,21 @@ interface Section {
 
 interface TextFormattingToolbarProps {
   onFormatChange?: (format: string, value: any) => void;
+  onApplyFormatting?: (format: string, value: any) => void;
   selectedText?: string;
   sections?: Section[];
   onSectionSelect?: (sectionId: string) => void;
+  selectedElementId?: string | null;
+  selectedElementType?: string | null;
 }
 
 export const TextFormattingToolbar: React.FC<TextFormattingToolbarProps> = ({
   onFormatChange,
+  onApplyFormatting,
   sections = [],
   onSectionSelect,
+  selectedElementId,
+  selectedElementType,
 }) => {
   const [fontSize, setFontSize] = useState("12");
   const [fontFamily, setFontFamily] = useState("normal-text");
