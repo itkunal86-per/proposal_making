@@ -61,21 +61,27 @@ export const TextFormattingToolbar: React.FC<TextFormattingToolbarProps> = ({
       newFormats.add(format);
     }
     setActiveFormats(newFormats);
+
+    // Apply formatting to selected text
+    onApplyFormatting?.(format, newFormats.has(format));
     onFormatChange?.(format, newFormats.has(format));
   };
 
   const handleFontSizeChange = (value: string) => {
     setFontSize(value);
+    onApplyFormatting?.("fontSize", value);
     onFormatChange?.("fontSize", value);
   };
 
   const handleFontFamilyChange = (value: string) => {
     setFontFamily(value);
+    onApplyFormatting?.("fontFamily", value);
     onFormatChange?.("fontFamily", value);
   };
 
   const handleTextAlignChange = (align: "left" | "center" | "right") => {
     setTextAlign(align);
+    onApplyFormatting?.("textAlign", align);
     onFormatChange?.("textAlign", align);
   };
 
