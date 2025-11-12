@@ -132,7 +132,7 @@ export default function Index() {
               </li>
             </ul>
             <div className="mt-8">
-              <a href="/login">
+              <a href={getStartedHref()}>
                 <Button className="bg-gradient-to-r from-primary to-cyan-500 text-white shadow hover:opacity-90">
                   Start free
                 </Button>
