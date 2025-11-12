@@ -38,11 +38,14 @@ interface TextFormattingToolbarProps {
 
 export const TextFormattingToolbar: React.FC<TextFormattingToolbarProps> = ({
   onFormatChange,
+  sections = [],
+  onSectionSelect,
 }) => {
   const [fontSize, setFontSize] = useState("12");
   const [fontFamily, setFontFamily] = useState("normal-text");
   const [textAlign, setTextAlign] = useState<"left" | "center" | "right">("left");
   const [activeFormats, setActiveFormats] = useState<Set<string>>(new Set());
+  const [showSectionsMenu, setShowSectionsMenu] = useState(false);
 
   const toggleFormat = (format: string) => {
     const newFormats = new Set(activeFormats);
@@ -70,8 +73,44 @@ export const TextFormattingToolbar: React.FC<TextFormattingToolbarProps> = ({
     onFormatChange?.("textAlign", align);
   };
 
+  const handleSectionSelect = (sectionId: string) => {
+    onSectionSelect?.(sectionId);
+    setShowSectionsMenu(false);
+  };
+
   return (
     <div className="flex items-center gap-1 px-4 py-3 bg-white border-b border-slate-200 flex-wrap">
+      {/* Sections Dropdown */}
+      <div className="relative">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-9 gap-1 hover:bg-slate-100"
+          onClick={() => setShowSectionsMenu(!showSectionsMenu)}
+        >
+          Sections
+          <ChevronDown className="w-4 h-4" />
+        </Button>
+
+        {showSectionsMenu && sections.length > 0 && (
+          <div className="absolute top-full left-0 mt-1 w-48 bg-white border border-slate-200 rounded-lg shadow-lg z-50">
+            <div className="py-1">
+              {sections.map((section) => (
+                <button
+                  key={section.id}
+                  onClick={() => handleSectionSelect(section.id)}
+                  className="w-full px-4 py-2 text-left text-sm hover:bg-slate-100 transition-colors"
+                >
+                  {section.title}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="w-px h-6 bg-slate-200" />
+
       {/* Text Style Dropdown */}
       <Select value={fontFamily} onValueChange={handleFontFamilyChange}>
         <SelectTrigger className="w-32 h-9 border-0 bg-slate-50 hover:bg-slate-100 text-xs">
