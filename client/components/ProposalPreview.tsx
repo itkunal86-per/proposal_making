@@ -14,6 +14,15 @@ interface ElementProps {
   color?: string;
   fontSize?: string;
   textAlign?: "left" | "center" | "right";
+  backgroundColor?: string;
+  borderColor?: string;
+  borderWidth?: string;
+  borderRadius?: string;
+  borderStyle?: "all" | "top" | "right" | "bottom" | "left";
+  paddingTop?: string;
+  paddingRight?: string;
+  paddingBottom?: string;
+  paddingLeft?: string;
 }
 
 const SelectableElement: React.FC<ElementProps> = ({
