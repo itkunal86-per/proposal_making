@@ -127,8 +127,23 @@ export default function ProposalEditor() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="text-xs text-muted-foreground whitespace-nowrap">
-              {saving ? "Saving..." : "Saved"}
+            <div className="flex items-center gap-3">
+              {section && (
+                <div className="text-sm">
+                  <span className="text-muted-foreground">Section:</span>
+                  <span className="ml-2 font-medium">{section.title}</span>
+                </div>
+              )}
+              <Button
+                onClick={() => setAIDialogOpen(true)}
+                variant="outline"
+                size="sm"
+              >
+                Ask AI
+              </Button>
+              <div className="text-xs text-muted-foreground whitespace-nowrap">
+                {saving ? "Saving..." : "Saved"}
+              </div>
             </div>
           </div>
         </div>
