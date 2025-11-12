@@ -75,177 +75,68 @@ export default function ProposalEditor() {
 
   const section = p.sections[current];
 
-  function addMedia(url: string, type: "image" | "video") {
-    const s: ProposalSection = {
-      ...section,
-      media: [...(section.media ?? []), { url, type }],
-    };
-    const next: Proposal = {
-      ...p,
-      sections: p.sections.map((x, i) => (i === current ? s : x)),
-    };
-    commit(next);
-  }
-
-  function aiWrite(
-    action: "generate" | "rewrite" | "summarize" | "translate",
-    prompt: string,
-  ) {
-    let content = section.content;
-    if (action === "generate") content = `${content}\n\nGenerated: ${prompt}`;
-    if (action === "rewrite") content = `${content}\n\nRewritten: ${prompt}`;
-    if (action === "summarize")
-      content =
-        content.slice(0, Math.max(80, Math.floor(content.length * 0.5))) +
-        "...";
-    if (action === "translate")
-      content = `${content}\n\n[Translated] ${prompt}`;
-    const s: ProposalSection = { ...section, content };
-    const next: Proposal = {
-      ...p,
-      sections: p.sections.map((x, i) => (i === current ? s : x)),
-    };
-    commit(next, true, `${action} via assistant`);
-    toast({ title: "AI assistant applied" });
-  }
-
   return (
-    <AppShell>
-      <section className="container py-6">
-        <div className="flex items-start justify-between gap-3">
-          <div className="w-full">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2">
-                <Input
-                  value={p.title}
-                  onChange={(e) => commit({ ...p, title: e.target.value })}
-                  className="w-[28rem]"
-                />
-                <Select
-                  value={p.client}
-                  onValueChange={(value) => commit({ ...p, client: value })}
-                  disabled={isLoadingClients}
-                >
-                  <SelectTrigger className="w-64">
-                    <SelectValue placeholder="Select a client" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {clients.map((client) => (
-                      <SelectItem key={client.id} value={client.name}>
-                        {client.name} ({client.company || "No company"})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Select
-                  value={p.status}
-                  onValueChange={(v: ProposalStatus) =>
-                    commit({ ...p, status: v })
-                  }
-                >
-                  <SelectTrigger className="w-40">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="draft">Draft</SelectItem>
-                    <SelectItem value="sent">Sent</SelectItem>
-                    <SelectItem value="accepted">Accepted</SelectItem>
-                    <SelectItem value="declined">Declined</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="text-xs text-muted-foreground">
-                {saving ? "Saving..." : "Saved"}
-              </div>
+    <div className="flex h-screen bg-slate-50">
+      <ProposalEditorSidebar
+        proposalId={p.id}
+        onOpenSections={() => setSectionsDialogOpen(true)}
+        onOpenAI={() => setAIDialogOpen(true)}
+      />
+
+      <div className="flex-1 flex flex-col ml-16">
+        {/* Header */}
+        <div className="bg-white border-b border-slate-200 px-6 py-4">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3 flex-1">
+              <Input
+                value={p.title}
+                onChange={(e) => commit({ ...p, title: e.target.value })}
+                className="flex-1 max-w-md"
+                placeholder="Proposal title"
+              />
+              <Select
+                value={p.client}
+                onValueChange={(value) => commit({ ...p, client: value })}
+                disabled={isLoadingClients}
+              >
+                <SelectTrigger className="w-64">
+                  <SelectValue placeholder="Select a client" />
+                </SelectTrigger>
+                <SelectContent>
+                  {clients.map((client) => (
+                    <SelectItem key={client.id} value={client.name}>
+                      {client.name} ({client.company || "No company"})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select
+                value={p.status}
+                onValueChange={(v: ProposalStatus) =>
+                  commit({ ...p, status: v })
+                }
+              >
+                <SelectTrigger className="w-40">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="sent">Sent</SelectItem>
+                  <SelectItem value="accepted">Accepted</SelectItem>
+                  <SelectItem value="declined">Declined</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="text-xs text-muted-foreground whitespace-nowrap">
+              {saving ? "Saving..." : "Saved"}
             </div>
           </div>
         </div>
 
-        <div className="mt-4 grid gap-4 lg:grid-cols-[260px_1fr_380px]">
-          {/* Left nav */}
-          <Card className="p-3 h-fit">
-            <div className="text-xs font-semibold">Sections</div>
-            <Separator className="my-2" />
-            <div className="space-y-1">
-              {p.sections.map((s, i) => (
-                <button
-                  key={s.id}
-                  onClick={() => setCurrent(i)}
-                  className={`w-full rounded px-2 py-1 text-left text-sm hover:bg-muted ${i === current ? "bg-muted" : ""}`}
-                >
-                  {s.title}
-                </button>
-              ))}
-            </div>
-            <div className="mt-3 flex gap-2">
-              <Button
-                size="sm"
-                onClick={async () => {
-                  const title = `Section ${p.sections.length + 1}`;
-                  await addSection(p, title);
-                  const np = await getProposal(p.id);
-                  if (np) setP(np);
-                  setCurrent(p.sections.length);
-                }}
-              >
-                Add
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={async () =>
-                  current > 0 && (await reorderSection(p, current, current - 1))
-                }
-              >
-                Up
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={async () =>
-                  current < p.sections.length - 1 &&
-                  (await reorderSection(p, current, current + 1))
-                }
-              >
-                Down
-              </Button>
-            </div>
-            <div className="mt-2">
-              <Button
-                size="sm"
-                variant="destructive"
-                onClick={async () => {
-                  const id = p.sections[current].id;
-                  await removeSection(p, id);
-                  const np = await getProposal(p.id);
-                  if (np) setP(np);
-                  setCurrent(Math.max(0, current - 1));
-                }}
-              >
-                Remove
-              </Button>
-            </div>
-
-            <Separator className="my-3" />
-            <div className="text-xs font-semibold">Navigation</div>
-            <div className="mt-2 space-y-1 text-sm">
-              <Link
-                className="block text-primary hover:underline"
-                to={`/proposals/${p.id}/settings`}
-              >
-                Settings
-              </Link>
-              <Link
-                className="block text-primary hover:underline"
-                to={`/proposals`}
-              >
-                Back to list
-              </Link>
-            </div>
-          </Card>
-
-          {/* Visual Editor Preview */}
-          <div className="overflow-y-auto max-h-[calc(100vh-200px)]">
+        {/* Main content area */}
+        <div className="flex-1 overflow-hidden flex gap-4">
+          {/* Editor Preview */}
+          <div className="flex-1 overflow-y-auto p-6">
             <ProposalPreview
               proposal={p}
               selectedElementId={selectedElementId}
@@ -257,7 +148,7 @@ export default function ProposalEditor() {
           </div>
 
           {/* Properties Panel */}
-          <div className="overflow-y-auto max-h-[calc(100vh-200px)]">
+          <div className="w-96 overflow-y-auto p-6 border-l border-slate-200 bg-white">
             <PropertiesPanel
               proposal={p}
               selectedElementId={selectedElementId}
@@ -270,7 +161,34 @@ export default function ProposalEditor() {
             />
           </div>
         </div>
-      </section>
-    </AppShell>
+      </div>
+
+      {/* Dialogs */}
+      <SectionsDialog
+        open={sectionsDialogOpen}
+        onOpenChange={setSectionsDialogOpen}
+        proposal={p}
+        currentSectionIndex={current}
+        onSelectSection={(index) => {
+          setCurrent(index);
+          setSectionsDialogOpen(false);
+        }}
+        onUpdateProposal={(updated) => {
+          setP(updated);
+          commit(updated);
+        }}
+      />
+
+      <AIAssistantDialog
+        open={aiDialogOpen}
+        onOpenChange={setAIDialogOpen}
+        proposal={p}
+        sectionId={section?.id}
+        onUpdateProposal={(updated) => {
+          setP(updated);
+          commit(updated);
+        }}
+      />
+    </div>
   );
 }
