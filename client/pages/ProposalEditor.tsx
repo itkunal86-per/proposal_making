@@ -192,16 +192,63 @@ export default function ProposalEditor() {
 
           {/* Properties Panel */}
           <div className="w-96 overflow-y-auto p-6 border-l border-slate-200 bg-white">
-            <PropertiesPanel
-              proposal={p}
-              selectedElementId={selectedElementId}
-              selectedElementType={selectedElementType}
-              onUpdateProposal={(updated) => commit(updated)}
-              onRemoveMedia={() => {
-                setSelectedElementId(null);
-                setSelectedElementType(null);
-              }}
-            />
+            {activePanel === "properties" ? (
+              <PropertiesPanel
+                proposal={p}
+                selectedElementId={selectedElementId}
+                selectedElementType={selectedElementType}
+                onUpdateProposal={(updated) => commit(updated)}
+                onRemoveMedia={() => {
+                  setSelectedElementId(null);
+                  setSelectedElementType(null);
+                }}
+              />
+            ) : activePanel === "document" ? (
+              <DocumentPanel
+                documentSettings={documentSettings}
+                onUpdateSettings={(settings) => setDocumentSettings(settings)}
+              />
+            ) : activePanel === "build" ? (
+              <BuildPanel
+                onAddContent={(type) => {
+                  console.log("Add content:", type);
+                }}
+              />
+            ) : activePanel === "uploads" ? (
+              <UploadsPanel
+                documentMedia={[]}
+                libraryMedia={[]}
+                onUpload={(file, destination) => {
+                  console.log("Upload:", file, destination);
+                }}
+              />
+            ) : activePanel === "signatures" ? (
+              <SignaturesPanel
+                signatureRecipient={signatureRecipient}
+                onChangeRecipient={setSignatureRecipient}
+                onAddSignature={() => {
+                  console.log("Add signature");
+                }}
+              />
+            ) : activePanel === "variables" ? (
+              <VariablesPanel
+                variables={[
+                  { id: "1", name: "Name", value: "Landwise" },
+                  { id: "2", name: "Company Name", value: "" },
+                  { id: "3", name: "User Name", value: "Sams Roy" },
+                  { id: "4", name: "Company Name", value: "Hirenq" },
+                ]}
+                onAddVariable={(name) => {
+                  console.log("Add variable:", name);
+                }}
+                onUpdateVariable={(id, value) => {
+                  console.log("Update variable:", id, value);
+                }}
+                onRemoveVariable={(id) => {
+                  console.log("Remove variable:", id);
+                }}
+              />
+            ) : null}
           </div>
         </div>
       </div>
