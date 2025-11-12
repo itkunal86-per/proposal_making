@@ -252,16 +252,106 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     };
 
     const sectionContentStyles = (section as any).contentStyles || {};
+    const [mediaUrl, setMediaUrl] = useState("");
+    const [mediaType, setMediaType] = useState<"image" | "video">("image");
+
+    const handleAddMedia = () => {
+      if (!mediaUrl.trim()) return;
+      const newMedia = [...(section.media || []), { type: mediaType, url: mediaUrl }];
+      handleUpdateSection({ media: newMedia });
+      setMediaUrl("");
+    };
+
+    const handleRemoveMedia = (index: number) => {
+      const newMedia = section.media!.filter((_, i) => i !== index);
+      handleUpdateSection({ media: newMedia });
+    };
 
     return (
-      <Card className="p-4 space-y-4 overflow-y-auto max-h-[80vh]">
+      <Card className="p-4 space-y-4 overflow-y-auto max-h-[90vh]">
         <div>
           <Label className="text-xs font-semibold">Section Content</Label>
           <Textarea
             value={section.content}
             onChange={(e) => handleUpdateSection({ content: e.target.value })}
-            className="mt-2 min-h-[200px]"
+            className="mt-2 min-h-[120px]"
           />
+        </div>
+
+        <Separator />
+
+        <div>
+          <Label className="text-xs font-semibold mb-2 block">Media</Label>
+          <div className="space-y-2 mb-3">
+            <div className="flex gap-2">
+              <Input
+                value={mediaUrl}
+                onChange={(e) => setMediaUrl(e.target.value)}
+                placeholder="https://..."
+                className="text-xs"
+              />
+              <select
+                value={mediaType}
+                onChange={(e) => setMediaType(e.target.value as "image" | "video")}
+                className="text-xs border rounded px-2 py-1"
+              >
+                <option value="image">Image</option>
+                <option value="video">Video</option>
+              </select>
+              <Button
+                onClick={handleAddMedia}
+                size="sm"
+                className="flex-shrink-0"
+              >
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+
+          {section.media && section.media.length > 0 && (
+            <div className="space-y-2">
+              {section.media.map((media, index) => (
+                <div key={index} className="border rounded p-2 bg-muted/50">
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <span className="text-xs font-medium">{media.type.toUpperCase()}</span>
+                    <Button
+                      onClick={() => handleRemoveMedia(index)}
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                    >
+                      <X className="w-3 h-3" />
+                    </Button>
+                  </div>
+                  <Input
+                    value={media.url}
+                    onChange={(e) => {
+                      const newMedia = [...section.media!];
+                      newMedia[index] = { ...media, url: e.target.value };
+                      handleUpdateSection({ media: newMedia });
+                    }}
+                    className="text-xs mb-2"
+                  />
+                  {media.type === "image" ? (
+                    <img
+                      src={media.url}
+                      alt="preview"
+                      className="w-full h-32 object-cover rounded"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Crect fill="%23f0f0f0" width="100" height="100"/%3E%3Ctext x="50" y="50" text-anchor="middle" dy=".3em" fill="%23999" font-size="12"%3EImage%3C/text%3E%3C/svg%3E';
+                      }}
+                    />
+                  ) : (
+                    <video
+                      src={media.url}
+                      className="w-full h-32 object-cover rounded bg-black"
+                      onError={() => {}}
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <Separator />
