@@ -38,6 +38,8 @@ export default function ProposalEditor() {
   const [selectedElementType, setSelectedElementType] = useState<string | null>(null);
   const [sectionsDialogOpen, setSectionsDialogOpen] = useState(false);
   const [aiDialogOpen, setAIDialogOpen] = useState(false);
+  const [aiElementId, setAIElementId] = useState<string | undefined>(undefined);
+  const [aiElementType, setAIElementType] = useState<string | undefined>(undefined);
   const saveTimer = useRef<number | null>(null);
 
   useEffect(() => {
