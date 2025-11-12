@@ -28,6 +28,8 @@ import {
   valueTotal,
 } from "@/services/proposalsService";
 import { type ClientRecord, listClients } from "@/services/clientsService";
+import { ProposalPreview } from "@/components/ProposalPreview";
+import { PropertiesPanel } from "@/components/PropertiesPanel";
 
 export default function ProposalEditor() {
   const { id = "" } = useParams();
