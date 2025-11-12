@@ -65,7 +65,7 @@ export default function Login() {
             Sign in to continue creating AI‑powered proposals.
           </p>
           {errors.form && (
-            <div className="mt-4 rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive-foreground">
+            <div className="mt-4 rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-black">
               {errors.form}
             </div>
           )}
@@ -81,7 +81,7 @@ export default function Login() {
                 aria-invalid={!!errors.email}
               />
               {errors.email && (
-                <p className="text-xs text-destructive">{errors.email}</p>
+                <p className="text-xs text-black">{errors.email}</p>
               )}
             </div>
             <div className="space-y-2">
@@ -95,7 +95,7 @@ export default function Login() {
                 aria-invalid={!!errors.password}
               />
               {errors.password && (
-                <p className="text-xs text-destructive">{errors.password}</p>
+                <p className="text-xs text-black">{errors.password}</p>
               )}
             </div>
             <div className="flex items-center justify-between">
