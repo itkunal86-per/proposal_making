@@ -22,9 +22,14 @@ import {
 import { type ClientRecord, listClients } from "@/services/clientsService";
 import { ProposalPreview } from "@/components/ProposalPreview";
 import { PropertiesPanel } from "@/components/PropertiesPanel";
-import { ProposalEditorSidebar } from "@/components/ProposalEditorSidebar";
+import { ProposalEditorSidebar, type PanelType } from "@/components/ProposalEditorSidebar";
 import { SectionsDialog } from "@/components/SectionsDialog";
 import { AIAssistantDialog } from "@/components/AIAssistantDialog";
+import { DocumentPanel } from "@/components/DocumentPanel";
+import { BuildPanel } from "@/components/BuildPanel";
+import { UploadsPanel } from "@/components/UploadsPanel";
+import { SignaturesPanel } from "@/components/SignaturesPanel";
+import { VariablesPanel } from "@/components/VariablesPanel";
 
 export default function ProposalEditor() {
   const { id = "" } = useParams();
