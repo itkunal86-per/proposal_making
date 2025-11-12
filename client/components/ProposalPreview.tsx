@@ -19,6 +19,7 @@ interface ElementProps {
 const SelectableElement: React.FC<ElementProps> = ({
   selected,
   onSelect,
+  onAI,
   children,
   type,
   color,
@@ -26,7 +27,7 @@ const SelectableElement: React.FC<ElementProps> = ({
   textAlign,
 }) => {
   const baseClasses =
-    "cursor-pointer transition-all duration-200 outline-2 outline-offset-2";
+    "cursor-pointer transition-all duration-200 outline-2 outline-offset-2 relative group";
   const selectedClasses = selected
     ? "outline outline-blue-500 bg-blue-50/50"
     : "hover:outline hover:outline-gray-300 hover:outline-offset-2";
@@ -45,6 +46,8 @@ const SelectableElement: React.FC<ElementProps> = ({
     textAlign: (textAlign as any) || "left",
   };
 
+  const isTextElement = type !== "image" && type !== "video";
+
   if (type === "image" || type === "video") {
     return (
       <div
@@ -52,6 +55,19 @@ const SelectableElement: React.FC<ElementProps> = ({
         className={`${baseClasses} ${selectedClasses} rounded border overflow-hidden`}
       >
         {children}
+        {onAI && (
+          <Button
+            onClick={(e) => {
+              e.stopPropagation();
+              onAI();
+            }}
+            variant="ghost"
+            size="sm"
+            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 hover:bg-white"
+          >
+            <Sparkles className="w-4 h-4" />
+          </Button>
+        )}
       </div>
     );
   }
@@ -71,6 +87,19 @@ const SelectableElement: React.FC<ElementProps> = ({
       <div className={(textClasses as any)[type] || ""}>
         {children}
       </div>
+      {onAI && (
+        <Button
+          onClick={(e) => {
+            e.stopPropagation();
+            onAI();
+          }}
+          variant="ghost"
+          size="sm"
+          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 hover:bg-white h-8 w-8 p-0"
+        >
+          <Sparkles className="w-4 h-4" />
+        </Button>
+      )}
     </div>
   );
 };
