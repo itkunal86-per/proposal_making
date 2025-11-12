@@ -14,6 +14,7 @@ import {
   Code,
   Undo2,
   Redo2,
+  ChevronDown,
 } from "lucide-react";
 import {
   Select,
@@ -23,9 +24,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+interface Section {
+  id: string;
+  title: string;
+}
+
 interface TextFormattingToolbarProps {
   onFormatChange?: (format: string, value: any) => void;
   selectedText?: string;
+  sections?: Section[];
+  onSectionSelect?: (sectionId: string) => void;
 }
 
 export const TextFormattingToolbar: React.FC<TextFormattingToolbarProps> = ({
