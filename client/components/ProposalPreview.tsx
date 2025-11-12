@@ -193,7 +193,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
 
       <div className="border-t pt-4 space-y-6">
         {proposal.sections.map((section, index) => (
-          <div key={section.id} className="space-y-3">
+          <div key={section.id} data-section-id={section.id} className="space-y-3">
             <SelectableElement
               id={`section-title-${section.id}`}
               type="section-title"
