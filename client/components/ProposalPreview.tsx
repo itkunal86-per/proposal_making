@@ -108,12 +108,14 @@ interface ProposalPreviewProps {
   proposal: Proposal;
   selectedElementId: string | null;
   onSelectElement: (id: string, type: string) => void;
+  onAIElement?: (elementId: string, elementType: string) => void;
 }
 
 export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
   proposal,
   selectedElementId,
   onSelectElement,
+  onAIElement,
 }) => {
   return (
     <div className="bg-white rounded-lg border p-6 space-y-6 shadow-sm">
