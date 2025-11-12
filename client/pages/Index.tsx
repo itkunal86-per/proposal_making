@@ -31,7 +31,7 @@ export default function Index() {
             pulls facts from your knowledge base.
           </p>
           <div className="mt-8 flex items-center justify-center gap-3">
-            <a href="/login">
+            <a href={getStartedHref()}>
               <Button
                 size="lg"
                 className="h-12 px-8 bg-gradient-to-r from-primary to-cyan-500 text-white shadow-lg hover:opacity-90"
