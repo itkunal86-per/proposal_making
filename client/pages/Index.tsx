@@ -1,7 +1,16 @@
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Index() {
+  const { user, status } = useAuth();
+
+  const getStartedHref = () => {
+    if (status === "ready" && user) {
+      return user.role === "admin" ? "/dashboard" : "/my/proposals";
+    }
+    return "/login";
+  };
   return (
     <div className="relative">
       <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(1400px_700px_at_50%_-200px,rgba(99,102,241,0.25),transparent),radial-gradient(900px_450px_at_80%_-150px,rgba(34,211,238,0.25),transparent)]" />
