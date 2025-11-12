@@ -86,6 +86,9 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
         selected={selectedElementId === "proposal-title"}
         onSelect={() => onSelectElement("proposal-title", "title")}
         value={proposal.title}
+        color={(proposal as any).titleStyles?.color}
+        fontSize={(proposal as any).titleStyles?.fontSize}
+        textAlign={(proposal as any).titleStyles?.textAlign}
       >
         {proposal.title}
       </SelectableElement>
@@ -108,6 +111,9 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                 onSelectElement(`section-title-${section.id}`, "section-title")
               }
               value={section.title}
+              color={(section as any).titleStyles?.color}
+              fontSize={(section as any).titleStyles?.fontSize}
+              textAlign={(section as any).titleStyles?.textAlign}
             >
               {section.title}
             </SelectableElement>
@@ -120,6 +126,9 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                 onSelectElement(`section-content-${section.id}`, "section-content")
               }
               value={section.content}
+              color={(section as any).contentStyles?.color}
+              fontSize={(section as any).contentStyles?.fontSize}
+              textAlign={(section as any).contentStyles?.textAlign}
             >
               {section.content}
             </SelectableElement>
