@@ -798,6 +798,198 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             </div>
           </div>
         </div>
+
+        <Separator />
+
+        <div className="space-y-3">
+          <h3 className="text-xs font-semibold">Background</h3>
+          <div>
+            <Label className="text-xs font-semibold">Color</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="color"
+                value={sectionContentStyles.backgroundColor || "#ffffff"}
+                onChange={(e) =>
+                  handleUpdateSection({
+                    contentStyles: { ...sectionContentStyles, backgroundColor: e.target.value }
+                  })
+                }
+                className="w-16 h-10 p-1 cursor-pointer"
+              />
+              <Input
+                value={sectionContentStyles.backgroundColor || "#ffffff"}
+                onChange={(e) =>
+                  handleUpdateSection({
+                    contentStyles: { ...sectionContentStyles, backgroundColor: e.target.value }
+                  })
+                }
+                className="flex-1"
+              />
+            </div>
+          </div>
+        </div>
+
+        <Separator />
+
+        <div className="space-y-3">
+          <h3 className="text-xs font-semibold">Borders</h3>
+          <div>
+            <Label className="text-xs font-semibold">Color</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="color"
+                value={sectionContentStyles.borderColor || "#000000"}
+                onChange={(e) =>
+                  handleUpdateSection({
+                    contentStyles: { ...sectionContentStyles, borderColor: e.target.value }
+                  })
+                }
+                className="w-16 h-10 p-1 cursor-pointer"
+              />
+              <Input
+                value={sectionContentStyles.borderColor || "#000000"}
+                onChange={(e) =>
+                  handleUpdateSection({
+                    contentStyles: { ...sectionContentStyles, borderColor: e.target.value }
+                  })
+                }
+                className="flex-1"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Borders</Label>
+            <select
+              value={sectionContentStyles.borderStyle || "all"}
+              onChange={(e) =>
+                handleUpdateSection({
+                  contentStyles: { ...sectionContentStyles, borderStyle: e.target.value }
+                })
+              }
+              className="w-full mt-2 px-3 py-2 border rounded-md text-sm"
+            >
+              <option value="all">All sides</option>
+              <option value="top">Top</option>
+              <option value="right">Right</option>
+              <option value="bottom">Bottom</option>
+              <option value="left">Left</option>
+            </select>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Border width</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="0"
+                max="10"
+                value={parseInt(sectionContentStyles.borderWidth || "0")}
+                onChange={(e) =>
+                  handleUpdateSection({
+                    contentStyles: { ...sectionContentStyles, borderWidth: e.target.value }
+                  })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">
+                px
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Border radius</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="0"
+                max="50"
+                value={parseInt(sectionContentStyles.borderRadius || "0")}
+                onChange={(e) =>
+                  handleUpdateSection({
+                    contentStyles: { ...sectionContentStyles, borderRadius: e.target.value }
+                  })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">
+                px
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <Separator />
+
+        <div className="space-y-3">
+          <h3 className="text-xs font-semibold">Spacing</h3>
+          <div>
+            <Label className="text-xs font-semibold">Padding</Label>
+            <div className="grid grid-cols-2 gap-2 mt-2">
+              <div>
+                <Label className="text-xs text-muted-foreground">Top</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={parseInt(sectionContentStyles.paddingTop || "0")}
+                  onChange={(e) =>
+                    handleUpdateSection({
+                      contentStyles: { ...sectionContentStyles, paddingTop: e.target.value }
+                    })
+                  }
+                  className="mt-1"
+                  placeholder="0"
+                />
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Right</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={parseInt(sectionContentStyles.paddingRight || "0")}
+                  onChange={(e) =>
+                    handleUpdateSection({
+                      contentStyles: { ...sectionContentStyles, paddingRight: e.target.value }
+                    })
+                  }
+                  className="mt-1"
+                  placeholder="0"
+                />
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Bottom</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={parseInt(sectionContentStyles.paddingBottom || "0")}
+                  onChange={(e) =>
+                    handleUpdateSection({
+                      contentStyles: { ...sectionContentStyles, paddingBottom: e.target.value }
+                    })
+                  }
+                  className="mt-1"
+                  placeholder="0"
+                />
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Left</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={parseInt(sectionContentStyles.paddingLeft || "0")}
+                  onChange={(e) =>
+                    handleUpdateSection({
+                      contentStyles: { ...sectionContentStyles, paddingLeft: e.target.value }
+                    })
+                  }
+                  className="mt-1"
+                  placeholder="0"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
       </Card>
     );
   }
