@@ -1,0 +1,518 @@
+import React, { useState } from "react";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { Proposal, ProposalSection } from "@/services/proposalsService";
+import { X, Plus } from "lucide-react";
+
+interface ElementStyle {
+  color?: string;
+  fontSize?: string;
+  textAlign?: "left" | "center" | "right";
+}
+
+interface PropertiesPanelProps {
+  proposal: Proposal;
+  selectedElementId: string | null;
+  selectedElementType: string | null;
+  onUpdateProposal: (proposal: Proposal) => void;
+  onRemoveMedia?: (sectionId: string, mediaIndex: number) => void;
+}
+
+export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
+  proposal,
+  selectedElementId,
+  selectedElementType,
+  onUpdateProposal,
+  onRemoveMedia,
+}) => {
+  if (!selectedElementId || !selectedElementType) {
+    return (
+      <Card className="p-4">
+        <div className="text-center text-muted-foreground">
+          <p className="text-sm">Select an element to edit its properties</p>
+        </div>
+      </Card>
+    );
+  }
+
+  const updateTitleStyles = (styles: Partial<ElementStyle>) => {
+    const updated = {
+      ...proposal,
+      titleStyles: { ...proposal.titleStyles, ...styles }
+    };
+    onUpdateProposal(updated as any);
+  };
+
+  if (selectedElementType === "title") {
+    const titleStyles = (proposal as any).titleStyles || {};
+    return (
+      <Card className="p-4 space-y-4">
+        <div>
+          <Label className="text-xs font-semibold">Proposal Title</Label>
+          <Input
+            value={proposal.title}
+            onChange={(e) =>
+              onUpdateProposal({ ...proposal, title: e.target.value })
+            }
+            className="mt-2"
+          />
+        </div>
+
+        <Separator />
+
+        <div className="space-y-3">
+          <div>
+            <Label className="text-xs font-semibold">Title Color</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="color"
+                value={titleStyles.color || "#000000"}
+                onChange={(e) =>
+                  updateTitleStyles({ color: e.target.value })
+                }
+                className="w-16 h-10 p-1 cursor-pointer"
+              />
+              <Input
+                value={titleStyles.color || "#000000"}
+                onChange={(e) =>
+                  updateTitleStyles({ color: e.target.value })
+                }
+                className="flex-1"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Font Size</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="12"
+                max="72"
+                value={parseInt(titleStyles.fontSize || "32")}
+                onChange={(e) =>
+                  updateTitleStyles({ fontSize: e.target.value })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">
+                px
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Text Alignment</Label>
+            <div className="flex gap-2 mt-2">
+              {(["left", "center", "right"] as const).map((align) => (
+                <Button
+                  key={align}
+                  variant={
+                    titleStyles.textAlign === align ? "default" : "outline"
+                  }
+                  size="sm"
+                  onClick={() =>
+                    updateTitleStyles({ textAlign: align })
+                  }
+                  className="capitalize flex-1"
+                >
+                  {align}
+                </Button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </Card>
+    );
+  }
+
+  if (selectedElementType === "section-title") {
+    const sectionId = selectedElementId.replace("section-title-", "");
+    const section = proposal.sections.find((s) => s.id === sectionId);
+
+    if (!section) return null;
+
+    const handleUpdateSection = (updates: Partial<ProposalSection>) => {
+      const updatedProposal = {
+        ...proposal,
+        sections: proposal.sections.map((s) =>
+          s.id === sectionId ? { ...s, ...updates } : s
+        ),
+      };
+      onUpdateProposal(updatedProposal);
+    };
+
+    const sectionTitleStyles = (section as any).titleStyles || {};
+
+    return (
+      <Card className="p-4 space-y-4">
+        <div>
+          <Label className="text-xs font-semibold">Section Title</Label>
+          <Input
+            value={section.title}
+            onChange={(e) => handleUpdateSection({ title: e.target.value })}
+            className="mt-2"
+          />
+        </div>
+
+        <Separator />
+
+        <div className="space-y-3">
+          <div>
+            <Label className="text-xs font-semibold">Title Color</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="color"
+                value={sectionTitleStyles.color || "#000000"}
+                onChange={(e) =>
+                  handleUpdateSection({
+                    titleStyles: { ...sectionTitleStyles, color: e.target.value }
+                  })
+                }
+                className="w-16 h-10 p-1 cursor-pointer"
+              />
+              <Input
+                value={sectionTitleStyles.color || "#000000"}
+                onChange={(e) =>
+                  handleUpdateSection({
+                    titleStyles: { ...sectionTitleStyles, color: e.target.value }
+                  })
+                }
+                className="flex-1"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Font Size</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="12"
+                max="72"
+                value={parseInt(sectionTitleStyles.fontSize || "24")}
+                onChange={(e) =>
+                  handleUpdateSection({
+                    titleStyles: { ...sectionTitleStyles, fontSize: e.target.value }
+                  })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">
+                px
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Text Alignment</Label>
+            <div className="flex gap-2 mt-2">
+              {(["left", "center", "right"] as const).map((align) => (
+                <Button
+                  key={align}
+                  variant={
+                    sectionTitleStyles.textAlign === align ? "default" : "outline"
+                  }
+                  size="sm"
+                  onClick={() =>
+                    handleUpdateSection({
+                      titleStyles: { ...sectionTitleStyles, textAlign: align }
+                    })
+                  }
+                  className="capitalize flex-1"
+                >
+                  {align}
+                </Button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </Card>
+    );
+  }
+
+  if (selectedElementType === "section-content") {
+    const sectionId = selectedElementId.replace("section-content-", "");
+    const section = proposal.sections.find((s) => s.id === sectionId);
+
+    if (!section) return null;
+
+    const handleUpdateSection = (updates: Partial<ProposalSection>) => {
+      const updatedProposal = {
+        ...proposal,
+        sections: proposal.sections.map((s) =>
+          s.id === sectionId ? { ...s, ...updates } : s
+        ),
+      };
+      onUpdateProposal(updatedProposal);
+    };
+
+    const sectionContentStyles = (section as any).contentStyles || {};
+    const [mediaUrl, setMediaUrl] = useState("");
+    const [mediaType, setMediaType] = useState<"image" | "video">("image");
+
+    const handleAddMedia = () => {
+      if (!mediaUrl.trim()) return;
+      const newMedia = [...(section.media || []), { type: mediaType, url: mediaUrl }];
+      handleUpdateSection({ media: newMedia });
+      setMediaUrl("");
+    };
+
+    const handleRemoveMedia = (index: number) => {
+      const newMedia = section.media!.filter((_, i) => i !== index);
+      handleUpdateSection({ media: newMedia });
+    };
+
+    return (
+      <Card className="p-4 space-y-4 overflow-y-auto max-h-[90vh]">
+        <div>
+          <Label className="text-xs font-semibold">Section Content</Label>
+          <Textarea
+            value={section.content}
+            onChange={(e) => handleUpdateSection({ content: e.target.value })}
+            className="mt-2 min-h-[120px]"
+          />
+        </div>
+
+        <Separator />
+
+        <div>
+          <Label className="text-xs font-semibold mb-2 block">Media</Label>
+          <div className="space-y-2 mb-3">
+            <div className="flex gap-2">
+              <Input
+                value={mediaUrl}
+                onChange={(e) => setMediaUrl(e.target.value)}
+                placeholder="https://..."
+                className="text-xs"
+              />
+              <select
+                value={mediaType}
+                onChange={(e) => setMediaType(e.target.value as "image" | "video")}
+                className="text-xs border rounded px-2 py-1"
+              >
+                <option value="image">Image</option>
+                <option value="video">Video</option>
+              </select>
+              <Button
+                onClick={handleAddMedia}
+                size="sm"
+                className="flex-shrink-0"
+              >
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+
+          {section.media && section.media.length > 0 && (
+            <div className="space-y-2">
+              {section.media.map((media, index) => (
+                <div key={index} className="border rounded p-2 bg-muted/50">
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <span className="text-xs font-medium">{media.type.toUpperCase()}</span>
+                    <Button
+                      onClick={() => handleRemoveMedia(index)}
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                    >
+                      <X className="w-3 h-3" />
+                    </Button>
+                  </div>
+                  <Input
+                    value={media.url}
+                    onChange={(e) => {
+                      const newMedia = [...section.media!];
+                      newMedia[index] = { ...media, url: e.target.value };
+                      handleUpdateSection({ media: newMedia });
+                    }}
+                    className="text-xs mb-2"
+                  />
+                  {media.type === "image" ? (
+                    <img
+                      src={media.url}
+                      alt="preview"
+                      className="w-full h-32 object-cover rounded"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Crect fill="%23f0f0f0" width="100" height="100"/%3E%3Ctext x="50" y="50" text-anchor="middle" dy=".3em" fill="%23999" font-size="12"%3EImage%3C/text%3E%3C/svg%3E';
+                      }}
+                    />
+                  ) : (
+                    <video
+                      src={media.url}
+                      className="w-full h-32 object-cover rounded bg-black"
+                      onError={() => {}}
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <Separator />
+
+        <div className="space-y-3">
+          <div>
+            <Label className="text-xs font-semibold">Text Color</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="color"
+                value={sectionContentStyles.color || "#000000"}
+                onChange={(e) =>
+                  handleUpdateSection({
+                    contentStyles: { ...sectionContentStyles, color: e.target.value }
+                  })
+                }
+                className="w-16 h-10 p-1 cursor-pointer"
+              />
+              <Input
+                value={sectionContentStyles.color || "#000000"}
+                onChange={(e) =>
+                  handleUpdateSection({
+                    contentStyles: { ...sectionContentStyles, color: e.target.value }
+                  })
+                }
+                className="flex-1"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Font Size</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="12"
+                max="72"
+                value={parseInt(sectionContentStyles.fontSize || "16")}
+                onChange={(e) =>
+                  handleUpdateSection({
+                    contentStyles: { ...sectionContentStyles, fontSize: e.target.value }
+                  })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">
+                px
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Text Alignment</Label>
+            <div className="flex gap-2 mt-2">
+              {(["left", "center", "right"] as const).map((align) => (
+                <Button
+                  key={align}
+                  variant={
+                    sectionContentStyles.textAlign === align ? "default" : "outline"
+                  }
+                  size="sm"
+                  onClick={() =>
+                    handleUpdateSection({
+                      contentStyles: { ...sectionContentStyles, textAlign: align }
+                    })
+                  }
+                  className="capitalize flex-1"
+                >
+                  {align}
+                </Button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </Card>
+    );
+  }
+
+  if (selectedElementType === "image" || selectedElementType === "video") {
+    const parts = selectedElementId.split("-");
+    const sectionId = parts[1];
+    const mediaIndex = parseInt(parts[2]);
+    const section = proposal.sections.find((s) => s.id === sectionId);
+
+    if (!section || !section.media || !section.media[mediaIndex]) return null;
+
+    const media = section.media[mediaIndex];
+
+    return (
+      <Card className="p-4 space-y-4">
+        <div>
+          <Label className="text-xs font-semibold">Media URL</Label>
+          <Input
+            value={media.url}
+            onChange={(e) => {
+              const newMedia = [...(section.media || [])];
+              newMedia[mediaIndex] = { ...media, url: e.target.value };
+              const updatedProposal = {
+                ...proposal,
+                sections: proposal.sections.map((s) =>
+                  s.id === sectionId ? { ...s, media: newMedia } : s
+                ),
+              };
+              onUpdateProposal(updatedProposal);
+            }}
+            className="mt-2"
+          />
+        </div>
+
+        <Separator />
+
+        <div>
+          <Label className="text-xs font-semibold">Media Type</Label>
+          <div className="mt-2 text-sm font-mono bg-muted p-2 rounded">
+            {media.type.toUpperCase()}
+          </div>
+        </div>
+
+        <div>
+          {media.type === "image" ? (
+            <img
+              src={media.url}
+              alt="preview"
+              className="w-full h-40 object-cover rounded"
+            />
+          ) : (
+            <video
+              src={media.url}
+              controls
+              className="w-full h-40 object-cover rounded"
+            />
+          )}
+        </div>
+
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={() => {
+            const newMedia = section.media!.filter((_, i) => i !== mediaIndex);
+            const updatedProposal = {
+              ...proposal,
+              sections: proposal.sections.map((s) =>
+                s.id === sectionId ? { ...s, media: newMedia } : s
+              ),
+            };
+            onUpdateProposal(updatedProposal);
+            onRemoveMedia?.(sectionId, mediaIndex);
+          }}
+          className="w-full"
+        >
+          Remove Media
+        </Button>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="p-4">
+      <div className="text-center text-muted-foreground">
+        <p className="text-sm">Unable to edit this element</p>
+      </div>
+    </Card>
+  );
+};

@@ -84,7 +84,7 @@ export default function Register() {
             Start your workspace to draft, manage, and send proposals.
           </p>
           {errors.form && (
-            <div className="mt-4 rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive-foreground">
+            <div className="mt-4 rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-black">
               {errors.form}
             </div>
           )}
@@ -99,7 +99,7 @@ export default function Register() {
                 aria-invalid={!!errors.name}
               />
               {errors.name && (
-                <p className="text-xs text-destructive">{errors.name}</p>
+                <p className="text-xs text-black">{errors.name}</p>
               )}
             </div>
             <div className="space-y-2">
@@ -112,7 +112,7 @@ export default function Register() {
                 aria-invalid={!!errors.company}
               />
               {errors.company && (
-                <p className="text-xs text-destructive">{errors.company}</p>
+                <p className="text-xs text-black">{errors.company}</p>
               )}
             </div>
             <div className="space-y-2">
@@ -125,7 +125,7 @@ export default function Register() {
                 aria-invalid={!!errors.phone}
               />
               {errors.phone && (
-                <p className="text-xs text-destructive">{errors.phone}</p>
+                <p className="text-xs text-black">{errors.phone}</p>
               )}
             </div>
             <div className="space-y-2">
@@ -138,7 +138,7 @@ export default function Register() {
                 aria-invalid={!!errors.email}
               />
               {errors.email && (
-                <p className="text-xs text-destructive">
+                <p className="text-xs text-black">
                   {Array.isArray(errors.email) ? errors.email[0] : errors.email}
                 </p>
               )}
@@ -153,7 +153,7 @@ export default function Register() {
                 aria-invalid={!!errors.password}
               />
               {errors.password && (
-                <p className="text-xs text-destructive">{errors.password}</p>
+                <p className="text-xs text-black">{errors.password}</p>
               )}
             </div>
             <Button
