@@ -1,7 +1,7 @@
 import React from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Type, Image, Video, Table, Shape } from "lucide-react";
+import { Type, Image, Video, Table, Square } from "lucide-react";
 
 interface BuildPanelProps {
   onAddContent?: (type: "text" | "image" | "video" | "table" | "shape") => void;
