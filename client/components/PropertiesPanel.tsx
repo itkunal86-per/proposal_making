@@ -250,6 +250,8 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
       onUpdateProposal(updatedProposal);
     };
 
+    const sectionContentStyles = (section as any).contentStyles || {};
+
     return (
       <Card className="p-4 space-y-4 overflow-y-auto max-h-[80vh]">
         <div>
@@ -269,16 +271,20 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             <div className="flex gap-2 mt-2">
               <Input
                 type="color"
-                value={elementStyles.color || "#000000"}
+                value={sectionContentStyles.color || "#000000"}
                 onChange={(e) =>
-                  setElementStyles({ ...elementStyles, color: e.target.value })
+                  handleUpdateSection({
+                    contentStyles: { ...sectionContentStyles, color: e.target.value }
+                  })
                 }
                 className="w-16 h-10 p-1 cursor-pointer"
               />
               <Input
-                value={elementStyles.color || "#000000"}
+                value={sectionContentStyles.color || "#000000"}
                 onChange={(e) =>
-                  setElementStyles({ ...elementStyles, color: e.target.value })
+                  handleUpdateSection({
+                    contentStyles: { ...sectionContentStyles, color: e.target.value }
+                  })
                 }
                 className="flex-1"
               />
@@ -292,11 +298,10 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                 type="number"
                 min="12"
                 max="72"
-                value={parseInt(elementStyles.fontSize || "16")}
+                value={parseInt(sectionContentStyles.fontSize || "16")}
                 onChange={(e) =>
-                  setElementStyles({
-                    ...elementStyles,
-                    fontSize: e.target.value,
+                  handleUpdateSection({
+                    contentStyles: { ...sectionContentStyles, fontSize: e.target.value }
                   })
                 }
                 className="flex-1"
@@ -314,13 +319,12 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                 <Button
                   key={align}
                   variant={
-                    elementStyles.textAlign === align ? "default" : "outline"
+                    sectionContentStyles.textAlign === align ? "default" : "outline"
                   }
                   size="sm"
                   onClick={() =>
-                    setElementStyles({
-                      ...elementStyles,
-                      textAlign: align,
+                    handleUpdateSection({
+                      contentStyles: { ...sectionContentStyles, textAlign: align }
                     })
                   }
                   className="capitalize flex-1"
