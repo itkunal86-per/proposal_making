@@ -49,7 +49,7 @@ export interface Proposal {
 
 const STORAGE_KEY = "app_proposals";
 const PROPOSALS_ENDPOINT = "https://propai-api.hirenq.com/api/proposals";
-const PROPOSALS_DETAILS_ENDPOINT = "http://localhost/ProposalAi/api/proposals/details";
+const PROPOSALS_DETAILS_ENDPOINT = "https://propai-api.hirenq.com/api/proposals/details";
 
 interface ApiProposalResponse {
   id: string;
