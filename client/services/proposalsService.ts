@@ -489,6 +489,7 @@ export async function duplicateProposal(id: string): Promise<Proposal | undefine
     title: `${src.title} (Copy)`,
     createdAt: Date.now(),
     updatedAt: Date.now(),
+    client_id: src.client_id,
     sections: src.sections.map((s) => ({ ...s, id: uuid() })),
     pricing: { ...src.pricing, items: src.pricing.items.map((i) => ({ ...i, id: uuid() })) },
   };
