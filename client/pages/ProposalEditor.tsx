@@ -62,7 +62,7 @@ export default function ProposalEditor() {
 
   useEffect(() => {
     (async () => {
-      const found = await getProposal(id);
+      const found = await getProposalDetails(id);
       if (!found) {
         nav("/proposals");
         return;
