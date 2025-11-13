@@ -31,6 +31,7 @@ export interface Proposal {
   id: string;
   title: string;
   client: string;
+  client_id?: string;
   status: ProposalStatus;
   createdBy: string;
   createdAt: number;
