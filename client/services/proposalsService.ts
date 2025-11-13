@@ -90,24 +90,24 @@ export interface CreateProposalResult {
   fieldErrors?: Record<string, string[]>;
 }
 
-const idSchema = z.string();
+const idSchema = z.union([z.string(), z.number()]);
 const sectionSchema = z.object({
   id: idSchema,
   title: z.string(),
   content: z.string(),
-  media: z.array(z.object({ type: z.union([z.literal("image"), z.literal("video")]), url: z.string().url() })).optional(),
-  comments: z.array(z.object({ id: z.string(), author: z.string(), text: z.string(), createdAt: z.number() })).optional(),
-  titleStyles: z.record(z.any()).optional(),
-  contentStyles: z.record(z.any()).optional(),
+  media: z.array(z.object({ type: z.union([z.literal("image"), z.literal("video")]), url: z.string() })).optional(),
+  comments: z.array(z.object({ id: z.union([z.string(), z.number()]), author: z.string(), text: z.string(), createdAt: z.number() })).optional(),
+  titleStyles: z.union([z.record(z.any()), z.array(z.any())]).optional(),
+  contentStyles: z.union([z.record(z.any()), z.array(z.any())]).optional(),
 });
 const pricingItemSchema = z.object({ id: idSchema, label: z.string(), qty: z.number(), price: z.number() });
 const proposalSchema = z.object({
   id: idSchema,
   title: z.string(),
-  client: z.string(),
-  client_id: z.string().optional(),
+  client: z.string().optional(),
+  client_id: z.union([z.string(), z.number()]).optional(),
   status: z.union([z.literal("draft"), z.literal("sent"), z.literal("accepted"), z.literal("declined")]),
-  createdBy: z.string(),
+  createdBy: z.union([z.string(), z.number()]).optional(),
   createdAt: z.number(),
   updatedAt: z.number(),
   sections: z.array(sectionSchema),
@@ -117,8 +117,8 @@ const proposalSchema = z.object({
     approvalFlow: z.string().optional(),
     sharing: z.object({ public: z.boolean(), token: z.string().optional(), allowComments: z.boolean() }),
   }),
-  versions: z.array(z.object({ id: idSchema, createdAt: z.number(), note: z.string().optional(), data: z.any() })),
-  titleStyles: z.record(z.any()).optional(),
+  versions: z.array(z.object({ id: idSchema, createdAt: z.number(), note: z.string().optional(), data: z.any() })).optional(),
+  titleStyles: z.union([z.record(z.any()), z.array(z.any())]).optional(),
 });
 const proposalListSchema = z.array(proposalSchema);
 
@@ -131,18 +131,24 @@ function uuid() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }
 
+function normalizeStyles(styles: any): Record<string, any> | undefined {
+  if (!styles || Array.isArray(styles)) return undefined;
+  if (typeof styles === "object") return styles;
+  return undefined;
+}
+
 function normalizeProposal(raw: z.infer<typeof proposalSchema>): Proposal {
   return {
-    id: raw.id!,
+    id: String(raw.id!),
     title: raw.title!,
-    client: raw.client!,
-    client_id: raw.client_id,
+    client: raw.client || "",
+    client_id: raw.client_id ? String(raw.client_id) : undefined,
     status: raw.status!,
-    createdBy: raw.createdBy!,
+    createdBy: String(raw.createdBy || "system"),
     createdAt: raw.createdAt!,
     updatedAt: raw.updatedAt!,
     sections: (raw.sections ?? []).map((s) => ({
-      id: s.id!,
+      id: String(s.id!),
       title: s.title!,
       content: s.content!,
       media: (s.media ?? []).map((m) => ({
@@ -150,16 +156,18 @@ function normalizeProposal(raw: z.infer<typeof proposalSchema>): Proposal {
         url: m.url!,
       })),
       comments: (s.comments ?? []).map((c) => ({
-        id: c.id!,
+        id: String(c.id!),
         author: c.author!,
         text: c.text!,
         createdAt: c.createdAt!,
       })),
+      titleStyles: normalizeStyles(s.titleStyles),
+      contentStyles: normalizeStyles(s.contentStyles),
     })),
     pricing: {
       currency: raw.pricing?.currency ?? "USD",
       items: (raw.pricing?.items ?? []).map((i) => ({
-        id: i.id!,
+        id: String(i.id!),
         label: i.label!,
         qty: i.qty!,
         price: i.price!,
@@ -172,15 +180,16 @@ function normalizeProposal(raw: z.infer<typeof proposalSchema>): Proposal {
       sharing: {
         public: raw.settings?.sharing?.public ?? false,
         token: raw.settings?.sharing?.token,
-        allowComments: raw.settings?.sharing?.allowComments ?? true,
+        allowComments: raw.settings?.sharing?.allowComments ?? false,
       },
     },
     versions: (raw.versions ?? []).map((v) => ({
-      id: v.id!,
+      id: String(v.id!),
       createdAt: v.createdAt!,
       note: v.note,
       data: v.data!,
     })),
+    titleStyles: normalizeStyles(raw.titleStyles),
   };
 }
 
