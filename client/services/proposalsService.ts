@@ -413,16 +413,8 @@ export async function updateProposal(p: Proposal, options?: { keepVersion?: bool
   }
 
   try {
-    const payload: Record<string, unknown> = {
-      title: p.title,
-      client_id: p.client,
-      status: p.status,
-      due_date: p.settings.dueDate ?? "",
-      approval_flow: p.settings.approvalFlow ?? "",
-      sharing_public: p.settings.sharing.public ? 1 : 0,
-      sharing_token: p.settings.sharing.token ?? "",
-      sharing_allow_comments: p.settings.sharing.allowComments ? 1 : 0,
-      versions: p.versions,
+    const payload = {
+      ...p,
       options: {
         keepVersion: options?.keepVersion ?? false,
         note: options?.note,
