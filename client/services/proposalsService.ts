@@ -95,6 +95,8 @@ const sectionSchema = z.object({
   content: z.string(),
   media: z.array(z.object({ type: z.union([z.literal("image"), z.literal("video")]), url: z.string().url() })).optional(),
   comments: z.array(z.object({ id: z.string(), author: z.string(), text: z.string(), createdAt: z.number() })).optional(),
+  titleStyles: z.record(z.any()).optional(),
+  contentStyles: z.record(z.any()).optional(),
 });
 const pricingItemSchema = z.object({ id: idSchema, label: z.string(), qty: z.number(), price: z.number() });
 const proposalSchema = z.object({
