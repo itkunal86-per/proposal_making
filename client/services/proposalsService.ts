@@ -329,15 +329,25 @@ export async function getProposalDetails(id: string): Promise<Proposal | undefin
       return getProposal(id);
     }
 
-    const json: Proposal = await res.json();
+    const json = await res.json();
     const validated = proposalSchema.safeParse(json);
 
     if (!validated.success) {
-      console.warn("Invalid proposal details format, falling back to local storage");
+      console.warn("Invalid proposal details format:", validated.error);
+      console.warn("Falling back to local storage");
       return getProposal(id);
     }
 
-    return normalizeProposal(validated.data);
+    const normalized = normalizeProposal(validated.data);
+    const list = await getAll();
+    const idx = list.findIndex((x) => x.id === normalized.id);
+    if (idx === -1) {
+      persist([normalized, ...list]);
+    } else {
+      list[idx] = normalized;
+      persist(list);
+    }
+    return normalized;
   } catch (err) {
     console.warn("Error fetching proposal details, falling back to local storage:", err);
     return getProposal(id);
