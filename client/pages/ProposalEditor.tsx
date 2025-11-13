@@ -15,7 +15,7 @@ import { toast } from "@/hooks/use-toast";
 import {
   type Proposal,
   type ProposalStatus,
-  getProposal,
+  getProposalDetails,
   updateProposal,
   valueTotal,
 } from "@/services/proposalsService";
