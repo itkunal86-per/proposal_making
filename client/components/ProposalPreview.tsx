@@ -278,35 +278,6 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
         ))}
       </div>
 
-      {proposal.pricing.items.length > 0 && (
-        <div className="border-t pt-4">
-          <h3 className="text-lg font-semibold mb-3">Pricing</h3>
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b">
-                <th className="text-left py-2">Item</th>
-                <th className="text-right py-2">Qty</th>
-                <th className="text-right py-2">Price</th>
-                <th className="text-right py-2">Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {proposal.pricing.items.map((item) => (
-                <tr key={item.id} className="border-b">
-                  <td className="py-2">{item.label}</td>
-                  <td className="text-right">{item.qty}</td>
-                  <td className="text-right">
-                    ${item.price.toLocaleString()}
-                  </td>
-                  <td className="text-right font-semibold">
-                    ${(item.qty * item.price).toLocaleString()}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
     </div>
   );
 };
