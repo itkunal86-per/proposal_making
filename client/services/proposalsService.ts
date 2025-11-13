@@ -104,6 +104,7 @@ const proposalSchema = z.object({
   id: idSchema,
   title: z.string(),
   client: z.string(),
+  client_id: z.string().optional(),
   status: z.union([z.literal("draft"), z.literal("sent"), z.literal("accepted"), z.literal("declined")]),
   createdBy: z.string(),
   createdAt: z.number(),
