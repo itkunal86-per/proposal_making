@@ -136,7 +136,10 @@ export default function ProposalEditor() {
               />
               <Select
                 value={p.client}
-                onValueChange={(value) => commit({ ...p, client: value })}
+                onValueChange={(value) => {
+                  const selectedClient = clients.find((c) => c.name === value);
+                  commit({ ...p, client: value, client_id: selectedClient?.id });
+                }}
                 disabled={isLoadingClients}
               >
                 <SelectTrigger className="w-64">
