@@ -9,6 +9,8 @@ export interface ProposalSection {
   content: string;
   media?: { type: "image" | "video"; url: string }[];
   comments?: { id: string; author: string; text: string; createdAt: number }[];
+  titleStyles?: Record<string, any>;
+  contentStyles?: Record<string, any>;
 }
 
 export interface ProposalPricingItem {
