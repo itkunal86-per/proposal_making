@@ -53,7 +53,7 @@ const PROPOSALS_ENDPOINT = "https://propai-api.hirenq.com/api/proposals";
 interface ApiProposalResponse {
   id: string;
   title: string;
-  client_id: string;
+  client_id?: string;
   status: ProposalStatus;
   created_at: string;
   created_by?: string;
