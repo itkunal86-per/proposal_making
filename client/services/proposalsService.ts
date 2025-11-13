@@ -207,6 +207,7 @@ function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmai
     id: apiProposal.id,
     title: apiProposal.title,
     client: apiProposal.client?.name || "",
+    client_id: apiProposal.client_id,
     status: apiProposal.status,
     createdBy: apiProposal.created_by || userEmail || "you@example.com",
     createdAt: createdAtMs,
