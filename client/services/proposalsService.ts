@@ -381,6 +381,7 @@ export async function createProposal(partial?: Partial<Proposal>): Promise<Propo
     id: uuid(),
     title: partial?.title ?? "Untitled Proposal",
     client: partial?.client ?? "",
+    client_id: partial?.client_id,
     status: partial?.status ?? "draft",
     createdBy: partial?.createdBy ?? "you@example.com",
     createdAt: now,
