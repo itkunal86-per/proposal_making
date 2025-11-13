@@ -298,6 +298,43 @@ export async function getProposal(id: string): Promise<Proposal | undefined> {
   return list.find((p) => p.id === id);
 }
 
+export async function getProposalDetails(id: string): Promise<Proposal | undefined> {
+  const token = getStoredToken();
+  if (!token) {
+    console.warn("No authentication token available, falling back to local storage");
+    return getProposal(id);
+  }
+
+  try {
+    const res = await fetch(`${PROPOSALS_DETAILS_ENDPOINT}/${id}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+      cache: "no-store",
+    });
+
+    if (!res.ok) {
+      console.warn(`Failed to fetch proposal details: ${res.statusText}, falling back to local storage`);
+      return getProposal(id);
+    }
+
+    const json: Proposal = await res.json();
+    const validated = proposalSchema.safeParse(json);
+
+    if (!validated.success) {
+      console.warn("Invalid proposal details format, falling back to local storage");
+      return getProposal(id);
+    }
+
+    return normalizeProposal(validated.data);
+  } catch (err) {
+    console.warn("Error fetching proposal details, falling back to local storage:", err);
+    return getProposal(id);
+  }
+}
+
 export async function getProposalByToken(token: string): Promise<Proposal | undefined> {
   const list = await getAll();
   return list.find((p) => p.settings.sharing.token === token);
