@@ -135,6 +135,7 @@ function normalizeProposal(raw: z.infer<typeof proposalSchema>): Proposal {
     id: raw.id!,
     title: raw.title!,
     client: raw.client!,
+    client_id: raw.client_id,
     status: raw.status!,
     createdBy: raw.createdBy!,
     createdAt: raw.createdAt!,
