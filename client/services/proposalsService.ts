@@ -43,6 +43,7 @@ export interface Proposal {
     sharing: { public: boolean; token?: string; allowComments: boolean };
   };
   versions: ProposalVersionSnapshot[];
+  titleStyles?: Record<string, any>;
 }
 
 const STORAGE_KEY = "app_proposals";
