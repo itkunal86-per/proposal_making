@@ -9,6 +9,8 @@ export interface ProposalSection {
   content: string;
   media?: { type: "image" | "video"; url: string }[];
   comments?: { id: string; author: string; text: string; createdAt: number }[];
+  titleStyles?: Record<string, any>;
+  contentStyles?: Record<string, any>;
 }
 
 export interface ProposalPricingItem {
@@ -41,6 +43,7 @@ export interface Proposal {
     sharing: { public: boolean; token?: string; allowComments: boolean };
   };
   versions: ProposalVersionSnapshot[];
+  titleStyles?: Record<string, any>;
 }
 
 const STORAGE_KEY = "app_proposals";
@@ -92,6 +95,8 @@ const sectionSchema = z.object({
   content: z.string(),
   media: z.array(z.object({ type: z.union([z.literal("image"), z.literal("video")]), url: z.string().url() })).optional(),
   comments: z.array(z.object({ id: z.string(), author: z.string(), text: z.string(), createdAt: z.number() })).optional(),
+  titleStyles: z.record(z.any()).optional(),
+  contentStyles: z.record(z.any()).optional(),
 });
 const pricingItemSchema = z.object({ id: idSchema, label: z.string(), qty: z.number(), price: z.number() });
 const proposalSchema = z.object({
@@ -110,6 +115,7 @@ const proposalSchema = z.object({
     sharing: z.object({ public: z.boolean(), token: z.string().optional(), allowComments: z.boolean() }),
   }),
   versions: z.array(z.object({ id: idSchema, createdAt: z.number(), note: z.string().optional(), data: z.any() })),
+  titleStyles: z.record(z.any()).optional(),
 });
 const proposalListSchema = z.array(proposalSchema);
 
