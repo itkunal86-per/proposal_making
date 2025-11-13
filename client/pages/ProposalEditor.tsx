@@ -82,6 +82,7 @@ export default function ProposalEditor() {
   }, [id, nav]);
 
   function commit(next: Proposal, keepVersion = false, note?: string) {
+    console.log("Proposal Edit Form Submitted:", next);
     setP(next);
     setSaving(true);
     if (saveTimer.current) window.clearTimeout(saveTimer.current);
