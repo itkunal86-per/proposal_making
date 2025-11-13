@@ -115,6 +115,7 @@ const proposalSchema = z.object({
     sharing: z.object({ public: z.boolean(), token: z.string().optional(), allowComments: z.boolean() }),
   }),
   versions: z.array(z.object({ id: idSchema, createdAt: z.number(), note: z.string().optional(), data: z.any() })),
+  titleStyles: z.record(z.any()).optional(),
 });
 const proposalListSchema = z.array(proposalSchema);
 
