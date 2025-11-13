@@ -23,6 +23,12 @@ interface ElementProps {
   paddingRight?: string;
   paddingBottom?: string;
   paddingLeft?: string;
+  bold?: boolean;
+  italic?: boolean;
+  underline?: boolean;
+  strikethrough?: boolean;
+  bulletList?: boolean;
+  numberList?: boolean;
 }
 
 const SelectableElement: React.FC<ElementProps> = ({
@@ -43,6 +49,12 @@ const SelectableElement: React.FC<ElementProps> = ({
   paddingRight,
   paddingBottom,
   paddingLeft,
+  bold,
+  italic,
+  underline,
+  strikethrough,
+  bulletList,
+  numberList,
 }) => {
   const baseClasses =
     "cursor-pointer transition-all duration-200 outline-2 outline-offset-2 relative group";
@@ -82,7 +94,14 @@ const SelectableElement: React.FC<ElementProps> = ({
     paddingRight: paddingRight ? `${paddingRight}px` : "0px",
     paddingBottom: paddingBottom ? `${paddingBottom}px` : "0px",
     paddingLeft: paddingLeft ? `${paddingLeft}px` : "0px",
+    fontWeight: bold ? "bold" : "normal",
+    fontStyle: italic ? "italic" : "normal",
+    textDecoration: underline ? "underline" : strikethrough ? "line-through" : "none",
   };
+
+  const formatClasses = [];
+  if (bulletList) formatClasses.push("list-disc list-inside");
+  if (numberList) formatClasses.push("list-decimal list-inside");
 
   const isTextElement = type !== "image" && type !== "video";
 
@@ -126,7 +145,7 @@ const SelectableElement: React.FC<ElementProps> = ({
       className={`${baseClasses} ${selectedClasses}`}
       style={styleOverrides}
     >
-      <div className={(textClasses as any)[type] || ""}>
+      <div className={`${(textClasses as any)[type] || ""} ${formatClasses.join(" ")}`}>
         {children}
       </div>
       {onAI && (
@@ -173,6 +192,12 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
         textAlign={(proposal as any).titleStyles?.textAlign}
         backgroundColor={(proposal as any).titleStyles?.backgroundColor}
         borderColor={(proposal as any).titleStyles?.borderColor}
+        bold={(proposal as any).titleStyles?.bold}
+        italic={(proposal as any).titleStyles?.italic}
+        underline={(proposal as any).titleStyles?.underline}
+        strikethrough={(proposal as any).titleStyles?.strikethrough}
+        bulletList={(proposal as any).titleStyles?.bulletList}
+        numberList={(proposal as any).titleStyles?.numberList}
         borderWidth={(proposal as any).titleStyles?.borderWidth}
         borderRadius={(proposal as any).titleStyles?.borderRadius}
         borderStyle={(proposal as any).titleStyles?.borderStyle}
@@ -215,6 +240,12 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
               paddingRight={(section as any).titleStyles?.paddingRight}
               paddingBottom={(section as any).titleStyles?.paddingBottom}
               paddingLeft={(section as any).titleStyles?.paddingLeft}
+              bold={(section as any).titleStyles?.bold}
+              italic={(section as any).titleStyles?.italic}
+              underline={(section as any).titleStyles?.underline}
+              strikethrough={(section as any).titleStyles?.strikethrough}
+              bulletList={(section as any).titleStyles?.bulletList}
+              numberList={(section as any).titleStyles?.numberList}
             >
               {section.title}
             </SelectableElement>
@@ -240,6 +271,12 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
               paddingRight={(section as any).contentStyles?.paddingRight}
               paddingBottom={(section as any).contentStyles?.paddingBottom}
               paddingLeft={(section as any).contentStyles?.paddingLeft}
+              bold={(section as any).contentStyles?.bold}
+              italic={(section as any).contentStyles?.italic}
+              underline={(section as any).contentStyles?.underline}
+              strikethrough={(section as any).contentStyles?.strikethrough}
+              bulletList={(section as any).contentStyles?.bulletList}
+              numberList={(section as any).contentStyles?.numberList}
             >
               {section.content}
             </SelectableElement>
@@ -278,35 +315,6 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
         ))}
       </div>
 
-      {proposal.pricing.items.length > 0 && (
-        <div className="border-t pt-4">
-          <h3 className="text-lg font-semibold mb-3">Pricing</h3>
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b">
-                <th className="text-left py-2">Item</th>
-                <th className="text-right py-2">Qty</th>
-                <th className="text-right py-2">Price</th>
-                <th className="text-right py-2">Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {proposal.pricing.items.map((item) => (
-                <tr key={item.id} className="border-b">
-                  <td className="py-2">{item.label}</td>
-                  <td className="text-right">{item.qty}</td>
-                  <td className="text-right">
-                    ${item.price.toLocaleString()}
-                  </td>
-                  <td className="text-right font-semibold">
-                    ${(item.qty * item.price).toLocaleString()}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
     </div>
   );
 };

@@ -84,7 +84,7 @@ export const ProposalEditorSidebar: React.FC<ProposalEditorSidebarProps> = ({
         </Button>
       </Link>
 
-      <Link to="/proposals">
+      <Link to="/my/proposals">
         <Button
           variant="ghost"
           size="icon"

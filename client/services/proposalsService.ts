@@ -31,6 +31,7 @@ export interface Proposal {
   id: string;
   title: string;
   client: string;
+  client_id?: string;
   status: ProposalStatus;
   createdBy: string;
   createdAt: number;
@@ -48,11 +49,12 @@ export interface Proposal {
 
 const STORAGE_KEY = "app_proposals";
 const PROPOSALS_ENDPOINT = "https://propai-api.hirenq.com/api/proposals";
+const PROPOSALS_DETAILS_ENDPOINT = "https://propai-api.hirenq.com/api/proposals/details";
 
 interface ApiProposalResponse {
   id: string;
   title: string;
-  client_id: string;
+  client_id?: string;
   status: ProposalStatus;
   created_at: string;
   created_by?: string;
@@ -88,23 +90,24 @@ export interface CreateProposalResult {
   fieldErrors?: Record<string, string[]>;
 }
 
-const idSchema = z.string();
+const idSchema = z.union([z.string(), z.number()]);
 const sectionSchema = z.object({
   id: idSchema,
   title: z.string(),
   content: z.string(),
-  media: z.array(z.object({ type: z.union([z.literal("image"), z.literal("video")]), url: z.string().url() })).optional(),
-  comments: z.array(z.object({ id: z.string(), author: z.string(), text: z.string(), createdAt: z.number() })).optional(),
-  titleStyles: z.record(z.any()).optional(),
-  contentStyles: z.record(z.any()).optional(),
+  media: z.array(z.object({ type: z.union([z.literal("image"), z.literal("video")]), url: z.string() })).optional(),
+  comments: z.array(z.object({ id: z.union([z.string(), z.number()]), author: z.string(), text: z.string(), createdAt: z.number() })).optional(),
+  titleStyles: z.union([z.record(z.any()), z.array(z.any())]).optional(),
+  contentStyles: z.union([z.record(z.any()), z.array(z.any())]).optional(),
 });
 const pricingItemSchema = z.object({ id: idSchema, label: z.string(), qty: z.number(), price: z.number() });
 const proposalSchema = z.object({
   id: idSchema,
   title: z.string(),
-  client: z.string(),
+  client: z.string().optional(),
+  client_id: z.union([z.string(), z.number()]).optional(),
   status: z.union([z.literal("draft"), z.literal("sent"), z.literal("accepted"), z.literal("declined")]),
-  createdBy: z.string(),
+  createdBy: z.union([z.string(), z.number()]).optional(),
   createdAt: z.number(),
   updatedAt: z.number(),
   sections: z.array(sectionSchema),
@@ -114,8 +117,8 @@ const proposalSchema = z.object({
     approvalFlow: z.string().optional(),
     sharing: z.object({ public: z.boolean(), token: z.string().optional(), allowComments: z.boolean() }),
   }),
-  versions: z.array(z.object({ id: idSchema, createdAt: z.number(), note: z.string().optional(), data: z.any() })),
-  titleStyles: z.record(z.any()).optional(),
+  versions: z.array(z.object({ id: idSchema, createdAt: z.number(), note: z.string().optional(), data: z.any() })).optional(),
+  titleStyles: z.union([z.record(z.any()), z.array(z.any())]).optional(),
 });
 const proposalListSchema = z.array(proposalSchema);
 
@@ -128,17 +131,24 @@ function uuid() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }
 
+function normalizeStyles(styles: any): Record<string, any> | undefined {
+  if (!styles || Array.isArray(styles)) return undefined;
+  if (typeof styles === "object") return styles;
+  return undefined;
+}
+
 function normalizeProposal(raw: z.infer<typeof proposalSchema>): Proposal {
   return {
-    id: raw.id!,
+    id: String(raw.id!),
     title: raw.title!,
-    client: raw.client!,
+    client: raw.client || "",
+    client_id: raw.client_id ? String(raw.client_id) : undefined,
     status: raw.status!,
-    createdBy: raw.createdBy!,
+    createdBy: String(raw.createdBy || "system"),
     createdAt: raw.createdAt!,
     updatedAt: raw.updatedAt!,
     sections: (raw.sections ?? []).map((s) => ({
-      id: s.id!,
+      id: String(s.id!),
       title: s.title!,
       content: s.content!,
       media: (s.media ?? []).map((m) => ({
@@ -146,16 +156,18 @@ function normalizeProposal(raw: z.infer<typeof proposalSchema>): Proposal {
         url: m.url!,
       })),
       comments: (s.comments ?? []).map((c) => ({
-        id: c.id!,
+        id: String(c.id!),
         author: c.author!,
         text: c.text!,
         createdAt: c.createdAt!,
       })),
+      titleStyles: normalizeStyles(s.titleStyles),
+      contentStyles: normalizeStyles(s.contentStyles),
     })),
     pricing: {
       currency: raw.pricing?.currency ?? "USD",
       items: (raw.pricing?.items ?? []).map((i) => ({
-        id: i.id!,
+        id: String(i.id!),
         label: i.label!,
         qty: i.qty!,
         price: i.price!,
@@ -168,15 +180,16 @@ function normalizeProposal(raw: z.infer<typeof proposalSchema>): Proposal {
       sharing: {
         public: raw.settings?.sharing?.public ?? false,
         token: raw.settings?.sharing?.token,
-        allowComments: raw.settings?.sharing?.allowComments ?? true,
+        allowComments: raw.settings?.sharing?.allowComments ?? false,
       },
     },
     versions: (raw.versions ?? []).map((v) => ({
-      id: v.id!,
+      id: String(v.id!),
       createdAt: v.createdAt!,
       note: v.note,
       data: v.data!,
     })),
+    titleStyles: normalizeStyles(raw.titleStyles),
   };
 }
 
@@ -204,6 +217,7 @@ function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmai
     id: apiProposal.id,
     title: apiProposal.title,
     client: apiProposal.client?.name || "",
+    client_id: apiProposal.client_id,
     status: apiProposal.status,
     createdBy: apiProposal.created_by || userEmail || "you@example.com",
     createdAt: createdAtMs,
@@ -293,6 +307,53 @@ export async function getProposal(id: string): Promise<Proposal | undefined> {
   return list.find((p) => p.id === id);
 }
 
+export async function getProposalDetails(id: string): Promise<Proposal | undefined> {
+  const token = getStoredToken();
+  if (!token) {
+    console.warn("No authentication token available, falling back to local storage");
+    return getProposal(id);
+  }
+
+  try {
+    const res = await fetch(`${PROPOSALS_DETAILS_ENDPOINT}/${id}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+      cache: "no-store",
+    });
+
+    if (!res.ok) {
+      console.warn(`Failed to fetch proposal details: ${res.statusText}, falling back to local storage`);
+      return getProposal(id);
+    }
+
+    const json = await res.json();
+    const validated = proposalSchema.safeParse(json);
+
+    if (!validated.success) {
+      console.warn("Invalid proposal details format:", validated.error);
+      console.warn("Falling back to local storage");
+      return getProposal(id);
+    }
+
+    const normalized = normalizeProposal(validated.data);
+    const list = await getAll();
+    const idx = list.findIndex((x) => x.id === normalized.id);
+    if (idx === -1) {
+      persist([normalized, ...list]);
+    } else {
+      list[idx] = normalized;
+      persist(list);
+    }
+    return normalized;
+  } catch (err) {
+    console.warn("Error fetching proposal details, falling back to local storage:", err);
+    return getProposal(id);
+  }
+}
+
 export async function getProposalByToken(token: string): Promise<Proposal | undefined> {
   const list = await getAll();
   return list.find((p) => p.settings.sharing.token === token);
@@ -377,6 +438,7 @@ export async function createProposal(partial?: Partial<Proposal>): Promise<Propo
     id: uuid(),
     title: partial?.title ?? "Untitled Proposal",
     client: partial?.client ?? "",
+    client_id: partial?.client_id,
     status: partial?.status ?? "draft",
     createdBy: partial?.createdBy ?? "you@example.com",
     createdAt: now,
@@ -413,16 +475,8 @@ export async function updateProposal(p: Proposal, options?: { keepVersion?: bool
   }
 
   try {
-    const payload: Record<string, unknown> = {
-      title: p.title,
-      client_id: p.client,
-      status: p.status,
-      due_date: p.settings.dueDate ?? "",
-      approval_flow: p.settings.approvalFlow ?? "",
-      sharing_public: p.settings.sharing.public ? 1 : 0,
-      sharing_token: p.settings.sharing.token ?? "",
-      sharing_allow_comments: p.settings.sharing.allowComments ? 1 : 0,
-      versions: p.versions,
+    const payload = {
+      ...p,
       options: {
         keepVersion: options?.keepVersion ?? false,
         note: options?.note,
@@ -492,6 +546,7 @@ export async function duplicateProposal(id: string): Promise<Proposal | undefine
     title: `${src.title} (Copy)`,
     createdAt: Date.now(),
     updatedAt: Date.now(),
+    client_id: src.client_id,
     sections: src.sections.map((s) => ({ ...s, id: uuid() })),
     pricing: { ...src.pricing, items: src.pricing.items.map((i) => ({ ...i, id: uuid() })) },
   };
