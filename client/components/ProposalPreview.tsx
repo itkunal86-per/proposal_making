@@ -47,6 +47,7 @@ const SelectableElement: React.FC<ElementProps> = ({
   backgroundColor,
   backgroundImage,
   backgroundSize,
+  backgroundOpacity,
   borderColor,
   borderWidth,
   borderRadius,
