@@ -250,6 +250,7 @@ export default function ProposalEditor() {
               onSelectElement={(id, type) => {
                 setSelectedElementId(id);
                 setSelectedElementType(type);
+                setActivePanel("properties");
               }}
               onAIElement={(id, type) => {
                 setAIElementId(id);
