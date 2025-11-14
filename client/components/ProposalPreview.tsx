@@ -142,11 +142,11 @@ const SelectableElement: React.FC<ElementProps> = ({
   return (
     <div
       onClick={onSelect}
-      className={`${baseClasses} ${selectedClasses}`}
+      className={`${baseClasses} ${selectedClasses} ${!children && type === "section-content" ? "min-h-[80px] border-2 border-dashed border-gray-300" : ""}`}
       style={styleOverrides}
     >
-      <div className={`${(textClasses as any)[type] || ""} ${formatClasses.join(" ")}`}>
-        {children}
+      <div className={`${(textClasses as any)[type] || ""} ${formatClasses.join(" ")} ${!children && type === "section-content" ? "text-gray-400 italic p-2" : ""}`}>
+        {children || (type === "section-content" ? "Click to add content..." : "")}
       </div>
       {onAI && (
         <Button
