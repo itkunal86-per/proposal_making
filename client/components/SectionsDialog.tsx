@@ -35,12 +35,9 @@ export const SectionsDialog: React.FC<SectionsDialogProps> = ({
     try {
       setLoading(true);
       const title = `Section ${proposal.sections.length + 1}`;
-      await addSection(proposal, title);
-      const np = await getProposal(proposal.id);
-      if (np) {
-        onUpdateProposal(np);
-        toast({ title: "Section added", description: "New section has been created." });
-      }
+      const updated = await addSection(proposal, title);
+      onUpdateProposal(updated);
+      toast({ title: "Section added", description: "New section has been created." });
     } catch (error) {
       console.error("Error adding section:", error);
       toast({ title: "Error", description: "Failed to add section.", variant: "destructive" });
@@ -53,12 +50,9 @@ export const SectionsDialog: React.FC<SectionsDialogProps> = ({
     try {
       setLoading(true);
       const id = proposal.sections[index].id;
-      await removeSection(proposal, id);
-      const np = await getProposal(proposal.id);
-      if (np) {
-        onUpdateProposal(np);
-        toast({ title: "Section deleted", description: "Section has been removed." });
-      }
+      const updated = await removeSection(proposal, id);
+      onUpdateProposal(updated);
+      toast({ title: "Section deleted", description: "Section has been removed." });
     } catch (error) {
       console.error("Error removing section:", error);
       toast({ title: "Error", description: "Failed to delete section.", variant: "destructive" });
@@ -70,11 +64,8 @@ export const SectionsDialog: React.FC<SectionsDialogProps> = ({
   const handleReorderSection = async (from: number, to: number) => {
     try {
       setLoading(true);
-      await reorderSection(proposal, from, to);
-      const np = await getProposal(proposal.id);
-      if (np) {
-        onUpdateProposal(np);
-      }
+      const updated = await reorderSection(proposal, from, to);
+      onUpdateProposal(updated);
     } catch (error) {
       console.error("Error reordering section:", error);
       toast({ title: "Error", description: "Failed to reorder sections.", variant: "destructive" });
