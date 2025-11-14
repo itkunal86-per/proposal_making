@@ -504,22 +504,44 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             />
           </div>
           {sectionTitleStyles.backgroundImage && (
-            <div>
-              <Label className="text-xs font-semibold">Background Size</Label>
-              <select
-                value={sectionTitleStyles.backgroundSize || "cover"}
-                onChange={(e) =>
-                  handleUpdateSection({
-                    titleStyles: { ...sectionTitleStyles, backgroundSize: e.target.value }
-                  })
-                }
-                className="w-full mt-2 px-3 py-2 border rounded-md text-sm"
-              >
-                <option value="cover">Cover</option>
-                <option value="contain">Contain</option>
-                <option value="stretch">Stretch</option>
-              </select>
-            </div>
+            <>
+              <div>
+                <Label className="text-xs font-semibold">Background Size</Label>
+                <select
+                  value={sectionTitleStyles.backgroundSize || "cover"}
+                  onChange={(e) =>
+                    handleUpdateSection({
+                      titleStyles: { ...sectionTitleStyles, backgroundSize: e.target.value }
+                    })
+                  }
+                  className="w-full mt-2 px-3 py-2 border rounded-md text-sm"
+                >
+                  <option value="cover">Cover</option>
+                  <option value="contain">Contain</option>
+                  <option value="stretch">Stretch</option>
+                </select>
+              </div>
+              <div>
+                <Label className="text-xs font-semibold">Background Opacity</Label>
+                <div className="flex gap-2 mt-2 items-center">
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={parseInt(sectionTitleStyles.backgroundOpacity || "100")}
+                    onChange={(e) =>
+                      handleUpdateSection({
+                        titleStyles: { ...sectionTitleStyles, backgroundOpacity: e.target.value }
+                      })
+                    }
+                    className="flex-1"
+                  />
+                  <span className="text-sm font-medium w-12 text-center">
+                    {parseInt(sectionTitleStyles.backgroundOpacity || "100")}%
+                  </span>
+                </div>
+              </div>
+            </>
           )}
         </div>
 
