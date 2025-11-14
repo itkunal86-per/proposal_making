@@ -585,7 +585,7 @@ export async function addComment(p: Proposal, sectionId: string, author: string,
   await updateProposal(p);
 }
 
-export async function reorderSection(p: Proposal, from: number, to: number) {
+export async function reorderSection(p: Proposal, from: number, to: number): Promise<Proposal> {
   const arr = [...p.sections];
   const [item] = arr.splice(from, 1);
   arr.splice(to, 0, item);
@@ -593,9 +593,10 @@ export async function reorderSection(p: Proposal, from: number, to: number) {
   console.log("Reordering sections:", { from, to, sectionCount: updated.sections.length });
   await updateProposal(updated);
   console.log("Reorder completed");
+  return updated;
 }
 
-export async function addSection(p: Proposal, title = "New Section") {
+export async function addSection(p: Proposal, title = "New Section"): Promise<Proposal> {
   const newSection = { id: uuid(), title, content: "", media: [], comments: [] };
   const updated = {
     ...p,
@@ -605,9 +606,10 @@ export async function addSection(p: Proposal, title = "New Section") {
   console.log("Adding section:", { title, newSectionId: newSection.id, totalSections: updated.sections.length });
   await updateProposal(updated);
   console.log("Add section completed");
+  return updated;
 }
 
-export async function removeSection(p: Proposal, id: string) {
+export async function removeSection(p: Proposal, id: string): Promise<Proposal> {
   const updated = {
     ...p,
     sections: p.sections.filter((s) => s.id !== id),
@@ -616,6 +618,7 @@ export async function removeSection(p: Proposal, id: string) {
   console.log("Removing section:", { sectionId: id, remainingSections: updated.sections.length });
   await updateProposal(updated);
   console.log("Remove section completed");
+  return updated;
 }
 
 export function valueTotal(p: Proposal): number {
