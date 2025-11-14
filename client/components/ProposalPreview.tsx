@@ -258,6 +258,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
               strikethrough={(section as any).titleStyles?.strikethrough}
               bulletList={(section as any).titleStyles?.bulletList}
               numberList={(section as any).titleStyles?.numberList}
+              code={(section as any).titleStyles?.code}
             >
               {section.title}
             </SelectableElement>
