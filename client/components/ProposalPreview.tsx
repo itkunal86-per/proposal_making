@@ -107,12 +107,7 @@ const SelectableElement: React.FC<ElementProps> = ({
   const formatClasses = [];
   if (bulletList) formatClasses.push("list-disc list-inside pl-4");
   if (numberList) formatClasses.push("list-decimal list-inside pl-4");
-
-  const codeStyle: React.CSSProperties = {};
-  if (bulletList || numberList) {
-    codeStyle.whiteSpace = "pre-wrap";
-    codeStyle.wordBreak = "break-word";
-  }
+  if (code) formatClasses.push("font-mono bg-gray-900 text-gray-100 rounded p-3");
 
   const isTextElement = type !== "image" && type !== "video";
 
