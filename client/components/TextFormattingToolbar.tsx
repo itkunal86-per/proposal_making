@@ -304,6 +304,7 @@ export const TextFormattingToolbar: React.FC<TextFormattingToolbarProps> = ({
         variant="ghost"
         size="sm"
         className="h-9 w-9 p-0 hover:bg-slate-100"
+        onClick={() => onFormatChange?.("undo", true)}
         title="Undo"
       >
         <Undo2 className="w-4 h-4" />
@@ -313,6 +314,7 @@ export const TextFormattingToolbar: React.FC<TextFormattingToolbarProps> = ({
         variant="ghost"
         size="sm"
         className="h-9 w-9 p-0 hover:bg-slate-100"
+        onClick={() => onFormatChange?.("redo", true)}
         title="Redo"
       >
         <Redo2 className="w-4 h-4" />

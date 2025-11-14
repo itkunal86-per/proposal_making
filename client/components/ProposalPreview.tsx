@@ -29,6 +29,7 @@ interface ElementProps {
   strikethrough?: boolean;
   bulletList?: boolean;
   numberList?: boolean;
+  code?: boolean;
 }
 
 const SelectableElement: React.FC<ElementProps> = ({
@@ -55,6 +56,7 @@ const SelectableElement: React.FC<ElementProps> = ({
   strikethrough,
   bulletList,
   numberList,
+  code,
 }) => {
   const baseClasses =
     "cursor-pointer transition-all duration-200 outline-2 outline-offset-2 relative group";
@@ -83,25 +85,23 @@ const SelectableElement: React.FC<ElementProps> = ({
     return `${width} solid ${color}`;
   };
 
+  const isCodeOnly = code && !bulletList && !numberList;
+
   const styleOverrides: React.CSSProperties = {
-    color: color || "inherit",
+    color: color || (isCodeOnly ? "#e8eaed" : "inherit"),
     fontSize: fontSize ? `${fontSize}px` : `${defaultFontSize}px`,
     textAlign: (textAlign as any) || "left",
-    backgroundColor: backgroundColor || "transparent",
+    backgroundColor: backgroundColor || (isCodeOnly ? "#1f2937" : "transparent"),
     border: getBorderStyle(),
-    borderRadius: borderRadius ? `${borderRadius}px` : "0px",
-    paddingTop: paddingTop ? `${paddingTop}px` : "0px",
-    paddingRight: paddingRight ? `${paddingRight}px` : "0px",
-    paddingBottom: paddingBottom ? `${paddingBottom}px` : "0px",
-    paddingLeft: paddingLeft ? `${paddingLeft}px` : "0px",
+    borderRadius: borderRadius ? `${borderRadius}px` : isCodeOnly ? "4px" : "0px",
+    paddingTop: paddingTop ? `${paddingTop}px` : isCodeOnly ? "12px" : "0px",
+    paddingRight: paddingRight ? `${paddingRight}px` : isCodeOnly ? "12px" : "0px",
+    paddingBottom: paddingBottom ? `${paddingBottom}px` : isCodeOnly ? "12px" : "0px",
+    paddingLeft: paddingLeft ? `${paddingLeft}px` : isCodeOnly ? "12px" : "0px",
     fontWeight: bold ? "bold" : "normal",
     fontStyle: italic ? "italic" : "normal",
     textDecoration: underline ? "underline" : strikethrough ? "line-through" : "none",
   };
-
-  const formatClasses = [];
-  if (bulletList) formatClasses.push("list-disc list-inside");
-  if (numberList) formatClasses.push("list-decimal list-inside");
 
   const isTextElement = type !== "image" && type !== "video";
 
@@ -139,14 +139,54 @@ const SelectableElement: React.FC<ElementProps> = ({
     "section-content": "",
   };
 
+  const renderContent = () => {
+    const content = children || (type === "section-content" ? "Click to add content..." : "");
+
+    if (bulletList && content) {
+      const lines = String(content).split('\n').filter(line => line.trim());
+      return (
+        <ul className="list-disc list-inside space-y-1" style={{ fontFamily: code ? "ui-monospace, SFMono-Regular, Menlo, Courier, monospace" : "inherit" }}>
+          {lines.map((line, idx) => (
+            <li key={idx} style={{ fontWeight: bold ? "bold" : "normal", fontStyle: italic ? "italic" : "normal", textDecoration: underline ? "underline" : strikethrough ? "line-through" : "none" }}>
+              {line}
+            </li>
+          ))}
+        </ul>
+      );
+    }
+
+    if (numberList && content) {
+      const lines = String(content).split('\n').filter(line => line.trim());
+      return (
+        <ol className="list-decimal list-inside space-y-1" style={{ fontFamily: code ? "ui-monospace, SFMono-Regular, Menlo, Courier, monospace" : "inherit" }}>
+          {lines.map((line, idx) => (
+            <li key={idx} style={{ fontWeight: bold ? "bold" : "normal", fontStyle: italic ? "italic" : "normal", textDecoration: underline ? "underline" : strikethrough ? "line-through" : "none" }}>
+              {line}
+            </li>
+          ))}
+        </ol>
+      );
+    }
+
+    if (code && content) {
+      return (
+        <div style={{ fontFamily: "ui-monospace, SFMono-Regular, Menlo, Courier, monospace", whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+          {content}
+        </div>
+      );
+    }
+
+    return <div style={{ fontWeight: bold ? "bold" : "normal", fontStyle: italic ? "italic" : "normal", textDecoration: underline ? "underline" : strikethrough ? "line-through" : "none" }}>{content}</div>;
+  };
+
   return (
     <div
       onClick={onSelect}
       className={`${baseClasses} ${selectedClasses} ${!children && type === "section-content" ? "min-h-[80px] border-2 border-dashed border-gray-300" : ""}`}
       style={styleOverrides}
     >
-      <div className={`${(textClasses as any)[type] || ""} ${formatClasses.join(" ")} ${!children && type === "section-content" ? "text-gray-400 italic p-2" : ""}`}>
-        {children || (type === "section-content" ? "Click to add content..." : "")}
+      <div className={`${(textClasses as any)[type] || ""} ${!children && type === "section-content" ? "text-gray-400 italic p-2" : ""}`}>
+        {renderContent()}
       </div>
       {onAI && (
         <Button
@@ -198,6 +238,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
         strikethrough={(proposal as any).titleStyles?.strikethrough}
         bulletList={(proposal as any).titleStyles?.bulletList}
         numberList={(proposal as any).titleStyles?.numberList}
+        code={(proposal as any).titleStyles?.code}
         borderWidth={(proposal as any).titleStyles?.borderWidth}
         borderRadius={(proposal as any).titleStyles?.borderRadius}
         borderStyle={(proposal as any).titleStyles?.borderStyle}
@@ -246,6 +287,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
               strikethrough={(section as any).titleStyles?.strikethrough}
               bulletList={(section as any).titleStyles?.bulletList}
               numberList={(section as any).titleStyles?.numberList}
+              code={(section as any).titleStyles?.code}
             >
               {section.title}
             </SelectableElement>
@@ -277,6 +319,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
               strikethrough={(section as any).contentStyles?.strikethrough}
               bulletList={(section as any).contentStyles?.bulletList}
               numberList={(section as any).contentStyles?.numberList}
+              code={(section as any).contentStyles?.code}
             >
               {section.content}
             </SelectableElement>

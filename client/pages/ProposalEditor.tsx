@@ -201,6 +201,16 @@ export default function ProposalEditor() {
           onSectionSelect={handleSectionNavigate}
           onFormatChange={(format, value) => {
             setTextFormatting((prev) => ({ ...prev, [format]: value }));
+
+            // Handle undo/redo
+            if (format === "undo" || format === "redo") {
+              toast({
+                title: format === "undo" ? "Undo" : "Redo",
+                description: "History tracking will be available in a future update",
+              });
+              return;
+            }
+
             if (selectedElementId && selectedElementType) {
               if (selectedElementType === "title") {
                 const updated = { ...p, titleStyles: { ...(p as any).titleStyles, [format]: value } };
