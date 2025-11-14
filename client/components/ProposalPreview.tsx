@@ -209,6 +209,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
         strikethrough={(proposal as any).titleStyles?.strikethrough}
         bulletList={(proposal as any).titleStyles?.bulletList}
         numberList={(proposal as any).titleStyles?.numberList}
+        code={(proposal as any).titleStyles?.code}
         borderWidth={(proposal as any).titleStyles?.borderWidth}
         borderRadius={(proposal as any).titleStyles?.borderRadius}
         borderStyle={(proposal as any).titleStyles?.borderStyle}
