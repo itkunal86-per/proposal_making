@@ -484,6 +484,8 @@ export async function updateProposal(p: Proposal, options?: { keepVersion?: bool
       },
     };
 
+    console.log("Updating proposal:", { proposalId: p.id, sectionCount: p.sections.length, sections: p.sections.map(s => s.title) });
+
     const res = await fetch(`${PROPOSALS_ENDPOINT}/${p.id}`, {
       method: "PUT",
       headers: {
@@ -493,26 +495,35 @@ export async function updateProposal(p: Proposal, options?: { keepVersion?: bool
       body: JSON.stringify(payload),
     });
 
+    console.log("Update response status:", res.status, res.ok);
+
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
       throw new Error(errorData.error || `Failed to update proposal: ${res.statusText}`);
     }
 
     const data: ApiProposalResponse = await res.json();
+    console.log("API response data:", data);
+
     let updatedProposal = convertApiProposalToProposal(data);
+    console.log("Converted proposal sections:", updatedProposal.sections.map(s => s.title));
 
     if (!updatedProposal.sections || updatedProposal.sections.length === 0) {
+      console.log("API response had no sections, using local sections");
       updatedProposal = { ...updatedProposal, sections: p.sections };
     }
 
     const list = await getAll();
     const idx = list.findIndex((x) => x.id === p.id);
     if (idx === -1) {
+      console.log("Proposal not in list, adding it");
       persist([updatedProposal, ...list]);
     } else {
+      console.log("Updating proposal in list at index", idx);
       list[idx] = updatedProposal;
       persist(list);
     }
+    console.log("Update completed successfully");
   } catch (err) {
     console.error("Failed to update proposal:", err);
     throw err;
