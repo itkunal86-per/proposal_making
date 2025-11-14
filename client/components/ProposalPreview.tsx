@@ -85,23 +85,22 @@ const SelectableElement: React.FC<ElementProps> = ({
     return `${width} solid ${color}`;
   };
 
+  const isCodeOnly = code && !bulletList && !numberList;
+
   const styleOverrides: React.CSSProperties = {
-    color: color || (code ? "#e8eaed" : "inherit"),
+    color: color || (isCodeOnly ? "#e8eaed" : "inherit"),
     fontSize: fontSize ? `${fontSize}px` : `${defaultFontSize}px`,
     textAlign: (textAlign as any) || "left",
-    backgroundColor: backgroundColor || (code ? "#1f2937" : "transparent"),
+    backgroundColor: backgroundColor || (isCodeOnly ? "#1f2937" : "transparent"),
     border: getBorderStyle(),
-    borderRadius: borderRadius ? `${borderRadius}px` : code ? "4px" : "0px",
-    paddingTop: paddingTop ? `${paddingTop}px` : code ? "12px" : "0px",
-    paddingRight: paddingRight ? `${paddingRight}px` : code ? "12px" : "0px",
-    paddingBottom: paddingBottom ? `${paddingBottom}px` : code ? "12px" : "0px",
-    paddingLeft: paddingLeft ? `${paddingLeft}px` : code ? "12px" : "0px",
+    borderRadius: borderRadius ? `${borderRadius}px` : isCodeOnly ? "4px" : "0px",
+    paddingTop: paddingTop ? `${paddingTop}px` : isCodeOnly ? "12px" : "0px",
+    paddingRight: paddingRight ? `${paddingRight}px` : isCodeOnly ? "12px" : "0px",
+    paddingBottom: paddingBottom ? `${paddingBottom}px` : isCodeOnly ? "12px" : "0px",
+    paddingLeft: paddingLeft ? `${paddingLeft}px` : isCodeOnly ? "12px" : "0px",
     fontWeight: bold ? "bold" : "normal",
     fontStyle: italic ? "italic" : "normal",
     textDecoration: underline ? "underline" : strikethrough ? "line-through" : "none",
-    fontFamily: code ? "ui-monospace, SFMono-Regular, Menlo, Courier, monospace" : "inherit",
-    whiteSpace: code ? "pre-wrap" : "normal",
-    wordBreak: code ? "break-word" : "normal",
   };
 
   const isTextElement = type !== "image" && type !== "video";
