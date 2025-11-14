@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -8,8 +8,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
-import { Proposal, addSection, removeSection, reorderSection, getProposal } from "@/services/proposalsService";
+import { Proposal, addSection, removeSection, reorderSection } from "@/services/proposalsService";
 import { ChevronUp, ChevronDown, Trash2, Plus } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 interface SectionsDialogProps {
   open: boolean;
@@ -28,24 +29,49 @@ export const SectionsDialog: React.FC<SectionsDialogProps> = ({
   onSelectSection,
   onUpdateProposal,
 }) => {
+  const [loading, setLoading] = useState(false);
+
   const handleAddSection = async () => {
-    const title = `Section ${proposal.sections.length + 1}`;
-    await addSection(proposal, title);
-    const np = await getProposal(proposal.id);
-    if (np) onUpdateProposal(np);
+    try {
+      setLoading(true);
+      const title = `Section ${proposal.sections.length + 1}`;
+      const updated = await addSection(proposal, title);
+      onUpdateProposal(updated);
+      toast({ title: "Section added", description: "New section has been created." });
+    } catch (error) {
+      console.error("Error adding section:", error);
+      toast({ title: "Error", description: "Failed to add section.", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleRemoveSection = async (index: number) => {
-    const id = proposal.sections[index].id;
-    await removeSection(proposal, id);
-    const np = await getProposal(proposal.id);
-    if (np) onUpdateProposal(np);
+    try {
+      setLoading(true);
+      const id = proposal.sections[index].id;
+      const updated = await removeSection(proposal, id);
+      onUpdateProposal(updated);
+      toast({ title: "Section deleted", description: "Section has been removed." });
+    } catch (error) {
+      console.error("Error removing section:", error);
+      toast({ title: "Error", description: "Failed to delete section.", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleReorderSection = async (from: number, to: number) => {
-    await reorderSection(proposal, from, to);
-    const np = await getProposal(proposal.id);
-    if (np) onUpdateProposal(np);
+    try {
+      setLoading(true);
+      const updated = await reorderSection(proposal, from, to);
+      onUpdateProposal(updated);
+    } catch (error) {
+      console.error("Error reordering section:", error);
+      toast({ title: "Error", description: "Failed to reorder sections.", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -79,9 +105,11 @@ export const SectionsDialog: React.FC<SectionsDialogProps> = ({
                   size="sm"
                   onClick={(e) => {
                     e.stopPropagation();
-                    index > 0 && handleReorderSection(index, index - 1);
+                    if (index > 0) {
+                      handleReorderSection(index, index - 1);
+                    }
                   }}
-                  disabled={index === 0}
+                  disabled={index === 0 || loading}
                   className="h-8 w-8 p-0"
                 >
                   <ChevronUp className="w-4 h-4" />
@@ -92,10 +120,11 @@ export const SectionsDialog: React.FC<SectionsDialogProps> = ({
                   size="sm"
                   onClick={(e) => {
                     e.stopPropagation();
-                    index < proposal.sections.length - 1 &&
+                    if (index < proposal.sections.length - 1) {
                       handleReorderSection(index, index + 1);
+                    }
                   }}
-                  disabled={index === proposal.sections.length - 1}
+                  disabled={index === proposal.sections.length - 1 || loading}
                   className="h-8 w-8 p-0"
                 >
                   <ChevronDown className="w-4 h-4" />
@@ -108,7 +137,7 @@ export const SectionsDialog: React.FC<SectionsDialogProps> = ({
                     e.stopPropagation();
                     handleRemoveSection(index);
                   }}
-                  disabled={proposal.sections.length === 1}
+                  disabled={proposal.sections.length === 1 || loading}
                   className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -120,7 +149,7 @@ export const SectionsDialog: React.FC<SectionsDialogProps> = ({
 
         <Separator className="my-3" />
 
-        <Button onClick={handleAddSection} className="w-full">
+        <Button onClick={handleAddSection} disabled={loading} className="w-full">
           <Plus className="w-4 h-4 mr-2" />
           Add Section
         </Button>

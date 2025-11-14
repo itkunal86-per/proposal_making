@@ -223,9 +223,9 @@ function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmai
     createdAt: createdAtMs,
     updatedAt: updatedAtMs,
     sections: [
-      { id: uuid(), title: "Overview", content: "Project overview...", media: [], comments: [] },
-      { id: uuid(), title: "Scope", content: "Scope of work...", media: [], comments: [] },
-      { id: uuid(), title: "Timeline", content: "Timeline...", media: [], comments: [] },
+      { id: uuid(), title: "Overview", content: "", media: [], comments: [] },
+      { id: uuid(), title: "Scope", content: "", media: [], comments: [] },
+      { id: uuid(), title: "Timeline", content: "", media: [], comments: [] },
     ],
     pricing: {
       currency: apiProposal.currency || "USD",
@@ -304,7 +304,8 @@ export async function listProposals(): Promise<Proposal[]> {
 
 export async function getProposal(id: string): Promise<Proposal | undefined> {
   const list = await getAll();
-  return list.find((p) => p.id === id);
+  const found = list.find((p) => p.id === id);
+  return found;
 }
 
 export async function getProposalDetails(id: string): Promise<Proposal | undefined> {
@@ -444,9 +445,9 @@ export async function createProposal(partial?: Partial<Proposal>): Promise<Propo
     createdAt: now,
     updatedAt: now,
     sections: partial?.sections ?? [
-      { id: uuid(), title: "Overview", content: "Project overview...", media: [], comments: [] },
-      { id: uuid(), title: "Scope", content: "Scope of work...", media: [], comments: [] },
-      { id: uuid(), title: "Timeline", content: "Timeline...", media: [], comments: [] },
+      { id: uuid(), title: "Overview", content: "", media: [], comments: [] },
+      { id: uuid(), title: "Scope", content: "", media: [], comments: [] },
+      { id: uuid(), title: "Timeline", content: "", media: [], comments: [] },
     ],
     pricing: partial?.pricing ?? {
       currency: "USD",
@@ -483,6 +484,8 @@ export async function updateProposal(p: Proposal, options?: { keepVersion?: bool
       },
     };
 
+    console.log("Updating proposal:", { proposalId: p.id, sectionCount: p.sections.length, sections: p.sections.map(s => s.title) });
+
     const res = await fetch(`${PROPOSALS_ENDPOINT}/${p.id}`, {
       method: "PUT",
       headers: {
@@ -492,22 +495,33 @@ export async function updateProposal(p: Proposal, options?: { keepVersion?: bool
       body: JSON.stringify(payload),
     });
 
+    console.log("Update response status:", res.status, res.ok);
+
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
       throw new Error(errorData.error || `Failed to update proposal: ${res.statusText}`);
     }
 
     const data: ApiProposalResponse = await res.json();
-    const updatedProposal = convertApiProposalToProposal(data);
+    console.log("API response data:", data);
+
+    let updatedProposal = convertApiProposalToProposal(data);
+    console.log("Converted proposal sections:", updatedProposal.sections.map(s => s.title));
+
+    console.log("Using local sections from the update request");
+    updatedProposal = { ...updatedProposal, sections: p.sections };
 
     const list = await getAll();
     const idx = list.findIndex((x) => x.id === p.id);
     if (idx === -1) {
+      console.log("Proposal not in list, adding it");
       persist([updatedProposal, ...list]);
     } else {
+      console.log("Updating proposal in list at index", idx);
       list[idx] = updatedProposal;
       persist(list);
     }
+    console.log("Update completed successfully");
   } catch (err) {
     console.error("Failed to update proposal:", err);
     throw err;
@@ -571,22 +585,40 @@ export async function addComment(p: Proposal, sectionId: string, author: string,
   await updateProposal(p);
 }
 
-export async function reorderSection(p: Proposal, from: number, to: number) {
+export async function reorderSection(p: Proposal, from: number, to: number): Promise<Proposal> {
   const arr = [...p.sections];
   const [item] = arr.splice(from, 1);
   arr.splice(to, 0, item);
-  p.sections = arr;
-  await updateProposal(p);
+  const updated = { ...p, sections: arr, updatedAt: Date.now() };
+  console.log("Reordering sections:", { from, to, sectionCount: updated.sections.length });
+  await updateProposal(updated);
+  console.log("Reorder completed");
+  return updated;
 }
 
-export async function addSection(p: Proposal, title = "New Section") {
-  p.sections = [...p.sections, { id: uuid(), title, content: "", media: [], comments: [] }];
-  await updateProposal(p);
+export async function addSection(p: Proposal, title = "New Section"): Promise<Proposal> {
+  const newSection = { id: uuid(), title, content: "", media: [], comments: [] };
+  const updated = {
+    ...p,
+    sections: [...p.sections, newSection],
+    updatedAt: Date.now(),
+  };
+  console.log("Adding section:", { title, newSectionId: newSection.id, totalSections: updated.sections.length });
+  await updateProposal(updated);
+  console.log("Add section completed");
+  return updated;
 }
 
-export async function removeSection(p: Proposal, id: string) {
-  p.sections = p.sections.filter((s) => s.id !== id);
-  await updateProposal(p);
+export async function removeSection(p: Proposal, id: string): Promise<Proposal> {
+  const updated = {
+    ...p,
+    sections: p.sections.filter((s) => s.id !== id),
+    updatedAt: Date.now(),
+  };
+  console.log("Removing section:", { sectionId: id, remainingSections: updated.sections.length });
+  await updateProposal(updated);
+  console.log("Remove section completed");
+  return updated;
 }
 
 export function valueTotal(p: Proposal): number {

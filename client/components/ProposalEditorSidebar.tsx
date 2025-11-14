@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { List, Settings, ArrowLeft, Sparkles, FileText, Layers, Upload, PenTool, Variable } from "lucide-react";
+import { List, Settings, ArrowLeft, Sparkles, Layers, Upload, PenTool, Variable } from "lucide-react";
 
 export type PanelType = "properties" | "document" | "build" | "uploads" | "signatures" | "variables";
 
@@ -21,7 +21,7 @@ export const ProposalEditorSidebar: React.FC<ProposalEditorSidebarProps> = ({
   proposalId,
 }) => {
   const panelButtons = [
-    { id: "document", icon: FileText, title: "Document" },
+    // { id: "document", icon: FileText, title: "Document" },
     { id: "build", icon: Layers, title: "Build" },
     { id: "uploads", icon: Upload, title: "Uploads" },
     { id: "signatures", icon: PenTool, title: "Signatures" },
