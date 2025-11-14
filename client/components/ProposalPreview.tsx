@@ -341,6 +341,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
               backgroundColor={(section as any).contentStyles?.backgroundColor}
               backgroundImage={(section as any).contentStyles?.backgroundImage}
               backgroundSize={(section as any).contentStyles?.backgroundSize}
+              backgroundOpacity={(section as any).contentStyles?.backgroundOpacity}
               borderColor={(section as any).contentStyles?.borderColor}
               borderWidth={(section as any).contentStyles?.borderWidth}
               borderRadius={(section as any).contentStyles?.borderRadius}
