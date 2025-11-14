@@ -575,18 +575,24 @@ export async function reorderSection(p: Proposal, from: number, to: number) {
   const arr = [...p.sections];
   const [item] = arr.splice(from, 1);
   arr.splice(to, 0, item);
-  p.sections = arr;
-  await updateProposal(p);
+  const updated = { ...p, sections: arr };
+  await updateProposal(updated);
 }
 
 export async function addSection(p: Proposal, title = "New Section") {
-  p.sections = [...p.sections, { id: uuid(), title, content: "", media: [], comments: [] }];
-  await updateProposal(p);
+  const updated = {
+    ...p,
+    sections: [...p.sections, { id: uuid(), title, content: "", media: [], comments: [] }],
+  };
+  await updateProposal(updated);
 }
 
 export async function removeSection(p: Proposal, id: string) {
-  p.sections = p.sections.filter((s) => s.id !== id);
-  await updateProposal(p);
+  const updated = {
+    ...p,
+    sections: p.sections.filter((s) => s.id !== id),
+  };
+  await updateProposal(updated);
 }
 
 export function valueTotal(p: Proposal): number {
