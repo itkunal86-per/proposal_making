@@ -56,6 +56,7 @@ const SelectableElement: React.FC<ElementProps> = ({
   strikethrough,
   bulletList,
   numberList,
+  code,
 }) => {
   const baseClasses =
     "cursor-pointer transition-all duration-200 outline-2 outline-offset-2 relative group";
