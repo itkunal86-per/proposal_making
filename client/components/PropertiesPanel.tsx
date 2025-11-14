@@ -885,6 +885,37 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               />
             </div>
           </div>
+          <div>
+            <Label className="text-xs font-semibold">Image URL</Label>
+            <Input
+              value={sectionContentStyles.backgroundImage || ""}
+              onChange={(e) =>
+                handleUpdateSection({
+                  contentStyles: { ...sectionContentStyles, backgroundImage: e.target.value }
+                })
+              }
+              placeholder="https://example.com/image.jpg"
+              className="mt-2"
+            />
+          </div>
+          {sectionContentStyles.backgroundImage && (
+            <div>
+              <Label className="text-xs font-semibold">Background Size</Label>
+              <select
+                value={sectionContentStyles.backgroundSize || "cover"}
+                onChange={(e) =>
+                  handleUpdateSection({
+                    contentStyles: { ...sectionContentStyles, backgroundSize: e.target.value }
+                  })
+                }
+                className="w-full mt-2 px-3 py-2 border rounded-md text-sm"
+              >
+                <option value="cover">Cover</option>
+                <option value="contain">Contain</option>
+                <option value="stretch">Stretch</option>
+              </select>
+            </div>
+          )}
         </div>
 
         <Separator />
