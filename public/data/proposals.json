@@ -8,9 +8,9 @@
     "createdAt": 1710200000000,
     "updatedAt": 1710200000000,
     "sections": [
-      { "id": "s-1", "title": "Overview", "content": "Project overview..." },
-      { "id": "s-2", "title": "Scope", "content": "Scope of work..." },
-      { "id": "s-3", "title": "Timeline", "content": "Timeline..." }
+      { "id": "s-1", "title": "Overview", "content": "" },
+      { "id": "s-2", "title": "Scope", "content": "" },
+      { "id": "s-3", "title": "Timeline", "content": "" }
     ],
     "pricing": {
       "currency": "USD",
