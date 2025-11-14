@@ -111,6 +111,7 @@ const SelectableElement: React.FC<ElementProps> = ({
     fontWeight: bold ? "bold" : "normal",
     fontStyle: italic ? "italic" : "normal",
     textDecoration: underline ? "underline" : strikethrough ? "line-through" : "none",
+    position: backgroundImage ? "relative" : "static",
   };
 
   const backgroundOverlayOpacity = backgroundImage && backgroundOpacity ? (100 - parseInt(backgroundOpacity)) / 100 : 0;
