@@ -176,20 +176,40 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             />
           </div>
           {titleStyles.backgroundImage && (
-            <div>
-              <Label className="text-xs font-semibold">Background Size</Label>
-              <select
-                value={titleStyles.backgroundSize || "cover"}
-                onChange={(e) =>
-                  updateTitleStyles({ backgroundSize: e.target.value })
-                }
-                className="w-full mt-2 px-3 py-2 border rounded-md text-sm"
-              >
-                <option value="cover">Cover</option>
-                <option value="contain">Contain</option>
-                <option value="stretch">Stretch</option>
-              </select>
-            </div>
+            <>
+              <div>
+                <Label className="text-xs font-semibold">Background Size</Label>
+                <select
+                  value={titleStyles.backgroundSize || "cover"}
+                  onChange={(e) =>
+                    updateTitleStyles({ backgroundSize: e.target.value })
+                  }
+                  className="w-full mt-2 px-3 py-2 border rounded-md text-sm"
+                >
+                  <option value="cover">Cover</option>
+                  <option value="contain">Contain</option>
+                  <option value="stretch">Stretch</option>
+                </select>
+              </div>
+              <div>
+                <Label className="text-xs font-semibold">Background Opacity</Label>
+                <div className="flex gap-2 mt-2 items-center">
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={parseInt(titleStyles.backgroundOpacity || "100")}
+                    onChange={(e) =>
+                      updateTitleStyles({ backgroundOpacity: e.target.value })
+                    }
+                    className="flex-1"
+                  />
+                  <span className="text-sm font-medium w-12 text-center">
+                    {parseInt(titleStyles.backgroundOpacity || "100")}%
+                  </span>
+                </div>
+              </div>
+            </>
           )}
         </div>
 
