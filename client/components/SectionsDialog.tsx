@@ -114,9 +114,11 @@ export const SectionsDialog: React.FC<SectionsDialogProps> = ({
                   size="sm"
                   onClick={(e) => {
                     e.stopPropagation();
-                    index > 0 && handleReorderSection(index, index - 1);
+                    if (index > 0) {
+                      handleReorderSection(index, index - 1);
+                    }
                   }}
-                  disabled={index === 0}
+                  disabled={index === 0 || loading}
                   className="h-8 w-8 p-0"
                 >
                   <ChevronUp className="w-4 h-4" />
@@ -127,10 +129,11 @@ export const SectionsDialog: React.FC<SectionsDialogProps> = ({
                   size="sm"
                   onClick={(e) => {
                     e.stopPropagation();
-                    index < proposal.sections.length - 1 &&
+                    if (index < proposal.sections.length - 1) {
                       handleReorderSection(index, index + 1);
+                    }
                   }}
-                  disabled={index === proposal.sections.length - 1}
+                  disabled={index === proposal.sections.length - 1 || loading}
                   className="h-8 w-8 p-0"
                 >
                   <ChevronDown className="w-4 h-4" />
@@ -143,7 +146,7 @@ export const SectionsDialog: React.FC<SectionsDialogProps> = ({
                     e.stopPropagation();
                     handleRemoveSection(index);
                   }}
-                  disabled={proposal.sections.length === 1}
+                  disabled={proposal.sections.length === 1 || loading}
                   className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
                 >
                   <Trash2 className="w-4 h-4" />
