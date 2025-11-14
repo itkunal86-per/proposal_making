@@ -29,6 +29,7 @@ interface ElementProps {
   strikethrough?: boolean;
   bulletList?: boolean;
   numberList?: boolean;
+  code?: boolean;
 }
 
 const SelectableElement: React.FC<ElementProps> = ({
