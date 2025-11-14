@@ -17,6 +17,7 @@ interface ElementProps {
   backgroundColor?: string;
   backgroundImage?: string;
   backgroundSize?: string;
+  backgroundOpacity?: string;
   borderColor?: string;
   borderWidth?: string;
   borderRadius?: string;
@@ -46,6 +47,7 @@ const SelectableElement: React.FC<ElementProps> = ({
   backgroundColor,
   backgroundImage,
   backgroundSize,
+  backgroundOpacity,
   borderColor,
   borderWidth,
   borderRadius,
@@ -109,7 +111,10 @@ const SelectableElement: React.FC<ElementProps> = ({
     fontWeight: bold ? "bold" : "normal",
     fontStyle: italic ? "italic" : "normal",
     textDecoration: underline ? "underline" : strikethrough ? "line-through" : "none",
+    position: backgroundImage ? "relative" : "static",
   };
+
+  const backgroundOverlayOpacity = backgroundImage && backgroundOpacity ? (100 - parseInt(backgroundOpacity)) / 100 : 0;
 
   const isTextElement = type !== "image" && type !== "video";
 
@@ -193,7 +198,21 @@ const SelectableElement: React.FC<ElementProps> = ({
       className={`${baseClasses} ${selectedClasses} ${!children && type === "section-content" ? "min-h-[80px] border-2 border-dashed border-gray-300" : ""}`}
       style={styleOverrides}
     >
-      <div className={`${(textClasses as any)[type] || ""} ${!children && type === "section-content" ? "text-gray-400 italic p-2" : ""}`}>
+      {backgroundImage && backgroundOverlayOpacity > 0 && (
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(255, 255, 255, " + backgroundOverlayOpacity + ")",
+            borderRadius: borderRadius ? `${borderRadius}px` : isCodeOnly ? "4px" : "0px",
+            pointerEvents: "none",
+          }}
+        />
+      )}
+      <div className={`${(textClasses as any)[type] || ""} ${!children && type === "section-content" ? "text-gray-400 italic p-2" : ""}`} style={{ position: "relative", zIndex: 1 }}>
         {renderContent()}
       </div>
       {onAI && (
@@ -205,6 +224,7 @@ const SelectableElement: React.FC<ElementProps> = ({
           variant="ghost"
           size="sm"
           className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 hover:bg-white h-8 w-8 p-0"
+          style={{ zIndex: 2 }}
         >
           <Sparkles className="w-4 h-4" />
         </Button>
@@ -241,6 +261,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
         backgroundColor={(proposal as any).titleStyles?.backgroundColor}
         backgroundImage={(proposal as any).titleStyles?.backgroundImage}
         backgroundSize={(proposal as any).titleStyles?.backgroundSize}
+        backgroundOpacity={(proposal as any).titleStyles?.backgroundOpacity}
         borderColor={(proposal as any).titleStyles?.borderColor}
         bold={(proposal as any).titleStyles?.bold}
         italic={(proposal as any).titleStyles?.italic}
@@ -285,6 +306,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
               backgroundColor={(section as any).titleStyles?.backgroundColor}
               backgroundImage={(section as any).titleStyles?.backgroundImage}
               backgroundSize={(section as any).titleStyles?.backgroundSize}
+              backgroundOpacity={(section as any).titleStyles?.backgroundOpacity}
               borderColor={(section as any).titleStyles?.borderColor}
               borderWidth={(section as any).titleStyles?.borderWidth}
               borderRadius={(section as any).titleStyles?.borderRadius}
@@ -319,6 +341,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
               backgroundColor={(section as any).contentStyles?.backgroundColor}
               backgroundImage={(section as any).contentStyles?.backgroundImage}
               backgroundSize={(section as any).contentStyles?.backgroundSize}
+              backgroundOpacity={(section as any).contentStyles?.backgroundOpacity}
               borderColor={(section as any).contentStyles?.borderColor}
               borderWidth={(section as any).contentStyles?.borderWidth}
               borderRadius={(section as any).contentStyles?.borderRadius}
