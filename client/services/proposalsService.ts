@@ -498,7 +498,11 @@ export async function updateProposal(p: Proposal, options?: { keepVersion?: bool
     }
 
     const data: ApiProposalResponse = await res.json();
-    const updatedProposal = convertApiProposalToProposal(data);
+    let updatedProposal = convertApiProposalToProposal(data);
+
+    if (!updatedProposal.sections || updatedProposal.sections.length === 0) {
+      updatedProposal = { ...updatedProposal, sections: p.sections };
+    }
 
     const list = await getAll();
     const idx = list.findIndex((x) => x.id === p.id);
