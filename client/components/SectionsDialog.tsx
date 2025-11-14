@@ -158,7 +158,7 @@ export const SectionsDialog: React.FC<SectionsDialogProps> = ({
 
         <Separator className="my-3" />
 
-        <Button onClick={handleAddSection} className="w-full">
+        <Button onClick={handleAddSection} disabled={loading} className="w-full">
           <Plus className="w-4 h-4 mr-2" />
           Add Section
         </Button>
