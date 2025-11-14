@@ -13,6 +13,9 @@ interface ElementStyle {
   fontSize?: string;
   textAlign?: "left" | "center" | "right";
   backgroundColor?: string;
+  backgroundImage?: string;
+  backgroundSize?: string;
+  backgroundOpacity?: string;
   borderColor?: string;
   borderWidth?: string;
   borderRadius?: string;
