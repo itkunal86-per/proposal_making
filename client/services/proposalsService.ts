@@ -304,7 +304,8 @@ export async function listProposals(): Promise<Proposal[]> {
 
 export async function getProposal(id: string): Promise<Proposal | undefined> {
   const list = await getAll();
-  return list.find((p) => p.id === id);
+  const found = list.find((p) => p.id === id);
+  return found;
 }
 
 export async function getProposalDetails(id: string): Promise<Proposal | undefined> {
