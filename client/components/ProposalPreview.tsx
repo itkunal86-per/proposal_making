@@ -261,6 +261,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
         backgroundColor={(proposal as any).titleStyles?.backgroundColor}
         backgroundImage={(proposal as any).titleStyles?.backgroundImage}
         backgroundSize={(proposal as any).titleStyles?.backgroundSize}
+        backgroundOpacity={(proposal as any).titleStyles?.backgroundOpacity}
         borderColor={(proposal as any).titleStyles?.borderColor}
         bold={(proposal as any).titleStyles?.bold}
         italic={(proposal as any).titleStyles?.italic}
