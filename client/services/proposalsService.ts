@@ -223,9 +223,9 @@ function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmai
     createdAt: createdAtMs,
     updatedAt: updatedAtMs,
     sections: [
-      { id: uuid(), title: "Overview", content: "Project overview...", media: [], comments: [] },
-      { id: uuid(), title: "Scope", content: "Scope of work...", media: [], comments: [] },
-      { id: uuid(), title: "Timeline", content: "Timeline...", media: [], comments: [] },
+      { id: uuid(), title: "Overview", content: "", media: [], comments: [] },
+      { id: uuid(), title: "Scope", content: "", media: [], comments: [] },
+      { id: uuid(), title: "Timeline", content: "", media: [], comments: [] },
     ],
     pricing: {
       currency: apiProposal.currency || "USD",
