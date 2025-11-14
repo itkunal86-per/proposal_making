@@ -508,10 +508,8 @@ export async function updateProposal(p: Proposal, options?: { keepVersion?: bool
     let updatedProposal = convertApiProposalToProposal(data);
     console.log("Converted proposal sections:", updatedProposal.sections.map(s => s.title));
 
-    if (!updatedProposal.sections || updatedProposal.sections.length === 0) {
-      console.log("API response had no sections, using local sections");
-      updatedProposal = { ...updatedProposal, sections: p.sections };
-    }
+    console.log("Using local sections from the update request");
+    updatedProposal = { ...updatedProposal, sections: p.sections };
 
     const list = await getAll();
     const idx = list.findIndex((x) => x.id === p.id);
