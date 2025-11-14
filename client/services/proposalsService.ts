@@ -445,9 +445,9 @@ export async function createProposal(partial?: Partial<Proposal>): Promise<Propo
     createdAt: now,
     updatedAt: now,
     sections: partial?.sections ?? [
-      { id: uuid(), title: "Overview", content: "Project overview...", media: [], comments: [] },
-      { id: uuid(), title: "Scope", content: "Scope of work...", media: [], comments: [] },
-      { id: uuid(), title: "Timeline", content: "Timeline...", media: [], comments: [] },
+      { id: uuid(), title: "Overview", content: "", media: [], comments: [] },
+      { id: uuid(), title: "Scope", content: "", media: [], comments: [] },
+      { id: uuid(), title: "Timeline", content: "", media: [], comments: [] },
     ],
     pricing: partial?.pricing ?? {
       currency: "USD",
