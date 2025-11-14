@@ -17,6 +17,7 @@ interface ElementProps {
   backgroundColor?: string;
   backgroundImage?: string;
   backgroundSize?: string;
+  backgroundOpacity?: string;
   borderColor?: string;
   borderWidth?: string;
   borderRadius?: string;
