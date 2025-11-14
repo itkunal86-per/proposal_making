@@ -21,7 +21,7 @@ export const ProposalEditorSidebar: React.FC<ProposalEditorSidebarProps> = ({
   proposalId,
 }) => {
   const panelButtons = [
-    { id: "document", icon: FileText, title: "Document" },
+    // { id: "document", icon: FileText, title: "Document" },
     { id: "build", icon: Layers, title: "Build" },
     { id: "uploads", icon: Upload, title: "Uploads" },
     { id: "signatures", icon: PenTool, title: "Signatures" },
