@@ -197,7 +197,21 @@ const SelectableElement: React.FC<ElementProps> = ({
       className={`${baseClasses} ${selectedClasses} ${!children && type === "section-content" ? "min-h-[80px] border-2 border-dashed border-gray-300" : ""}`}
       style={styleOverrides}
     >
-      <div className={`${(textClasses as any)[type] || ""} ${!children && type === "section-content" ? "text-gray-400 italic p-2" : ""}`}>
+      {backgroundImage && backgroundOverlayOpacity > 0 && (
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(255, 255, 255, " + backgroundOverlayOpacity + ")",
+            borderRadius: borderRadius ? `${borderRadius}px` : isCodeOnly ? "4px" : "0px",
+            pointerEvents: "none",
+          }}
+        />
+      )}
+      <div className={`${(textClasses as any)[type] || ""} ${!children && type === "section-content" ? "text-gray-400 italic p-2" : ""}`} style={{ position: "relative", zIndex: 1 }}>
         {renderContent()}
       </div>
       {onAI && (
@@ -209,6 +223,7 @@ const SelectableElement: React.FC<ElementProps> = ({
           variant="ghost"
           size="sm"
           className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 hover:bg-white h-8 w-8 p-0"
+          style={{ zIndex: 2 }}
         >
           <Sparkles className="w-4 h-4" />
         </Button>
