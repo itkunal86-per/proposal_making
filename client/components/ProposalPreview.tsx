@@ -93,6 +93,8 @@ const SelectableElement: React.FC<ElementProps> = ({
 
   const isCodeOnly = code && !bulletList && !numberList;
 
+  const opacityValue = backgroundOpacity ? parseInt(backgroundOpacity) / 100 : 1;
+
   const styleOverrides: React.CSSProperties = {
     color: color || (isCodeOnly ? "#e8eaed" : "inherit"),
     fontSize: fontSize ? `${fontSize}px` : `${defaultFontSize}px`,
@@ -102,6 +104,8 @@ const SelectableElement: React.FC<ElementProps> = ({
     backgroundSize: backgroundSize || "cover",
     backgroundPosition: "center",
     backgroundRepeat: "no-repeat",
+    backgroundBlendMode: backgroundImage && backgroundOpacity ? "multiply" : "normal",
+    opacity: backgroundImage && backgroundOpacity ? opacityValue : 1,
     border: getBorderStyle(),
     borderRadius: borderRadius ? `${borderRadius}px` : isCodeOnly ? "4px" : "0px",
     paddingTop: paddingTop ? `${paddingTop}px` : isCodeOnly ? "12px" : "0px",
