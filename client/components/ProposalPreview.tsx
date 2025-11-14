@@ -15,6 +15,8 @@ interface ElementProps {
   fontSize?: string;
   textAlign?: "left" | "center" | "right";
   backgroundColor?: string;
+  backgroundImage?: string;
+  backgroundSize?: string;
   borderColor?: string;
   borderWidth?: string;
   borderRadius?: string;
@@ -42,6 +44,8 @@ const SelectableElement: React.FC<ElementProps> = ({
   fontSize,
   textAlign,
   backgroundColor,
+  backgroundImage,
+  backgroundSize,
   borderColor,
   borderWidth,
   borderRadius,
@@ -92,6 +96,10 @@ const SelectableElement: React.FC<ElementProps> = ({
     fontSize: fontSize ? `${fontSize}px` : `${defaultFontSize}px`,
     textAlign: (textAlign as any) || "left",
     backgroundColor: backgroundColor || (isCodeOnly ? "#1f2937" : "transparent"),
+    backgroundImage: backgroundImage ? `url(${backgroundImage})` : undefined,
+    backgroundSize: backgroundSize || "cover",
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
     border: getBorderStyle(),
     borderRadius: borderRadius ? `${borderRadius}px` : isCodeOnly ? "4px" : "0px",
     paddingTop: paddingTop ? `${paddingTop}px` : isCodeOnly ? "12px" : "0px",
@@ -231,6 +239,8 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
         fontSize={(proposal as any).titleStyles?.fontSize}
         textAlign={(proposal as any).titleStyles?.textAlign}
         backgroundColor={(proposal as any).titleStyles?.backgroundColor}
+        backgroundImage={(proposal as any).titleStyles?.backgroundImage}
+        backgroundSize={(proposal as any).titleStyles?.backgroundSize}
         borderColor={(proposal as any).titleStyles?.borderColor}
         bold={(proposal as any).titleStyles?.bold}
         italic={(proposal as any).titleStyles?.italic}
@@ -273,6 +283,8 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
               fontSize={(section as any).titleStyles?.fontSize}
               textAlign={(section as any).titleStyles?.textAlign}
               backgroundColor={(section as any).titleStyles?.backgroundColor}
+              backgroundImage={(section as any).titleStyles?.backgroundImage}
+              backgroundSize={(section as any).titleStyles?.backgroundSize}
               borderColor={(section as any).titleStyles?.borderColor}
               borderWidth={(section as any).titleStyles?.borderWidth}
               borderRadius={(section as any).titleStyles?.borderRadius}
