@@ -8,7 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
-import { Proposal, addSection, removeSection, reorderSection, getProposal } from "@/services/proposalsService";
+import { Proposal, addSection, removeSection, reorderSection } from "@/services/proposalsService";
 import { ChevronUp, ChevronDown, Trash2, Plus } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
