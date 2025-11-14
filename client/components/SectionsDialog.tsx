@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { Proposal, addSection, removeSection, reorderSection, getProposal } from "@/services/proposalsService";
 import { ChevronUp, ChevronDown, Trash2, Plus } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 interface SectionsDialogProps {
   open: boolean;
@@ -28,24 +29,58 @@ export const SectionsDialog: React.FC<SectionsDialogProps> = ({
   onSelectSection,
   onUpdateProposal,
 }) => {
+  const [loading, setLoading] = useState(false);
+
   const handleAddSection = async () => {
-    const title = `Section ${proposal.sections.length + 1}`;
-    await addSection(proposal, title);
-    const np = await getProposal(proposal.id);
-    if (np) onUpdateProposal(np);
+    try {
+      setLoading(true);
+      const title = `Section ${proposal.sections.length + 1}`;
+      await addSection(proposal, title);
+      const np = await getProposal(proposal.id);
+      if (np) {
+        onUpdateProposal(np);
+        toast({ title: "Section added", description: "New section has been created." });
+      }
+    } catch (error) {
+      console.error("Error adding section:", error);
+      toast({ title: "Error", description: "Failed to add section.", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleRemoveSection = async (index: number) => {
-    const id = proposal.sections[index].id;
-    await removeSection(proposal, id);
-    const np = await getProposal(proposal.id);
-    if (np) onUpdateProposal(np);
+    try {
+      setLoading(true);
+      const id = proposal.sections[index].id;
+      await removeSection(proposal, id);
+      const np = await getProposal(proposal.id);
+      if (np) {
+        onUpdateProposal(np);
+        toast({ title: "Section deleted", description: "Section has been removed." });
+      }
+    } catch (error) {
+      console.error("Error removing section:", error);
+      toast({ title: "Error", description: "Failed to delete section.", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleReorderSection = async (from: number, to: number) => {
-    await reorderSection(proposal, from, to);
-    const np = await getProposal(proposal.id);
-    if (np) onUpdateProposal(np);
+    try {
+      setLoading(true);
+      await reorderSection(proposal, from, to);
+      const np = await getProposal(proposal.id);
+      if (np) {
+        onUpdateProposal(np);
+      }
+    } catch (error) {
+      console.error("Error reordering section:", error);
+      toast({ title: "Error", description: "Failed to reorder sections.", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
