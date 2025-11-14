@@ -100,8 +100,14 @@ const SelectableElement: React.FC<ElementProps> = ({
   };
 
   const formatClasses = [];
-  if (bulletList) formatClasses.push("list-disc list-inside");
-  if (numberList) formatClasses.push("list-decimal list-inside");
+  if (bulletList) formatClasses.push("list-disc list-inside pl-4");
+  if (numberList) formatClasses.push("list-decimal list-inside pl-4");
+
+  const codeStyle: React.CSSProperties = {};
+  if (bulletList || numberList) {
+    codeStyle.whiteSpace = "pre-wrap";
+    codeStyle.wordBreak = "break-word";
+  }
 
   const isTextElement = type !== "image" && type !== "video";
 
