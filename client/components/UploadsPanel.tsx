@@ -117,11 +117,22 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
     }
   };
 
-  const handleDeleteMedia = (mediaId: string, destination: "document" | "library") => {
+  const handleDeleteMedia = async (mediaId: string, destination: "document" | "library") => {
+    const result = await deleteProposalMedia(mediaId);
+
+    if (!result.success) {
+      toast({
+        title: "Delete Failed",
+        description: result.error || "Failed to delete media",
+        variant: "destructive",
+      });
+      return;
+    }
+
     onMediaRemoved?.(mediaId, destination);
     toast({
       title: "Media Removed",
-      description: "Media has been removed from your uploads",
+      description: result.message || "Media has been removed from your uploads",
     });
   };
 
