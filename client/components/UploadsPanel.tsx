@@ -242,6 +242,12 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
               />
             </label>
 
+            {!loadingMedia && documentMedia.length === 0 && (
+              <p className="text-sm text-slate-500 text-center py-4">
+                No media uploaded yet
+              </p>
+            )}
+
             {documentMedia.length > 0 && (
               <div className="space-y-3">
                 <div className="grid grid-cols-2 gap-3">
