@@ -1,14 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Loader2, Trash2, Image, Copy } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Plus, Loader2, Trash2, Copy } from "lucide-react";
 import { uploadMediaToProposal, fetchProposalMedia } from "@/services/mediaService";
 import { toast } from "@/hooks/use-toast";
 
@@ -19,19 +12,12 @@ interface UploadedMedia {
   name: string;
 }
 
-interface Section {
-  id: string;
-  title: string;
-}
-
 interface UploadsPanelProps {
   proposalId: string;
   documentMedia?: UploadedMedia[];
   libraryMedia?: UploadedMedia[];
-  sections?: Section[];
   onMediaUploaded?: (media: UploadedMedia, destination: "document" | "library") => void;
   onMediaRemoved?: (mediaId: string, destination: "document" | "library") => void;
-  onSetBackgroundImage?: (imageUrl: string, sectionId: string) => void;
 }
 
 export const UploadsPanel: React.FC<UploadsPanelProps> = ({
