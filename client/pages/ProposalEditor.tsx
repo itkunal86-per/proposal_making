@@ -323,26 +323,8 @@ export default function ProposalEditor() {
                 proposalId={p.id}
                 documentMedia={documentMedia}
                 libraryMedia={libraryMedia}
-                onMediaUploaded={useCallback((media, destination) => {
-                  if (destination === "document") {
-                    setDocumentMedia((prev) => {
-                      const exists = prev.some((m) => m.id === media.id);
-                      return exists ? prev : [...prev, media];
-                    });
-                  } else {
-                    setLibraryMedia((prev) => {
-                      const exists = prev.some((m) => m.id === media.id);
-                      return exists ? prev : [...prev, media];
-                    });
-                  }
-                }, [])}
-                onMediaRemoved={useCallback((mediaId, destination) => {
-                  if (destination === "document") {
-                    setDocumentMedia((prev) => prev.filter((m) => m.id !== mediaId));
-                  } else {
-                    setLibraryMedia((prev) => prev.filter((m) => m.id !== mediaId));
-                  }
-                }, [])}
+                onMediaUploaded={handleMediaUploaded}
+                onMediaRemoved={handleMediaRemoved}
               />
             ) : activePanel === "signatures" ? (
               <SignaturesPanel
