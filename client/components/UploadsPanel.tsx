@@ -159,18 +159,42 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
   };
 
   const handleCopyUrl = (imageUrl: string) => {
-    navigator.clipboard.writeText(imageUrl).then(() => {
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(imageUrl).then(() => {
+        toast({
+          title: "Copied",
+          description: "Image URL copied to clipboard",
+        });
+      }).catch(() => {
+        fallbackCopyToClipboard(imageUrl);
+      });
+    } else {
+      fallbackCopyToClipboard(imageUrl);
+    }
+  };
+
+  const fallbackCopyToClipboard = (text: string) => {
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+    textarea.style.position = "fixed";
+    textarea.style.opacity = "0";
+    document.body.appendChild(textarea);
+    textarea.select();
+    try {
+      document.execCommand("copy");
       toast({
         title: "Copied",
         description: "Image URL copied to clipboard",
       });
-    }).catch(() => {
+    } catch (err) {
       toast({
         title: "Failed to Copy",
         description: "Could not copy URL to clipboard",
         variant: "destructive",
       });
-    });
+    } finally {
+      document.body.removeChild(textarea);
+    }
   };
 
   const isUploadingDocument = uploadingDocuments.size > 0;
