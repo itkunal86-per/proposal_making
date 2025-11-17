@@ -5,6 +5,7 @@ const UPLOAD_LIBRARY_ENDPOINT = "https://propai-api.hirenq.com/api/upload/media/
 const FETCH_MEDIA_ENDPOINT = "https://propai-api.hirenq.com/api/proposal/media";
 const FETCH_LIBRARY_ENDPOINT = "https://propai-api.hirenq.com/api/media/library";
 const DELETE_MEDIA_ENDPOINT = "https://propai-api.hirenq.com/api/proposal/media";
+const DELETE_LIBRARY_ENDPOINT = "https://propai-api.hirenq.com/api/media/library";
 
 export interface MediaItem {
   id: number;
