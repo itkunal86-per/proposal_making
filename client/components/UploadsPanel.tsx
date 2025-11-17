@@ -89,7 +89,9 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
     setUploading((prev) => new Set([...prev, fileId]));
 
     try {
-      const result = await uploadMediaToProposal(file, proposalId);
+      const result = destination === "document"
+        ? await uploadMediaToProposal(file, proposalId)
+        : await uploadMediaToLibrary(file);
 
       if (!result.success || !result.data) {
         toast({
