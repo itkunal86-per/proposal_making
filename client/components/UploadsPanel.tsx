@@ -161,10 +161,12 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
         {activeTab === "document" ? (
           <>
             <label className="border-2 border-dashed border-slate-300 rounded-lg p-6 flex flex-col items-center justify-center min-h-[200px] cursor-pointer hover:border-slate-400 transition-colors bg-slate-50">
-              {isUploadingDocument ? (
+              {isUploadingDocument || loadingMedia ? (
                 <>
                   <Loader2 className="w-8 h-8 text-slate-400 mb-2 animate-spin" />
-                  <p className="text-sm text-slate-500 text-center">Uploading...</p>
+                  <p className="text-sm text-slate-500 text-center">
+                    {isUploadingDocument ? "Uploading..." : "Loading media..."}
+                  </p>
                 </>
               ) : (
                 <>
@@ -183,7 +185,7 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
                     handleFileSelect(file, "document");
                   }
                 }}
-                disabled={isUploadingDocument}
+                disabled={isUploadingDocument || loadingMedia}
                 className="hidden"
               />
             </label>
