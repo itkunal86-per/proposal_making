@@ -230,3 +230,54 @@ export async function uploadMediaToProposal(
     };
   }
 }
+
+export async function uploadMediaToLibrary(
+  file: File
+): Promise<{
+  success: boolean;
+  data?: UploadMediaResponse;
+  error?: string;
+}> {
+  const token = getStoredToken();
+  if (!token) {
+    return {
+      success: false,
+      error: "No authentication token available",
+    };
+  }
+
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await fetch(UPLOAD_LIBRARY_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData: UploadMediaError = await response.json().catch(() => ({
+        error: "Upload failed. Contact to administrator.",
+        details: "Unknown error",
+      }));
+      return {
+        success: false,
+        error: errorData.error || "Upload failed",
+      };
+    }
+
+    const data: UploadMediaResponse = await response.json();
+    return {
+      success: true,
+      data,
+    };
+  } catch (err) {
+    return {
+      success: false,
+      error: "Network error. Please try again.",
+    };
+  }
+}
