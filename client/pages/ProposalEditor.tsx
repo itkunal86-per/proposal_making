@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -57,6 +57,8 @@ export default function ProposalEditor() {
   const [documentSettings, setDocumentSettings] = useState<DocumentSettings>({});
   const [signatureRecipient, setSignatureRecipient] = useState("");
   const [textFormatting, setTextFormatting] = useState<Record<string, any>>({});
+  const [documentMedia, setDocumentMedia] = useState<Array<{ id: string; url: string; type: "image" | "video"; name: string }>>([]);
+  const [libraryMedia, setLibraryMedia] = useState<Array<{ id: string; url: string; type: "image" | "video"; name: string }>>([]);
   const previewContainerRef = useRef<HTMLDivElement>(null);
   const saveTimer = useRef<number | null>(null);
 
@@ -108,6 +110,28 @@ export default function ProposalEditor() {
       }, 100);
     }
   };
+
+  const handleMediaUploaded = useCallback((media: { id: string; url: string; type: "image" | "video"; name: string }, destination: "document" | "library") => {
+    if (destination === "document") {
+      setDocumentMedia((prev) => {
+        const exists = prev.some((m) => m.id === media.id);
+        return exists ? prev : [...prev, media];
+      });
+    } else {
+      setLibraryMedia((prev) => {
+        const exists = prev.some((m) => m.id === media.id);
+        return exists ? prev : [...prev, media];
+      });
+    }
+  }, []);
+
+  const handleMediaRemoved = useCallback((mediaId: string, destination: "document" | "library") => {
+    if (destination === "document") {
+      setDocumentMedia((prev) => prev.filter((m) => m.id !== mediaId));
+    } else {
+      setLibraryMedia((prev) => prev.filter((m) => m.id !== mediaId));
+    }
+  }, []);
 
   if (!p) return null;
 
@@ -296,11 +320,11 @@ export default function ProposalEditor() {
               />
             ) : activePanel === "uploads" ? (
               <UploadsPanel
-                documentMedia={[]}
-                libraryMedia={[]}
-                onUpload={(file, destination) => {
-                  console.log("Upload:", file, destination);
-                }}
+                proposalId={p.id}
+                documentMedia={documentMedia}
+                libraryMedia={libraryMedia}
+                onMediaUploaded={handleMediaUploaded}
+                onMediaRemoved={handleMediaRemoved}
               />
             ) : activePanel === "signatures" ? (
               <SignaturesPanel
