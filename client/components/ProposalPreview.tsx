@@ -111,7 +111,7 @@ const SelectableElement: React.FC<ElementProps> = ({
     fontWeight: bold ? "bold" : "normal",
     fontStyle: italic ? "italic" : "normal",
     textDecoration: underline ? "underline" : strikethrough ? "line-through" : "none",
-    position: backgroundImage ? "relative" : "static",
+    position: (backgroundImage || onAI) ? "relative" : "static",
   };
 
   const backgroundOverlayOpacity = backgroundImage && backgroundOpacity ? (100 - parseInt(backgroundOpacity)) / 100 : 0;
@@ -122,7 +122,7 @@ const SelectableElement: React.FC<ElementProps> = ({
     return (
       <div
         onClick={onSelect}
-        className={`${baseClasses} ${selectedClasses} overflow-hidden`}
+        className={`${baseClasses} ${selectedClasses} overflow-hidden group`}
         style={{
           borderRadius: borderRadius ? `${borderRadius}px` : "4px",
           border: getBorderStyle(),
@@ -137,7 +137,7 @@ const SelectableElement: React.FC<ElementProps> = ({
             }}
             variant="ghost"
             size="sm"
-            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 hover:bg-white"
+            className="absolute top-2 right-2 bg-white/80 hover:bg-white opacity-0 group-hover:opacity-100 transition-opacity"
           >
             <Sparkles className="w-4 h-4" />
           </Button>
@@ -195,7 +195,7 @@ const SelectableElement: React.FC<ElementProps> = ({
   return (
     <div
       onClick={onSelect}
-      className={`${baseClasses} ${selectedClasses} ${!children && type === "section-content" ? "min-h-[80px] border-2 border-dashed border-gray-300" : ""}`}
+      className={`${baseClasses} ${selectedClasses} ${!children && type === "section-content" ? "min-h-[80px] border-2 border-dashed border-gray-300" : ""} group`}
       style={styleOverrides}
     >
       {backgroundImage && backgroundOverlayOpacity > 0 && (
@@ -223,7 +223,7 @@ const SelectableElement: React.FC<ElementProps> = ({
           }}
           variant="ghost"
           size="sm"
-          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 hover:bg-white h-8 w-8 p-0"
+          className="absolute top-2 right-2 bg-white/80 hover:bg-white opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0"
           style={{ zIndex: 2 }}
         >
           <Sparkles className="w-4 h-4" />
