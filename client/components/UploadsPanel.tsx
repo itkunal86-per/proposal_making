@@ -90,7 +90,11 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
 
         if (result.success && result.data) {
           console.log("Library media loaded successfully:", result.data);
-          const libraryMediaList = result.data.media
+
+          const mediaArray = Array.isArray(result.data.media) ? result.data.media : [];
+          console.log("Media array:", mediaArray);
+
+          const libraryMediaList = mediaArray
             .filter((media: any) => {
               // Filter out items without required fields
               const isValid = media?.id && (media?.url || media?.path);
