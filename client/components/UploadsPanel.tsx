@@ -90,18 +90,30 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
 
         if (result.success && result.data) {
           console.log("Library media loaded successfully:", result.data);
-          const libraryMediaList = result.data.media.map((media) => {
-            // Extract filename from path or url
-            let name = media.path
-              ? media.path.split("/").pop() || media.path
-              : media.url.split("/").pop() || media.url;
-            return {
-              id: String(media.id),
-              url: media.url,
-              type: media.type as "image" | "video",
-              name: name || "Media",
-            };
-          });
+          const libraryMediaList = result.data.media
+            .filter((media: any) => {
+              // Filter out items without required fields
+              const isValid = media?.id && (media?.url || media?.path);
+              if (!isValid) {
+                console.warn("Skipping invalid media item:", media);
+              }
+              return isValid;
+            })
+            .map((media: any) => {
+              // Extract filename from path or url
+              let name = "Media";
+              if (media.path && typeof media.path === "string") {
+                name = media.path.split("/").pop() || media.path;
+              } else if (media.url && typeof media.url === "string") {
+                name = media.url.split("/").pop() || media.url;
+              }
+              return {
+                id: String(media.id),
+                url: media.url || "",
+                type: (media.type as "image" | "video") || "image",
+                name: name || "Media",
+              };
+            });
 
           if (libraryMediaList.length > 0 && onMediaUploaded) {
             console.log("Adding media to library:", libraryMediaList);
