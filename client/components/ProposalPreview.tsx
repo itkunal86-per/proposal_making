@@ -120,30 +120,42 @@ const SelectableElement: React.FC<ElementProps> = ({
 
   if (type === "image" || type === "video") {
     return (
-      <div
-        onClick={onSelect}
-        className={`${baseClasses} ${selectedClasses} overflow-hidden`}
-        style={{
-          borderRadius: borderRadius ? `${borderRadius}px` : "4px",
-          border: getBorderStyle(),
-        }}
-      >
-        {children}
-        {onAI && (
-          <Button
-            onClick={(e) => {
-              e.stopPropagation();
-              onAI();
-            }}
-            variant="ghost"
-            size="sm"
-            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 hover:bg-white"
-          >
-            <Sparkles className="w-4 h-4" />
-          </Button>
-        )}
-      </div>
-    );
+    <div
+      onClick={onSelect}
+      className={`${baseClasses} ${selectedClasses} overflow-hidden`}
+      style={{
+        borderRadius: borderRadius ? `${borderRadius}px` : "4px",
+        border: getBorderStyle(),
+      }}
+    >
+      {children}
+      {onAI && (
+        <Button
+          onClick={(e) => {
+            e.stopPropagation();
+            onAI();
+          }}
+          variant="ghost"
+          size="sm"
+          className="absolute top-2 right-2 bg-white/80 hover:bg-white transition-all"
+          style={{
+            opacity: 0,
+            pointerEvents: 'none',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.opacity = '1';
+            e.currentTarget.style.pointerEvents = 'auto';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.opacity = '0';
+            e.currentTarget.style.pointerEvents = 'none';
+          }}
+        >
+          <Sparkles className="w-4 h-4" />
+        </Button>
+      )}
+    </div>
+  );
   }
 
   const textClasses = {
