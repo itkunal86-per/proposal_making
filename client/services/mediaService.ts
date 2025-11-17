@@ -204,7 +204,7 @@ export async function fetchLibraryMedia(): Promise<{
         }
       }
 
-      console.error("Failed to fetch library media:", response.status, errorData);
+      console.error("Failed to fetch library media:", response.status, JSON.stringify(errorData));
       return {
         success: false,
         error: errorData.error || errorData.message || `Failed to fetch library media (${response.status})`,
