@@ -36,6 +36,7 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
   useEffect(() => {
     const loadProposalMedia = async () => {
       setLoadingMedia(true);
+      setMediaLoadError(null);
       try {
         const result = await fetchProposalMedia(proposalId);
         if (result.success && result.data) {
@@ -55,16 +56,18 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
           }
         } else if (!result.success) {
           console.error("Failed to load proposal media:", result.error);
+          setMediaLoadError(result.error || "Failed to load media");
         }
       } catch (err) {
         console.error("Failed to load proposal media:", err);
+        setMediaLoadError("Error loading media");
       } finally {
         setLoadingMedia(false);
       }
     };
 
     loadProposalMedia();
-  }, [proposalId]);
+  }, [proposalId, onMediaUploaded]);
 
   const handleFileSelect = async (file: File, destination: "document" | "library") => {
     const fileId = `${Date.now()}-${file.name}`;
