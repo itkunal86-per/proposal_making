@@ -72,7 +72,6 @@ export async function fetchProposalMedia(
     const response = await fetch(url, {
       method: "GET",
       headers: {
-        "Content-Type": "application/json",
         "Authorization": `Bearer ${token}`,
       },
     });
