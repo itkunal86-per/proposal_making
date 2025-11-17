@@ -2,6 +2,7 @@ import { getStoredToken } from "@/lib/auth";
 
 const UPLOAD_ENDPOINT = "https://propai-api.hirenq.com/api/upload/media";
 const FETCH_MEDIA_ENDPOINT = "https://propai-api.hirenq.com/api/proposal/media";
+const DELETE_MEDIA_ENDPOINT = "https://propai-api.hirenq.com/api/proposal/media";
 
 export interface MediaItem {
   id: number;
