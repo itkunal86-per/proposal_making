@@ -66,7 +66,10 @@ export async function fetchProposalMedia(
   }
 
   try {
-    const response = await fetch(`${FETCH_MEDIA_ENDPOINT}/${proposalId}`, {
+    const url = `${FETCH_MEDIA_ENDPOINT}/${proposalId}`;
+    console.log("Fetching media from:", url);
+
+    const response = await fetch(url, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
