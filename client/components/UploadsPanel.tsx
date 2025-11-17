@@ -90,12 +90,18 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
 
         if (result.success && result.data) {
           console.log("Library media loaded successfully:", result.data);
-          const libraryMediaList = result.data.media.map((media) => ({
-            id: String(media.id),
-            url: media.url,
-            type: media.type as "image" | "video",
-            name: media.path.split("/").pop() || media.path,
-          }));
+          const libraryMediaList = result.data.media.map((media) => {
+            // Extract filename from path or url
+            let name = media.path
+              ? media.path.split("/").pop() || media.path
+              : media.url.split("/").pop() || media.url;
+            return {
+              id: String(media.id),
+              url: media.url,
+              type: media.type as "image" | "video",
+              name: name || "Media",
+            };
+          });
 
           if (libraryMediaList.length > 0 && onMediaUploaded) {
             console.log("Adding media to library:", libraryMediaList);
