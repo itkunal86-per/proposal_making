@@ -259,7 +259,7 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
               />
             </label>
 
-            {!loadingMedia && mediaLoadError && (
+            {!loadingMedia && mediaLoadError && !mediaLoadError.includes("500") && (
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded text-sm">
                 <p className="font-semibold">Error loading media</p>
                 <p>{mediaLoadError}</p>
