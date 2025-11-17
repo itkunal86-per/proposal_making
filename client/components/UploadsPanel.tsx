@@ -158,6 +158,21 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
     });
   };
 
+  const handleCopyUrl = (imageUrl: string) => {
+    navigator.clipboard.writeText(imageUrl).then(() => {
+      toast({
+        title: "Copied",
+        description: "Image URL copied to clipboard",
+      });
+    }).catch(() => {
+      toast({
+        title: "Failed to Copy",
+        description: "Could not copy URL to clipboard",
+        variant: "destructive",
+      });
+    });
+  };
+
   const isUploadingDocument = uploadingDocuments.size > 0;
   const isUploadingLibrary = uploadingLibrary.size > 0;
 
