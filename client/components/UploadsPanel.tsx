@@ -317,36 +317,49 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
             </label>
 
             {libraryMedia.length > 0 && (
-              <div className="grid grid-cols-2 gap-3">
-                {libraryMedia.map((media) => (
-                  <div
-                    key={media.id}
-                    className="border rounded-lg overflow-hidden bg-slate-100 group relative"
-                  >
-                    {media.type === "image" ? (
-                      <img
-                        src={media.url}
-                        alt={media.name}
-                        className="w-full h-24 object-cover"
-                      />
-                    ) : (
-                      <video
-                        src={media.url}
-                        className="w-full h-24 object-cover bg-black"
-                      />
-                    )}
-                    <button
-                      onClick={() => handleDeleteMedia(media.id, "library")}
-                      className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                      title="Delete media"
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  {libraryMedia.map((media) => (
+                    <div
+                      key={media.id}
+                      className="border rounded-lg overflow-hidden bg-slate-100 group relative"
                     >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                    <p className="text-xs text-slate-600 px-2 py-1 truncate">
-                      {media.name}
-                    </p>
-                  </div>
-                ))}
+                      {media.type === "image" ? (
+                        <img
+                          src={media.url}
+                          alt={media.name}
+                          className="w-full h-24 object-cover"
+                        />
+                      ) : (
+                        <video
+                          src={media.url}
+                          className="w-full h-24 object-cover bg-black"
+                        />
+                      )}
+                      <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        {media.type === "image" && (
+                          <button
+                            onClick={() => handleSetAsBackground(media.url)}
+                            className="bg-blue-500 hover:bg-blue-600 text-white rounded p-1"
+                            title="Set as background"
+                          >
+                            <Image className="w-4 h-4" />
+                          </button>
+                        )}
+                        <button
+                          onClick={() => handleDeleteMedia(media.id, "library")}
+                          className="bg-red-500 hover:bg-red-600 text-white rounded p-1"
+                          title="Delete media"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <p className="text-xs text-slate-600 px-2 py-1 truncate">
+                        {media.name}
+                      </p>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </>
