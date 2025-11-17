@@ -31,6 +31,7 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
   const [uploadingDocuments, setUploadingDocuments] = useState<Set<string>>(new Set());
   const [uploadingLibrary, setUploadingLibrary] = useState<Set<string>>(new Set());
   const [loadingMedia, setLoadingMedia] = useState(true);
+  const [mediaLoadError, setMediaLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadProposalMedia = async () => {
