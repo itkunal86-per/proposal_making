@@ -57,6 +57,8 @@ export default function ProposalEditor() {
   const [documentSettings, setDocumentSettings] = useState<DocumentSettings>({});
   const [signatureRecipient, setSignatureRecipient] = useState("");
   const [textFormatting, setTextFormatting] = useState<Record<string, any>>({});
+  const [documentMedia, setDocumentMedia] = useState<Array<{ id: string; url: string; type: "image" | "video"; name: string }>>([]);
+  const [libraryMedia, setLibraryMedia] = useState<Array<{ id: string; url: string; type: "image" | "video"; name: string }>>([]);
   const previewContainerRef = useRef<HTMLDivElement>(null);
   const saveTimer = useRef<number | null>(null);
 
