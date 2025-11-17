@@ -134,6 +134,99 @@ export async function fetchProposalMedia(
   }
 }
 
+export interface LibraryMediaItem {
+  id: number;
+  type: "image" | "video";
+  url: string;
+  path: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FetchLibraryMediaResponse {
+  media: LibraryMediaItem[];
+}
+
+export async function fetchLibraryMedia(): Promise<{
+  success: boolean;
+  data?: FetchLibraryMediaResponse;
+  error?: string;
+}> {
+  const token = getStoredToken();
+  if (!token) {
+    return {
+      success: false,
+      error: "No authentication token available",
+    };
+  }
+
+  try {
+    const url = FETCH_LIBRARY_ENDPOINT;
+    console.log("Fetching library media from:", url);
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const contentType = response.headers.get("content-type");
+      let errorData: any = {};
+
+      if (contentType?.includes("application/json")) {
+        try {
+          errorData = await response.json();
+        } catch (e) {
+          const text = await response.text();
+          console.error("Failed to fetch library media - text response:", text);
+          errorData = { error: text || "Server error" };
+        }
+      } else {
+        const text = await response.text();
+        console.error("Failed to fetch library media - non-JSON response:", text);
+        errorData = { error: text || "Server error" };
+      }
+
+      console.error("Failed to fetch library media:", response.status, errorData);
+      return {
+        success: false,
+        error: errorData.error || errorData.message || `Failed to fetch library media (${response.status})`,
+      };
+    }
+
+    const contentType = response.headers.get("content-type");
+    if (!contentType?.includes("application/json")) {
+      const text = await response.text();
+      console.error("Unexpected response format:", text);
+      return {
+        success: false,
+        error: "Unexpected response format from server",
+      };
+    }
+
+    const data: FetchLibraryMediaResponse = await response.json();
+
+    // Ensure media array exists
+    if (!data.media) {
+      data.media = [];
+    }
+
+    console.log("Fetched library media:", data);
+    return {
+      success: true,
+      data,
+    };
+  } catch (err) {
+    console.error("Network error fetching library media:", err);
+    return {
+      success: false,
+      error: "Network error. Please try again.",
+    };
+  }
+}
+
 export async function deleteProposalMedia(
   mediaId: number | string
 ): Promise<{
