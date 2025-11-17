@@ -95,6 +95,51 @@ export async function fetchProposalMedia(
   }
 }
 
+export async function deleteProposalMedia(
+  mediaId: number | string
+): Promise<{
+  success: boolean;
+  message?: string;
+  error?: string;
+}> {
+  const token = getStoredToken();
+  if (!token) {
+    return {
+      success: false,
+      error: "No authentication token available",
+    };
+  }
+
+  try {
+    const response = await fetch(`${DELETE_MEDIA_ENDPOINT}/${mediaId}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      return {
+        success: false,
+        error: errorData.message || "Failed to delete media",
+      };
+    }
+
+    const data = await response.json();
+    return {
+      success: true,
+      message: data.message || "Media deleted successfully",
+    };
+  } catch (err) {
+    return {
+      success: false,
+      error: "Network error. Please try again.",
+    };
+  }
+}
+
 export async function uploadMediaToProposal(
   file: File,
   proposalId: string
