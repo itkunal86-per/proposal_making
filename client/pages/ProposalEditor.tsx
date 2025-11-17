@@ -111,6 +111,28 @@ export default function ProposalEditor() {
     }
   };
 
+  const handleMediaUploaded = useCallback((media: { id: string; url: string; type: "image" | "video"; name: string }, destination: "document" | "library") => {
+    if (destination === "document") {
+      setDocumentMedia((prev) => {
+        const exists = prev.some((m) => m.id === media.id);
+        return exists ? prev : [...prev, media];
+      });
+    } else {
+      setLibraryMedia((prev) => {
+        const exists = prev.some((m) => m.id === media.id);
+        return exists ? prev : [...prev, media];
+      });
+    }
+  }, []);
+
+  const handleMediaRemoved = useCallback((mediaId: string, destination: "document" | "library") => {
+    if (destination === "document") {
+      setDocumentMedia((prev) => prev.filter((m) => m.id !== mediaId));
+    } else {
+      setLibraryMedia((prev) => prev.filter((m) => m.id !== mediaId));
+    }
+  }, []);
+
   if (!p) return null;
 
   const section = p.sections[current];
