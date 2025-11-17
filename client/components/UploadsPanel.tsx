@@ -188,6 +188,24 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
         </button>
       </div>
 
+      {sections.length > 0 && (
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Apply to Section:</label>
+          <Select value={selectedSectionId} onValueChange={setSelectedSectionId}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select a section for background" />
+            </SelectTrigger>
+            <SelectContent>
+              {sections.map((section) => (
+                <SelectItem key={section.id} value={section.id}>
+                  {section.title}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
       <div className="space-y-3">
         {activeTab === "document" ? (
           <>
