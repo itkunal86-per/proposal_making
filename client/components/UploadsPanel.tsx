@@ -113,10 +113,13 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
           }
         } else if (!result.success) {
           console.warn("Failed to load library media:", result.error);
-          // Silently fail for 500 errors, just log them
+          // If it's a 500 error, the API might not be ready yet
+          if (result.error?.includes("500")) {
+            console.info("Library API returned 500 - may not be available yet");
+          }
         }
       } catch (err) {
-        console.error("Failed to load library media:", err);
+        console.error("Failed to load library media - exception:", err);
       }
     };
 
