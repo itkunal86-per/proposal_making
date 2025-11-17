@@ -195,9 +195,7 @@ const SelectableElement: React.FC<ElementProps> = ({
   return (
     <div
       onClick={onSelect}
-      onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => setIsHovering(false)}
-      className={`${baseClasses} ${selectedClasses} ${!children && type === "section-content" ? "min-h-[80px] border-2 border-dashed border-gray-300" : ""}`}
+      className={`${baseClasses} ${selectedClasses} ${!children && type === "section-content" ? "min-h-[80px] border-2 border-dashed border-gray-300" : ""} group`}
       style={styleOverrides}
     >
       {backgroundImage && backgroundOverlayOpacity > 0 && (
@@ -225,12 +223,8 @@ const SelectableElement: React.FC<ElementProps> = ({
           }}
           variant="ghost"
           size="sm"
-          className="absolute top-2 right-2 bg-white/80 hover:bg-white transition-opacity h-8 w-8 p-0"
-          style={{
-            zIndex: 2,
-            opacity: isHovering ? 1 : 0,
-            pointerEvents: isHovering ? 'auto' : 'none',
-          }}
+          className="absolute top-2 right-2 bg-white/80 hover:bg-white opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0"
+          style={{ zIndex: 2 }}
         >
           <Sparkles className="w-4 h-4" />
         </Button>
