@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, Loader2, Trash2 } from "lucide-react";
-import { uploadMediaToProposal } from "@/services/mediaService";
+import { uploadMediaToProposal, fetchProposalMedia } from "@/services/mediaService";
 import { toast } from "@/hooks/use-toast";
 
 interface UploadedMedia {
