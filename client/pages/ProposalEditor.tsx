@@ -133,6 +133,27 @@ export default function ProposalEditor() {
     }
   }, []);
 
+  const handleSetBackgroundImage = useCallback((imageUrl: string, sectionId: string) => {
+    setP((prev) => {
+      if (!prev) return prev;
+      const updatedSections = prev.sections.map((section) => {
+        if (section.id === sectionId) {
+          return {
+            ...section,
+            contentStyles: {
+              ...(section.contentStyles || {}),
+              backgroundImage: imageUrl,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            },
+          };
+        }
+        return section;
+      });
+      return { ...prev, sections: updatedSections };
+    });
+  }, []);
+
   if (!p) return null;
 
   const section = p.sections[current];
