@@ -344,8 +344,10 @@ export default function ProposalEditor() {
                 proposalId={p.id}
                 documentMedia={documentMedia}
                 libraryMedia={libraryMedia}
+                sections={p.sections}
                 onMediaUploaded={handleMediaUploaded}
                 onMediaRemoved={handleMediaRemoved}
+                onSetBackgroundImage={handleSetBackgroundImage}
               />
             ) : activePanel === "signatures" ? (
               <SignaturesPanel
