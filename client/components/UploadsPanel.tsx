@@ -47,9 +47,13 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
             }))
           );
 
-          flattenedMedia.forEach((media) => {
-            onMediaUploaded?.(media, "document");
-          });
+          if (flattenedMedia.length > 0 && onMediaUploaded) {
+            flattenedMedia.forEach((media) => {
+              onMediaUploaded(media, "document");
+            });
+          }
+        } else if (!result.success) {
+          console.error("Failed to load proposal media:", result.error);
         }
       } catch (err) {
         console.error("Failed to load proposal media:", err);
@@ -59,7 +63,7 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
     };
 
     loadProposalMedia();
-  }, [proposalId, onMediaUploaded]);
+  }, [proposalId]);
 
   const handleFileSelect = async (file: File, destination: "document" | "library") => {
     const fileId = `${Date.now()}-${file.name}`;
