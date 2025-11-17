@@ -183,7 +183,9 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
   };
 
   const handleDeleteMedia = async (mediaId: string, destination: "document" | "library") => {
-    const result = await deleteProposalMedia(mediaId);
+    const result = destination === "document"
+      ? await deleteProposalMedia(mediaId)
+      : await deleteLibraryMedia(mediaId);
 
     if (!result.success) {
       toast({
