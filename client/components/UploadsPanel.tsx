@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Loader2, Trash2, Image } from "lucide-react";
+import { Plus, Loader2, Trash2, Image, Copy } from "lucide-react";
 import {
   Select,
   SelectContent,
