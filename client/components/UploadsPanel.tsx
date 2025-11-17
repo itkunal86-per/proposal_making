@@ -67,6 +67,7 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
     };
 
     loadProposalMedia();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [proposalId]);
 
   const handleFileSelect = async (file: File, destination: "document" | "library") => {
