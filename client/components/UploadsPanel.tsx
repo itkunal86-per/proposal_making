@@ -249,22 +249,13 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
                       )}
                       <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         {media.type === "image" && (
-                          <>
-                            <button
-                              onClick={() => handleSetAsBackground(media.url)}
-                              className="bg-blue-500 hover:bg-blue-600 text-white rounded p-1"
-                              title="Set as background"
-                            >
-                              <Image className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => handleCopyUrl(media.url)}
-                              className="bg-slate-600 hover:bg-slate-700 text-white rounded p-1"
-                              title="Copy URL"
-                            >
-                              <Copy className="w-4 h-4" />
-                            </button>
-                          </>
+                          <button
+                            onClick={() => handleCopyUrl(media.url)}
+                            className="bg-slate-600 hover:bg-slate-700 text-white rounded p-1"
+                            title="Copy URL"
+                          >
+                            <Copy className="w-4 h-4" />
+                          </button>
                         )}
                         <button
                           onClick={() => handleDeleteMedia(media.id, "document")}
