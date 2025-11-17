@@ -239,7 +239,11 @@ export async function fetchLibraryMedia(): Promise<{
       data.media = [];
     }
 
-    console.log("Fetched library media:", data);
+    console.log("Fetched library media - full response:", data);
+    console.log("Media count:", data.media?.length || 0);
+    if (data.media && data.media.length > 0) {
+      console.log("First media item structure:", data.media[0]);
+    }
     return {
       success: true,
       data,
