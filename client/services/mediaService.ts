@@ -49,6 +49,51 @@ export interface UploadMediaError {
   details: string;
 }
 
+export async function fetchProposalMedia(
+  proposalId: string
+): Promise<{
+  success: boolean;
+  data?: FetchProposalMediaResponse;
+  error?: string;
+}> {
+  const token = getStoredToken();
+  if (!token) {
+    return {
+      success: false,
+      error: "No authentication token available",
+    };
+  }
+
+  try {
+    const response = await fetch(`${FETCH_MEDIA_ENDPOINT}/${proposalId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      return {
+        success: false,
+        error: errorData.error || "Failed to fetch media",
+      };
+    }
+
+    const data: FetchProposalMediaResponse = await response.json();
+    return {
+      success: true,
+      data,
+    };
+  } catch (err) {
+    return {
+      success: false,
+      error: "Network error. Please try again.",
+    };
+  }
+}
+
 export async function uploadMediaToProposal(
   file: File,
   proposalId: string
