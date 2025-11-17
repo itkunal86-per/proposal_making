@@ -122,9 +122,7 @@ const SelectableElement: React.FC<ElementProps> = ({
     return (
       <div
         onClick={onSelect}
-        onMouseEnter={() => setIsHovering(true)}
-        onMouseLeave={() => setIsHovering(false)}
-        className={`${baseClasses} ${selectedClasses} overflow-hidden`}
+        className={`${baseClasses} ${selectedClasses} overflow-hidden group`}
         style={{
           borderRadius: borderRadius ? `${borderRadius}px` : "4px",
           border: getBorderStyle(),
@@ -139,11 +137,7 @@ const SelectableElement: React.FC<ElementProps> = ({
             }}
             variant="ghost"
             size="sm"
-            className="absolute top-2 right-2 bg-white/80 hover:bg-white transition-opacity"
-            style={{
-              opacity: isHovering ? 1 : 0,
-              pointerEvents: isHovering ? 'auto' : 'none',
-            }}
+            className="absolute top-2 right-2 bg-white/80 hover:bg-white opacity-0 group-hover:opacity-100 transition-opacity"
           >
             <Sparkles className="w-4 h-4" />
           </Button>
