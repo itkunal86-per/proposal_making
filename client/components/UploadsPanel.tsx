@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, Loader2, Trash2, Copy } from "lucide-react";
-import { uploadMediaToProposal, uploadMediaToLibrary, fetchProposalMedia, fetchLibraryMedia, deleteProposalMedia } from "@/services/mediaService";
+import { uploadMediaToProposal, uploadMediaToLibrary, fetchProposalMedia, fetchLibraryMedia, deleteProposalMedia, deleteLibraryMedia } from "@/services/mediaService";
 import { toast } from "@/hooks/use-toast";
 
 interface UploadedMedia {
