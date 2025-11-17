@@ -38,8 +38,11 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
       setLoadingMedia(true);
       setMediaLoadError(null);
       try {
+        console.log("Loading media for proposal:", proposalId);
         const result = await fetchProposalMedia(proposalId);
+
         if (result.success && result.data) {
+          console.log("Media loaded successfully:", result.data);
           const flattenedMedia = result.data.media.flatMap((record) =>
             record.media.map((media) => ({
               id: String(media.id),
@@ -50,13 +53,22 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
           );
 
           if (flattenedMedia.length > 0 && onMediaUploaded) {
+            console.log("Adding media to document:", flattenedMedia);
             flattenedMedia.forEach((media) => {
               onMediaUploaded(media, "document");
             });
+          } else {
+            console.log("No media found for proposal");
           }
         } else if (!result.success) {
-          console.error("Failed to load proposal media:", result.error);
-          setMediaLoadError(result.error || "Failed to load media");
+          console.warn("Failed to load proposal media:", result.error);
+          // Only show error if it's not a 500 - servers sometimes have issues
+          if (result.error?.includes("500")) {
+            console.warn("API server error - media may not be available yet");
+            // Don't show error to user for server errors, just log it
+          } else {
+            setMediaLoadError(result.error || "Failed to load media");
+          }
         }
       } catch (err) {
         console.error("Failed to load proposal media:", err);
