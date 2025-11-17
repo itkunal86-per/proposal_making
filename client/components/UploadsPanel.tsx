@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Loader2, Trash2 } from "lucide-react";
+import { uploadMediaToProposal } from "@/services/mediaService";
+import { toast } from "@/hooks/use-toast";
 
 interface UploadedMedia {
   id: string;
@@ -11,17 +13,90 @@ interface UploadedMedia {
 }
 
 interface UploadsPanelProps {
+  proposalId: string;
   documentMedia?: UploadedMedia[];
   libraryMedia?: UploadedMedia[];
-  onUpload?: (file: File, destination: "document" | "library") => void;
+  onMediaUploaded?: (media: UploadedMedia, destination: "document" | "library") => void;
+  onMediaRemoved?: (mediaId: string, destination: "document" | "library") => void;
 }
 
 export const UploadsPanel: React.FC<UploadsPanelProps> = ({
+  proposalId,
   documentMedia = [],
   libraryMedia = [],
-  onUpload,
+  onMediaUploaded,
+  onMediaRemoved,
 }) => {
   const [activeTab, setActiveTab] = useState<"document" | "library">("document");
+  const [uploadingDocuments, setUploadingDocuments] = useState<Set<string>>(new Set());
+  const [uploadingLibrary, setUploadingLibrary] = useState<Set<string>>(new Set());
+
+  const handleFileSelect = async (file: File, destination: "document" | "library") => {
+    const fileId = `${Date.now()}-${file.name}`;
+    const setUploading = destination === "document" ? setUploadingDocuments : setUploadingLibrary;
+
+    setUploading((prev) => new Set([...prev, fileId]));
+
+    try {
+      const result = await uploadMediaToProposal(file, proposalId);
+
+      if (!result.success || !result.data) {
+        toast({
+          title: "Upload Failed",
+          description: result.error || "Failed to upload media",
+          variant: "destructive",
+        });
+        setUploading((prev) => {
+          const next = new Set(prev);
+          next.delete(fileId);
+          return next;
+        });
+        return;
+      }
+
+      const newMedia: UploadedMedia = {
+        id: String(result.data.media_record.id),
+        url: result.data.media_record.url,
+        type: result.data.media_record.type as "image" | "video",
+        name: file.name,
+      };
+
+      onMediaUploaded?.(newMedia, destination);
+
+      toast({
+        title: "Upload Successful",
+        description: `${file.name} uploaded successfully`,
+      });
+
+      setUploading((prev) => {
+        const next = new Set(prev);
+        next.delete(fileId);
+        return next;
+      });
+    } catch (err) {
+      toast({
+        title: "Upload Error",
+        description: "An unexpected error occurred during upload",
+        variant: "destructive",
+      });
+      setUploading((prev) => {
+        const next = new Set(prev);
+        next.delete(fileId);
+        return next;
+      });
+    }
+  };
+
+  const handleDeleteMedia = (mediaId: string, destination: "document" | "library") => {
+    onMediaRemoved?.(mediaId, destination);
+    toast({
+      title: "Media Removed",
+      description: "Media has been removed from your uploads",
+    });
+  };
+
+  const isUploadingDocument = uploadingDocuments.size > 0;
+  const isUploadingLibrary = uploadingLibrary.size > 0;
 
   return (
     <Card className="p-4 space-y-4">
@@ -53,30 +128,40 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
       <div className="space-y-3">
         {activeTab === "document" ? (
           <>
-            <div className="border-2 border-dashed border-slate-300 rounded-lg p-6 flex flex-col items-center justify-center min-h-[200px] cursor-pointer hover:border-slate-400 transition-colors bg-slate-50">
-              <Plus className="w-8 h-8 text-slate-400 mb-2" />
-              <p className="text-sm text-slate-500 text-center">
-                Click to upload or drag and drop
-              </p>
+            <label className="border-2 border-dashed border-slate-300 rounded-lg p-6 flex flex-col items-center justify-center min-h-[200px] cursor-pointer hover:border-slate-400 transition-colors bg-slate-50">
+              {isUploadingDocument ? (
+                <>
+                  <Loader2 className="w-8 h-8 text-slate-400 mb-2 animate-spin" />
+                  <p className="text-sm text-slate-500 text-center">Uploading...</p>
+                </>
+              ) : (
+                <>
+                  <Plus className="w-8 h-8 text-slate-400 mb-2" />
+                  <p className="text-sm text-slate-500 text-center">
+                    Click to upload or drag and drop
+                  </p>
+                </>
+              )}
               <input
                 type="file"
                 accept="image/*,video/*"
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (file) {
-                    onUpload?.(file, "document");
+                    handleFileSelect(file, "document");
                   }
                 }}
+                disabled={isUploadingDocument}
                 className="hidden"
               />
-            </div>
+            </label>
 
             {documentMedia.length > 0 && (
               <div className="grid grid-cols-2 gap-3">
                 {documentMedia.map((media) => (
                   <div
                     key={media.id}
-                    className="border rounded-lg overflow-hidden bg-slate-100"
+                    className="border rounded-lg overflow-hidden bg-slate-100 group relative"
                   >
                     {media.type === "image" ? (
                       <img
@@ -90,6 +175,16 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
                         className="w-full h-24 object-cover bg-black"
                       />
                     )}
+                    <button
+                      onClick={() => handleDeleteMedia(media.id, "document")}
+                      className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      title="Delete media"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                    <p className="text-xs text-slate-600 px-2 py-1 truncate">
+                      {media.name}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -97,30 +192,40 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
           </>
         ) : (
           <>
-            <div className="border-2 border-dashed border-slate-300 rounded-lg p-6 flex flex-col items-center justify-center min-h-[200px] cursor-pointer hover:border-slate-400 transition-colors bg-slate-50">
-              <Plus className="w-8 h-8 text-slate-400 mb-2" />
-              <p className="text-sm text-slate-500 text-center">
-                Click to upload or drag and drop
-              </p>
+            <label className="border-2 border-dashed border-slate-300 rounded-lg p-6 flex flex-col items-center justify-center min-h-[200px] cursor-pointer hover:border-slate-400 transition-colors bg-slate-50">
+              {isUploadingLibrary ? (
+                <>
+                  <Loader2 className="w-8 h-8 text-slate-400 mb-2 animate-spin" />
+                  <p className="text-sm text-slate-500 text-center">Uploading...</p>
+                </>
+              ) : (
+                <>
+                  <Plus className="w-8 h-8 text-slate-400 mb-2" />
+                  <p className="text-sm text-slate-500 text-center">
+                    Click to upload or drag and drop
+                  </p>
+                </>
+              )}
               <input
                 type="file"
                 accept="image/*,video/*"
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (file) {
-                    onUpload?.(file, "library");
+                    handleFileSelect(file, "library");
                   }
                 }}
+                disabled={isUploadingLibrary}
                 className="hidden"
               />
-            </div>
+            </label>
 
             {libraryMedia.length > 0 && (
               <div className="grid grid-cols-2 gap-3">
                 {libraryMedia.map((media) => (
                   <div
                     key={media.id}
-                    className="border rounded-lg overflow-hidden bg-slate-100"
+                    className="border rounded-lg overflow-hidden bg-slate-100 group relative"
                   >
                     {media.type === "image" ? (
                       <img
@@ -134,6 +239,16 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
                         className="w-full h-24 object-cover bg-black"
                       />
                     )}
+                    <button
+                      onClick={() => handleDeleteMedia(media.id, "library")}
+                      className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      title="Delete media"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                    <p className="text-xs text-slate-600 px-2 py-1 truncate">
+                      {media.name}
+                    </p>
                   </div>
                 ))}
               </div>
