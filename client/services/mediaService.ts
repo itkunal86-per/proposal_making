@@ -76,18 +76,21 @@ export async function fetchProposalMedia(
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
+      console.error("Failed to fetch media:", response.status, errorData);
       return {
         success: false,
-        error: errorData.error || "Failed to fetch media",
+        error: errorData.error || `Failed to fetch media (${response.status})`,
       };
     }
 
     const data: FetchProposalMediaResponse = await response.json();
+    console.log("Fetched proposal media:", data);
     return {
       success: true,
       data,
     };
   } catch (err) {
+    console.error("Network error fetching media:", err);
     return {
       success: false,
       error: "Network error. Please try again.",
