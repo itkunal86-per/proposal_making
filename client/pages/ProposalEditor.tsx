@@ -298,10 +298,22 @@ export default function ProposalEditor() {
               />
             ) : activePanel === "uploads" ? (
               <UploadsPanel
-                documentMedia={[]}
-                libraryMedia={[]}
-                onUpload={(file, destination) => {
-                  console.log("Upload:", file, destination);
+                proposalId={p.id}
+                documentMedia={documentMedia}
+                libraryMedia={libraryMedia}
+                onMediaUploaded={(media, destination) => {
+                  if (destination === "document") {
+                    setDocumentMedia((prev) => [...prev, media]);
+                  } else {
+                    setLibraryMedia((prev) => [...prev, media]);
+                  }
+                }}
+                onMediaRemoved={(mediaId, destination) => {
+                  if (destination === "document") {
+                    setDocumentMedia((prev) => prev.filter((m) => m.id !== mediaId));
+                  } else {
+                    setLibraryMedia((prev) => prev.filter((m) => m.id !== mediaId));
+                  }
                 }}
               />
             ) : activePanel === "signatures" ? (
