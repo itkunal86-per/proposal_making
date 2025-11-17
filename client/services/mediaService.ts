@@ -75,11 +75,37 @@ export async function fetchProposalMedia(
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+      const contentType = response.headers.get("content-type");
+      let errorData: any = {};
+
+      if (contentType?.includes("application/json")) {
+        try {
+          errorData = await response.json();
+        } catch (e) {
+          const text = await response.text();
+          console.error("Failed to fetch media - text response:", text);
+          errorData = { error: text || "Server error" };
+        }
+      } else {
+        const text = await response.text();
+        console.error("Failed to fetch media - non-JSON response:", text);
+        errorData = { error: text || "Server error" };
+      }
+
       console.error("Failed to fetch media:", response.status, errorData);
       return {
         success: false,
-        error: errorData.error || `Failed to fetch media (${response.status})`,
+        error: errorData.error || errorData.message || `Failed to fetch media (${response.status})`,
+      };
+    }
+
+    const contentType = response.headers.get("content-type");
+    if (!contentType?.includes("application/json")) {
+      const text = await response.text();
+      console.error("Unexpected response format:", text);
+      return {
+        success: false,
+        error: "Unexpected response format from server",
       };
     }
 
