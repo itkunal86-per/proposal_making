@@ -110,6 +110,12 @@ export async function fetchProposalMedia(
     }
 
     const data: FetchProposalMediaResponse = await response.json();
+
+    // Ensure media array exists
+    if (!data.media) {
+      data.media = [];
+    }
+
     console.log("Fetched proposal media:", data);
     return {
       success: true,
