@@ -79,21 +79,23 @@ export async function fetchProposalMedia(
     });
 
     if (!response.ok) {
-      const contentType = response.headers.get("content-type");
-      let errorData: any = {};
+      // Read the body once and store it
+      let bodyText = "";
+      try {
+        bodyText = await response.text();
+      } catch (e) {
+        bodyText = "Unable to read response body";
+      }
 
-      if (contentType?.includes("application/json")) {
+      // Try to parse as JSON, otherwise use as string
+      let errorData: any = { error: bodyText };
+      if (bodyText) {
         try {
-          errorData = await response.json();
+          errorData = JSON.parse(bodyText);
         } catch (e) {
-          const text = await response.text();
-          console.error("Failed to fetch media - text response:", text);
-          errorData = { error: text || "Server error" };
+          // If not JSON, keep the text
+          errorData = { error: bodyText || "Server error" };
         }
-      } else {
-        const text = await response.text();
-        console.error("Failed to fetch media - non-JSON response:", text);
-        errorData = { error: text || "Server error" };
       }
 
       console.error("Failed to fetch media:", response.status, errorData);
@@ -103,17 +105,28 @@ export async function fetchProposalMedia(
       };
     }
 
-    const contentType = response.headers.get("content-type");
-    if (!contentType?.includes("application/json")) {
-      const text = await response.text();
-      console.error("Unexpected response format:", text);
+    // Success response - read body once
+    let bodyText = "";
+    try {
+      bodyText = await response.text();
+    } catch (e) {
+      console.error("Failed to read response body:", e);
+      return {
+        success: false,
+        error: "Failed to read response from server",
+      };
+    }
+
+    let data: FetchProposalMediaResponse;
+    try {
+      data = JSON.parse(bodyText);
+    } catch (e) {
+      console.error("Failed to parse response as JSON:", bodyText);
       return {
         success: false,
         error: "Unexpected response format from server",
       };
     }
-
-    const data: FetchProposalMediaResponse = await response.json();
 
     // Ensure media array exists
     if (!data.media) {
