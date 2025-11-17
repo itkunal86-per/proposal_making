@@ -82,6 +82,42 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [proposalId]);
 
+  useEffect(() => {
+    const loadLibraryMedia = async () => {
+      try {
+        console.log("Loading library media");
+        const result = await fetchLibraryMedia();
+
+        if (result.success && result.data) {
+          console.log("Library media loaded successfully:", result.data);
+          const libraryMediaList = result.data.media.map((media) => ({
+            id: String(media.id),
+            url: media.url,
+            type: media.type as "image" | "video",
+            name: media.path.split("/").pop() || media.path,
+          }));
+
+          if (libraryMediaList.length > 0 && onMediaUploaded) {
+            console.log("Adding media to library:", libraryMediaList);
+            libraryMediaList.forEach((media) => {
+              onMediaUploaded(media, "library");
+            });
+          } else {
+            console.log("No media found in library");
+          }
+        } else if (!result.success) {
+          console.warn("Failed to load library media:", result.error);
+          // Silently fail for 500 errors, just log them
+        }
+      } catch (err) {
+        console.error("Failed to load library media:", err);
+      }
+    };
+
+    loadLibraryMedia();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleFileSelect = async (file: File, destination: "document" | "library") => {
     const fileId = `${Date.now()}-${file.name}`;
     const setUploading = destination === "document" ? setUploadingDocuments : setUploadingLibrary;
