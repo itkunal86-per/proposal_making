@@ -24,16 +24,13 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
   proposalId,
   documentMedia = [],
   libraryMedia = [],
-  sections = [],
   onMediaUploaded,
   onMediaRemoved,
-  onSetBackgroundImage,
 }) => {
   const [activeTab, setActiveTab] = useState<"document" | "library">("document");
   const [uploadingDocuments, setUploadingDocuments] = useState<Set<string>>(new Set());
   const [uploadingLibrary, setUploadingLibrary] = useState<Set<string>>(new Set());
   const [loadingMedia, setLoadingMedia] = useState(true);
-  const [selectedSectionId, setSelectedSectionId] = useState<string>("");
 
   useEffect(() => {
     const loadProposalMedia = async () => {
