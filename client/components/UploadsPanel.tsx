@@ -246,7 +246,14 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
               />
             </label>
 
-            {!loadingMedia && documentMedia.length === 0 && (
+            {!loadingMedia && mediaLoadError && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded text-sm">
+                <p className="font-semibold">Error loading media</p>
+                <p>{mediaLoadError}</p>
+              </div>
+            )}
+
+            {!loadingMedia && documentMedia.length === 0 && !mediaLoadError && (
               <p className="text-sm text-slate-500 text-center py-4">
                 No media uploaded yet
               </p>
