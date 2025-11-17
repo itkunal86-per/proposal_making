@@ -1,6 +1,30 @@
 import { getStoredToken } from "@/lib/auth";
 
 const UPLOAD_ENDPOINT = "https://propai-api.hirenq.com/api/upload/media";
+const FETCH_MEDIA_ENDPOINT = "https://propai-api.hirenq.com/api/proposal/media";
+
+export interface MediaItem {
+  id: number;
+  type: "image" | "video";
+  url: string;
+  path: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProposalMediaRecord {
+  id: number;
+  media_id: string;
+  proposal_id: string;
+  created_at: string;
+  updated_at: string;
+  media: MediaItem[];
+}
+
+export interface FetchProposalMediaResponse {
+  proposal_id: string;
+  media: ProposalMediaRecord[];
+}
 
 export interface UploadMediaResponse {
   message: string;
