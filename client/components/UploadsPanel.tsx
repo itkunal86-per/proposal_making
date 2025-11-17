@@ -30,6 +30,38 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
   const [activeTab, setActiveTab] = useState<"document" | "library">("document");
   const [uploadingDocuments, setUploadingDocuments] = useState<Set<string>>(new Set());
   const [uploadingLibrary, setUploadingLibrary] = useState<Set<string>>(new Set());
+  const [loadingMedia, setLoadingMedia] = useState(true);
+
+  useEffect(() => {
+    const loadProposalMedia = async () => {
+      setLoadingMedia(true);
+      try {
+        const result = await fetchProposalMedia(proposalId);
+        if (result.success && result.data) {
+          const flattenedMedia = result.data.media.flatMap((record) =>
+            record.media.map((media) => ({
+              id: String(media.id),
+              url: media.url,
+              type: media.type as "image" | "video",
+              name: media.path.split("/").pop() || media.path,
+            }))
+          );
+
+          for (const media of flattenedMedia) {
+            if (documentMedia.length === 0 || !documentMedia.find((m) => m.id === media.id)) {
+              onMediaUploaded?.(media, "document");
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load proposal media:", err);
+      } finally {
+        setLoadingMedia(false);
+      }
+    };
+
+    loadProposalMedia();
+  }, [proposalId]);
 
   const handleFileSelect = async (file: File, destination: "document" | "library") => {
     const fileId = `${Date.now()}-${file.name}`;
