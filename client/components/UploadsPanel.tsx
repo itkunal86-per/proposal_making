@@ -125,22 +125,6 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
     });
   };
 
-  const handleSetAsBackground = (imageUrl: string) => {
-    if (!selectedSectionId) {
-      toast({
-        title: "Select a Section",
-        description: "Please select a section to apply the background image",
-        variant: "destructive",
-      });
-      return;
-    }
-    onSetBackgroundImage?.(imageUrl, selectedSectionId);
-    toast({
-      title: "Background Applied",
-      description: `Background image applied to selected section`,
-    });
-  };
-
   const handleCopyUrl = (imageUrl: string) => {
     if (navigator.clipboard && window.isSecureContext) {
       navigator.clipboard.writeText(imageUrl).then(() => {
