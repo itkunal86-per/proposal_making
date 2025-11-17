@@ -156,8 +156,17 @@ export interface LibraryMediaItem {
   updated_at: string;
 }
 
-export interface FetchLibraryMediaResponse {
+export interface LibraryMediaRecord {
+  id: number;
+  media_id: string;
+  user_id: string;
+  created_at: string;
+  updated_at: string;
   media: LibraryMediaItem[];
+}
+
+export interface FetchLibraryMediaResponse {
+  media: LibraryMediaRecord[];
 }
 
 export async function fetchLibraryMedia(): Promise<{
