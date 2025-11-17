@@ -67,7 +67,7 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
     };
 
     loadProposalMedia();
-  }, [proposalId, onMediaUploaded]);
+  }, [proposalId]);
 
   const handleFileSelect = async (file: File, destination: "document" | "library") => {
     const fileId = `${Date.now()}-${file.name}`;
