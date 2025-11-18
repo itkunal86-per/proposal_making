@@ -27,6 +27,51 @@ export interface FetchVariablesResponse {
 
 const API_BASE = "https://propai-api.hirenq.com/api";
 
+export async function fetchVariables(proposalId: string): Promise<{
+  data: Variable[] | null;
+  error: string | null;
+}> {
+  try {
+    const token = getStoredToken();
+    if (!token) {
+      return {
+        data: null,
+        error: "Authentication token not found. Please log in again.",
+      };
+    }
+
+    const response = await fetch(`${API_BASE}/proposal/variables/${proposalId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const responseData: FetchVariablesResponse | ApiError = await response.json();
+
+    if (!response.ok) {
+      const errorData = responseData as ApiError;
+      return {
+        data: null,
+        error: errorData.error || "Failed to fetch variables",
+      };
+    }
+
+    const successData = responseData as FetchVariablesResponse;
+    return {
+      data: successData.variables,
+      error: null,
+    };
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : "Network error. Please try again.";
+    return {
+      data: null,
+      error: errorMessage,
+    };
+  }
+}
+
 export async function createVariable(proposalId: string, variableName: string): Promise<{
   data: Variable | null;
   error: string | null;
