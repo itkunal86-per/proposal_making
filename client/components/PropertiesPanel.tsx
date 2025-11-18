@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Proposal, ProposalSection } from "@/services/proposalsService";
 import { X, Plus } from "lucide-react";
+import { VariableInserter } from "@/components/VariableInserter";
 
 interface ElementStyle {
   color?: string;
