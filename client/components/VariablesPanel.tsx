@@ -253,7 +253,7 @@ export const VariablesPanel: React.FC<VariablesPanelProps> = ({
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => handleDeleteVariable(variable.id)}
+                  onClick={() => showDeleteConfirm(variable.id, variable.name)}
                   disabled={deletingId === variable.id}
                   className="ml-2 h-6 w-6 p-0 hover:bg-red-50 hover:text-red-600"
                   type="button"
