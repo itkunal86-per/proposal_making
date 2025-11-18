@@ -91,6 +91,11 @@ export const VariablesPanel: React.FC<VariablesPanelProps> = ({
           description: error,
           variant: "destructive",
         });
+        setEditingValues((prev) => {
+          const updated = { ...prev };
+          delete updated[id];
+          return updated;
+        });
         return;
       }
 
@@ -98,6 +103,11 @@ export const VariablesPanel: React.FC<VariablesPanelProps> = ({
         toast({
           title: "Success",
           description: "Variable updated successfully",
+        });
+        setEditingValues((prev) => {
+          const updated = { ...prev };
+          delete updated[id];
+          return updated;
         });
         onUpdateVariable?.(String(id), value);
       }
@@ -107,6 +117,11 @@ export const VariablesPanel: React.FC<VariablesPanelProps> = ({
         title: "Error",
         description: errorMessage,
         variant: "destructive",
+      });
+      setEditingValues((prev) => {
+        const updated = { ...prev };
+        delete updated[id];
+        return updated;
       });
     } finally {
       setUpdatingId(null);
