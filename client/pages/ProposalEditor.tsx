@@ -63,6 +63,7 @@ export default function ProposalEditor() {
   const [libraryMedia, setLibraryMedia] = useState<Array<{ id: string; url: string; type: "image" | "video"; name: string }>>([]);
   const [variables, setVariables] = useState<Array<{ id: string | number; name: string; value: string }>>([]);
   const [isLoadingVariables, setIsLoadingVariables] = useState(false);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
   const previewContainerRef = useRef<HTMLDivElement>(null);
   const saveTimer = useRef<number | null>(null);
 
