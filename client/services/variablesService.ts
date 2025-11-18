@@ -132,3 +132,51 @@ export async function createVariable(proposalId: string, variableName: string): 
     };
   }
 }
+
+export async function updateVariable(variableId: number | string, variableValue: string): Promise<{
+  data: Variable | null;
+  error: string | null;
+}> {
+  try {
+    const token = getStoredToken();
+    if (!token) {
+      return {
+        data: null,
+        error: "Authentication token not found. Please log in again.",
+      };
+    }
+
+    const response = await fetch(`${API_BASE}/variables/${variableId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        variable_value: variableValue,
+      }),
+    });
+
+    const responseData: UpdateVariableResponse | ApiError = await response.json();
+
+    if (!response.ok) {
+      const errorData = responseData as ApiError;
+      return {
+        data: null,
+        error: errorData.error || "Failed to update variable",
+      };
+    }
+
+    const successData = responseData as UpdateVariableResponse;
+    return {
+      data: successData.variable,
+      error: null,
+    };
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : "Network error. Please try again.";
+    return {
+      data: null,
+      error: errorMessage,
+    };
+  }
+}
