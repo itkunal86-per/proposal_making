@@ -749,7 +749,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
       <Card className="p-4 space-y-4 overflow-y-auto max-h-[90vh]">
         <div>
           <Label className="text-xs font-semibold">Section Content</Label>
-          <div className="mt-2">
+          <div className="mt-2 relative">
             <VariableInserter
               value={section.content}
               onChange={(value) => handleUpdateSection({ content: value })}
