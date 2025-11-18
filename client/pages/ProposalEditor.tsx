@@ -378,7 +378,7 @@ export default function ProposalEditor() {
                   );
                 }}
                 onRemoveVariable={(id) => {
-                  console.log("Remove variable:", id);
+                  setVariables((prev) => prev.filter((v) => String(v.id) !== id));
                 }}
                 onVariableCreated={(variable: ApiVariable) => {
                   setVariables((prev) => [
