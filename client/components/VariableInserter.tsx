@@ -1,6 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
 
 interface VariableInserterProps {
   value: string;
@@ -58,7 +57,7 @@ export const VariableInserter: React.FC<VariableInserterProps> = ({
           const coords = getCaretCoordinates(textarea, cursorPos);
           setDropdown({
             visible: true,
-            position: { top: coords.top + 24, left: coords.left },
+            position: { top: coords.top, left: coords.left },
             searchTerm: "",
             cursorPos,
           });
@@ -71,7 +70,7 @@ export const VariableInserter: React.FC<VariableInserterProps> = ({
           const coords = getCaretCoordinates(textarea, cursorPos);
           setDropdown({
             visible: true,
-            position: { top: coords.top + 24, left: coords.left },
+            position: { top: coords.top, left: coords.left },
             searchTerm,
             cursorPos,
           });
@@ -119,7 +118,7 @@ export const VariableInserter: React.FC<VariableInserterProps> = ({
   const filteredVariables = getFilteredVariables();
 
   return (
-    <div className="relative">
+    <div className="relative w-full">
       <Textarea
         ref={textareaRef}
         value={value}
@@ -127,29 +126,35 @@ export const VariableInserter: React.FC<VariableInserterProps> = ({
         className={className}
       />
 
-      {dropdown.visible && filteredVariables.length > 0 && (
+      {dropdown.visible && variables.length > 0 && (
         <div
-          className="absolute bg-white border border-slate-200 rounded-lg shadow-lg z-50 max-w-xs"
+          className="absolute bg-white border border-slate-200 rounded-lg shadow-xl z-50 w-64"
           style={{
-            top: `${dropdown.position.top}px`,
+            top: `${dropdown.position.top + 24}px`,
             left: `${dropdown.position.left}px`,
             maxHeight: "200px",
             overflowY: "auto",
-            minWidth: "200px",
           }}
         >
-          {filteredVariables.map((variable) => (
-            <button
-              key={variable.id}
-              onClick={() => handleVariableSelect(variable.name)}
-              className="w-full text-left px-3 py-2 hover:bg-blue-50 transition-colors text-sm border-b last:border-b-0"
-            >
-              <div className="font-medium text-slate-900">{variable.name}</div>
-              {variable.value && (
-                <div className="text-xs text-slate-500">{variable.value}</div>
-              )}
-            </button>
-          ))}
+          {filteredVariables.length > 0 ? (
+            filteredVariables.map((variable) => (
+              <button
+                key={variable.id}
+                onClick={() => handleVariableSelect(variable.name)}
+                className="w-full text-left px-3 py-2 hover:bg-blue-50 transition-colors text-sm border-b last:border-b-0"
+                type="button"
+              >
+                <div className="font-medium text-slate-900">{variable.name}</div>
+                {variable.value && (
+                  <div className="text-xs text-slate-500 truncate">{variable.value}</div>
+                )}
+              </button>
+            ))
+          ) : (
+            <div className="px-3 py-2 text-sm text-slate-500 text-center">
+              No variables found
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -165,7 +170,7 @@ function getCaretCoordinates(
   const span = document.createElement("span");
 
   const style = window.getComputedStyle(textarea);
-  [
+  const props = [
     "direction",
     "boxSizing",
     "width",
@@ -195,7 +200,9 @@ function getCaretCoordinates(
     "letterSpacing",
     "wordSpacing",
     "tabSize",
-  ].forEach((prop) => {
+  ];
+
+  props.forEach((prop) => {
     (div.style as any)[prop] = (style as any)[prop];
   });
 
@@ -210,13 +217,14 @@ function getCaretCoordinates(
   span.textContent = textarea.value.substring(position) || ".";
   div.appendChild(span);
 
-  const rect = div.getBoundingClientRect();
+  const spanRect = span.getBoundingClientRect();
+  const divRect = div.getBoundingClientRect();
   const textareaRect = textarea.getBoundingClientRect();
 
   document.body.removeChild(div);
 
   return {
-    top: rect.top - textareaRect.top + textarea.parentElement!.scrollTop,
-    left: rect.left - textareaRect.left + textarea.parentElement!.scrollLeft,
+    top: spanRect.top - textareaRect.top,
+    left: spanRect.left - textareaRect.left,
   };
 }
