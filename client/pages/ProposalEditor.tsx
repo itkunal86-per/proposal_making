@@ -322,6 +322,7 @@ export default function ProposalEditor() {
                 setAIElementType(type);
                 setAIDialogOpen(true);
               }}
+              variables={variables}
             />
           </div>
 
