@@ -128,6 +128,7 @@ export const VariableInserter: React.FC<VariableInserterProps> = ({
             const dropdownTop = spanRect.top + 20;
             const dropdownLeft = spanRect.left;
 
+            console.log("Setting dropdown:", { dropdownTop, dropdownLeft, searchTerm, variableCount: variables.length });
             setDropdown({
               visible: true,
               position: { top: dropdownTop, left: dropdownLeft },
