@@ -39,6 +39,7 @@ export const VariablesPanel: React.FC<VariablesPanelProps> = ({
   const [expandedId, setExpandedId] = useState<string | number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [updatingId, setUpdatingId] = useState<string | number | null>(null);
+  const [deletingId, setDeletingId] = useState<string | number | null>(null);
   const [editingValues, setEditingValues] = useState<Record<string | number, string>>({});
 
   const handleAddVariable = async () => {
