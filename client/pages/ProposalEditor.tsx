@@ -343,12 +343,8 @@ export default function ProposalEditor() {
               />
             ) : activePanel === "variables" ? (
               <VariablesPanel
-                variables={[
-                  { id: "1", name: "Name", value: "Landwise" },
-                  { id: "2", name: "Company Name", value: "" },
-                  { id: "3", name: "User Name", value: "Sams Roy" },
-                  { id: "4", name: "Company Name", value: "Hirenq" },
-                ]}
+                proposalId={p.id}
+                variables={variables}
                 onAddVariable={(name) => {
                   console.log("Add variable:", name);
                 }}
@@ -357,6 +353,16 @@ export default function ProposalEditor() {
                 }}
                 onRemoveVariable={(id) => {
                   console.log("Remove variable:", id);
+                }}
+                onVariableCreated={(variable: ApiVariable) => {
+                  setVariables((prev) => [
+                    ...prev,
+                    {
+                      id: variable.id,
+                      name: variable.variable_name,
+                      value: variable.variable_value,
+                    },
+                  ]);
                 }}
               />
             ) : null}
