@@ -31,7 +31,7 @@ import { UploadsPanel } from "@/components/UploadsPanel";
 import { SignaturesPanel } from "@/components/SignaturesPanel";
 import { VariablesPanel } from "@/components/VariablesPanel";
 import { TextFormattingToolbar } from "@/components/TextFormattingToolbar";
-import type { Variable as ApiVariable } from "@/services/variablesService";
+import { fetchVariables, type Variable as ApiVariable } from "@/services/variablesService";
 
 interface DocumentSettings {
   company?: string;
