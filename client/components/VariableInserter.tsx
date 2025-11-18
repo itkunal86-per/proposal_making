@@ -108,6 +108,12 @@ export const VariableInserter: React.FC<VariableInserterProps> = ({
 
   const filteredVariables = getFilteredVariables();
 
+  React.useEffect(() => {
+    if (dropdown.visible) {
+      console.log("Dropdown visible:", { filteredVariables: filteredVariables.length, variables: variables.length, searchTerm: dropdown.searchTerm });
+    }
+  }, [dropdown.visible, filteredVariables.length]);
+
   return (
     <div ref={containerRef} className="relative">
       <Textarea
