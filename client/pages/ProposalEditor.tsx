@@ -435,6 +435,14 @@ export default function ProposalEditor() {
           commit(updated);
         }}
       />
+
+      {showPreviewModal && (
+        <ProposalPreviewModal
+          proposal={p}
+          variables={variables}
+          onClose={() => setShowPreviewModal(false)}
+        />
+      )}
     </div>
   );
 }
