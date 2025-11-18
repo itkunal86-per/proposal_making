@@ -140,7 +140,14 @@ export const VariablesPanel: React.FC<VariablesPanelProps> = ({
     }
   };
 
-  const handleDeleteVariable = async (id: string | number) => {
+  const showDeleteConfirm = (id: string | number, name: string) => {
+    setDeleteConfirm({ id, name });
+  };
+
+  const handleDeleteVariable = async () => {
+    if (!deleteConfirm) return;
+
+    const { id } = deleteConfirm;
     setDeletingId(id);
     try {
       const { success, error } = await deleteVariable(id);
@@ -161,6 +168,7 @@ export const VariablesPanel: React.FC<VariablesPanelProps> = ({
         });
         onRemoveVariable?.(String(id));
         setExpandedId(null);
+        setDeleteConfirm(null);
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
