@@ -21,6 +21,7 @@ export const VariableInserter: React.FC<VariableInserterProps> = ({
   variables = [],
   className = "",
 }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [dropdown, setDropdown] = useState<VariableDropdown>({
     visible: false,
@@ -42,19 +43,23 @@ export const VariableInserter: React.FC<VariableInserterProps> = ({
 
     onChange(newValue);
 
+    if (variables.length === 0) {
+      setDropdown({ ...dropdown, visible: false });
+      return;
+    }
+
     // Find if we're in a variable insertion context (after '{')
     const beforeCursor = newValue.substring(0, cursorPos);
     const lastBraceIndex = beforeCursor.lastIndexOf("{");
 
     if (lastBraceIndex !== -1) {
       const afterLastBrace = beforeCursor.substring(lastBraceIndex);
-      
+
       // Check if this is the start of a variable (single '{' or '{{')
       if (afterLastBrace === "{" || afterLastBrace === "{{") {
         // Show dropdown
-        const textarea = textareaRef.current;
-        if (textarea) {
-          const coords = getCaretCoordinates(textarea, cursorPos);
+        if (textareaRef.current && containerRef.current) {
+          const coords = getCaretCoordinates(textareaRef.current, cursorPos);
           setDropdown({
             visible: true,
             position: { top: coords.top, left: coords.left },
@@ -65,9 +70,8 @@ export const VariableInserter: React.FC<VariableInserterProps> = ({
       } else if (afterLastBrace.match(/^\{\{[a-zA-Z0-9\s]*$/)) {
         // User is typing inside {{...
         const searchTerm = afterLastBrace.substring(2);
-        const textarea = textareaRef.current;
-        if (textarea) {
-          const coords = getCaretCoordinates(textarea, cursorPos);
+        if (textareaRef.current && containerRef.current) {
+          const coords = getCaretCoordinates(textareaRef.current, cursorPos);
           setDropdown({
             visible: true,
             position: { top: coords.top, left: coords.left },
