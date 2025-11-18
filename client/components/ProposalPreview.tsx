@@ -361,7 +361,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
               numberList={(section as any).contentStyles?.numberList}
               code={(section as any).contentStyles?.code}
             >
-              {section.content}
+              {replaceVariables(section.content, variables)}
             </SelectableElement>
 
             {section.media && section.media.length > 0 && (
