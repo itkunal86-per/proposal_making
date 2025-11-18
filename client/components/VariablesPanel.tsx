@@ -3,9 +3,9 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ChevronDown, Plus } from "lucide-react";
+import { ChevronDown, Plus, Trash2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { createVariable, updateVariable, type Variable as ApiVariable } from "@/services/variablesService";
+import { createVariable, updateVariable, deleteVariable, type Variable as ApiVariable } from "@/services/variablesService";
 
 interface Variable {
   id: string | number;
