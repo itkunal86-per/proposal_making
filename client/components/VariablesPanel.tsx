@@ -38,6 +38,7 @@ export const VariablesPanel: React.FC<VariablesPanelProps> = ({
   const [newVariableName, setNewVariableName] = useState("");
   const [expandedId, setExpandedId] = useState<string | number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [updatingId, setUpdatingId] = useState<string | number | null>(null);
 
   const handleAddVariable = async () => {
     if (!newVariableName.trim()) {
