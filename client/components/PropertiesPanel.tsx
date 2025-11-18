@@ -753,7 +753,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             <VariableInserter
               value={section.content}
               onChange={(value) => handleUpdateSection({ content: value })}
-              variables={variables}
+              variables={variables || []}
               className="min-h-[120px]"
             />
           </div>
