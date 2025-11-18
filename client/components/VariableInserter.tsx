@@ -1,5 +1,4 @@
 import React, { useRef, useState } from "react";
-import { createPortal } from "react-dom";
 import { Textarea } from "@/components/ui/textarea";
 
 interface VariableInserterProps {
@@ -11,7 +10,6 @@ interface VariableInserterProps {
 
 interface VariableDropdown {
   visible: boolean;
-  position: { top: number; left: number };
   searchTerm: string;
 }
 
@@ -22,9 +20,9 @@ export const VariableInserter: React.FC<VariableInserterProps> = ({
   className = "",
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [dropdown, setDropdown] = useState<VariableDropdown>({
     visible: false,
-    position: { top: 0, left: 0 },
     searchTerm: "",
   });
 
@@ -52,7 +50,7 @@ export const VariableInserter: React.FC<VariableInserterProps> = ({
 
     if (lastBraceIndex !== -1) {
       const afterLastBrace = beforeCursor.substring(lastBraceIndex);
-
+      
       // Check if this is the start of a variable ({{ pattern)
       const isOpeningBrace = afterLastBrace === "{" || afterLastBrace === "{{";
       const isInsideVariable = afterLastBrace.match(/^\{\{[a-zA-Z0-9\s]*$/);
@@ -65,80 +63,10 @@ export const VariableInserter: React.FC<VariableInserterProps> = ({
         }
 
         console.log("Variable trigger detected:", { afterLastBrace, isOpeningBrace, isInsideVariable, variables: variables.length });
-
-        // Calculate dropdown position
-        if (textareaRef.current) {
-          try {
-            const textareaRect = textareaRef.current.getBoundingClientRect();
-            const div = document.createElement("div");
-            const span = document.createElement("span");
-
-            const style = window.getComputedStyle(textareaRef.current);
-            const props = [
-              "direction",
-              "boxSizing",
-              "width",
-              "height",
-              "overflowX",
-              "overflowY",
-              "borderTopWidth",
-              "borderRightWidth",
-              "borderBottomWidth",
-              "borderLeftWidth",
-              "paddingTop",
-              "paddingRight",
-              "paddingBottom",
-              "paddingLeft",
-              "fontStyle",
-              "fontVariant",
-              "fontWeight",
-              "fontStretch",
-              "fontSize",
-              "fontSizeAdjust",
-              "lineHeight",
-              "fontFamily",
-              "textAlign",
-              "textTransform",
-              "textIndent",
-              "textDecoration",
-              "letterSpacing",
-              "wordSpacing",
-              "tabSize",
-            ];
-
-            props.forEach((prop) => {
-              (div.style as any)[prop] = (style as any)[prop];
-            });
-
-            div.style.position = "absolute";
-            div.style.visibility = "hidden";
-            div.style.whiteSpace = "pre-wrap";
-            div.style.wordWrap = "break-word";
-
-            document.body.appendChild(div);
-
-            div.textContent = newValue.substring(0, cursorPos);
-            span.textContent = newValue.substring(cursorPos) || ".";
-            div.appendChild(span);
-
-            const spanRect = span.getBoundingClientRect();
-            document.body.removeChild(div);
-
-            // Calculate position relative to viewport, accounting for textarea position
-            const dropdownTop = spanRect.top + 20;
-            const dropdownLeft = spanRect.left;
-
-            console.log("Setting dropdown:", { dropdownTop, dropdownLeft, searchTerm, variableCount: variables.length });
-            setDropdown({
-              visible: true,
-              position: { top: dropdownTop, left: dropdownLeft },
-              searchTerm,
-            });
-          } catch (e) {
-            console.error("Error calculating caret coordinates:", e);
-            setDropdown({ ...dropdown, visible: false });
-          }
-        }
+        setDropdown({
+          visible: true,
+          searchTerm,
+        });
       } else {
         setDropdown({ ...dropdown, visible: false });
       }
@@ -180,18 +108,8 @@ export const VariableInserter: React.FC<VariableInserterProps> = ({
 
   const filteredVariables = getFilteredVariables();
 
-  React.useEffect(() => {
-    console.log("VariableInserter render:", {
-      visible: dropdown.visible,
-      variableCount: variables.length,
-      filteredCount: filteredVariables.length,
-      position: dropdown.position,
-      shouldRender: dropdown.visible && variables.length > 0 && filteredVariables.length > 0
-    });
-  }, [dropdown.visible, variables.length, filteredVariables.length]);
-
   return (
-    <>
+    <div ref={containerRef} className="relative">
       <Textarea
         ref={textareaRef}
         value={value}
@@ -199,34 +117,30 @@ export const VariableInserter: React.FC<VariableInserterProps> = ({
         className={className}
       />
 
-      {dropdown.visible && variables.length > 0 && filteredVariables.length > 0 &&
-        createPortal(
-          <div
-            className="fixed bg-white border border-slate-200 rounded-lg shadow-xl z-50 w-72"
-            style={{
-              top: `${dropdown.position.top}px`,
-              left: `${Math.max(0, dropdown.position.left)}px`,
-              maxHeight: "250px",
-              overflowY: "auto",
-              minWidth: "250px",
-            }}
-          >
-            {filteredVariables.map((variable) => (
-              <button
-                key={variable.id}
-                onClick={() => handleVariableSelect(variable.name)}
-                className="w-full text-left px-3 py-2 hover:bg-blue-50 transition-colors text-sm border-b last:border-b-0"
-                type="button"
-              >
-                <div className="font-medium text-slate-900">{variable.name}</div>
-                {variable.value && (
-                  <div className="text-xs text-slate-500 truncate">{variable.value}</div>
-                )}
-              </button>
-            ))}
-          </div>,
-          document.body
-        )}
-    </>
+      {dropdown.visible && variables.length > 0 && filteredVariables.length > 0 && (
+        <div
+          className="absolute top-full left-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-lg z-50 w-full"
+          style={{
+            maxHeight: "250px",
+            overflowY: "auto",
+            minWidth: "250px",
+          }}
+        >
+          {filteredVariables.map((variable) => (
+            <button
+              key={variable.id}
+              onClick={() => handleVariableSelect(variable.name)}
+              className="w-full text-left px-3 py-2 hover:bg-blue-50 transition-colors text-sm border-b last:border-b-0"
+              type="button"
+            >
+              <div className="font-medium text-slate-900">{variable.name}</div>
+              {variable.value && (
+                <div className="text-xs text-slate-500 truncate">{variable.value}</div>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   );
 };
