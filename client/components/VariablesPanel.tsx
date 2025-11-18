@@ -4,21 +4,26 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ChevronDown, Plus } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
+import { createVariable, type Variable as ApiVariable } from "@/services/variablesService";
 
 interface Variable {
-  id: string;
+  id: string | number;
   name: string;
   value: string;
 }
 
 interface VariablesPanelProps {
+  proposalId: string;
   variables?: Variable[];
   onAddVariable?: (name: string) => void;
   onUpdateVariable?: (id: string, value: string) => void;
   onRemoveVariable?: (id: string) => void;
+  onVariableCreated?: (variable: ApiVariable) => void;
 }
 
 export const VariablesPanel: React.FC<VariablesPanelProps> = ({
+  proposalId,
   variables = [
     { id: "1", name: "Name", value: "Landwise" },
     { id: "2", name: "Company Name", value: "" },
@@ -28,14 +33,48 @@ export const VariablesPanel: React.FC<VariablesPanelProps> = ({
   onAddVariable,
   onUpdateVariable,
   onRemoveVariable,
+  onVariableCreated,
 }) => {
   const [newVariableName, setNewVariableName] = useState("");
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<string | number | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleAddVariable = () => {
-    if (newVariableName.trim()) {
-      onAddVariable?.(newVariableName);
-      setNewVariableName("");
+  const handleAddVariable = async () => {
+    if (!newVariableName.trim()) {
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const { data, error } = await createVariable(proposalId, newVariableName);
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: error,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (data) {
+        toast({
+          title: "Success",
+          description: `Variable "${newVariableName}" created successfully`,
+        });
+        setNewVariableName("");
+        onVariableCreated?.(data);
+        onAddVariable?.(newVariableName);
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
