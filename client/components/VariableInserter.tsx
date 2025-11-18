@@ -65,7 +65,6 @@ export const VariableInserter: React.FC<VariableInserterProps> = ({
         }
 
         console.log("Variable trigger detected:", { afterLastBrace, isOpeningBrace, isInsideVariable, variables: variables.length });
-        alert("Variable dropdown triggered! Variables: " + variables.length);
 
         // Calculate dropdown position
         if (textareaRef.current) {
