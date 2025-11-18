@@ -160,7 +160,7 @@ export const VariableInserter: React.FC<VariableInserterProps> = ({
   );
 };
 
-// Helper function to get caret coordinates in viewport
+// Helper function to get caret coordinates in viewport (relative to viewport for fixed positioning)
 function getCaretCoordinatesInViewport(
   textarea: HTMLTextAreaElement,
   position: number
@@ -217,12 +217,12 @@ function getCaretCoordinatesInViewport(
   div.appendChild(span);
 
   const spanRect = span.getBoundingClientRect();
-  const textareaRect = textarea.getBoundingClientRect();
 
   document.body.removeChild(div);
 
+  // Return viewport-relative coordinates (for fixed positioning)
   return {
-    top: spanRect.top + window.scrollY,
-    left: spanRect.left + window.scrollX,
+    top: spanRect.top,
+    left: spanRect.left,
   };
 }
