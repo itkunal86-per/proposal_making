@@ -104,10 +104,11 @@ export const VariablesPanel: React.FC<VariablesPanelProps> = ({
             onChange={(e) => setNewVariableName(e.target.value)}
             placeholder="Variable name"
             onKeyPress={(e) => {
-              if (e.key === "Enter") {
+              if (e.key === "Enter" && !isLoading) {
                 handleAddVariable();
               }
             }}
+            disabled={isLoading}
             className="text-sm"
           />
           <Button
@@ -115,6 +116,8 @@ export const VariablesPanel: React.FC<VariablesPanelProps> = ({
             size="sm"
             variant="outline"
             className="px-3"
+            disabled={isLoading}
+            type="button"
           >
             <Plus className="w-4 h-4" />
           </Button>
