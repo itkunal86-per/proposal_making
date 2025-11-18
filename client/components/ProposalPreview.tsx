@@ -247,6 +247,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
   selectedElementId,
   onSelectElement,
   onAIElement,
+  variables = [],
 }) => {
   return (
     <div className="bg-white rounded-lg border p-6 space-y-6 shadow-sm">
