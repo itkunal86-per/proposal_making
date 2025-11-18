@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ChevronDown, Plus } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { createVariable, type Variable as ApiVariable } from "@/services/variablesService";
+import { createVariable, updateVariable, type Variable as ApiVariable } from "@/services/variablesService";
 
 interface Variable {
   id: string | number;
