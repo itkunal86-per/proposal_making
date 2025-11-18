@@ -235,6 +235,13 @@ export default function ProposalEditor() {
                 </div>
               )}
               <Button
+                onClick={() => setShowPreviewModal(true)}
+                variant="outline"
+                size="sm"
+              >
+                Preview Proposal
+              </Button>
+              <Button
                 onClick={() => {
                   setAIElementId(undefined);
                   setAIElementType(undefined);
