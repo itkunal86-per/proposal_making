@@ -30,6 +30,11 @@ export interface UpdateVariableResponse {
   variable: Variable;
 }
 
+export interface DeleteVariableResponse {
+  message: string;
+  variable_id: string;
+}
+
 const API_BASE = "https://propai-api.hirenq.com/api";
 
 export async function fetchVariables(proposalId: string): Promise<{
