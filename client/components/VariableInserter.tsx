@@ -67,10 +67,68 @@ export const VariableInserter: React.FC<VariableInserterProps> = ({
         // Calculate dropdown position
         if (textareaRef.current) {
           try {
-            const coords = getCaretCoordinatesInViewport(textareaRef.current, cursorPos);
+            const textareaRect = textareaRef.current.getBoundingClientRect();
+            const div = document.createElement("div");
+            const span = document.createElement("span");
+
+            const style = window.getComputedStyle(textareaRef.current);
+            const props = [
+              "direction",
+              "boxSizing",
+              "width",
+              "height",
+              "overflowX",
+              "overflowY",
+              "borderTopWidth",
+              "borderRightWidth",
+              "borderBottomWidth",
+              "borderLeftWidth",
+              "paddingTop",
+              "paddingRight",
+              "paddingBottom",
+              "paddingLeft",
+              "fontStyle",
+              "fontVariant",
+              "fontWeight",
+              "fontStretch",
+              "fontSize",
+              "fontSizeAdjust",
+              "lineHeight",
+              "fontFamily",
+              "textAlign",
+              "textTransform",
+              "textIndent",
+              "textDecoration",
+              "letterSpacing",
+              "wordSpacing",
+              "tabSize",
+            ];
+
+            props.forEach((prop) => {
+              (div.style as any)[prop] = (style as any)[prop];
+            });
+
+            div.style.position = "absolute";
+            div.style.visibility = "hidden";
+            div.style.whiteSpace = "pre-wrap";
+            div.style.wordWrap = "break-word";
+
+            document.body.appendChild(div);
+
+            div.textContent = value.substring(0, cursorPos);
+            span.textContent = value.substring(cursorPos) || ".";
+            div.appendChild(span);
+
+            const spanRect = span.getBoundingClientRect();
+            document.body.removeChild(div);
+
+            // Calculate position relative to viewport, accounting for textarea position
+            const dropdownTop = spanRect.top + 20;
+            const dropdownLeft = spanRect.left;
+
             setDropdown({
               visible: true,
-              position: { top: coords.top + 24, left: coords.left },
+              position: { top: dropdownTop, left: dropdownLeft },
               searchTerm,
             });
           } catch (e) {
