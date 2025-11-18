@@ -185,3 +185,47 @@ export async function updateVariable(variableId: number | string, variableValue:
     };
   }
 }
+
+export async function deleteVariable(variableId: number | string): Promise<{
+  success: boolean;
+  error: string | null;
+}> {
+  try {
+    const token = getStoredToken();
+    if (!token) {
+      return {
+        success: false,
+        error: "Authentication token not found. Please log in again.",
+      };
+    }
+
+    const response = await fetch(`${API_BASE}/variables/${variableId}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const responseData: DeleteVariableResponse | ApiError = await response.json();
+
+    if (!response.ok) {
+      const errorData = responseData as ApiError;
+      return {
+        success: false,
+        error: errorData.error || "Failed to delete variable",
+      };
+    }
+
+    return {
+      success: true,
+      error: null,
+    };
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : "Network error. Please try again.";
+    return {
+      success: false,
+      error: errorMessage,
+    };
+  }
+}
