@@ -210,24 +210,26 @@ export const VariablesPanel: React.FC<VariablesPanelProps> = ({
                       const newValue = editingValues[variable.id] ?? variable.value;
                       if (newValue !== variable.value) {
                         handleUpdateVariable(variable.id, newValue);
+                      } else {
+                        setEditingValues((prev) => {
+                          const updated = { ...prev };
+                          delete updated[variable.id];
+                          return updated;
+                        });
                       }
-                      setEditingValues((prev) => {
-                        const updated = { ...prev };
-                        delete updated[variable.id];
-                        return updated;
-                      });
                     }}
                     onKeyPress={(e) => {
                       if (e.key === "Enter") {
                         const newValue = editingValues[variable.id] ?? variable.value;
                         if (newValue !== variable.value) {
                           handleUpdateVariable(variable.id, newValue);
+                        } else {
+                          setEditingValues((prev) => {
+                            const updated = { ...prev };
+                            delete updated[variable.id];
+                            return updated;
+                          });
                         }
-                        setEditingValues((prev) => {
-                          const updated = { ...prev };
-                          delete updated[variable.id];
-                          return updated;
-                        });
                       }
                     }}
                     placeholder="Variable value"
