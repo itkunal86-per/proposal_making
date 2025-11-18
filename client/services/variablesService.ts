@@ -20,7 +20,7 @@ export interface ApiError {
   issues?: Record<string, string[]>;
 }
 
-const API_BASE = "http://localhost/ProposalAi/api";
+const API_BASE = "https://propai-api.hirenq.com/api";
 
 export async function createVariable(proposalId: string, variableName: string): Promise<{
   data: Variable | null;
