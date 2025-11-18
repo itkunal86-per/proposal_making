@@ -129,6 +129,40 @@ export const VariablesPanel: React.FC<VariablesPanelProps> = ({
     }
   };
 
+  const handleDeleteVariable = async (id: string | number) => {
+    setDeletingId(id);
+    try {
+      const { success, error } = await deleteVariable(id);
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: error,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (success) {
+        toast({
+          title: "Success",
+          description: "Variable deleted successfully",
+        });
+        onRemoveVariable?.(String(id));
+        setExpandedId(null);
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   return (
     <Card className="p-4 space-y-4">
       <h2 className="text-lg font-semibold flex items-center gap-2">
