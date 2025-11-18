@@ -115,11 +115,16 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
 
                 {/* Section Content */}
                 <div
+                  className="relative"
                   style={{
                     color: (section as any).contentStyles?.color,
                     fontSize: `${(section as any).contentStyles?.fontSize || 16}px`,
                     textAlign: ((section as any).contentStyles?.textAlign || "left") as any,
                     backgroundColor: (section as any).contentStyles?.backgroundColor,
+                    backgroundImage: (section as any).contentStyles?.backgroundImage ? `url(${(section as any).contentStyles?.backgroundImage})` : undefined,
+                    backgroundSize: (section as any).contentStyles?.backgroundSize || "cover",
+                    backgroundPosition: "center",
+                    backgroundRepeat: "no-repeat",
                     padding: `${(section as any).contentStyles?.paddingTop || 0}px ${(section as any).contentStyles?.paddingRight || 0}px ${(section as any).contentStyles?.paddingBottom || 0}px ${(section as any).contentStyles?.paddingLeft || 0}px`,
                     borderRadius: (section as any).contentStyles?.borderRadius ? `${(section as any).contentStyles?.borderRadius}px` : undefined,
                     fontWeight: (section as any).contentStyles?.bold ? "bold" : "normal",
@@ -129,7 +134,23 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                     wordBreak: "break-word",
                   }}
                 >
-                  {replaceVariables(section.content, variables)}
+                  {(section as any).contentStyles?.backgroundImage && (section as any).contentStyles?.backgroundOpacity && (
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: `rgba(255, 255, 255, ${(100 - parseInt((section as any).contentStyles?.backgroundOpacity || "100")) / 100})`,
+                        borderRadius: (section as any).contentStyles?.borderRadius ? `${(section as any).contentStyles?.borderRadius}px` : undefined,
+                        pointerEvents: "none",
+                      }}
+                    />
+                  )}
+                  <div style={{ position: "relative", zIndex: 1 }}>
+                    {replaceVariables(section.content, variables)}
+                  </div>
                 </div>
 
                 {/* Media */}
