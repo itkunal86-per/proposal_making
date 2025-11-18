@@ -86,6 +86,34 @@ export default function ProposalEditor() {
     })();
   }, [id, nav]);
 
+  useEffect(() => {
+    (async () => {
+      setIsLoadingVariables(true);
+      try {
+        const { data, error } = await fetchVariables(id);
+        if (error) {
+          console.error("Failed to fetch variables:", error);
+          setVariables([]);
+          return;
+        }
+        if (data) {
+          setVariables(
+            data.map((v) => ({
+              id: v.id,
+              name: v.variable_name,
+              value: v.variable_value,
+            }))
+          );
+        }
+      } catch (error) {
+        console.error("Failed to fetch variables:", error);
+        setVariables([]);
+      } finally {
+        setIsLoadingVariables(false);
+      }
+    })();
+  }, [id]);
+
   function commit(next: Proposal, keepVersion = false, note?: string) {
     console.log("Proposal Edit Form Submitted:", next);
     setP(next);
