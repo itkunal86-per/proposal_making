@@ -34,6 +34,7 @@ interface PropertiesPanelProps {
   selectedElementType: string | null;
   onUpdateProposal: (proposal: Proposal) => void;
   onRemoveMedia?: (sectionId: string, mediaIndex: number) => void;
+  variables?: Array<{ id: string | number; name: string; value: string }>;
 }
 
 export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
