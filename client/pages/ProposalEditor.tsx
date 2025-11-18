@@ -373,7 +373,9 @@ export default function ProposalEditor() {
                   console.log("Add variable:", name);
                 }}
                 onUpdateVariable={(id, value) => {
-                  console.log("Update variable:", id, value);
+                  setVariables((prev) =>
+                    prev.map((v) => (v.id === id ? { ...v, value } : v))
+                  );
                 }}
                 onRemoveVariable={(id) => {
                   console.log("Remove variable:", id);
