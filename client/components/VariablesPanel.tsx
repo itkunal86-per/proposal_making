@@ -79,6 +79,39 @@ export const VariablesPanel: React.FC<VariablesPanelProps> = ({
     }
   };
 
+  const handleUpdateVariable = async (id: string | number, value: string) => {
+    setUpdatingId(id);
+    try {
+      const { data, error } = await updateVariable(id, value);
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: error,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (data) {
+        toast({
+          title: "Success",
+          description: "Variable updated successfully",
+        });
+        onUpdateVariable?.(String(id), value);
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
   return (
     <Card className="p-4 space-y-4">
       <h2 className="text-lg font-semibold flex items-center gap-2">
