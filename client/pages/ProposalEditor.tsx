@@ -337,6 +337,7 @@ export default function ProposalEditor() {
                   setSelectedElementId(null);
                   setSelectedElementType(null);
                 }}
+                variables={variables}
               />
             ) : activePanel === "document" ? (
               <DocumentPanel
