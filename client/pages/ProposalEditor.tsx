@@ -374,7 +374,7 @@ export default function ProposalEditor() {
                 }}
                 onUpdateVariable={(id, value) => {
                   setVariables((prev) =>
-                    prev.map((v) => (v.id === id ? { ...v, value } : v))
+                    prev.map((v) => (String(v.id) === id ? { ...v, value } : v))
                   );
                 }}
                 onRemoveVariable={(id) => {
