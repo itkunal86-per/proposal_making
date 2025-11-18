@@ -239,6 +239,7 @@ interface ProposalPreviewProps {
   selectedElementId: string | null;
   onSelectElement: (id: string, type: string) => void;
   onAIElement?: (elementId: string, elementType: string) => void;
+  variables?: Array<{ id: string | number; name: string; value: string }>;
 }
 
 export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
