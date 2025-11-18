@@ -20,6 +20,11 @@ export interface ApiError {
   issues?: Record<string, string[]>;
 }
 
+export interface FetchVariablesResponse {
+  proposal_id: string;
+  variables: Variable[];
+}
+
 const API_BASE = "https://propai-api.hirenq.com/api";
 
 export async function createVariable(proposalId: string, variableName: string): Promise<{
