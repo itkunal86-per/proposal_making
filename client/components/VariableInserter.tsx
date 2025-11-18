@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 
 interface VariableInserterProps {
@@ -12,7 +12,6 @@ interface VariableDropdown {
   visible: boolean;
   position: { top: number; left: number };
   searchTerm: string;
-  cursorPos: number;
 }
 
 export const VariableInserter: React.FC<VariableInserterProps> = ({
@@ -27,7 +26,6 @@ export const VariableInserter: React.FC<VariableInserterProps> = ({
     visible: false,
     position: { top: 0, left: 0 },
     searchTerm: "",
-    cursorPos: 0,
   });
 
   const getFilteredVariables = () => {
@@ -54,30 +52,31 @@ export const VariableInserter: React.FC<VariableInserterProps> = ({
 
     if (lastBraceIndex !== -1) {
       const afterLastBrace = beforeCursor.substring(lastBraceIndex);
+      
+      // Check if this is the start of a variable ({{ pattern)
+      const isOpeningBrace = afterLastBrace === "{" || afterLastBrace === "{{";
+      const isInsideVariable = afterLastBrace.match(/^\{\{[a-zA-Z0-9\s]*$/);
 
-      // Check if this is the start of a variable (single '{' or '{{')
-      if (afterLastBrace === "{" || afterLastBrace === "{{") {
-        // Show dropdown
-        if (textareaRef.current && containerRef.current) {
-          const coords = getCaretCoordinates(textareaRef.current, cursorPos);
-          setDropdown({
-            visible: true,
-            position: { top: coords.top, left: coords.left },
-            searchTerm: "",
-            cursorPos,
-          });
+      if (isOpeningBrace || isInsideVariable) {
+        // Calculate search term
+        let searchTerm = "";
+        if (isInsideVariable) {
+          searchTerm = afterLastBrace.substring(2);
         }
-      } else if (afterLastBrace.match(/^\{\{[a-zA-Z0-9\s]*$/)) {
-        // User is typing inside {{...
-        const searchTerm = afterLastBrace.substring(2);
+
+        // Calculate dropdown position
         if (textareaRef.current && containerRef.current) {
-          const coords = getCaretCoordinates(textareaRef.current, cursorPos);
-          setDropdown({
-            visible: true,
-            position: { top: coords.top, left: coords.left },
-            searchTerm,
-            cursorPos,
-          });
+          try {
+            const coords = getCaretCoordinates(textareaRef.current, cursorPos);
+            setDropdown({
+              visible: true,
+              position: { top: coords.top + 24, left: coords.left },
+              searchTerm,
+            });
+          } catch (e) {
+            console.error("Error calculating caret coordinates:", e);
+            setDropdown({ ...dropdown, visible: false });
+          }
         }
       } else {
         setDropdown({ ...dropdown, visible: false });
@@ -91,10 +90,9 @@ export const VariableInserter: React.FC<VariableInserterProps> = ({
     const textarea = textareaRef.current;
     if (!textarea) return;
 
-    const text = value;
     const cursorPos = textarea.selectionStart;
-    const beforeCursor = text.substring(0, cursorPos);
-    const afterCursor = text.substring(cursorPos);
+    const beforeCursor = value.substring(0, cursorPos);
+    const afterCursor = value.substring(cursorPos);
 
     // Find the position of the opening brace
     const lastBraceIndex = beforeCursor.lastIndexOf("{");
@@ -102,7 +100,7 @@ export const VariableInserter: React.FC<VariableInserterProps> = ({
 
     // Replace from the brace to current position with the variable
     const newText =
-      text.substring(0, lastBraceIndex) +
+      value.substring(0, lastBraceIndex) +
       `{{${variableName}}}` +
       afterCursor;
 
@@ -128,46 +126,39 @@ export const VariableInserter: React.FC<VariableInserterProps> = ({
         value={value}
         onChange={handleTextChange}
         className={className}
-        style={{ position: "relative", zIndex: 1 }}
       />
 
-      {dropdown.visible && variables.length > 0 && (
+      {dropdown.visible && variables.length > 0 && filteredVariables.length > 0 && (
         <div
           className="absolute bg-white border border-slate-200 rounded-lg shadow-xl z-50 w-72"
           style={{
-            top: `${dropdown.position.top + 28}px`,
-            left: `${dropdown.position.left}px`,
+            top: `${dropdown.position.top}px`,
+            left: `${Math.max(0, dropdown.position.left)}px`,
             maxHeight: "250px",
             overflowY: "auto",
             minWidth: "250px",
           }}
         >
-          {filteredVariables.length > 0 ? (
-            filteredVariables.map((variable) => (
-              <button
-                key={variable.id}
-                onClick={() => handleVariableSelect(variable.name)}
-                className="w-full text-left px-3 py-2 hover:bg-blue-50 transition-colors text-sm border-b last:border-b-0"
-                type="button"
-              >
-                <div className="font-medium text-slate-900">{variable.name}</div>
-                {variable.value && (
-                  <div className="text-xs text-slate-500 truncate">{variable.value}</div>
-                )}
-              </button>
-            ))
-          ) : (
-            <div className="px-3 py-2 text-sm text-slate-500 text-center">
-              No variables found
-            </div>
-          )}
+          {filteredVariables.map((variable) => (
+            <button
+              key={variable.id}
+              onClick={() => handleVariableSelect(variable.name)}
+              className="w-full text-left px-3 py-2 hover:bg-blue-50 transition-colors text-sm border-b last:border-b-0"
+              type="button"
+            >
+              <div className="font-medium text-slate-900">{variable.name}</div>
+              {variable.value && (
+                <div className="text-xs text-slate-500 truncate">{variable.value}</div>
+              )}
+            </button>
+          ))}
         </div>
       )}
     </div>
   );
 };
 
-// Helper function to get caret coordinates
+// Helper function to get caret coordinates relative to textarea
 function getCaretCoordinates(
   textarea: HTMLTextAreaElement,
   position: number
