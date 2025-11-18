@@ -180,6 +180,16 @@ export const VariableInserter: React.FC<VariableInserterProps> = ({
 
   const filteredVariables = getFilteredVariables();
 
+  React.useEffect(() => {
+    console.log("VariableInserter render:", {
+      visible: dropdown.visible,
+      variableCount: variables.length,
+      filteredCount: filteredVariables.length,
+      position: dropdown.position,
+      shouldRender: dropdown.visible && variables.length > 0 && filteredVariables.length > 0
+    });
+  }, [dropdown.visible, variables.length, filteredVariables.length]);
+
   return (
     <>
       <Textarea
