@@ -36,17 +36,40 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
           <div className="max-w-4xl mx-auto bg-white p-8 shadow-sm">
             {/* Title */}
             <div
-              className="mb-8"
+              className="mb-8 relative"
               style={{
                 color: (proposal as any).titleStyles?.color,
                 fontSize: `${(proposal as any).titleStyles?.fontSize || 32}px`,
                 textAlign: ((proposal as any).titleStyles?.textAlign || "left") as any,
                 backgroundColor: (proposal as any).titleStyles?.backgroundColor,
+                backgroundImage: (proposal as any).titleStyles?.backgroundImage ? `url(${(proposal as any).titleStyles?.backgroundImage})` : undefined,
+                backgroundSize: (proposal as any).titleStyles?.backgroundSize || "cover",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
                 padding: `${(proposal as any).titleStyles?.paddingTop || 0}px ${(proposal as any).titleStyles?.paddingRight || 0}px ${(proposal as any).titleStyles?.paddingBottom || 0}px ${(proposal as any).titleStyles?.paddingLeft || 0}px`,
                 borderRadius: (proposal as any).titleStyles?.borderRadius ? `${(proposal as any).titleStyles?.borderRadius}px` : undefined,
+                fontWeight: (proposal as any).titleStyles?.bold ? "bold" : "normal",
+                fontStyle: (proposal as any).titleStyles?.italic ? "italic" : "normal",
+                textDecoration: (proposal as any).titleStyles?.underline ? "underline" : (proposal as any).titleStyles?.strikethrough ? "line-through" : "none",
               }}
             >
-              {proposal.title}
+              {(proposal as any).titleStyles?.backgroundImage && (proposal as any).titleStyles?.backgroundOpacity && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: `rgba(255, 255, 255, ${(100 - parseInt((proposal as any).titleStyles?.backgroundOpacity || "100")) / 100})`,
+                    borderRadius: (proposal as any).titleStyles?.borderRadius ? `${(proposal as any).titleStyles?.borderRadius}px` : undefined,
+                    pointerEvents: "none",
+                  }}
+                />
+              )}
+              <div style={{ position: "relative", zIndex: 1 }}>
+                {proposal.title}
+              </div>
             </div>
 
             {/* Sections */}
