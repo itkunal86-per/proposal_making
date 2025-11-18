@@ -122,22 +122,24 @@ export const VariableInserter: React.FC<VariableInserterProps> = ({
   const filteredVariables = getFilteredVariables();
 
   return (
-    <div className="relative w-full">
+    <div ref={containerRef} className="relative w-full">
       <Textarea
         ref={textareaRef}
         value={value}
         onChange={handleTextChange}
         className={className}
+        style={{ position: "relative", zIndex: 1 }}
       />
 
       {dropdown.visible && variables.length > 0 && (
         <div
-          className="absolute bg-white border border-slate-200 rounded-lg shadow-xl z-50 w-64"
+          className="absolute bg-white border border-slate-200 rounded-lg shadow-xl z-50 w-72"
           style={{
-            top: `${dropdown.position.top + 24}px`,
+            top: `${dropdown.position.top + 28}px`,
             left: `${dropdown.position.left}px`,
-            maxHeight: "200px",
+            maxHeight: "250px",
             overflowY: "auto",
+            minWidth: "250px",
           }}
         >
           {filteredVariables.length > 0 ? (
