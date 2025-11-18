@@ -115,8 +115,8 @@ export const VariableInserter: React.FC<VariableInserterProps> = ({
 
             document.body.appendChild(div);
 
-            div.textContent = value.substring(0, cursorPos);
-            span.textContent = value.substring(cursorPos) || ".";
+            div.textContent = newValue.substring(0, cursorPos);
+            span.textContent = newValue.substring(cursorPos) || ".";
             div.appendChild(span);
 
             const spanRect = span.getBoundingClientRect();
