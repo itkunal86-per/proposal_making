@@ -184,12 +184,40 @@ export const VariablesPanel: React.FC<VariablesPanelProps> = ({
               {expandedId === variable.id && (
                 <div className="px-3 pb-3 border-t bg-slate-50">
                   <Input
-                    value={variable.value}
+                    value={editingValues[variable.id] ?? variable.value}
                     onChange={(e) =>
-                      onUpdateVariable?.(variable.id, e.target.value)
+                      setEditingValues((prev) => ({
+                        ...prev,
+                        [variable.id]: e.target.value,
+                      }))
                     }
+                    onBlur={() => {
+                      const newValue = editingValues[variable.id] ?? variable.value;
+                      if (newValue !== variable.value) {
+                        handleUpdateVariable(variable.id, newValue);
+                      }
+                      setEditingValues((prev) => {
+                        const updated = { ...prev };
+                        delete updated[variable.id];
+                        return updated;
+                      });
+                    }}
+                    onKeyPress={(e) => {
+                      if (e.key === "Enter") {
+                        const newValue = editingValues[variable.id] ?? variable.value;
+                        if (newValue !== variable.value) {
+                          handleUpdateVariable(variable.id, newValue);
+                        }
+                        setEditingValues((prev) => {
+                          const updated = { ...prev };
+                          delete updated[variable.id];
+                          return updated;
+                        });
+                      }
+                    }}
                     placeholder="Variable value"
                     className="text-sm"
+                    disabled={updatingId === variable.id}
                   />
                 </div>
               )}
