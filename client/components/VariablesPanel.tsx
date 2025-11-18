@@ -215,21 +215,33 @@ export const VariablesPanel: React.FC<VariablesPanelProps> = ({
         <div className="space-y-2 max-h-96 overflow-y-auto">
           {variables.map((variable) => (
             <div key={variable.id} className="border rounded-lg">
-              <button
-                onClick={() =>
-                  setExpandedId(expandedId === variable.id ? null : variable.id)
-                }
-                className="w-full flex items-center justify-between p-3 hover:bg-slate-50 transition-colors"
-              >
-                <span className="text-sm font-medium text-slate-700">
-                  {variable.name}
-                </span>
-                <ChevronDown
-                  className={`w-4 h-4 text-slate-400 transition-transform ${
-                    expandedId === variable.id ? "rotate-180" : ""
-                  }`}
-                />
-              </button>
+              <div className="flex items-center justify-between p-3 hover:bg-slate-50 transition-colors">
+                <button
+                  onClick={() =>
+                    setExpandedId(expandedId === variable.id ? null : variable.id)
+                  }
+                  className="flex-1 flex items-center justify-between"
+                >
+                  <span className="text-sm font-medium text-slate-700">
+                    {variable.name}
+                  </span>
+                  <ChevronDown
+                    className={`w-4 h-4 text-slate-400 transition-transform ${
+                      expandedId === variable.id ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleDeleteVariable(variable.id)}
+                  disabled={deletingId === variable.id}
+                  className="ml-2 h-6 w-6 p-0 hover:bg-red-50 hover:text-red-600"
+                  type="button"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
 
               {expandedId === variable.id && (
                 <div className="px-3 pb-3 border-t bg-slate-50">
