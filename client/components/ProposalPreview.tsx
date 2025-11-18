@@ -2,6 +2,7 @@ import React from "react";
 import { Proposal, ProposalSection } from "@/services/proposalsService";
 import { Button } from "@/components/ui/button";
 import { Sparkles } from "lucide-react";
+import { replaceVariables } from "@/lib/variableUtils";
 
 interface ElementProps {
   id: string;
@@ -238,6 +239,7 @@ interface ProposalPreviewProps {
   selectedElementId: string | null;
   onSelectElement: (id: string, type: string) => void;
   onAIElement?: (elementId: string, elementType: string) => void;
+  variables?: Array<{ id: string | number; name: string; value: string }>;
 }
 
 export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
@@ -245,6 +247,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
   selectedElementId,
   onSelectElement,
   onAIElement,
+  variables = [],
 }) => {
   return (
     <div className="bg-white rounded-lg border p-6 space-y-6 shadow-sm">
@@ -358,7 +361,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
               numberList={(section as any).contentStyles?.numberList}
               code={(section as any).contentStyles?.code}
             >
-              {section.content}
+              {replaceVariables(section.content, variables)}
             </SelectableElement>
 
             {section.media && section.media.length > 0 && (

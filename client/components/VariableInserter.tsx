@@ -1,0 +1,152 @@
+import React, { useRef, useState } from "react";
+import { Textarea } from "@/components/ui/textarea";
+
+interface VariableInserterProps {
+  value: string;
+  onChange: (value: string) => void;
+  variables?: Array<{ id: string | number; name: string; value: string }>;
+  className?: string;
+}
+
+interface VariableDropdown {
+  visible: boolean;
+  searchTerm: string;
+}
+
+export const VariableInserter: React.FC<VariableInserterProps> = ({
+  value,
+  onChange,
+  variables = [],
+  className = "",
+}) => {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [dropdown, setDropdown] = useState<VariableDropdown>({
+    visible: false,
+    searchTerm: "",
+  });
+
+  const getFilteredVariables = () => {
+    if (!dropdown.searchTerm) return variables;
+    return variables.filter((v) =>
+      v.name.toLowerCase().includes(dropdown.searchTerm.toLowerCase())
+    );
+  };
+
+  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newValue = e.target.value;
+    const cursorPos = e.target.selectionStart;
+
+    onChange(newValue);
+
+    if (variables.length === 0) {
+      setDropdown({ ...dropdown, visible: false });
+      return;
+    }
+
+    // Find if we're in a variable insertion context (after '{')
+    const beforeCursor = newValue.substring(0, cursorPos);
+    const lastBraceIndex = beforeCursor.lastIndexOf("{");
+
+    if (lastBraceIndex !== -1) {
+      const afterLastBrace = beforeCursor.substring(lastBraceIndex);
+      
+      // Check if this is the start of a variable ({{ pattern)
+      const isOpeningBrace = afterLastBrace === "{" || afterLastBrace === "{{";
+      const isInsideVariable = afterLastBrace.match(/^\{\{[a-zA-Z0-9\s]*$/);
+
+      if (isOpeningBrace || isInsideVariable) {
+        // Calculate search term
+        let searchTerm = "";
+        if (isInsideVariable) {
+          searchTerm = afterLastBrace.substring(2);
+        }
+
+        console.log("Variable trigger detected:", { afterLastBrace, isOpeningBrace, isInsideVariable, variables: variables.length });
+        setDropdown({
+          visible: true,
+          searchTerm,
+        });
+      } else {
+        setDropdown({ ...dropdown, visible: false });
+      }
+    } else {
+      setDropdown({ ...dropdown, visible: false });
+    }
+  };
+
+  const handleVariableSelect = (variableName: string) => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const cursorPos = textarea.selectionStart;
+    const beforeCursor = value.substring(0, cursorPos);
+    const afterCursor = value.substring(cursorPos);
+
+    // Find the position of the opening brace
+    const lastBraceIndex = beforeCursor.lastIndexOf("{");
+    if (lastBraceIndex === -1) return;
+
+    // Replace from the brace to current position with the variable
+    const newText =
+      value.substring(0, lastBraceIndex) +
+      `{{${variableName}}}` +
+      afterCursor;
+
+    onChange(newText);
+
+    // Close dropdown
+    setDropdown({ ...dropdown, visible: false });
+
+    // Focus textarea and move cursor after the inserted variable
+    setTimeout(() => {
+      textarea.focus();
+      const newCursorPos = lastBraceIndex + `{{${variableName}}}`.length;
+      textarea.setSelectionRange(newCursorPos, newCursorPos);
+    }, 0);
+  };
+
+  const filteredVariables = getFilteredVariables();
+
+  React.useEffect(() => {
+    if (dropdown.visible) {
+      console.log("Dropdown visible:", { filteredVariables: filteredVariables.length, variables: variables.length, searchTerm: dropdown.searchTerm });
+    }
+  }, [dropdown.visible, filteredVariables.length]);
+
+  return (
+    <div ref={containerRef} className="relative">
+      <Textarea
+        ref={textareaRef}
+        value={value}
+        onChange={handleTextChange}
+        className={className}
+      />
+
+      {dropdown.visible && variables.length > 0 && filteredVariables.length > 0 && (
+        <div
+          className="absolute top-full left-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-lg z-50 w-full"
+          style={{
+            maxHeight: "250px",
+            overflowY: "auto",
+            minWidth: "250px",
+          }}
+        >
+          {filteredVariables.map((variable) => (
+            <button
+              key={variable.id}
+              onClick={() => handleVariableSelect(variable.name)}
+              className="w-full text-left px-3 py-2 hover:bg-blue-50 transition-colors text-sm border-b last:border-b-0"
+              type="button"
+            >
+              <div className="font-medium text-slate-900">{variable.name}</div>
+              {variable.value && (
+                <div className="text-xs text-slate-500 truncate">{variable.value}</div>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};

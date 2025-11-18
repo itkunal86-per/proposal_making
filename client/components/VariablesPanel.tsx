@@ -3,22 +3,37 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ChevronDown, Plus } from "lucide-react";
+import { ChevronDown, Plus, Trash2 } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { createVariable, updateVariable, deleteVariable, type Variable as ApiVariable } from "@/services/variablesService";
 
 interface Variable {
-  id: string;
+  id: string | number;
   name: string;
   value: string;
 }
 
 interface VariablesPanelProps {
+  proposalId: string;
   variables?: Variable[];
   onAddVariable?: (name: string) => void;
   onUpdateVariable?: (id: string, value: string) => void;
   onRemoveVariable?: (id: string) => void;
+  onVariableCreated?: (variable: ApiVariable) => void;
 }
 
 export const VariablesPanel: React.FC<VariablesPanelProps> = ({
+  proposalId,
   variables = [
     { id: "1", name: "Name", value: "Landwise" },
     { id: "2", name: "Company Name", value: "" },
@@ -28,14 +43,142 @@ export const VariablesPanel: React.FC<VariablesPanelProps> = ({
   onAddVariable,
   onUpdateVariable,
   onRemoveVariable,
+  onVariableCreated,
 }) => {
   const [newVariableName, setNewVariableName] = useState("");
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<string | number | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [updatingId, setUpdatingId] = useState<string | number | null>(null);
+  const [deletingId, setDeletingId] = useState<string | number | null>(null);
+  const [editingValues, setEditingValues] = useState<Record<string | number, string>>({});
+  const [deleteConfirm, setDeleteConfirm] = useState<{ id: string | number; name: string } | null>(null);
 
-  const handleAddVariable = () => {
-    if (newVariableName.trim()) {
-      onAddVariable?.(newVariableName);
-      setNewVariableName("");
+  const handleAddVariable = async () => {
+    if (!newVariableName.trim()) {
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const { data, error } = await createVariable(proposalId, newVariableName);
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: error,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (data) {
+        toast({
+          title: "Success",
+          description: `Variable "${newVariableName}" created successfully`,
+        });
+        setNewVariableName("");
+        onVariableCreated?.(data);
+        onAddVariable?.(newVariableName);
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleUpdateVariable = async (id: string | number, value: string) => {
+    setUpdatingId(id);
+    try {
+      const { data, error } = await updateVariable(id, value);
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: error,
+          variant: "destructive",
+        });
+        setEditingValues((prev) => {
+          const updated = { ...prev };
+          delete updated[id];
+          return updated;
+        });
+        return;
+      }
+
+      if (data) {
+        toast({
+          title: "Success",
+          description: "Variable updated successfully",
+        });
+        setEditingValues((prev) => {
+          const updated = { ...prev };
+          delete updated[id];
+          return updated;
+        });
+        onUpdateVariable?.(String(id), value);
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      setEditingValues((prev) => {
+        const updated = { ...prev };
+        delete updated[id];
+        return updated;
+      });
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
+  const showDeleteConfirm = (id: string | number, name: string) => {
+    setDeleteConfirm({ id, name });
+  };
+
+  const handleDeleteVariable = async () => {
+    if (!deleteConfirm) return;
+
+    const { id } = deleteConfirm;
+    setDeletingId(id);
+    try {
+      const { success, error } = await deleteVariable(id);
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: error,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (success) {
+        toast({
+          title: "Success",
+          description: "Variable deleted successfully",
+        });
+        onRemoveVariable?.(String(id));
+        setExpandedId(null);
+        setDeleteConfirm(null);
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -65,10 +208,11 @@ export const VariablesPanel: React.FC<VariablesPanelProps> = ({
             onChange={(e) => setNewVariableName(e.target.value)}
             placeholder="Variable name"
             onKeyPress={(e) => {
-              if (e.key === "Enter") {
+              if (e.key === "Enter" && !isLoading) {
                 handleAddVariable();
               }
             }}
+            disabled={isLoading}
             className="text-sm"
           />
           <Button
@@ -76,6 +220,8 @@ export const VariablesPanel: React.FC<VariablesPanelProps> = ({
             size="sm"
             variant="outline"
             className="px-3"
+            disabled={isLoading}
+            type="button"
           >
             <Plus className="w-4 h-4" />
           </Button>
@@ -88,31 +234,73 @@ export const VariablesPanel: React.FC<VariablesPanelProps> = ({
         <div className="space-y-2 max-h-96 overflow-y-auto">
           {variables.map((variable) => (
             <div key={variable.id} className="border rounded-lg">
-              <button
-                onClick={() =>
-                  setExpandedId(expandedId === variable.id ? null : variable.id)
-                }
-                className="w-full flex items-center justify-between p-3 hover:bg-slate-50 transition-colors"
-              >
-                <span className="text-sm font-medium text-slate-700">
-                  {variable.name}
-                </span>
-                <ChevronDown
-                  className={`w-4 h-4 text-slate-400 transition-transform ${
-                    expandedId === variable.id ? "rotate-180" : ""
-                  }`}
-                />
-              </button>
+              <div className="flex items-center justify-between p-3 hover:bg-slate-50 transition-colors">
+                <button
+                  onClick={() =>
+                    setExpandedId(expandedId === variable.id ? null : variable.id)
+                  }
+                  className="flex-1 flex items-center justify-between"
+                >
+                  <span className="text-sm font-medium text-slate-700">
+                    {variable.name}
+                  </span>
+                  <ChevronDown
+                    className={`w-4 h-4 text-slate-400 transition-transform ${
+                      expandedId === variable.id ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => showDeleteConfirm(variable.id, variable.name)}
+                  disabled={deletingId === variable.id}
+                  className="ml-2 h-6 w-6 p-0 hover:bg-red-50 hover:text-red-600"
+                  type="button"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
 
               {expandedId === variable.id && (
                 <div className="px-3 pb-3 border-t bg-slate-50">
                   <Input
-                    value={variable.value}
+                    value={editingValues[variable.id] ?? variable.value}
                     onChange={(e) =>
-                      onUpdateVariable?.(variable.id, e.target.value)
+                      setEditingValues((prev) => ({
+                        ...prev,
+                        [variable.id]: e.target.value,
+                      }))
                     }
+                    onBlur={() => {
+                      const newValue = editingValues[variable.id] ?? variable.value;
+                      if (newValue !== variable.value) {
+                        handleUpdateVariable(variable.id, newValue);
+                      } else {
+                        setEditingValues((prev) => {
+                          const updated = { ...prev };
+                          delete updated[variable.id];
+                          return updated;
+                        });
+                      }
+                    }}
+                    onKeyPress={(e) => {
+                      if (e.key === "Enter") {
+                        const newValue = editingValues[variable.id] ?? variable.value;
+                        if (newValue !== variable.value) {
+                          handleUpdateVariable(variable.id, newValue);
+                        } else {
+                          setEditingValues((prev) => {
+                            const updated = { ...prev };
+                            delete updated[variable.id];
+                            return updated;
+                          });
+                        }
+                      }
+                    }}
                     placeholder="Variable value"
                     className="text-sm"
+                    disabled={updatingId === variable.id}
                   />
                 </div>
               )}
@@ -120,6 +308,27 @@ export const VariablesPanel: React.FC<VariablesPanelProps> = ({
           ))}
         </div>
       </div>
+
+      <AlertDialog open={!!deleteConfirm} onOpenChange={() => setDeleteConfirm(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Variable</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete <span className="font-semibold">"{deleteConfirm?.name}"</span>? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteVariable}
+              disabled={deletingId === deleteConfirm?.id}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 };

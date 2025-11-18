@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Proposal, ProposalSection } from "@/services/proposalsService";
 import { X, Plus } from "lucide-react";
+import { VariableInserter } from "@/components/VariableInserter";
 
 interface ElementStyle {
   color?: string;
@@ -33,6 +34,7 @@ interface PropertiesPanelProps {
   selectedElementType: string | null;
   onUpdateProposal: (proposal: Proposal) => void;
   onRemoveMedia?: (sectionId: string, mediaIndex: number) => void;
+  variables?: Array<{ id: string | number; name: string; value: string }>;
 }
 
 export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
@@ -41,6 +43,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   selectedElementType,
   onUpdateProposal,
   onRemoveMedia,
+  variables,
 }) => {
   if (!selectedElementId || !selectedElementType) {
     return (
@@ -746,11 +749,18 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
       <Card className="p-4 space-y-4 overflow-y-auto max-h-[90vh]">
         <div>
           <Label className="text-xs font-semibold">Section Content</Label>
-          <Textarea
-            value={section.content}
-            onChange={(e) => handleUpdateSection({ content: e.target.value })}
-            className="mt-2 min-h-[120px]"
-          />
+          <div className="mt-2 relative">
+            <VariableInserter
+              value={section.content}
+              onChange={(value) => handleUpdateSection({ content: value })}
+              variables={variables || []}
+              className="min-h-[120px]"
+            />
+          </div>
+          <div className="mt-2 text-xs text-slate-500 bg-blue-50 border border-blue-200 rounded-lg p-3">
+            <p className="font-medium mb-1">💡 Add Variables</p>
+            <p>Type a single brace to insert variables like {"{{variable_name}}"}</p>
+          </div>
         </div>
 
         <Separator />

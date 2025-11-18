@@ -21,6 +21,7 @@ import {
 } from "@/services/proposalsService";
 import { type ClientRecord, listClients } from "@/services/clientsService";
 import { ProposalPreview } from "@/components/ProposalPreview";
+import { ProposalPreviewModal } from "@/components/ProposalPreviewModal";
 import { PropertiesPanel } from "@/components/PropertiesPanel";
 import { ProposalEditorSidebar, type PanelType } from "@/components/ProposalEditorSidebar";
 import { SectionsDialog } from "@/components/SectionsDialog";
@@ -31,6 +32,7 @@ import { UploadsPanel } from "@/components/UploadsPanel";
 import { SignaturesPanel } from "@/components/SignaturesPanel";
 import { VariablesPanel } from "@/components/VariablesPanel";
 import { TextFormattingToolbar } from "@/components/TextFormattingToolbar";
+import { fetchVariables, type Variable as ApiVariable } from "@/services/variablesService";
 
 interface DocumentSettings {
   company?: string;
@@ -59,6 +61,9 @@ export default function ProposalEditor() {
   const [textFormatting, setTextFormatting] = useState<Record<string, any>>({});
   const [documentMedia, setDocumentMedia] = useState<Array<{ id: string; url: string; type: "image" | "video"; name: string }>>([]);
   const [libraryMedia, setLibraryMedia] = useState<Array<{ id: string; url: string; type: "image" | "video"; name: string }>>([]);
+  const [variables, setVariables] = useState<Array<{ id: string | number; name: string; value: string }>>([]);
+  const [isLoadingVariables, setIsLoadingVariables] = useState(false);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
   const previewContainerRef = useRef<HTMLDivElement>(null);
   const saveTimer = useRef<number | null>(null);
 
@@ -82,6 +87,34 @@ export default function ProposalEditor() {
       }
     })();
   }, [id, nav]);
+
+  useEffect(() => {
+    (async () => {
+      setIsLoadingVariables(true);
+      try {
+        const { data, error } = await fetchVariables(id);
+        if (error) {
+          console.error("Failed to fetch variables:", error);
+          setVariables([]);
+          return;
+        }
+        if (data) {
+          setVariables(
+            data.map((v) => ({
+              id: v.id,
+              name: v.variable_name,
+              value: v.variable_value,
+            }))
+          );
+        }
+      } catch (error) {
+        console.error("Failed to fetch variables:", error);
+        setVariables([]);
+      } finally {
+        setIsLoadingVariables(false);
+      }
+    })();
+  }, [id]);
 
   function commit(next: Proposal, keepVersion = false, note?: string) {
     console.log("Proposal Edit Form Submitted:", next);
@@ -202,6 +235,13 @@ export default function ProposalEditor() {
                 </div>
               )}
               <Button
+                onClick={() => setShowPreviewModal(true)}
+                variant="outline"
+                size="sm"
+              >
+                Preview Proposal
+              </Button>
+              <Button
                 onClick={() => {
                   setAIElementId(undefined);
                   setAIElementType(undefined);
@@ -291,6 +331,7 @@ export default function ProposalEditor() {
                 setAIElementType(type);
                 setAIDialogOpen(true);
               }}
+              variables={variables}
             />
           </div>
 
@@ -306,6 +347,7 @@ export default function ProposalEditor() {
                   setSelectedElementId(null);
                   setSelectedElementType(null);
                 }}
+                variables={variables}
               />
             ) : activePanel === "document" ? (
               <DocumentPanel
@@ -336,20 +378,28 @@ export default function ProposalEditor() {
               />
             ) : activePanel === "variables" ? (
               <VariablesPanel
-                variables={[
-                  { id: "1", name: "Name", value: "Landwise" },
-                  { id: "2", name: "Company Name", value: "" },
-                  { id: "3", name: "User Name", value: "Sams Roy" },
-                  { id: "4", name: "Company Name", value: "Hirenq" },
-                ]}
+                proposalId={p.id}
+                variables={variables}
                 onAddVariable={(name) => {
                   console.log("Add variable:", name);
                 }}
                 onUpdateVariable={(id, value) => {
-                  console.log("Update variable:", id, value);
+                  setVariables((prev) =>
+                    prev.map((v) => (String(v.id) === id ? { ...v, value } : v))
+                  );
                 }}
                 onRemoveVariable={(id) => {
-                  console.log("Remove variable:", id);
+                  setVariables((prev) => prev.filter((v) => String(v.id) !== id));
+                }}
+                onVariableCreated={(variable: ApiVariable) => {
+                  setVariables((prev) => [
+                    ...prev,
+                    {
+                      id: variable.id,
+                      name: variable.variable_name,
+                      value: variable.variable_value,
+                    },
+                  ]);
                 }}
               />
             ) : null}
@@ -385,6 +435,14 @@ export default function ProposalEditor() {
           commit(updated);
         }}
       />
+
+      {showPreviewModal && (
+        <ProposalPreviewModal
+          proposal={p}
+          variables={variables}
+          onClose={() => setShowPreviewModal(false)}
+        />
+      )}
     </div>
   );
 }
