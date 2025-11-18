@@ -60,12 +60,8 @@ export default function ProposalEditor() {
   const [textFormatting, setTextFormatting] = useState<Record<string, any>>({});
   const [documentMedia, setDocumentMedia] = useState<Array<{ id: string; url: string; type: "image" | "video"; name: string }>>([]);
   const [libraryMedia, setLibraryMedia] = useState<Array<{ id: string; url: string; type: "image" | "video"; name: string }>>([]);
-  const [variables, setVariables] = useState<Array<{ id: string | number; name: string; value: string }>>([
-    { id: "1", name: "Name", value: "Landwise" },
-    { id: "2", name: "Company Name", value: "" },
-    { id: "3", name: "User Name", value: "Sams Roy" },
-    { id: "4", name: "Company Name", value: "Hirenq" },
-  ]);
+  const [variables, setVariables] = useState<Array<{ id: string | number; name: string; value: string }>>([]);
+  const [isLoadingVariables, setIsLoadingVariables] = useState(false);
   const previewContainerRef = useRef<HTMLDivElement>(null);
   const saveTimer = useRef<number | null>(null);
 
