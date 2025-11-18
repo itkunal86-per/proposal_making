@@ -52,7 +52,7 @@ export const VariableInserter: React.FC<VariableInserterProps> = ({
 
     if (lastBraceIndex !== -1) {
       const afterLastBrace = beforeCursor.substring(lastBraceIndex);
-      
+
       // Check if this is the start of a variable ({{ pattern)
       const isOpeningBrace = afterLastBrace === "{" || afterLastBrace === "{{";
       const isInsideVariable = afterLastBrace.match(/^\{\{[a-zA-Z0-9\s]*$/);
@@ -63,6 +63,8 @@ export const VariableInserter: React.FC<VariableInserterProps> = ({
         if (isInsideVariable) {
           searchTerm = afterLastBrace.substring(2);
         }
+
+        console.log("Variable trigger detected:", { afterLastBrace, isOpeningBrace, isInsideVariable, variables: variables.length });
 
         // Calculate dropdown position
         if (textareaRef.current) {
