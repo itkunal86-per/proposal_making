@@ -606,9 +606,9 @@ export async function addSection(p: Proposal, title = "New Section", layout: "si
     sections: [...p.sections, newSection],
     updatedAt: Date.now(),
   };
-  console.log("Adding section:", { title, newSectionId: newSection.id, layout, totalSections: updated.sections.length });
+  console.log("Adding section:", { title, newSectionId: newSection.id, layout, totalSections: updated.sections.length, newSection });
   await updateProposal(updated);
-  console.log("Add section completed");
+  console.log("Add section completed", { sections: updated.sections.map(s => ({ id: s.id, title: s.title, layout: s.layout })) });
   return updated;
 }
 
