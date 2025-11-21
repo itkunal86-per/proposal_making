@@ -71,6 +71,31 @@ export default function MyProposals() {
     setIsCreateDialogOpen(true);
   };
 
+  const handleOpenGenerateDialog = async () => {
+    await loadClients();
+    const newProposal = await createProposal({
+      title: "New Proposal",
+      client: "",
+    });
+    setBaseProposalForGeneration(newProposal);
+    setIsGenerateDialogOpen(true);
+  };
+
+  const handleProposalGenerated = async (generated: Proposal) => {
+    try {
+      await persistProposal(generated);
+      await updateProposal(generated);
+      await refresh();
+      nav(`/proposals/${generated.id}/edit`);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to save generated proposal",
+        variant: "destructive",
+      });
+    }
+  };
+
   const mine = useMemo(() => {
     const email = user?.email?.toLowerCase();
     const list = rows.filter((p) => (email ? p.createdBy.toLowerCase() === email : true));
