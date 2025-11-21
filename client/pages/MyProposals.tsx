@@ -181,7 +181,13 @@ export default function MyProposals() {
             <h1 className="text-2xl font-bold">My Proposals</h1>
             <p className="text-muted-foreground">Create and manage proposals you own.</p>
           </div>
-          <Button onClick={handleOpenCreateDialog}>New proposal</Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={handleOpenGenerateDialog}>
+              <Wand2 className="mr-2 h-4 w-4" />
+              AI Generate
+            </Button>
+            <Button onClick={handleOpenCreateDialog}>New proposal</Button>
+          </div>
         </div>
 
         <Card className="mt-4 p-4">
