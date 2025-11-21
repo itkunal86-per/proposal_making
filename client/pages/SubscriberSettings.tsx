@@ -161,15 +161,15 @@ export default function SubscriberSettings() {
             <h2 className="text-lg font-semibold">CRM Integration</h2>
             <div className="grid gap-2">
               <Label>GHL API key</Label>
-              <Input value={data.crm?.ghlApiKey ?? ""} onChange={(e) => setData((d) => ({ ...d, crm: { ...(d.crm ?? { ghlApiKey: "", ghlLocationId: "", syncClients: true, syncProposals: true }), ghlApiKey: e.target.value } }))} />
+              <Input value={data.crm.ghlApiKey} onChange={(e) => setData((d) => ({ ...d, crm: { ...d.crm, ghlApiKey: e.target.value } }))} />
             </div>
             <div className="grid gap-2">
               <Label>Location ID</Label>
-              <Input value={data.crm?.ghlLocationId ?? ""} onChange={(e) => setData((d) => ({ ...d, crm: { ...(d.crm ?? { ghlApiKey: "", ghlLocationId: "", syncClients: true, syncProposals: true }), ghlLocationId: e.target.value } }))} />
+              <Input value={data.crm.ghlLocationId} onChange={(e) => setData((d) => ({ ...d, crm: { ...d.crm, ghlLocationId: e.target.value } }))} />
             </div>
             <div className="flex items-center gap-2">
-              <label className="text-sm"><input type="checkbox" className="mr-2" checked={data.crm?.syncClients ?? true} onChange={(e) => setData((d) => ({ ...d, crm: { ...(d.crm ?? { ghlApiKey: "", ghlLocationId: "", syncClients: true, syncProposals: true }), syncClients: e.target.checked } }))} /> Sync clients</label>
-              <label className="text-sm"><input type="checkbox" className="mr-2" checked={data.crm?.syncProposals ?? true} onChange={(e) => setData((d) => ({ ...d, crm: { ...(d.crm ?? { ghlApiKey: "", ghlLocationId: "", syncClients: true, syncProposals: true }), syncProposals: e.target.checked } }))} /> Sync proposals</label>
+              <label className="text-sm"><input type="checkbox" className="mr-2" checked={data.crm.syncClients} onChange={(e) => setData((d) => ({ ...d, crm: { ...d.crm, syncClients: e.target.checked } }))} /> Sync clients</label>
+              <label className="text-sm"><input type="checkbox" className="mr-2" checked={data.crm.syncProposals} onChange={(e) => setData((d) => ({ ...d, crm: { ...d.crm, syncProposals: e.target.checked } }))} /> Sync proposals</label>
             </div>
             <div className="flex gap-2">
               <Button variant="outline" onClick={testConnection}>Test connection</Button>
