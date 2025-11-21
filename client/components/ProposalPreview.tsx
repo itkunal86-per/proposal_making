@@ -303,7 +303,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
         </div>
       )}
 
-      <div className="border-t pt-4">
+      <div className="border-t">
         {proposal.sections.map((section, index) => {
           const isMultiColumn = section.layout === "two-column" || section.layout === "three-column";
           const columnGapValue = typeof section.columnGap === "number" ? section.columnGap : 24;
@@ -323,6 +323,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
             className={containerClassName}
             style={{
               gap: isMultiColumn ? `${columnGapValue}px` : undefined,
+              marginTop: index === 0 && typeof section.gapAfter === "number" ? `${section.gapAfter}px` : index === 0 ? "24px" : undefined,
               marginBottom: typeof section.gapAfter === "number" ? `${section.gapAfter}px` : "24px"
             }}
           >
