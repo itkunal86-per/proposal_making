@@ -175,7 +175,7 @@ export default function SubscriberSettings() {
               <Button variant="outline" onClick={testConnection}>Test connection</Button>
               <Button onClick={syncNow}>Sync now</Button>
             </div>
-            {data.crm?.lastSyncedAt && (
+            {data.crm.lastSyncedAt && (
               <div className="text-xs text-muted-foreground">Last synced: {new Date(data.crm.lastSyncedAt).toLocaleString()}</div>
             )}
           </div>
