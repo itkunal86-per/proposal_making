@@ -7,6 +7,7 @@ export interface ProposalSection {
   id: string;
   title: string;
   content: string;
+  layout?: "single" | "two-column" | "three-column";
   media?: { type: "image" | "video"; url: string }[];
   comments?: { id: string; author: string; text: string; createdAt: number }[];
   titleStyles?: Record<string, any>;
