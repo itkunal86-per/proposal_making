@@ -321,7 +321,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
             data-section-id={section.id}
             className={containerClassName}
             style={{
-              marginBottom: section.gapAfter ? `${section.gapAfter}px` : "24px"
+              marginBottom: typeof section.gapAfter === "number" ? `${section.gapAfter}px` : "24px"
             }}
           >
             {isMultiColumn && (
