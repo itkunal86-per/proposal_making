@@ -164,6 +164,7 @@ function normalizeProposal(raw: z.infer<typeof proposalSchema>): Proposal {
       layout: s.layout || "single",
       columnContents: s.columnContents || undefined,
       columnStyles: s.columnStyles ? s.columnStyles.map(normalizeStyles) : undefined,
+      columnGap: s.columnGap || undefined,
       gapAfter: s.gapAfter || undefined,
       media: (s.media ?? []).map((m) => ({
         type: m.type!,
