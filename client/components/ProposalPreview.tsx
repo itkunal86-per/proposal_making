@@ -421,7 +421,17 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
               <>
                 {section.layout === "two-column" && (
                   <>
-                    <div className="p-4 border border-slate-200 rounded bg-slate-50">
+                    <div style={{
+                      backgroundColor: (section as any).columnStyles?.[0]?.backgroundColor || "transparent",
+                      borderWidth: (section as any).columnStyles?.[0]?.borderWidth ? `${(section as any).columnStyles[0].borderWidth}px` : "0px",
+                      borderColor: (section as any).columnStyles?.[0]?.borderColor || "#000000",
+                      borderStyle: (section as any).columnStyles?.[0]?.borderWidth ? "solid" : "none",
+                      borderRadius: (section as any).columnStyles?.[0]?.borderRadius ? `${(section as any).columnStyles[0].borderRadius}px` : "0px",
+                      paddingTop: (section as any).columnStyles?.[0]?.paddingTop ? `${(section as any).columnStyles[0].paddingTop}px` : "0px",
+                      paddingRight: (section as any).columnStyles?.[0]?.paddingRight ? `${(section as any).columnStyles[0].paddingRight}px` : "0px",
+                      paddingBottom: (section as any).columnStyles?.[0]?.paddingBottom ? `${(section as any).columnStyles[0].paddingBottom}px` : "0px",
+                      paddingLeft: (section as any).columnStyles?.[0]?.paddingLeft ? `${(section as any).columnStyles[0].paddingLeft}px` : "0px",
+                    }}>
                       <SelectableElement
                         id={`section-content-${section.id}-col1`}
                         type="section-content"
