@@ -847,7 +847,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                 type="number"
                 min="0"
                 max="100"
-                value={section.gapAfter || 24}
+                value={typeof section.gapAfter === "number" ? section.gapAfter : 24}
                 onChange={(e) =>
                   handleUpdateSection({
                     gapAfter: parseInt(e.target.value)
@@ -1540,7 +1540,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                 type="number"
                 min="0"
                 max="100"
-                value={section.gapAfter || 24}
+                value={typeof section.gapAfter === "number" ? section.gapAfter : 24}
                 onChange={(e) =>
                   handleUpdateSection({
                     gapAfter: parseInt(e.target.value)
