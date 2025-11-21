@@ -9,6 +9,7 @@ export interface ProposalSection {
   content: string;
   layout?: "single" | "two-column" | "three-column";
   columnContents?: string[];
+  columnStyles?: Record<string, any>[];
   media?: { type: "image" | "video"; url: string }[];
   comments?: { id: string; author: string; text: string; createdAt: number }[];
   titleStyles?: Record<string, any>;
