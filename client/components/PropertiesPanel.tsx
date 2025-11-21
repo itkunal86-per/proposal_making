@@ -784,6 +784,143 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
 
         <Separator />
 
+        {columnIndex >= 0 && (
+          <>
+            <div>
+              <Label className="text-xs font-semibold mb-2 block">Column Styling</Label>
+              <div className="space-y-3">
+                <div>
+                  <label className="text-xs font-medium">Background Color</label>
+                  <Input
+                    type="color"
+                    value={(section as any).columnStyles?.[columnIndex]?.backgroundColor || "#ffffff"}
+                    onChange={(e) => {
+                      const newColumnStyles = [...((section as any).columnStyles || [])];
+                      newColumnStyles[columnIndex] = { ...newColumnStyles[columnIndex], backgroundColor: e.target.value };
+                      handleUpdateSection({ columnStyles: newColumnStyles });
+                    }}
+                    className="h-8 cursor-pointer"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-xs font-medium">Border Width</label>
+                    <Input
+                      type="number"
+                      min="0"
+                      max="10"
+                      value={(section as any).columnStyles?.[columnIndex]?.borderWidth || 0}
+                      onChange={(e) => {
+                        const newColumnStyles = [...((section as any).columnStyles || [])];
+                        newColumnStyles[columnIndex] = { ...newColumnStyles[columnIndex], borderWidth: parseInt(e.target.value) };
+                        handleUpdateSection({ columnStyles: newColumnStyles });
+                      }}
+                      placeholder="0"
+                      className="text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium">Border Color</label>
+                    <Input
+                      type="color"
+                      value={(section as any).columnStyles?.[columnIndex]?.borderColor || "#000000"}
+                      onChange={(e) => {
+                        const newColumnStyles = [...((section as any).columnStyles || [])];
+                        newColumnStyles[columnIndex] = { ...newColumnStyles[columnIndex], borderColor: e.target.value };
+                        handleUpdateSection({ columnStyles: newColumnStyles });
+                      }}
+                      className="h-8 cursor-pointer"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-medium">Border Radius</label>
+                  <Input
+                    type="number"
+                    min="0"
+                    max="50"
+                    value={(section as any).columnStyles?.[columnIndex]?.borderRadius || 0}
+                    onChange={(e) => {
+                      const newColumnStyles = [...((section as any).columnStyles || [])];
+                      newColumnStyles[columnIndex] = { ...newColumnStyles[columnIndex], borderRadius: parseInt(e.target.value) };
+                      handleUpdateSection({ columnStyles: newColumnStyles });
+                    }}
+                    placeholder="0"
+                    className="text-xs"
+                  />
+                </div>
+
+                <div className="grid grid-cols-4 gap-2">
+                  <div>
+                    <label className="text-xs font-medium">Top</label>
+                    <Input
+                      type="number"
+                      min="0"
+                      value={(section as any).columnStyles?.[columnIndex]?.paddingTop || 0}
+                      onChange={(e) => {
+                        const newColumnStyles = [...((section as any).columnStyles || [])];
+                        newColumnStyles[columnIndex] = { ...newColumnStyles[columnIndex], paddingTop: parseInt(e.target.value) };
+                        handleUpdateSection({ columnStyles: newColumnStyles });
+                      }}
+                      placeholder="0"
+                      className="text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium">Right</label>
+                    <Input
+                      type="number"
+                      min="0"
+                      value={(section as any).columnStyles?.[columnIndex]?.paddingRight || 0}
+                      onChange={(e) => {
+                        const newColumnStyles = [...((section as any).columnStyles || [])];
+                        newColumnStyles[columnIndex] = { ...newColumnStyles[columnIndex], paddingRight: parseInt(e.target.value) };
+                        handleUpdateSection({ columnStyles: newColumnStyles });
+                      }}
+                      placeholder="0"
+                      className="text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium">Bottom</label>
+                    <Input
+                      type="number"
+                      min="0"
+                      value={(section as any).columnStyles?.[columnIndex]?.paddingBottom || 0}
+                      onChange={(e) => {
+                        const newColumnStyles = [...((section as any).columnStyles || [])];
+                        newColumnStyles[columnIndex] = { ...newColumnStyles[columnIndex], paddingBottom: parseInt(e.target.value) };
+                        handleUpdateSection({ columnStyles: newColumnStyles });
+                      }}
+                      placeholder="0"
+                      className="text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium">Left</label>
+                    <Input
+                      type="number"
+                      min="0"
+                      value={(section as any).columnStyles?.[columnIndex]?.paddingLeft || 0}
+                      onChange={(e) => {
+                        const newColumnStyles = [...((section as any).columnStyles || [])];
+                        newColumnStyles[columnIndex] = { ...newColumnStyles[columnIndex], paddingLeft: parseInt(e.target.value) };
+                        handleUpdateSection({ columnStyles: newColumnStyles });
+                      }}
+                      placeholder="0"
+                      className="text-xs"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <Separator />
+          </>
+        )}
+
         <div>
           <Label className="text-xs font-semibold mb-2 block">Media</Label>
           <div className="space-y-2 mb-3">
