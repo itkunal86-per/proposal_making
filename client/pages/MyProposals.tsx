@@ -18,8 +18,13 @@ import {
   deleteProposal,
   duplicateProposal,
   listProposals,
+  createProposal,
+  updateProposal,
+  persistProposal,
 } from "@/services/proposalsService";
 import { type ClientRecord, listClients } from "@/services/clientsService";
+import { GenerateProposalDialog } from "@/components/GenerateProposalDialog";
+import { Wand2 } from "lucide-react";
 
 export default function MyProposals() {
   const { user } = useAuth();
