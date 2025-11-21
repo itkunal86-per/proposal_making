@@ -150,10 +150,17 @@ export const SectionsDialog: React.FC<SectionsDialogProps> = ({
 
         <Separator className="my-3" />
 
-        <Button onClick={handleAddSection} disabled={loading} className="w-full">
+        <Button onClick={() => setTemplateDialogOpen(true)} disabled={loading} className="w-full">
           <Plus className="w-4 h-4 mr-2" />
           Add Section
         </Button>
+
+        <SectionTemplateDialog
+          open={templateDialogOpen}
+          onOpenChange={setTemplateDialogOpen}
+          onSelectTemplate={handleAddSection}
+          loading={loading}
+        />
       </DialogContent>
     </Dialog>
   );
