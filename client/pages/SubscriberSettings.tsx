@@ -49,24 +49,26 @@ export default function SubscriberSettings() {
       if (raw) {
         const parsed = JSON.parse(raw) as ProfileData;
         setData({
-          name: parsed.name || "",
-          company: parsed.company || "",
-          email: parsed.email || "",
-          crm: parsed.crm || {
-            ghlApiKey: "",
-            ghlLocationId: "",
-            syncClients: true,
-            syncProposals: true,
+          name: parsed.name ?? "",
+          company: parsed.company ?? "",
+          email: parsed.email ?? "",
+          crm: {
+            ghlApiKey: parsed.crm?.ghlApiKey ?? "",
+            ghlLocationId: parsed.crm?.ghlLocationId ?? "",
+            syncClients: parsed.crm?.syncClients ?? true,
+            syncProposals: parsed.crm?.syncProposals ?? true,
+            lastSyncedAt: parsed.crm?.lastSyncedAt,
           },
-          subscription: parsed.subscription || {
-            plan: "free",
+          subscription: {
+            plan: parsed.subscription?.plan ?? "free",
+            updatedAt: parsed.subscription?.updatedAt,
           },
         });
       } else if (user) {
         setData({
-          name: user.name,
-          company: user.company || "",
-          email: user.email,
+          name: user.name ?? "",
+          company: user.company ?? "",
+          email: user.email ?? "",
           crm: {
             ghlApiKey: "",
             ghlLocationId: "",
