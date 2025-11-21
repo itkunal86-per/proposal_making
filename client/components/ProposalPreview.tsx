@@ -303,7 +303,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
         </div>
       )}
 
-      <div className="border-t pt-4 space-y-6">
+      <div className="border-t pt-4">
         {proposal.sections.map((section, index) => {
           const isMultiColumn = section.layout === "two-column" || section.layout === "three-column";
           const containerClassName =
