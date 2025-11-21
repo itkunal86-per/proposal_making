@@ -367,7 +367,7 @@ export async function getProposalDetails(id: string): Promise<Proposal | undefin
     }
 
     let normalized = normalizeProposal(validated.data);
-    const list = await getAll();
+    const list = readStored() ?? [];
     const idx = list.findIndex((x) => x.id === normalized.id);
 
     // Merge with local storage to preserve gap settings and other properties
@@ -405,12 +405,7 @@ export async function getProposalDetails(id: string): Promise<Proposal | undefin
       };
     }
 
-    if (idx === -1) {
-      persist([normalized, ...list]);
-    } else {
-      list[idx] = normalized;
-      persist(list);
-    }
+    persist([normalized, ...list.filter(x => x.id !== normalized.id)]);
     return normalized;
   } catch (err) {
     console.warn("Error fetching proposal details, falling back to local storage:", err);
