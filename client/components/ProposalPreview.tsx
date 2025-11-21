@@ -454,7 +454,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                         numberList={(section as any).contentStyles?.numberList}
                         code={(section as any).contentStyles?.code}
                       >
-                        {replaceVariables(section.content, variables)}
+                        {replaceVariables((section as any).columnContents?.[0] || "", variables)}
                       </SelectableElement>
                     </div>
                     <div className="p-4 border border-slate-200 rounded bg-slate-50">
@@ -490,7 +490,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                         numberList={(section as any).contentStyles?.numberList}
                         code={(section as any).contentStyles?.code}
                       >
-                        {replaceVariables(section.content, variables)}
+                        {replaceVariables((section as any).columnContents?.[1] || "", variables)}
                       </SelectableElement>
                     </div>
                   </>
@@ -530,7 +530,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                         numberList={(section as any).contentStyles?.numberList}
                         code={(section as any).contentStyles?.code}
                       >
-                        {replaceVariables(section.content, variables)}
+                        {replaceVariables((section as any).columnContents?.[0] || "", variables)}
                       </SelectableElement>
                     </div>
                     <div className="p-4 border border-slate-200 rounded bg-slate-50">
@@ -566,7 +566,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                         numberList={(section as any).contentStyles?.numberList}
                         code={(section as any).contentStyles?.code}
                       >
-                        {replaceVariables(section.content, variables)}
+                        {replaceVariables((section as any).columnContents?.[1] || "", variables)}
                       </SelectableElement>
                     </div>
                     <div className="p-4 border border-slate-200 rounded bg-slate-50">
@@ -602,7 +602,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                         numberList={(section as any).contentStyles?.numberList}
                         code={(section as any).contentStyles?.code}
                       >
-                        {replaceVariables(section.content, variables)}
+                        {replaceVariables((section as any).columnContents?.[2] || "", variables)}
                       </SelectableElement>
                     </div>
                   </>
