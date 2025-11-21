@@ -28,15 +28,55 @@ interface ProfileData {
 export default function SubscriberSettings() {
   const { user } = useAuth();
   const key = useMemo(() => (user ? `subscriber_settings_${user.id}` : "subscriber_settings_anonymous"), [user]);
-  const [data, setData] = useState<ProfileData>({ name: "", company: "", email: "" });
+  const [data, setData] = useState<ProfileData>({
+    name: "",
+    company: "",
+    email: "",
+    crm: {
+      ghlApiKey: "",
+      ghlLocationId: "",
+      syncClients: true,
+      syncProposals: true,
+    },
+    subscription: {
+      plan: "free",
+    },
+  });
 
   useEffect(() => {
     try {
       const raw = localStorage.getItem(key);
       if (raw) {
-        setData(JSON.parse(raw) as ProfileData);
+        const parsed = JSON.parse(raw) as ProfileData;
+        setData({
+          name: parsed.name || "",
+          company: parsed.company || "",
+          email: parsed.email || "",
+          crm: parsed.crm || {
+            ghlApiKey: "",
+            ghlLocationId: "",
+            syncClients: true,
+            syncProposals: true,
+          },
+          subscription: parsed.subscription || {
+            plan: "free",
+          },
+        });
       } else if (user) {
-        setData({ name: user.name, company: user.company, email: user.email });
+        setData({
+          name: user.name,
+          company: user.company || "",
+          email: user.email,
+          crm: {
+            ghlApiKey: "",
+            ghlLocationId: "",
+            syncClients: true,
+            syncProposals: true,
+          },
+          subscription: {
+            plan: "free",
+          },
+        });
       }
     } catch {}
   }, [key, user]);
