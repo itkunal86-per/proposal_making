@@ -1096,6 +1096,69 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                     />
                   </div>
                 </div>
+
+                <div className="grid grid-cols-4 gap-2">
+                  <div>
+                    <label className="text-xs font-medium">Top</label>
+                    <Input
+                      type="number"
+                      min="0"
+                      value={(section as any).columnStyles?.[columnIndex]?.marginTop || 0}
+                      onChange={(e) => {
+                        const newColumnStyles = [...((section as any).columnStyles || [])];
+                        newColumnStyles[columnIndex] = { ...newColumnStyles[columnIndex], marginTop: parseInt(e.target.value) };
+                        handleUpdateSection({ columnStyles: newColumnStyles });
+                      }}
+                      placeholder="0"
+                      className="text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium">Right</label>
+                    <Input
+                      type="number"
+                      min="0"
+                      value={(section as any).columnStyles?.[columnIndex]?.marginRight || 0}
+                      onChange={(e) => {
+                        const newColumnStyles = [...((section as any).columnStyles || [])];
+                        newColumnStyles[columnIndex] = { ...newColumnStyles[columnIndex], marginRight: parseInt(e.target.value) };
+                        handleUpdateSection({ columnStyles: newColumnStyles });
+                      }}
+                      placeholder="0"
+                      className="text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium">Bottom</label>
+                    <Input
+                      type="number"
+                      min="0"
+                      value={(section as any).columnStyles?.[columnIndex]?.marginBottom || 0}
+                      onChange={(e) => {
+                        const newColumnStyles = [...((section as any).columnStyles || [])];
+                        newColumnStyles[columnIndex] = { ...newColumnStyles[columnIndex], marginBottom: parseInt(e.target.value) };
+                        handleUpdateSection({ columnStyles: newColumnStyles });
+                      }}
+                      placeholder="0"
+                      className="text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium">Left</label>
+                    <Input
+                      type="number"
+                      min="0"
+                      value={(section as any).columnStyles?.[columnIndex]?.marginLeft || 0}
+                      onChange={(e) => {
+                        const newColumnStyles = [...((section as any).columnStyles || [])];
+                        newColumnStyles[columnIndex] = { ...newColumnStyles[columnIndex], marginLeft: parseInt(e.target.value) };
+                        handleUpdateSection({ columnStyles: newColumnStyles });
+                      }}
+                      placeholder="0"
+                      className="text-xs"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
 
