@@ -374,13 +374,13 @@ export async function getProposalDetails(id: string): Promise<Proposal | undefin
     if (idx !== -1 && list[idx]) {
       const localProposal = list[idx];
 
-      // Merge sections: preserve gap values from local storage if API response doesn't have them
+      // Merge sections: preserve column content, gap values, and styles from local storage if API response doesn't have them
       normalized = {
         ...normalized,
         sections: normalized.sections.map((apiSection, sectionIndex) => {
           const localSection = localProposal.sections[sectionIndex];
 
-          // If we can find a matching local section by ID, use it for gap values
+          // If we can find a matching local section by ID, use it for detailed properties
           const matchingLocalSection = localSection && localSection.id === apiSection.id
             ? localSection
             : localProposal.sections.find(s => s.id === apiSection.id);
@@ -390,13 +390,14 @@ export async function getProposalDetails(id: string): Promise<Proposal | undefin
               ...apiSection,
               gapAfter: apiSection.gapAfter !== undefined ? apiSection.gapAfter : matchingLocalSection.gapAfter,
               columnGap: apiSection.columnGap !== undefined ? apiSection.columnGap : matchingLocalSection.columnGap,
-              // Also preserve other properties that might be set locally
-              columnContents: apiSection.columnContents && apiSection.columnContents.length > 0
+              // Preserve columnContents: use API if present and non-empty, otherwise use local
+              columnContents: (Array.isArray(apiSection.columnContents) && apiSection.columnContents.length > 0)
                 ? apiSection.columnContents
-                : matchingLocalSection.columnContents,
-              columnStyles: apiSection.columnStyles && apiSection.columnStyles.length > 0
+                : (Array.isArray(matchingLocalSection.columnContents) ? matchingLocalSection.columnContents : undefined),
+              // Preserve columnStyles: use API if present and non-empty, otherwise use local
+              columnStyles: (Array.isArray(apiSection.columnStyles) && apiSection.columnStyles.length > 0)
                 ? apiSection.columnStyles
-                : matchingLocalSection.columnStyles,
+                : (Array.isArray(matchingLocalSection.columnStyles) ? matchingLocalSection.columnStyles : undefined),
             };
           }
 
