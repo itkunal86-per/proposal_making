@@ -864,6 +864,32 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               Spacing between this section and the next one (default: 24px)
             </p>
           </div>
+
+          {isMultiColumn && (
+            <div>
+              <Label className="text-xs font-semibold">Gap Between Columns</Label>
+              <div className="flex gap-2 mt-2">
+                <Input
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={typeof section.columnGap === "number" ? section.columnGap : 24}
+                  onChange={(e) =>
+                    handleUpdateSection({
+                      columnGap: parseInt(e.target.value)
+                    })
+                  }
+                  className="flex-1"
+                />
+                <span className="text-sm text-muted-foreground self-center">
+                  px
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                Spacing between columns (default: 24px)
+              </p>
+            </div>
+          )}
         </div>
       </Card>
     );
