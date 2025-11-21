@@ -298,6 +298,7 @@ export default function ProposalEditor() {
               } else if (selectedElementType === "section-content") {
                 // Handle both old format (section-content-id) and new format (section-content-id-col1)
                 let sectionId = selectedElementId.replace("section-content-", "");
+                const colMatch = sectionId.match(/-col(\d+)$/);
                 sectionId = sectionId.replace(/-col\d+$/, "");
                 const section = p.sections.find((s) => s.id === sectionId);
                 if (section) {
