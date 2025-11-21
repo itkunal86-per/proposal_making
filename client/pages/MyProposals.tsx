@@ -358,6 +358,15 @@ export default function MyProposals() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {baseProposalForGeneration && (
+        <GenerateProposalDialog
+          open={isGenerateDialogOpen}
+          onOpenChange={setIsGenerateDialogOpen}
+          baseProposal={baseProposalForGeneration}
+          onProposalGenerated={handleProposalGenerated}
+        />
+      )}
     </AppShell>
   );
 }
