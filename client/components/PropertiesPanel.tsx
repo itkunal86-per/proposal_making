@@ -773,6 +773,72 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               </div>
             </div>
           </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Margin</Label>
+            <div className="grid grid-cols-2 gap-2 mt-2">
+              <div>
+                <Label className="text-xs text-muted-foreground">Top</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={parseInt(sectionTitleStyles.marginTop || "0")}
+                  onChange={(e) =>
+                    handleUpdateSection({
+                      titleStyles: { ...sectionTitleStyles, marginTop: e.target.value }
+                    })
+                  }
+                  className="mt-1"
+                  placeholder="0"
+                />
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Right</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={parseInt(sectionTitleStyles.marginRight || "0")}
+                  onChange={(e) =>
+                    handleUpdateSection({
+                      titleStyles: { ...sectionTitleStyles, marginRight: e.target.value }
+                    })
+                  }
+                  className="mt-1"
+                  placeholder="0"
+                />
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Bottom</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={parseInt(sectionTitleStyles.marginBottom || "0")}
+                  onChange={(e) =>
+                    handleUpdateSection({
+                      titleStyles: { ...sectionTitleStyles, marginBottom: e.target.value }
+                    })
+                  }
+                  className="mt-1"
+                  placeholder="0"
+                />
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Left</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={parseInt(sectionTitleStyles.marginLeft || "0")}
+                  onChange={(e) =>
+                    handleUpdateSection({
+                      titleStyles: { ...sectionTitleStyles, marginLeft: e.target.value }
+                    })
+                  }
+                  className="mt-1"
+                  placeholder="0"
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </Card>
     );
