@@ -82,8 +82,8 @@ export default function SubscriberSettings() {
   }, [key, user]);
 
   async function testConnection() {
-    const apiKey = data.crm?.ghlApiKey?.trim() ?? "";
-    const location = data.crm?.ghlLocationId?.trim() ?? "";
+    const apiKey = data.crm.ghlApiKey.trim();
+    const location = data.crm.ghlLocationId.trim();
     if (!apiKey || !location) {
       toast({ title: "Enter API key and Location ID", variant: "destructive" });
       return;
