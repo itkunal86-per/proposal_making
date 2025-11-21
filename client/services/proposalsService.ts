@@ -225,6 +225,18 @@ function persist(list: Proposal[]) {
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
 }
 
+export async function persistProposal(p: Proposal) {
+  if (!isBrowser()) return;
+  const list = await getAll();
+  const idx = list.findIndex((x) => x.id === p.id);
+  if (idx === -1) {
+    persist([p, ...list]);
+  } else {
+    list[idx] = p;
+    persist(list);
+  }
+}
+
 function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmail?: string): Proposal {
   const createdAtMs = new Date(apiProposal.created_at).getTime() || Date.now();
   const updatedAtMs = apiProposal.updated_at ? new Date(apiProposal.updated_at).getTime() : createdAtMs;
