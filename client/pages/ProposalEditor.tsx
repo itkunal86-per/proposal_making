@@ -280,8 +280,9 @@ export default function ProposalEditor() {
                 const updated = { ...p, titleStyles: { ...(p as any).titleStyles, [format]: value } };
                 commit(updated);
               } else if (selectedElementType === "section-title") {
-                const parts = selectedElementId.split("-");
-                const sectionId = parts[2];
+                // Handle both old format (section-title-id) and new format (section-title-id-colX if needed)
+                let sectionId = selectedElementId.replace("section-title-", "");
+                sectionId = sectionId.replace(/-col\d+$/, "");
                 const section = p.sections.find((s) => s.id === sectionId);
                 if (section) {
                   const updated = {
