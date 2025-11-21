@@ -101,8 +101,8 @@ export default function SubscriberSettings() {
   }
 
   async function syncNow() {
-    const apiKey = data.crm?.ghlApiKey?.trim() ?? "";
-    const location = data.crm?.ghlLocationId?.trim() ?? "";
+    const apiKey = data.crm.ghlApiKey.trim();
+    const location = data.crm.ghlLocationId.trim();
     if (!apiKey || !location) {
       toast({ title: "Enter API key and Location ID", variant: "destructive" });
       return;
@@ -110,13 +110,13 @@ export default function SubscriberSettings() {
     try {
       const { listProposals } = await import("@/services/proposalsService");
       const { listClients } = await import("@/services/clientsService");
-      const proposals = data.crm?.syncProposals ? (await listProposals()).length : 0;
-      const clients = data.crm?.syncClients ? (await listClients()).length : 0;
+      const proposals = data.crm.syncProposals ? (await listProposals()).length : 0;
+      const clients = data.crm.syncClients ? (await listClients()).length : 0;
 
       // Mock sync - in production this will connect to your Laravel API
       setData((d) => ({
         ...d,
-        crm: { ...(d.crm ?? { ghlApiKey: "", ghlLocationId: "", syncClients: true, syncProposals: true }), lastSyncedAt: Date.now() },
+        crm: { ...d.crm, lastSyncedAt: Date.now() },
       }));
       toast({ title: "Sync scheduled", description: `${clients} clients, ${proposals} proposals` });
     } catch (e: any) {
