@@ -598,14 +598,14 @@ export async function reorderSection(p: Proposal, from: number, to: number): Pro
   return updated;
 }
 
-export async function addSection(p: Proposal, title = "New Section"): Promise<Proposal> {
-  const newSection = { id: uuid(), title, content: "", media: [], comments: [] };
+export async function addSection(p: Proposal, title = "New Section", layout: "single" | "two-column" | "three-column" = "single"): Promise<Proposal> {
+  const newSection = { id: uuid(), title, content: "", layout, media: [], comments: [] };
   const updated = {
     ...p,
     sections: [...p.sections, newSection],
     updatedAt: Date.now(),
   };
-  console.log("Adding section:", { title, newSectionId: newSection.id, totalSections: updated.sections.length });
+  console.log("Adding section:", { title, newSectionId: newSection.id, layout, totalSections: updated.sections.length });
   await updateProposal(updated);
   console.log("Add section completed");
   return updated;
