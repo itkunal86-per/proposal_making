@@ -615,8 +615,9 @@ export async function addSection(p: Proposal, title = "New Section", layout: "si
   const columnCount = layout === "two-column" ? 2 : layout === "three-column" ? 3 : 0;
   const columnContents = columnCount > 0 ? Array(columnCount).fill("") : undefined;
   const columnStyles = columnCount > 0 ? Array(columnCount).fill({}) : undefined;
+  const columnGap = columnCount > 0 ? 24 : undefined;
 
-  const newSection = { id: uuid(), title, content: "", layout, columnContents, columnStyles, media: [], comments: [] };
+  const newSection = { id: uuid(), title, content: "", layout, columnContents, columnStyles, columnGap, media: [], comments: [] };
   const updated = {
     ...p,
     sections: [...p.sections, newSection],
