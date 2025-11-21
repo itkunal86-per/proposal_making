@@ -161,11 +161,11 @@ export default function SubscriberSettings() {
             <h2 className="text-lg font-semibold">CRM Integration</h2>
             <div className="grid gap-2">
               <Label>GHL API key</Label>
-              <Input value={data.crm.ghlApiKey} onChange={(e) => setData((d) => ({ ...d, crm: { ...d.crm, ghlApiKey: e.target.value } }))} />
+              <Input value={data.crm?.ghlApiKey ?? ""} onChange={(e) => setData((d) => ({ ...d, crm: { ...d.crm, ghlApiKey: e.target.value } }))} />
             </div>
             <div className="grid gap-2">
               <Label>Location ID</Label>
-              <Input value={data.crm.ghlLocationId} onChange={(e) => setData((d) => ({ ...d, crm: { ...d.crm, ghlLocationId: e.target.value } }))} />
+              <Input value={data.crm?.ghlLocationId ?? ""} onChange={(e) => setData((d) => ({ ...d, crm: { ...d.crm, ghlLocationId: e.target.value } }))} />
             </div>
             <div className="flex items-center gap-2">
               <label className="text-sm"><input type="checkbox" className="mr-2" checked={data.crm.syncClients} onChange={(e) => setData((d) => ({ ...d, crm: { ...d.crm, syncClients: e.target.checked } }))} /> Sync clients</label>
