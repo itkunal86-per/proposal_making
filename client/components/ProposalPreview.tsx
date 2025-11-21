@@ -27,6 +27,10 @@ interface ElementProps {
   paddingRight?: string;
   paddingBottom?: string;
   paddingLeft?: string;
+  marginTop?: string;
+  marginRight?: string;
+  marginBottom?: string;
+  marginLeft?: string;
   bold?: boolean;
   italic?: boolean;
   underline?: boolean;
