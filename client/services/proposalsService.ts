@@ -354,9 +354,16 @@ export async function getProposalDetails(id: string): Promise<Proposal | undefin
       return getProposal(id);
     }
 
-    const normalized = normalizeProposal(validated.data);
+    let normalized = normalizeProposal(validated.data);
     const list = await getAll();
     const idx = list.findIndex((x) => x.id === normalized.id);
+
+    // If the API response has no sections or minimal sections, preserve the sections from local storage
+    if (normalized.sections.length <= 1 && idx !== -1 && list[idx]?.sections.length > normalized.sections.length) {
+      console.log("API returned minimal sections, preserving detailed sections from local storage");
+      normalized = { ...normalized, sections: list[idx].sections };
+    }
+
     if (idx === -1) {
       persist([normalized, ...list]);
     } else {
