@@ -10,6 +10,7 @@ export interface ProposalSection {
   layout?: "single" | "two-column" | "three-column";
   columnContents?: string[];
   columnStyles?: Record<string, any>[];
+  columnGap?: number;
   gapAfter?: number;
   media?: { type: "image" | "video"; url: string }[];
   comments?: { id: string; author: string; text: string; createdAt: number }[];
@@ -102,6 +103,7 @@ const sectionSchema = z.object({
   layout: z.union([z.literal("single"), z.literal("two-column"), z.literal("three-column")]).optional(),
   columnContents: z.array(z.string()).optional(),
   columnStyles: z.array(z.record(z.any())).optional(),
+  columnGap: z.number().optional(),
   gapAfter: z.number().optional(),
   media: z.array(z.object({ type: z.union([z.literal("image"), z.literal("video")]), url: z.string() })).optional(),
   comments: z.array(z.object({ id: z.union([z.string(), z.number()]), author: z.string(), text: z.string(), createdAt: z.number() })).optional(),
@@ -160,9 +162,10 @@ function normalizeProposal(raw: z.infer<typeof proposalSchema>): Proposal {
       title: s.title!,
       content: s.content!,
       layout: s.layout || "single",
-      columnContents: s.columnContents || undefined,
+      columnContents: Array.isArray(s.columnContents) ? s.columnContents : undefined,
       columnStyles: s.columnStyles ? s.columnStyles.map(normalizeStyles) : undefined,
-      gapAfter: s.gapAfter || undefined,
+      columnGap: typeof s.columnGap === "number" ? s.columnGap : undefined,
+      gapAfter: typeof s.gapAfter === "number" ? s.gapAfter : undefined,
       media: (s.media ?? []).map((m) => ({
         type: m.type!,
         url: m.url!,
@@ -220,6 +223,18 @@ function readStored(): Proposal[] | null {
 function persist(list: Proposal[]) {
   if (!isBrowser()) return;
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+}
+
+export async function persistProposal(p: Proposal) {
+  if (!isBrowser()) return;
+  const list = readStored() ?? [];
+  const idx = list.findIndex((x) => x.id === p.id);
+  if (idx === -1) {
+    persist([p, ...list]);
+  } else {
+    list[idx] = p;
+    persist(list);
+  }
 }
 
 function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmail?: string): Proposal {
@@ -351,15 +366,47 @@ export async function getProposalDetails(id: string): Promise<Proposal | undefin
       return getProposal(id);
     }
 
-    const normalized = normalizeProposal(validated.data);
-    const list = await getAll();
+    let normalized = normalizeProposal(validated.data);
+    const list = readStored() ?? [];
     const idx = list.findIndex((x) => x.id === normalized.id);
-    if (idx === -1) {
-      persist([normalized, ...list]);
-    } else {
-      list[idx] = normalized;
-      persist(list);
+
+    // Merge with local storage to preserve gap settings and other properties
+    if (idx !== -1 && list[idx]) {
+      const localProposal = list[idx];
+
+      // Merge sections: preserve column content, gap values, and styles from local storage if API response doesn't have them
+      normalized = {
+        ...normalized,
+        sections: normalized.sections.map((apiSection, sectionIndex) => {
+          const localSection = localProposal.sections[sectionIndex];
+
+          // If we can find a matching local section by ID, use it for detailed properties
+          const matchingLocalSection = localSection && localSection.id === apiSection.id
+            ? localSection
+            : localProposal.sections.find(s => s.id === apiSection.id);
+
+          if (matchingLocalSection) {
+            return {
+              ...apiSection,
+              gapAfter: apiSection.gapAfter !== undefined ? apiSection.gapAfter : matchingLocalSection.gapAfter,
+              columnGap: apiSection.columnGap !== undefined ? apiSection.columnGap : matchingLocalSection.columnGap,
+              // Preserve columnContents: use API if present and non-empty, otherwise use local
+              columnContents: (Array.isArray(apiSection.columnContents) && apiSection.columnContents.length > 0)
+                ? apiSection.columnContents
+                : (Array.isArray(matchingLocalSection.columnContents) ? matchingLocalSection.columnContents : undefined),
+              // Preserve columnStyles: use API if present and non-empty, otherwise use local
+              columnStyles: (Array.isArray(apiSection.columnStyles) && apiSection.columnStyles.length > 0)
+                ? apiSection.columnStyles
+                : (Array.isArray(matchingLocalSection.columnStyles) ? matchingLocalSection.columnStyles : undefined),
+            };
+          }
+
+          return apiSection;
+        }),
+      };
     }
+
+    persist([normalized, ...list.filter(x => x.id !== normalized.id)]);
     return normalized;
   } catch (err) {
     console.warn("Error fetching proposal details, falling back to local storage:", err);
@@ -612,8 +659,9 @@ export async function addSection(p: Proposal, title = "New Section", layout: "si
   const columnCount = layout === "two-column" ? 2 : layout === "three-column" ? 3 : 0;
   const columnContents = columnCount > 0 ? Array(columnCount).fill("") : undefined;
   const columnStyles = columnCount > 0 ? Array(columnCount).fill({}) : undefined;
+  const columnGap = columnCount > 0 ? 24 : undefined;
 
-  const newSection = { id: uuid(), title, content: "", layout, columnContents, columnStyles, media: [], comments: [] };
+  const newSection = { id: uuid(), title, content: "", layout, columnContents, columnStyles, columnGap, media: [], comments: [] };
   const updated = {
     ...p,
     sections: [...p.sections, newSection],

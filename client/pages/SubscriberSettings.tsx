@@ -28,22 +28,64 @@ interface ProfileData {
 export default function SubscriberSettings() {
   const { user } = useAuth();
   const key = useMemo(() => (user ? `subscriber_settings_${user.id}` : "subscriber_settings_anonymous"), [user]);
-  const [data, setData] = useState<ProfileData>({ name: "", company: "", email: "" });
+  const [data, setData] = useState<ProfileData>({
+    name: "",
+    company: "",
+    email: "",
+    crm: {
+      ghlApiKey: "",
+      ghlLocationId: "",
+      syncClients: true,
+      syncProposals: true,
+    },
+    subscription: {
+      plan: "free",
+    },
+  });
 
   useEffect(() => {
     try {
       const raw = localStorage.getItem(key);
       if (raw) {
-        setData(JSON.parse(raw) as ProfileData);
+        const parsed = JSON.parse(raw) as ProfileData;
+        setData({
+          name: parsed.name ?? "",
+          company: parsed.company ?? "",
+          email: parsed.email ?? "",
+          crm: {
+            ghlApiKey: parsed.crm?.ghlApiKey ?? "",
+            ghlLocationId: parsed.crm?.ghlLocationId ?? "",
+            syncClients: parsed.crm?.syncClients ?? true,
+            syncProposals: parsed.crm?.syncProposals ?? true,
+            lastSyncedAt: parsed.crm?.lastSyncedAt,
+          },
+          subscription: {
+            plan: parsed.subscription?.plan ?? "free",
+            updatedAt: parsed.subscription?.updatedAt,
+          },
+        });
       } else if (user) {
-        setData({ name: user.name, company: user.company, email: user.email });
+        setData({
+          name: user.name ?? "",
+          company: user.company ?? "",
+          email: user.email ?? "",
+          crm: {
+            ghlApiKey: "",
+            ghlLocationId: "",
+            syncClients: true,
+            syncProposals: true,
+          },
+          subscription: {
+            plan: "free",
+          },
+        });
       }
     } catch {}
   }, [key, user]);
 
   async function testConnection() {
-    const apiKey = data.crm?.ghlApiKey?.trim() ?? "";
-    const location = data.crm?.ghlLocationId?.trim() ?? "";
+    const apiKey = data.crm.ghlApiKey.trim();
+    const location = data.crm.ghlLocationId.trim();
     if (!apiKey || !location) {
       toast({ title: "Enter API key and Location ID", variant: "destructive" });
       return;
@@ -61,8 +103,8 @@ export default function SubscriberSettings() {
   }
 
   async function syncNow() {
-    const apiKey = data.crm?.ghlApiKey?.trim() ?? "";
-    const location = data.crm?.ghlLocationId?.trim() ?? "";
+    const apiKey = data.crm.ghlApiKey.trim();
+    const location = data.crm.ghlLocationId.trim();
     if (!apiKey || !location) {
       toast({ title: "Enter API key and Location ID", variant: "destructive" });
       return;
@@ -70,13 +112,13 @@ export default function SubscriberSettings() {
     try {
       const { listProposals } = await import("@/services/proposalsService");
       const { listClients } = await import("@/services/clientsService");
-      const proposals = data.crm?.syncProposals ? (await listProposals()).length : 0;
-      const clients = data.crm?.syncClients ? (await listClients()).length : 0;
+      const proposals = data.crm.syncProposals ? (await listProposals()).length : 0;
+      const clients = data.crm.syncClients ? (await listClients()).length : 0;
 
       // Mock sync - in production this will connect to your Laravel API
       setData((d) => ({
         ...d,
-        crm: { ...(d.crm ?? { ghlApiKey: "", ghlLocationId: "", syncClients: true, syncProposals: true }), lastSyncedAt: Date.now() },
+        crm: { ...d.crm, lastSyncedAt: Date.now() },
       }));
       toast({ title: "Sync scheduled", description: `${clients} clients, ${proposals} proposals` });
     } catch (e: any) {
@@ -90,7 +132,7 @@ export default function SubscriberSettings() {
   }
 
   function updatePlan(plan: "free" | "pro" | "business") {
-    setData((d) => ({ ...d, subscription: { plan, updatedAt: Date.now() } }));
+    setData((d) => ({ ...d, subscription: { ...d.subscription, plan, updatedAt: Date.now() } }));
     setTimeout(() => save(), 0);
   }
 
@@ -104,7 +146,7 @@ export default function SubscriberSettings() {
         <Card className="mt-4 p-4 space-y-4">
           <div className="grid gap-2">
             <Label htmlFor="name">Full name</Label>
-            <Input id="name" value={data.name} onChange={(e) => setData((d) => ({ ...d, name: e.target.value }))} />
+            <Input id="name" value={data.name ?? ""} onChange={(e) => setData((d) => ({ ...d, name: e.target.value }))} />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="company">Company</Label>
@@ -112,7 +154,7 @@ export default function SubscriberSettings() {
           </div>
           <div className="grid gap-2">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" value={data.email} onChange={(e) => setData((d) => ({ ...d, email: e.target.value }))} />
+            <Input id="email" type="email" value={data.email ?? ""} onChange={(e) => setData((d) => ({ ...d, email: e.target.value }))} />
           </div>
           <Separator />
 
@@ -121,21 +163,21 @@ export default function SubscriberSettings() {
             <h2 className="text-lg font-semibold">CRM Integration</h2>
             <div className="grid gap-2">
               <Label>GHL API key</Label>
-              <Input value={data.crm?.ghlApiKey ?? ""} onChange={(e) => setData((d) => ({ ...d, crm: { ...(d.crm ?? { ghlApiKey: "", ghlLocationId: "", syncClients: true, syncProposals: true }), ghlApiKey: e.target.value } }))} />
+              <Input value={data.crm?.ghlApiKey ?? ""} onChange={(e) => setData((d) => ({ ...d, crm: { ...d.crm, ghlApiKey: e.target.value } }))} />
             </div>
             <div className="grid gap-2">
               <Label>Location ID</Label>
-              <Input value={data.crm?.ghlLocationId ?? ""} onChange={(e) => setData((d) => ({ ...d, crm: { ...(d.crm ?? { ghlApiKey: "", ghlLocationId: "", syncClients: true, syncProposals: true }), ghlLocationId: e.target.value } }))} />
+              <Input value={data.crm?.ghlLocationId ?? ""} onChange={(e) => setData((d) => ({ ...d, crm: { ...d.crm, ghlLocationId: e.target.value } }))} />
             </div>
             <div className="flex items-center gap-2">
-              <label className="text-sm"><input type="checkbox" className="mr-2" checked={data.crm?.syncClients ?? true} onChange={(e) => setData((d) => ({ ...d, crm: { ...(d.crm ?? { ghlApiKey: "", ghlLocationId: "", syncClients: true, syncProposals: true }), syncClients: e.target.checked } }))} /> Sync clients</label>
-              <label className="text-sm"><input type="checkbox" className="mr-2" checked={data.crm?.syncProposals ?? true} onChange={(e) => setData((d) => ({ ...d, crm: { ...(d.crm ?? { ghlApiKey: "", ghlLocationId: "", syncClients: true, syncProposals: true }), syncProposals: e.target.checked } }))} /> Sync proposals</label>
+              <label className="text-sm"><input type="checkbox" className="mr-2" checked={data.crm.syncClients} onChange={(e) => setData((d) => ({ ...d, crm: { ...d.crm, syncClients: e.target.checked } }))} /> Sync clients</label>
+              <label className="text-sm"><input type="checkbox" className="mr-2" checked={data.crm.syncProposals} onChange={(e) => setData((d) => ({ ...d, crm: { ...d.crm, syncProposals: e.target.checked } }))} /> Sync proposals</label>
             </div>
             <div className="flex gap-2">
               <Button variant="outline" onClick={testConnection}>Test connection</Button>
               <Button onClick={syncNow}>Sync now</Button>
             </div>
-            {data.crm?.lastSyncedAt && (
+            {data.crm.lastSyncedAt && (
               <div className="text-xs text-muted-foreground">Last synced: {new Date(data.crm.lastSyncedAt).toLocaleString()}</div>
             )}
           </div>
@@ -147,12 +189,12 @@ export default function SubscriberSettings() {
             <h2 className="text-lg font-semibold">Subscription</h2>
             <div className="flex gap-2">
               {(["free", "pro", "business"] as const).map((p) => (
-                <Button key={p} variant={data.subscription?.plan === p ? "default" : "outline"} onClick={() => updatePlan(p)}>
+                <Button key={p} variant={data.subscription.plan === p ? "default" : "outline"} onClick={() => updatePlan(p)}>
                   {p}
                 </Button>
               ))}
             </div>
-            {data.subscription?.updatedAt && (
+            {data.subscription.updatedAt && (
               <div className="text-xs text-muted-foreground">Updated: {new Date(data.subscription.updatedAt).toLocaleString()}</div>
             )}
           </div>

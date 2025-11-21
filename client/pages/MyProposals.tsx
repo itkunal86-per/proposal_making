@@ -18,8 +18,13 @@ import {
   deleteProposal,
   duplicateProposal,
   listProposals,
+  createProposal,
+  updateProposal,
+  persistProposal,
 } from "@/services/proposalsService";
 import { type ClientRecord, listClients } from "@/services/clientsService";
+import { GenerateProposalDialog } from "@/components/GenerateProposalDialog";
+import { Wand2 } from "lucide-react";
 
 export default function MyProposals() {
   const { user } = useAuth();
@@ -36,6 +41,8 @@ export default function MyProposals() {
   const [isLoadingClients, setIsLoadingClients] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isGenerateDialogOpen, setIsGenerateDialogOpen] = useState(false);
+  const [baseProposalForGeneration, setBaseProposalForGeneration] = useState<Proposal | null>(null);
   const [formData, setFormData] = useState<CreateProposalInput>({
     title: "",
     client_id: "",
@@ -62,6 +69,31 @@ export default function MyProposals() {
   const handleOpenCreateDialog = async () => {
     await loadClients();
     setIsCreateDialogOpen(true);
+  };
+
+  const handleOpenGenerateDialog = async () => {
+    await loadClients();
+    const newProposal = await createProposal({
+      title: "New Proposal",
+      client: "",
+    });
+    setBaseProposalForGeneration(newProposal);
+    setIsGenerateDialogOpen(true);
+  };
+
+  const handleProposalGenerated = async (generated: Proposal) => {
+    try {
+      await persistProposal(generated);
+      await updateProposal(generated);
+      await refresh();
+      nav(`/proposals/${generated.id}/edit`);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to save generated proposal",
+        variant: "destructive",
+      });
+    }
   };
 
   const mine = useMemo(() => {
@@ -149,7 +181,13 @@ export default function MyProposals() {
             <h1 className="text-2xl font-bold">My Proposals</h1>
             <p className="text-muted-foreground">Create and manage proposals you own.</p>
           </div>
-          <Button onClick={handleOpenCreateDialog}>New proposal</Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={handleOpenGenerateDialog}>
+              <Wand2 className="mr-2 h-4 w-4" />
+              AI Generate
+            </Button>
+            <Button onClick={handleOpenCreateDialog}>New proposal</Button>
+          </div>
         </div>
 
         <Card className="mt-4 p-4">
@@ -320,6 +358,15 @@ export default function MyProposals() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {baseProposalForGeneration && (
+        <GenerateProposalDialog
+          open={isGenerateDialogOpen}
+          onOpenChange={setIsGenerateDialogOpen}
+          baseProposal={baseProposalForGeneration}
+          onProposalGenerated={handleProposalGenerated}
+        />
+      )}
     </AppShell>
   );
 }

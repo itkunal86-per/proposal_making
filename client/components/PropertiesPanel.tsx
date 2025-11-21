@@ -445,6 +445,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     };
 
     const sectionTitleStyles = (section as any).titleStyles || {};
+    const isMultiColumn = section.layout === "two-column" || section.layout === "three-column";
 
     return (
       <Card className="p-4 space-y-4">
@@ -847,10 +848,10 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                 type="number"
                 min="0"
                 max="100"
-                value={typeof section.gapAfter === "number" ? section.gapAfter : 24}
+                value={String(typeof section.gapAfter === "number" ? section.gapAfter : 24)}
                 onChange={(e) =>
                   handleUpdateSection({
-                    gapAfter: parseInt(e.target.value)
+                    gapAfter: parseInt(e.target.value) || 0
                   })
                 }
                 className="flex-1"
@@ -863,6 +864,32 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               Spacing between this section and the next one (default: 24px)
             </p>
           </div>
+
+          {isMultiColumn && (
+            <div>
+              <Label className="text-xs font-semibold">Gap Between Columns</Label>
+              <div className="flex gap-2 mt-2">
+                <Input
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={String(typeof section.columnGap === "number" ? section.columnGap : 24)}
+                  onChange={(e) =>
+                    handleUpdateSection({
+                      columnGap: parseInt(e.target.value) || 0
+                    })
+                  }
+                  className="flex-1"
+                />
+                <span className="text-sm text-muted-foreground self-center">
+                  px
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                Spacing between columns (default: 24px)
+              </p>
+            </div>
+          )}
         </div>
       </Card>
     );
@@ -1007,66 +1034,135 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                   />
                 </div>
 
-                <div className="grid grid-cols-4 gap-2">
-                  <div>
-                    <label className="text-xs font-medium">Top</label>
-                    <Input
-                      type="number"
-                      min="0"
-                      value={(section as any).columnStyles?.[columnIndex]?.paddingTop || 0}
-                      onChange={(e) => {
-                        const newColumnStyles = [...((section as any).columnStyles || [])];
-                        newColumnStyles[columnIndex] = { ...newColumnStyles[columnIndex], paddingTop: parseInt(e.target.value) };
-                        handleUpdateSection({ columnStyles: newColumnStyles });
-                      }}
-                      placeholder="0"
-                      className="text-xs"
-                    />
+                <div>
+                  <label className="text-xs font-medium block">Padding</label>
+                  <div className="grid grid-cols-4 gap-2 mt-2">
+                    <div>
+                      <label className="text-xs font-medium text-muted-foreground">Top</label>
+                      <Input
+                        type="number"
+                        min="0"
+                        value={(section as any).columnStyles?.[columnIndex]?.paddingTop || 0}
+                        onChange={(e) => {
+                          const newColumnStyles = [...((section as any).columnStyles || [])];
+                          newColumnStyles[columnIndex] = { ...newColumnStyles[columnIndex], paddingTop: parseInt(e.target.value) };
+                          handleUpdateSection({ columnStyles: newColumnStyles });
+                        }}
+                        placeholder="0"
+                        className="text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-muted-foreground">Right</label>
+                      <Input
+                        type="number"
+                        min="0"
+                        value={(section as any).columnStyles?.[columnIndex]?.paddingRight || 0}
+                        onChange={(e) => {
+                          const newColumnStyles = [...((section as any).columnStyles || [])];
+                          newColumnStyles[columnIndex] = { ...newColumnStyles[columnIndex], paddingRight: parseInt(e.target.value) };
+                          handleUpdateSection({ columnStyles: newColumnStyles });
+                        }}
+                        placeholder="0"
+                        className="text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-muted-foreground">Bottom</label>
+                      <Input
+                        type="number"
+                        min="0"
+                        value={(section as any).columnStyles?.[columnIndex]?.paddingBottom || 0}
+                        onChange={(e) => {
+                          const newColumnStyles = [...((section as any).columnStyles || [])];
+                          newColumnStyles[columnIndex] = { ...newColumnStyles[columnIndex], paddingBottom: parseInt(e.target.value) };
+                          handleUpdateSection({ columnStyles: newColumnStyles });
+                        }}
+                        placeholder="0"
+                        className="text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-muted-foreground">Left</label>
+                      <Input
+                        type="number"
+                        min="0"
+                        value={(section as any).columnStyles?.[columnIndex]?.paddingLeft || 0}
+                        onChange={(e) => {
+                          const newColumnStyles = [...((section as any).columnStyles || [])];
+                          newColumnStyles[columnIndex] = { ...newColumnStyles[columnIndex], paddingLeft: parseInt(e.target.value) };
+                          handleUpdateSection({ columnStyles: newColumnStyles });
+                        }}
+                        placeholder="0"
+                        className="text-xs"
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <label className="text-xs font-medium">Right</label>
-                    <Input
-                      type="number"
-                      min="0"
-                      value={(section as any).columnStyles?.[columnIndex]?.paddingRight || 0}
-                      onChange={(e) => {
-                        const newColumnStyles = [...((section as any).columnStyles || [])];
-                        newColumnStyles[columnIndex] = { ...newColumnStyles[columnIndex], paddingRight: parseInt(e.target.value) };
-                        handleUpdateSection({ columnStyles: newColumnStyles });
-                      }}
-                      placeholder="0"
-                      className="text-xs"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs font-medium">Bottom</label>
-                    <Input
-                      type="number"
-                      min="0"
-                      value={(section as any).columnStyles?.[columnIndex]?.paddingBottom || 0}
-                      onChange={(e) => {
-                        const newColumnStyles = [...((section as any).columnStyles || [])];
-                        newColumnStyles[columnIndex] = { ...newColumnStyles[columnIndex], paddingBottom: parseInt(e.target.value) };
-                        handleUpdateSection({ columnStyles: newColumnStyles });
-                      }}
-                      placeholder="0"
-                      className="text-xs"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs font-medium">Left</label>
-                    <Input
-                      type="number"
-                      min="0"
-                      value={(section as any).columnStyles?.[columnIndex]?.paddingLeft || 0}
-                      onChange={(e) => {
-                        const newColumnStyles = [...((section as any).columnStyles || [])];
-                        newColumnStyles[columnIndex] = { ...newColumnStyles[columnIndex], paddingLeft: parseInt(e.target.value) };
-                        handleUpdateSection({ columnStyles: newColumnStyles });
-                      }}
-                      placeholder="0"
-                      className="text-xs"
-                    />
+                </div>
+
+                <div>
+                  <label className="text-xs font-medium block">Margin</label>
+                  <div className="grid grid-cols-4 gap-2 mt-2">
+                    <div>
+                      <label className="text-xs font-medium text-muted-foreground">Top</label>
+                      <Input
+                        type="number"
+                        min="0"
+                        value={(section as any).columnStyles?.[columnIndex]?.marginTop || 0}
+                        onChange={(e) => {
+                          const newColumnStyles = [...((section as any).columnStyles || [])];
+                          newColumnStyles[columnIndex] = { ...newColumnStyles[columnIndex], marginTop: parseInt(e.target.value) };
+                          handleUpdateSection({ columnStyles: newColumnStyles });
+                        }}
+                        placeholder="0"
+                        className="text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-muted-foreground">Right</label>
+                      <Input
+                        type="number"
+                        min="0"
+                        value={(section as any).columnStyles?.[columnIndex]?.marginRight || 0}
+                        onChange={(e) => {
+                          const newColumnStyles = [...((section as any).columnStyles || [])];
+                          newColumnStyles[columnIndex] = { ...newColumnStyles[columnIndex], marginRight: parseInt(e.target.value) };
+                          handleUpdateSection({ columnStyles: newColumnStyles });
+                        }}
+                        placeholder="0"
+                        className="text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-muted-foreground">Bottom</label>
+                      <Input
+                        type="number"
+                        min="0"
+                        value={(section as any).columnStyles?.[columnIndex]?.marginBottom || 0}
+                        onChange={(e) => {
+                          const newColumnStyles = [...((section as any).columnStyles || [])];
+                          newColumnStyles[columnIndex] = { ...newColumnStyles[columnIndex], marginBottom: parseInt(e.target.value) };
+                          handleUpdateSection({ columnStyles: newColumnStyles });
+                        }}
+                        placeholder="0"
+                        className="text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-muted-foreground">Left</label>
+                      <Input
+                        type="number"
+                        min="0"
+                        value={(section as any).columnStyles?.[columnIndex]?.marginLeft || 0}
+                        onChange={(e) => {
+                          const newColumnStyles = [...((section as any).columnStyles || [])];
+                          newColumnStyles[columnIndex] = { ...newColumnStyles[columnIndex], marginLeft: parseInt(e.target.value) };
+                          handleUpdateSection({ columnStyles: newColumnStyles });
+                        }}
+                        placeholder="0"
+                        className="text-xs"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1540,10 +1636,10 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                 type="number"
                 min="0"
                 max="100"
-                value={typeof section.gapAfter === "number" ? section.gapAfter : 24}
+                value={String(typeof section.gapAfter === "number" ? section.gapAfter : 24)}
                 onChange={(e) =>
                   handleUpdateSection({
-                    gapAfter: parseInt(e.target.value)
+                    gapAfter: parseInt(e.target.value) || 0
                   })
                 }
                 className="flex-1"
