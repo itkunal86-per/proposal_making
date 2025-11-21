@@ -122,6 +122,10 @@ export default function ProposalEditor() {
     setP(next);
     setSaving(true);
     if (saveTimer.current) window.clearTimeout(saveTimer.current);
+
+    // Persist immediately to localStorage to prevent data loss on page reload
+    void persistProposal(next);
+
     saveTimer.current = window.setTimeout(() => {
       void updateProposal(next, { keepVersion, note });
       setSaving(false);
