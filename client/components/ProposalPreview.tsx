@@ -323,7 +323,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
             className={containerClassName}
             style={{
               gap: isMultiColumn ? `${columnGapValue}px` : undefined,
-              marginTop: index === 0 && typeof section.gapAfter === "number" ? `${section.gapAfter}px` : index === 0 ? "24px" : undefined,
+              marginTop: index === 0 ? (typeof section.gapAfter === "number" ? `${section.gapAfter}px` : "24px") : undefined,
               marginBottom: typeof section.gapAfter === "number" ? `${section.gapAfter}px` : "24px"
             }}
           >
