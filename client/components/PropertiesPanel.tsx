@@ -26,6 +26,13 @@ interface ElementStyle {
   paddingRight?: string;
   paddingBottom?: string;
   paddingLeft?: string;
+  marginTop?: string;
+  marginRight?: string;
+  marginBottom?: string;
+  marginLeft?: string;
+  paddingRight?: string;
+  paddingBottom?: string;
+  paddingLeft?: string;
 }
 
 interface PropertiesPanelProps {
