@@ -27,6 +27,10 @@ interface ElementProps {
   paddingRight?: string;
   paddingBottom?: string;
   paddingLeft?: string;
+  marginTop?: string;
+  marginRight?: string;
+  marginBottom?: string;
+  marginLeft?: string;
   bold?: boolean;
   italic?: boolean;
   underline?: boolean;
@@ -57,6 +61,10 @@ const SelectableElement: React.FC<ElementProps> = ({
   paddingRight,
   paddingBottom,
   paddingLeft,
+  marginTop,
+  marginRight,
+  marginBottom,
+  marginLeft,
   bold,
   italic,
   underline,
@@ -109,6 +117,10 @@ const SelectableElement: React.FC<ElementProps> = ({
     paddingRight: paddingRight ? `${paddingRight}px` : isCodeOnly ? "12px" : "0px",
     paddingBottom: paddingBottom ? `${paddingBottom}px` : isCodeOnly ? "12px" : "0px",
     paddingLeft: paddingLeft ? `${paddingLeft}px` : isCodeOnly ? "12px" : "0px",
+    marginTop: marginTop ? `${marginTop}px` : "0px",
+    marginRight: marginRight ? `${marginRight}px` : "0px",
+    marginBottom: marginBottom ? `${marginBottom}px` : "0px",
+    marginLeft: marginLeft ? `${marginLeft}px` : "0px",
     fontWeight: bold ? "bold" : "normal",
     fontStyle: italic ? "italic" : "normal",
     textDecoration: underline ? "underline" : strikethrough ? "line-through" : "none",
@@ -291,81 +303,392 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
         </div>
       )}
 
-      <div className="border-t pt-4 space-y-6">
-        {proposal.sections.map((section, index) => (
-          <div key={section.id} data-section-id={section.id} className="space-y-3">
-            <SelectableElement
-              id={`section-title-${section.id}`}
-              type="section-title"
-              selected={selectedElementId === `section-title-${section.id}`}
-              onSelect={() =>
-                onSelectElement(`section-title-${section.id}`, "section-title")
-              }
-              onAI={() => onAIElement?.(`section-title-${section.id}`, "section-title")}
-              value={section.title}
-              color={(section as any).titleStyles?.color}
-              fontSize={(section as any).titleStyles?.fontSize}
-              textAlign={(section as any).titleStyles?.textAlign}
-              backgroundColor={(section as any).titleStyles?.backgroundColor}
-              backgroundImage={(section as any).titleStyles?.backgroundImage}
-              backgroundSize={(section as any).titleStyles?.backgroundSize}
-              backgroundOpacity={(section as any).titleStyles?.backgroundOpacity}
-              borderColor={(section as any).titleStyles?.borderColor}
-              borderWidth={(section as any).titleStyles?.borderWidth}
-              borderRadius={(section as any).titleStyles?.borderRadius}
-              borderStyle={(section as any).titleStyles?.borderStyle}
-              paddingTop={(section as any).titleStyles?.paddingTop}
-              paddingRight={(section as any).titleStyles?.paddingRight}
-              paddingBottom={(section as any).titleStyles?.paddingBottom}
-              paddingLeft={(section as any).titleStyles?.paddingLeft}
-              bold={(section as any).titleStyles?.bold}
-              italic={(section as any).titleStyles?.italic}
-              underline={(section as any).titleStyles?.underline}
-              strikethrough={(section as any).titleStyles?.strikethrough}
-              bulletList={(section as any).titleStyles?.bulletList}
-              numberList={(section as any).titleStyles?.numberList}
-              code={(section as any).titleStyles?.code}
-            >
-              {section.title}
-            </SelectableElement>
+      <div className="border-t pt-4">
+        {proposal.sections.map((section, index) => {
+          const isMultiColumn = section.layout === "two-column" || section.layout === "three-column";
+          const containerClassName =
+            section.layout === "two-column" ? "grid grid-cols-2 gap-6" :
+            section.layout === "three-column" ? "grid grid-cols-3 gap-6" :
+            "space-y-3";
 
-            <SelectableElement
-              id={`section-content-${section.id}`}
-              type="section-content"
-              selected={selectedElementId === `section-content-${section.id}`}
-              onSelect={() =>
-                onSelectElement(`section-content-${section.id}`, "section-content")
-              }
-              onAI={() => onAIElement?.(`section-content-${section.id}`, "section-content")}
-              value={section.content}
-              color={(section as any).contentStyles?.color}
-              fontSize={(section as any).contentStyles?.fontSize}
-              textAlign={(section as any).contentStyles?.textAlign}
-              backgroundColor={(section as any).contentStyles?.backgroundColor}
-              backgroundImage={(section as any).contentStyles?.backgroundImage}
-              backgroundSize={(section as any).contentStyles?.backgroundSize}
-              backgroundOpacity={(section as any).contentStyles?.backgroundOpacity}
-              borderColor={(section as any).contentStyles?.borderColor}
-              borderWidth={(section as any).contentStyles?.borderWidth}
-              borderRadius={(section as any).contentStyles?.borderRadius}
-              borderStyle={(section as any).contentStyles?.borderStyle}
-              paddingTop={(section as any).contentStyles?.paddingTop}
-              paddingRight={(section as any).contentStyles?.paddingRight}
-              paddingBottom={(section as any).contentStyles?.paddingBottom}
-              paddingLeft={(section as any).contentStyles?.paddingLeft}
-              bold={(section as any).contentStyles?.bold}
-              italic={(section as any).contentStyles?.italic}
-              underline={(section as any).contentStyles?.underline}
-              strikethrough={(section as any).contentStyles?.strikethrough}
-              bulletList={(section as any).contentStyles?.bulletList}
-              numberList={(section as any).contentStyles?.numberList}
-              code={(section as any).contentStyles?.code}
-            >
-              {replaceVariables(section.content, variables)}
-            </SelectableElement>
+          if (section.layout && section.layout !== "single") {
+            console.log(`Rendering section "${section.title}" with layout: ${section.layout}`, { containerClassName, isMultiColumn });
+          }
+
+          return (
+          <div
+            key={section.id}
+            data-section-id={section.id}
+            className={containerClassName}
+            style={{
+              marginBottom: typeof section.gapAfter === "number" ? `${section.gapAfter}px` : "24px"
+            }}
+          >
+            {isMultiColumn && (
+              <div className="col-span-full">
+                <SelectableElement
+                  id={`section-title-${section.id}`}
+                  type="section-title"
+                  selected={selectedElementId === `section-title-${section.id}`}
+                  onSelect={() =>
+                    onSelectElement(`section-title-${section.id}`, "section-title")
+                  }
+                  onAI={() => onAIElement?.(`section-title-${section.id}`, "section-title")}
+                  value={section.title}
+                  color={(section as any).titleStyles?.color}
+                  fontSize={(section as any).titleStyles?.fontSize}
+                  textAlign={(section as any).titleStyles?.textAlign}
+                  backgroundColor={(section as any).titleStyles?.backgroundColor}
+                  backgroundImage={(section as any).titleStyles?.backgroundImage}
+                  backgroundSize={(section as any).titleStyles?.backgroundSize}
+                  backgroundOpacity={(section as any).titleStyles?.backgroundOpacity}
+                  borderColor={(section as any).titleStyles?.borderColor}
+                  borderWidth={(section as any).titleStyles?.borderWidth}
+                  borderRadius={(section as any).titleStyles?.borderRadius}
+                  borderStyle={(section as any).titleStyles?.borderStyle}
+                  paddingTop={(section as any).titleStyles?.paddingTop}
+                  paddingRight={(section as any).titleStyles?.paddingRight}
+                  paddingBottom={(section as any).titleStyles?.paddingBottom}
+                  paddingLeft={(section as any).titleStyles?.paddingLeft}
+                  bold={(section as any).titleStyles?.bold}
+                  italic={(section as any).titleStyles?.italic}
+                  underline={(section as any).titleStyles?.underline}
+                  strikethrough={(section as any).titleStyles?.strikethrough}
+                  bulletList={(section as any).titleStyles?.bulletList}
+                  numberList={(section as any).titleStyles?.numberList}
+                  code={(section as any).titleStyles?.code}
+                >
+                  {section.title}
+                </SelectableElement>
+              </div>
+            )}
+            {!isMultiColumn && (
+              <SelectableElement
+                id={`section-title-${section.id}`}
+                type="section-title"
+                selected={selectedElementId === `section-title-${section.id}`}
+                onSelect={() =>
+                  onSelectElement(`section-title-${section.id}`, "section-title")
+                }
+                onAI={() => onAIElement?.(`section-title-${section.id}`, "section-title")}
+                value={section.title}
+                color={(section as any).titleStyles?.color}
+                fontSize={(section as any).titleStyles?.fontSize}
+                textAlign={(section as any).titleStyles?.textAlign}
+                backgroundColor={(section as any).titleStyles?.backgroundColor}
+                backgroundImage={(section as any).titleStyles?.backgroundImage}
+                backgroundSize={(section as any).titleStyles?.backgroundSize}
+                backgroundOpacity={(section as any).titleStyles?.backgroundOpacity}
+                borderColor={(section as any).titleStyles?.borderColor}
+                borderWidth={(section as any).titleStyles?.borderWidth}
+                borderRadius={(section as any).titleStyles?.borderRadius}
+                borderStyle={(section as any).titleStyles?.borderStyle}
+                paddingTop={(section as any).titleStyles?.paddingTop}
+                paddingRight={(section as any).titleStyles?.paddingRight}
+                paddingBottom={(section as any).titleStyles?.paddingBottom}
+                paddingLeft={(section as any).titleStyles?.paddingLeft}
+                bold={(section as any).titleStyles?.bold}
+                italic={(section as any).titleStyles?.italic}
+                underline={(section as any).titleStyles?.underline}
+                strikethrough={(section as any).titleStyles?.strikethrough}
+                bulletList={(section as any).titleStyles?.bulletList}
+                numberList={(section as any).titleStyles?.numberList}
+                code={(section as any).titleStyles?.code}
+              >
+                {section.title}
+              </SelectableElement>
+            )}
+
+            {!isMultiColumn && (
+              <SelectableElement
+                id={`section-content-${section.id}`}
+                type="section-content"
+                selected={selectedElementId === `section-content-${section.id}`}
+                onSelect={() =>
+                  onSelectElement(`section-content-${section.id}`, "section-content")
+                }
+                onAI={() => onAIElement?.(`section-content-${section.id}`, "section-content")}
+                value={section.content}
+                color={(section as any).contentStyles?.color}
+                fontSize={(section as any).contentStyles?.fontSize}
+                textAlign={(section as any).contentStyles?.textAlign}
+                backgroundColor={(section as any).contentStyles?.backgroundColor}
+                backgroundImage={(section as any).contentStyles?.backgroundImage}
+                backgroundSize={(section as any).contentStyles?.backgroundSize}
+                backgroundOpacity={(section as any).contentStyles?.backgroundOpacity}
+                borderColor={(section as any).contentStyles?.borderColor}
+                borderWidth={(section as any).contentStyles?.borderWidth}
+                borderRadius={(section as any).contentStyles?.borderRadius}
+                borderStyle={(section as any).contentStyles?.borderStyle}
+                paddingTop={(section as any).contentStyles?.paddingTop}
+                paddingRight={(section as any).contentStyles?.paddingRight}
+                paddingBottom={(section as any).contentStyles?.paddingBottom}
+                paddingLeft={(section as any).contentStyles?.paddingLeft}
+                bold={(section as any).contentStyles?.bold}
+                italic={(section as any).contentStyles?.italic}
+                underline={(section as any).contentStyles?.underline}
+                strikethrough={(section as any).contentStyles?.strikethrough}
+                bulletList={(section as any).contentStyles?.bulletList}
+                numberList={(section as any).contentStyles?.numberList}
+                code={(section as any).contentStyles?.code}
+              >
+                {replaceVariables(section.content, variables)}
+              </SelectableElement>
+            )}
+
+            {isMultiColumn && (
+              <>
+                {section.layout === "two-column" && (
+                  <>
+                    <div style={{
+                      backgroundColor: (section as any).columnStyles?.[0]?.backgroundColor || "transparent",
+                      borderWidth: (section as any).columnStyles?.[0]?.borderWidth ? `${(section as any).columnStyles[0].borderWidth}px` : "0px",
+                      borderColor: (section as any).columnStyles?.[0]?.borderColor || "#000000",
+                      borderStyle: (section as any).columnStyles?.[0]?.borderWidth ? "solid" : "none",
+                      borderRadius: (section as any).columnStyles?.[0]?.borderRadius ? `${(section as any).columnStyles[0].borderRadius}px` : "0px",
+                      paddingTop: (section as any).columnStyles?.[0]?.paddingTop ? `${(section as any).columnStyles[0].paddingTop}px` : "0px",
+                      paddingRight: (section as any).columnStyles?.[0]?.paddingRight ? `${(section as any).columnStyles[0].paddingRight}px` : "0px",
+                      paddingBottom: (section as any).columnStyles?.[0]?.paddingBottom ? `${(section as any).columnStyles[0].paddingBottom}px` : "0px",
+                      paddingLeft: (section as any).columnStyles?.[0]?.paddingLeft ? `${(section as any).columnStyles[0].paddingLeft}px` : "0px",
+                      marginTop: (section as any).columnStyles?.[0]?.marginTop ? `${(section as any).columnStyles[0].marginTop}px` : "0px",
+                      marginRight: (section as any).columnStyles?.[0]?.marginRight ? `${(section as any).columnStyles[0].marginRight}px` : "0px",
+                      marginBottom: (section as any).columnStyles?.[0]?.marginBottom ? `${(section as any).columnStyles[0].marginBottom}px` : "0px",
+                      marginLeft: (section as any).columnStyles?.[0]?.marginLeft ? `${(section as any).columnStyles[0].marginLeft}px` : "0px",
+                    }}>
+                      <SelectableElement
+                        id={`section-content-${section.id}-col1`}
+                        type="section-content"
+                        selected={selectedElementId === `section-content-${section.id}-col1`}
+                        onSelect={() =>
+                          onSelectElement(`section-content-${section.id}-col1`, "section-content")
+                        }
+                        onAI={() => onAIElement?.(`section-content-${section.id}-col1`, "section-content")}
+                        value={section.content}
+                        color={(section as any).contentStyles?.color}
+                        fontSize={(section as any).contentStyles?.fontSize}
+                        textAlign={(section as any).contentStyles?.textAlign}
+                        backgroundColor={(section as any).contentStyles?.backgroundColor}
+                        backgroundImage={(section as any).contentStyles?.backgroundImage}
+                        backgroundSize={(section as any).contentStyles?.backgroundSize}
+                        backgroundOpacity={(section as any).contentStyles?.backgroundOpacity}
+                        borderColor={(section as any).contentStyles?.borderColor}
+                        borderWidth={(section as any).contentStyles?.borderWidth}
+                        borderRadius={(section as any).contentStyles?.borderRadius}
+                        borderStyle={(section as any).contentStyles?.borderStyle}
+                        paddingTop={(section as any).contentStyles?.paddingTop}
+                        paddingRight={(section as any).contentStyles?.paddingRight}
+                        paddingBottom={(section as any).contentStyles?.paddingBottom}
+                        paddingLeft={(section as any).contentStyles?.paddingLeft}
+                        bold={(section as any).contentStyles?.bold}
+                        italic={(section as any).contentStyles?.italic}
+                        underline={(section as any).contentStyles?.underline}
+                        strikethrough={(section as any).contentStyles?.strikethrough}
+                        bulletList={(section as any).contentStyles?.bulletList}
+                        numberList={(section as any).contentStyles?.numberList}
+                        code={(section as any).contentStyles?.code}
+                      >
+                        {replaceVariables((section as any).columnContents?.[0] || "", variables)}
+                      </SelectableElement>
+                    </div>
+                    <div style={{
+                      backgroundColor: (section as any).columnStyles?.[1]?.backgroundColor || "transparent",
+                      borderWidth: (section as any).columnStyles?.[1]?.borderWidth ? `${(section as any).columnStyles[1].borderWidth}px` : "0px",
+                      borderColor: (section as any).columnStyles?.[1]?.borderColor || "#000000",
+                      borderStyle: (section as any).columnStyles?.[1]?.borderWidth ? "solid" : "none",
+                      borderRadius: (section as any).columnStyles?.[1]?.borderRadius ? `${(section as any).columnStyles[1].borderRadius}px` : "0px",
+                      paddingTop: (section as any).columnStyles?.[1]?.paddingTop ? `${(section as any).columnStyles[1].paddingTop}px` : "0px",
+                      paddingRight: (section as any).columnStyles?.[1]?.paddingRight ? `${(section as any).columnStyles[1].paddingRight}px` : "0px",
+                      paddingBottom: (section as any).columnStyles?.[1]?.paddingBottom ? `${(section as any).columnStyles[1].paddingBottom}px` : "0px",
+                      paddingLeft: (section as any).columnStyles?.[1]?.paddingLeft ? `${(section as any).columnStyles[1].paddingLeft}px` : "0px",
+                    }}>
+                      <SelectableElement
+                        id={`section-content-${section.id}-col2`}
+                        type="section-content"
+                        selected={selectedElementId === `section-content-${section.id}-col2`}
+                        onSelect={() =>
+                          onSelectElement(`section-content-${section.id}-col2`, "section-content")
+                        }
+                        onAI={() => onAIElement?.(`section-content-${section.id}-col2`, "section-content")}
+                        value={section.content}
+                        color={(section as any).contentStyles?.color}
+                        fontSize={(section as any).contentStyles?.fontSize}
+                        textAlign={(section as any).contentStyles?.textAlign}
+                        backgroundColor={(section as any).contentStyles?.backgroundColor}
+                        backgroundImage={(section as any).contentStyles?.backgroundImage}
+                        backgroundSize={(section as any).contentStyles?.backgroundSize}
+                        backgroundOpacity={(section as any).contentStyles?.backgroundOpacity}
+                        borderColor={(section as any).contentStyles?.borderColor}
+                        borderWidth={(section as any).contentStyles?.borderWidth}
+                        borderRadius={(section as any).contentStyles?.borderRadius}
+                        borderStyle={(section as any).contentStyles?.borderStyle}
+                        paddingTop={(section as any).contentStyles?.paddingTop}
+                        paddingRight={(section as any).contentStyles?.paddingRight}
+                        paddingBottom={(section as any).contentStyles?.paddingBottom}
+                        paddingLeft={(section as any).contentStyles?.paddingLeft}
+                        bold={(section as any).contentStyles?.bold}
+                        italic={(section as any).contentStyles?.italic}
+                        underline={(section as any).contentStyles?.underline}
+                        strikethrough={(section as any).contentStyles?.strikethrough}
+                        bulletList={(section as any).contentStyles?.bulletList}
+                        numberList={(section as any).contentStyles?.numberList}
+                        code={(section as any).contentStyles?.code}
+                      >
+                        {replaceVariables((section as any).columnContents?.[1] || "", variables)}
+                      </SelectableElement>
+                    </div>
+                  </>
+                )}
+                {section.layout === "three-column" && (
+                  <>
+                    <div style={{
+                      backgroundColor: (section as any).columnStyles?.[0]?.backgroundColor || "transparent",
+                      borderWidth: (section as any).columnStyles?.[0]?.borderWidth ? `${(section as any).columnStyles[0].borderWidth}px` : "0px",
+                      borderColor: (section as any).columnStyles?.[0]?.borderColor || "#000000",
+                      borderStyle: (section as any).columnStyles?.[0]?.borderWidth ? "solid" : "none",
+                      borderRadius: (section as any).columnStyles?.[0]?.borderRadius ? `${(section as any).columnStyles[0].borderRadius}px` : "0px",
+                      paddingTop: (section as any).columnStyles?.[0]?.paddingTop ? `${(section as any).columnStyles[0].paddingTop}px` : "0px",
+                      paddingRight: (section as any).columnStyles?.[0]?.paddingRight ? `${(section as any).columnStyles[0].paddingRight}px` : "0px",
+                      paddingBottom: (section as any).columnStyles?.[0]?.paddingBottom ? `${(section as any).columnStyles[0].paddingBottom}px` : "0px",
+                      paddingLeft: (section as any).columnStyles?.[0]?.paddingLeft ? `${(section as any).columnStyles[0].paddingLeft}px` : "0px",
+                      marginTop: (section as any).columnStyles?.[0]?.marginTop ? `${(section as any).columnStyles[0].marginTop}px` : "0px",
+                      marginRight: (section as any).columnStyles?.[0]?.marginRight ? `${(section as any).columnStyles[0].marginRight}px` : "0px",
+                      marginBottom: (section as any).columnStyles?.[0]?.marginBottom ? `${(section as any).columnStyles[0].marginBottom}px` : "0px",
+                      marginLeft: (section as any).columnStyles?.[0]?.marginLeft ? `${(section as any).columnStyles[0].marginLeft}px` : "0px",
+                    }}>
+                      <SelectableElement
+                        id={`section-content-${section.id}-col1`}
+                        type="section-content"
+                        selected={selectedElementId === `section-content-${section.id}-col1`}
+                        onSelect={() =>
+                          onSelectElement(`section-content-${section.id}-col1`, "section-content")
+                        }
+                        onAI={() => onAIElement?.(`section-content-${section.id}-col1`, "section-content")}
+                        value={section.content}
+                        color={(section as any).contentStyles?.color}
+                        fontSize={(section as any).contentStyles?.fontSize}
+                        textAlign={(section as any).contentStyles?.textAlign}
+                        backgroundColor={(section as any).contentStyles?.backgroundColor}
+                        backgroundImage={(section as any).contentStyles?.backgroundImage}
+                        backgroundSize={(section as any).contentStyles?.backgroundSize}
+                        backgroundOpacity={(section as any).contentStyles?.backgroundOpacity}
+                        borderColor={(section as any).contentStyles?.borderColor}
+                        borderWidth={(section as any).contentStyles?.borderWidth}
+                        borderRadius={(section as any).contentStyles?.borderRadius}
+                        borderStyle={(section as any).contentStyles?.borderStyle}
+                        paddingTop={(section as any).contentStyles?.paddingTop}
+                        paddingRight={(section as any).contentStyles?.paddingRight}
+                        paddingBottom={(section as any).contentStyles?.paddingBottom}
+                        paddingLeft={(section as any).contentStyles?.paddingLeft}
+                        bold={(section as any).contentStyles?.bold}
+                        italic={(section as any).contentStyles?.italic}
+                        underline={(section as any).contentStyles?.underline}
+                        strikethrough={(section as any).contentStyles?.strikethrough}
+                        bulletList={(section as any).contentStyles?.bulletList}
+                        numberList={(section as any).contentStyles?.numberList}
+                        code={(section as any).contentStyles?.code}
+                      >
+                        {replaceVariables((section as any).columnContents?.[0] || "", variables)}
+                      </SelectableElement>
+                    </div>
+                    <div style={{
+                      backgroundColor: (section as any).columnStyles?.[1]?.backgroundColor || "transparent",
+                      borderWidth: (section as any).columnStyles?.[1]?.borderWidth ? `${(section as any).columnStyles[1].borderWidth}px` : "0px",
+                      borderColor: (section as any).columnStyles?.[1]?.borderColor || "#000000",
+                      borderStyle: (section as any).columnStyles?.[1]?.borderWidth ? "solid" : "none",
+                      borderRadius: (section as any).columnStyles?.[1]?.borderRadius ? `${(section as any).columnStyles[1].borderRadius}px` : "0px",
+                      paddingTop: (section as any).columnStyles?.[1]?.paddingTop ? `${(section as any).columnStyles[1].paddingTop}px` : "0px",
+                      paddingRight: (section as any).columnStyles?.[1]?.paddingRight ? `${(section as any).columnStyles[1].paddingRight}px` : "0px",
+                      paddingBottom: (section as any).columnStyles?.[1]?.paddingBottom ? `${(section as any).columnStyles[1].paddingBottom}px` : "0px",
+                      paddingLeft: (section as any).columnStyles?.[1]?.paddingLeft ? `${(section as any).columnStyles[1].paddingLeft}px` : "0px",
+                    }}>
+                      <SelectableElement
+                        id={`section-content-${section.id}-col2`}
+                        type="section-content"
+                        selected={selectedElementId === `section-content-${section.id}-col2`}
+                        onSelect={() =>
+                          onSelectElement(`section-content-${section.id}-col2`, "section-content")
+                        }
+                        onAI={() => onAIElement?.(`section-content-${section.id}-col2`, "section-content")}
+                        value={section.content}
+                        color={(section as any).contentStyles?.color}
+                        fontSize={(section as any).contentStyles?.fontSize}
+                        textAlign={(section as any).contentStyles?.textAlign}
+                        backgroundColor={(section as any).contentStyles?.backgroundColor}
+                        backgroundImage={(section as any).contentStyles?.backgroundImage}
+                        backgroundSize={(section as any).contentStyles?.backgroundSize}
+                        backgroundOpacity={(section as any).contentStyles?.backgroundOpacity}
+                        borderColor={(section as any).contentStyles?.borderColor}
+                        borderWidth={(section as any).contentStyles?.borderWidth}
+                        borderRadius={(section as any).contentStyles?.borderRadius}
+                        borderStyle={(section as any).contentStyles?.borderStyle}
+                        paddingTop={(section as any).contentStyles?.paddingTop}
+                        paddingRight={(section as any).contentStyles?.paddingRight}
+                        paddingBottom={(section as any).contentStyles?.paddingBottom}
+                        paddingLeft={(section as any).contentStyles?.paddingLeft}
+                        bold={(section as any).contentStyles?.bold}
+                        italic={(section as any).contentStyles?.italic}
+                        underline={(section as any).contentStyles?.underline}
+                        strikethrough={(section as any).contentStyles?.strikethrough}
+                        bulletList={(section as any).contentStyles?.bulletList}
+                        numberList={(section as any).contentStyles?.numberList}
+                        code={(section as any).contentStyles?.code}
+                      >
+                        {replaceVariables((section as any).columnContents?.[1] || "", variables)}
+                      </SelectableElement>
+                    </div>
+                    <div style={{
+                      backgroundColor: (section as any).columnStyles?.[2]?.backgroundColor || "transparent",
+                      borderWidth: (section as any).columnStyles?.[2]?.borderWidth ? `${(section as any).columnStyles[2].borderWidth}px` : "0px",
+                      borderColor: (section as any).columnStyles?.[2]?.borderColor || "#000000",
+                      borderStyle: (section as any).columnStyles?.[2]?.borderWidth ? "solid" : "none",
+                      borderRadius: (section as any).columnStyles?.[2]?.borderRadius ? `${(section as any).columnStyles[2].borderRadius}px` : "0px",
+                      paddingTop: (section as any).columnStyles?.[2]?.paddingTop ? `${(section as any).columnStyles[2].paddingTop}px` : "0px",
+                      paddingRight: (section as any).columnStyles?.[2]?.paddingRight ? `${(section as any).columnStyles[2].paddingRight}px` : "0px",
+                      paddingBottom: (section as any).columnStyles?.[2]?.paddingBottom ? `${(section as any).columnStyles[2].paddingBottom}px` : "0px",
+                      paddingLeft: (section as any).columnStyles?.[2]?.paddingLeft ? `${(section as any).columnStyles[2].paddingLeft}px` : "0px",
+                    }}>
+                      <SelectableElement
+                        id={`section-content-${section.id}-col3`}
+                        type="section-content"
+                        selected={selectedElementId === `section-content-${section.id}-col3`}
+                        onSelect={() =>
+                          onSelectElement(`section-content-${section.id}-col3`, "section-content")
+                        }
+                        onAI={() => onAIElement?.(`section-content-${section.id}-col3`, "section-content")}
+                        value={section.content}
+                        color={(section as any).contentStyles?.color}
+                        fontSize={(section as any).contentStyles?.fontSize}
+                        textAlign={(section as any).contentStyles?.textAlign}
+                        backgroundColor={(section as any).contentStyles?.backgroundColor}
+                        backgroundImage={(section as any).contentStyles?.backgroundImage}
+                        backgroundSize={(section as any).contentStyles?.backgroundSize}
+                        backgroundOpacity={(section as any).contentStyles?.backgroundOpacity}
+                        borderColor={(section as any).contentStyles?.borderColor}
+                        borderWidth={(section as any).contentStyles?.borderWidth}
+                        borderRadius={(section as any).contentStyles?.borderRadius}
+                        borderStyle={(section as any).contentStyles?.borderStyle}
+                        paddingTop={(section as any).contentStyles?.paddingTop}
+                        paddingRight={(section as any).contentStyles?.paddingRight}
+                        paddingBottom={(section as any).contentStyles?.paddingBottom}
+                        paddingLeft={(section as any).contentStyles?.paddingLeft}
+                        bold={(section as any).contentStyles?.bold}
+                        italic={(section as any).contentStyles?.italic}
+                        underline={(section as any).contentStyles?.underline}
+                        strikethrough={(section as any).contentStyles?.strikethrough}
+                        bulletList={(section as any).contentStyles?.bulletList}
+                        numberList={(section as any).contentStyles?.numberList}
+                        code={(section as any).contentStyles?.code}
+                      >
+                        {replaceVariables((section as any).columnContents?.[2] || "", variables)}
+                      </SelectableElement>
+                    </div>
+                  </>
+                )}
+              </>
+            )}
 
             {section.media && section.media.length > 0 && (
-              <div className="grid gap-4 mt-4">
+              <div className={isMultiColumn ? "col-span-full grid gap-4 mt-4" : "grid gap-4 mt-4"}>
                 {section.media.map((media, mIndex) => (
                   <SelectableElement
                     key={mIndex}
@@ -395,7 +718,8 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
               </div>
             )}
           </div>
-        ))}
+        );
+        })}
       </div>
 
     </div>

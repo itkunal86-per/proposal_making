@@ -7,6 +7,10 @@ export interface ProposalSection {
   id: string;
   title: string;
   content: string;
+  layout?: "single" | "two-column" | "three-column";
+  columnContents?: string[];
+  columnStyles?: Record<string, any>[];
+  gapAfter?: number;
   media?: { type: "image" | "video"; url: string }[];
   comments?: { id: string; author: string; text: string; createdAt: number }[];
   titleStyles?: Record<string, any>;
@@ -95,6 +99,10 @@ const sectionSchema = z.object({
   id: idSchema,
   title: z.string(),
   content: z.string(),
+  layout: z.union([z.literal("single"), z.literal("two-column"), z.literal("three-column")]).optional(),
+  columnContents: z.array(z.string()).optional(),
+  columnStyles: z.array(z.record(z.any())).optional(),
+  gapAfter: z.number().optional(),
   media: z.array(z.object({ type: z.union([z.literal("image"), z.literal("video")]), url: z.string() })).optional(),
   comments: z.array(z.object({ id: z.union([z.string(), z.number()]), author: z.string(), text: z.string(), createdAt: z.number() })).optional(),
   titleStyles: z.union([z.record(z.any()), z.array(z.any())]).optional(),
@@ -151,6 +159,10 @@ function normalizeProposal(raw: z.infer<typeof proposalSchema>): Proposal {
       id: String(s.id!),
       title: s.title!,
       content: s.content!,
+      layout: s.layout || "single",
+      columnContents: s.columnContents || undefined,
+      columnStyles: s.columnStyles ? s.columnStyles.map(normalizeStyles) : undefined,
+      gapAfter: s.gapAfter || undefined,
       media: (s.media ?? []).map((m) => ({
         type: m.type!,
         url: m.url!,
@@ -223,9 +235,9 @@ function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmai
     createdAt: createdAtMs,
     updatedAt: updatedAtMs,
     sections: [
-      { id: uuid(), title: "Overview", content: "", media: [], comments: [] },
-      { id: uuid(), title: "Scope", content: "", media: [], comments: [] },
-      { id: uuid(), title: "Timeline", content: "", media: [], comments: [] },
+      { id: uuid(), title: "Overview", content: "", layout: "single", media: [], comments: [] },
+      { id: uuid(), title: "Scope", content: "", layout: "single", media: [], comments: [] },
+      { id: uuid(), title: "Timeline", content: "", layout: "single", media: [], comments: [] },
     ],
     pricing: {
       currency: apiProposal.currency || "USD",
@@ -596,16 +608,20 @@ export async function reorderSection(p: Proposal, from: number, to: number): Pro
   return updated;
 }
 
-export async function addSection(p: Proposal, title = "New Section"): Promise<Proposal> {
-  const newSection = { id: uuid(), title, content: "", media: [], comments: [] };
+export async function addSection(p: Proposal, title = "New Section", layout: "single" | "two-column" | "three-column" = "single"): Promise<Proposal> {
+  const columnCount = layout === "two-column" ? 2 : layout === "three-column" ? 3 : 0;
+  const columnContents = columnCount > 0 ? Array(columnCount).fill("") : undefined;
+  const columnStyles = columnCount > 0 ? Array(columnCount).fill({}) : undefined;
+
+  const newSection = { id: uuid(), title, content: "", layout, columnContents, columnStyles, media: [], comments: [] };
   const updated = {
     ...p,
     sections: [...p.sections, newSection],
     updatedAt: Date.now(),
   };
-  console.log("Adding section:", { title, newSectionId: newSection.id, totalSections: updated.sections.length });
+  console.log("Adding section:", { title, newSectionId: newSection.id, layout, columnCount, totalSections: updated.sections.length, newSection });
   await updateProposal(updated);
-  console.log("Add section completed");
+  console.log("Add section completed", { sections: updated.sections.map(s => ({ id: s.id, title: s.title, layout: s.layout })) });
   return updated;
 }
 

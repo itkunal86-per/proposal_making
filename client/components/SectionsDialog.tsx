@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { Proposal, addSection, removeSection, reorderSection } from "@/services/proposalsService";
+import { SectionTemplateDialog, type SectionLayout } from "@/components/SectionTemplateDialog";
 import { ChevronUp, ChevronDown, Trash2, Plus } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
@@ -30,14 +31,14 @@ export const SectionsDialog: React.FC<SectionsDialogProps> = ({
   onUpdateProposal,
 }) => {
   const [loading, setLoading] = useState(false);
+  const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
 
-  const handleAddSection = async () => {
+  const handleAddSection = async (title: string, layout: SectionLayout) => {
     try {
       setLoading(true);
-      const title = `Section ${proposal.sections.length + 1}`;
-      const updated = await addSection(proposal, title);
+      const updated = await addSection(proposal, title, layout);
       onUpdateProposal(updated);
-      toast({ title: "Section added", description: "New section has been created." });
+      toast({ title: "Section added", description: `New ${layout} section has been created.` });
     } catch (error) {
       console.error("Error adding section:", error);
       toast({ title: "Error", description: "Failed to add section.", variant: "destructive" });
@@ -149,10 +150,17 @@ export const SectionsDialog: React.FC<SectionsDialogProps> = ({
 
         <Separator className="my-3" />
 
-        <Button onClick={handleAddSection} disabled={loading} className="w-full">
+        <Button onClick={() => setTemplateDialogOpen(true)} disabled={loading} className="w-full">
           <Plus className="w-4 h-4 mr-2" />
           Add Section
         </Button>
+
+        <SectionTemplateDialog
+          open={templateDialogOpen}
+          onOpenChange={setTemplateDialogOpen}
+          onSelectTemplate={handleAddSection}
+          loading={loading}
+        />
       </DialogContent>
     </Dialog>
   );
