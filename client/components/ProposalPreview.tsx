@@ -292,9 +292,17 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
       )}
 
       <div className="border-t pt-4 space-y-6">
-        {proposal.sections.map((section, index) => (
-          <div key={section.id} data-section-id={section.id} className="space-y-3">
-            <SelectableElement
+        {proposal.sections.map((section, index) => {
+          const sectionClassName =
+            section.layout === "two-column" ? "grid grid-cols-2 gap-6" :
+            section.layout === "three-column" ? "grid grid-cols-3 gap-6" :
+            "space-y-3";
+
+          return (
+          <div key={section.id} data-section-id={section.id} className={sectionClassName}>
+            {(section.layout === "single" || !section.layout) && (
+              <>
+                <SelectableElement
               id={`section-title-${section.id}`}
               type="section-title"
               selected={selectedElementId === `section-title-${section.id}`}
@@ -365,7 +373,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
             </SelectableElement>
 
             {section.media && section.media.length > 0 && (
-              <div className="grid gap-4 mt-4">
+              <div className="grid gap-4 mt-4 col-span-full">
                 {section.media.map((media, mIndex) => (
                   <SelectableElement
                     key={mIndex}
@@ -394,8 +402,117 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                 ))}
               </div>
             )}
+              </>
+            )}
+            {(section.layout === "two-column" || section.layout === "three-column") && (
+              <>
+                <div className="col-span-full">
+                  <SelectableElement
+                    id={`section-title-${section.id}`}
+                    type="section-title"
+                    selected={selectedElementId === `section-title-${section.id}`}
+                    onSelect={() =>
+                      onSelectElement(`section-title-${section.id}`, "section-title")
+                    }
+                    onAI={() => onAIElement?.(`section-title-${section.id}`, "section-title")}
+                    value={section.title}
+                    color={(section as any).titleStyles?.color}
+                    fontSize={(section as any).titleStyles?.fontSize}
+                    textAlign={(section as any).titleStyles?.textAlign}
+                    backgroundColor={(section as any).titleStyles?.backgroundColor}
+                    backgroundImage={(section as any).titleStyles?.backgroundImage}
+                    backgroundSize={(section as any).titleStyles?.backgroundSize}
+                    backgroundOpacity={(section as any).titleStyles?.backgroundOpacity}
+                    borderColor={(section as any).titleStyles?.borderColor}
+                    borderWidth={(section as any).titleStyles?.borderWidth}
+                    borderRadius={(section as any).titleStyles?.borderRadius}
+                    borderStyle={(section as any).titleStyles?.borderStyle}
+                    paddingTop={(section as any).titleStyles?.paddingTop}
+                    paddingRight={(section as any).titleStyles?.paddingRight}
+                    paddingBottom={(section as any).titleStyles?.paddingBottom}
+                    paddingLeft={(section as any).titleStyles?.paddingLeft}
+                    bold={(section as any).titleStyles?.bold}
+                    italic={(section as any).titleStyles?.italic}
+                    underline={(section as any).titleStyles?.underline}
+                    strikethrough={(section as any).titleStyles?.strikethrough}
+                    bulletList={(section as any).titleStyles?.bulletList}
+                    numberList={(section as any).titleStyles?.numberList}
+                    code={(section as any).titleStyles?.code}
+                  >
+                    {section.title}
+                  </SelectableElement>
+                </div>
+                <div>
+                  <SelectableElement
+                    id={`section-content-${section.id}`}
+                    type="section-content"
+                    selected={selectedElementId === `section-content-${section.id}`}
+                    onSelect={() =>
+                      onSelectElement(`section-content-${section.id}`, "section-content")
+                    }
+                    onAI={() => onAIElement?.(`section-content-${section.id}`, "section-content")}
+                    value={section.content}
+                    color={(section as any).contentStyles?.color}
+                    fontSize={(section as any).contentStyles?.fontSize}
+                    textAlign={(section as any).contentStyles?.textAlign}
+                    backgroundColor={(section as any).contentStyles?.backgroundColor}
+                    backgroundImage={(section as any).contentStyles?.backgroundImage}
+                    backgroundSize={(section as any).contentStyles?.backgroundSize}
+                    backgroundOpacity={(section as any).contentStyles?.backgroundOpacity}
+                    borderColor={(section as any).contentStyles?.borderColor}
+                    borderWidth={(section as any).contentStyles?.borderWidth}
+                    borderRadius={(section as any).contentStyles?.borderRadius}
+                    borderStyle={(section as any).contentStyles?.borderStyle}
+                    paddingTop={(section as any).contentStyles?.paddingTop}
+                    paddingRight={(section as any).contentStyles?.paddingRight}
+                    paddingBottom={(section as any).contentStyles?.paddingBottom}
+                    paddingLeft={(section as any).contentStyles?.paddingLeft}
+                    bold={(section as any).contentStyles?.bold}
+                    italic={(section as any).contentStyles?.italic}
+                    underline={(section as any).contentStyles?.underline}
+                    strikethrough={(section as any).contentStyles?.strikethrough}
+                    bulletList={(section as any).contentStyles?.bulletList}
+                    numberList={(section as any).contentStyles?.numberList}
+                    code={(section as any).contentStyles?.code}
+                  >
+                    {replaceVariables(section.content, variables)}
+                  </SelectableElement>
+                  {section.media && section.media.length > 0 && (
+                    <div className="grid gap-4 mt-4">
+                      {section.media.map((media, mIndex) => (
+                        <SelectableElement
+                          key={mIndex}
+                          id={`media-${section.id}-${mIndex}`}
+                          type={media.type}
+                          selected={selectedElementId === `media-${section.id}-${mIndex}`}
+                          onSelect={() =>
+                            onSelectElement(`media-${section.id}-${mIndex}`, media.type)
+                          }
+                          onAI={() => onAIElement?.(`media-${section.id}-${mIndex}`, media.type)}
+                        >
+                          {media.type === "image" ? (
+                            <img
+                              src={media.url}
+                              alt="proposal media"
+                              className="w-full h-auto rounded"
+                            />
+                          ) : (
+                            <video
+                              src={media.url}
+                              controls
+                              className="w-full h-auto rounded"
+                            />
+                          )}
+                        </SelectableElement>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
           </div>
-        ))}
+        );
+        })}
       </div>
 
     </div>
