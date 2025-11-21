@@ -295,8 +295,9 @@ export default function ProposalEditor() {
                   commit(updated);
                 }
               } else if (selectedElementType === "section-content") {
-                const parts = selectedElementId.split("-");
-                const sectionId = parts[2];
+                // Handle both old format (section-content-id) and new format (section-content-id-col1)
+                let sectionId = selectedElementId.replace("section-content-", "");
+                sectionId = sectionId.replace(/-col\d+$/, "");
                 const section = p.sections.find((s) => s.id === sectionId);
                 if (section) {
                   const updated = {
