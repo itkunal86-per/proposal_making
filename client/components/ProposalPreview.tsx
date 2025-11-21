@@ -543,6 +543,10 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                       paddingRight: (section as any).columnStyles?.[0]?.paddingRight ? `${(section as any).columnStyles[0].paddingRight}px` : "0px",
                       paddingBottom: (section as any).columnStyles?.[0]?.paddingBottom ? `${(section as any).columnStyles[0].paddingBottom}px` : "0px",
                       paddingLeft: (section as any).columnStyles?.[0]?.paddingLeft ? `${(section as any).columnStyles[0].paddingLeft}px` : "0px",
+                      marginTop: (section as any).columnStyles?.[0]?.marginTop ? `${(section as any).columnStyles[0].marginTop}px` : "0px",
+                      marginRight: (section as any).columnStyles?.[0]?.marginRight ? `${(section as any).columnStyles[0].marginRight}px` : "0px",
+                      marginBottom: (section as any).columnStyles?.[0]?.marginBottom ? `${(section as any).columnStyles[0].marginBottom}px` : "0px",
+                      marginLeft: (section as any).columnStyles?.[0]?.marginLeft ? `${(section as any).columnStyles[0].marginLeft}px` : "0px",
                     }}>
                       <SelectableElement
                         id={`section-content-${section.id}-col1`}
