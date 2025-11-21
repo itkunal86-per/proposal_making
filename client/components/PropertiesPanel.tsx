@@ -848,10 +848,10 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                 type="number"
                 min="0"
                 max="100"
-                value={typeof section.gapAfter === "number" ? section.gapAfter : 24}
+                value={String(typeof section.gapAfter === "number" ? section.gapAfter : 24)}
                 onChange={(e) =>
                   handleUpdateSection({
-                    gapAfter: parseInt(e.target.value)
+                    gapAfter: parseInt(e.target.value) || 0
                   })
                 }
                 className="flex-1"
@@ -873,10 +873,10 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                   type="number"
                   min="0"
                   max="100"
-                  value={typeof section.columnGap === "number" ? section.columnGap : 24}
+                  value={String(typeof section.columnGap === "number" ? section.columnGap : 24)}
                   onChange={(e) =>
                     handleUpdateSection({
-                      columnGap: parseInt(e.target.value)
+                      columnGap: parseInt(e.target.value) || 0
                     })
                   }
                   className="flex-1"
@@ -1567,10 +1567,10 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                 type="number"
                 min="0"
                 max="100"
-                value={typeof section.gapAfter === "number" ? section.gapAfter : 24}
+                value={String(typeof section.gapAfter === "number" ? section.gapAfter : 24)}
                 onChange={(e) =>
                   handleUpdateSection({
-                    gapAfter: parseInt(e.target.value)
+                    gapAfter: parseInt(e.target.value) || 0
                   })
                 }
                 className="flex-1"
