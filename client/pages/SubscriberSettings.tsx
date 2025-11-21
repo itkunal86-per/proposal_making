@@ -144,7 +144,7 @@ export default function SubscriberSettings() {
         <Card className="mt-4 p-4 space-y-4">
           <div className="grid gap-2">
             <Label htmlFor="name">Full name</Label>
-            <Input id="name" value={data.name} onChange={(e) => setData((d) => ({ ...d, name: e.target.value }))} />
+            <Input id="name" value={data.name ?? ""} onChange={(e) => setData((d) => ({ ...d, name: e.target.value }))} />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="company">Company</Label>
@@ -152,7 +152,7 @@ export default function SubscriberSettings() {
           </div>
           <div className="grid gap-2">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" value={data.email} onChange={(e) => setData((d) => ({ ...d, email: e.target.value }))} />
+            <Input id="email" type="email" value={data.email ?? ""} onChange={(e) => setData((d) => ({ ...d, email: e.target.value }))} />
           </div>
           <Separator />
 
