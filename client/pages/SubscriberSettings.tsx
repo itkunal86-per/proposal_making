@@ -187,12 +187,12 @@ export default function SubscriberSettings() {
             <h2 className="text-lg font-semibold">Subscription</h2>
             <div className="flex gap-2">
               {(["free", "pro", "business"] as const).map((p) => (
-                <Button key={p} variant={data.subscription?.plan === p ? "default" : "outline"} onClick={() => updatePlan(p)}>
+                <Button key={p} variant={data.subscription.plan === p ? "default" : "outline"} onClick={() => updatePlan(p)}>
                   {p}
                 </Button>
               ))}
             </div>
-            {data.subscription?.updatedAt && (
+            {data.subscription.updatedAt && (
               <div className="text-xs text-muted-foreground">Updated: {new Date(data.subscription.updatedAt).toLocaleString()}</div>
             )}
           </div>
