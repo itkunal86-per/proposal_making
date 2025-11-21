@@ -31,14 +31,14 @@ export const SectionsDialog: React.FC<SectionsDialogProps> = ({
   onUpdateProposal,
 }) => {
   const [loading, setLoading] = useState(false);
+  const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
 
-  const handleAddSection = async () => {
+  const handleAddSection = async (title: string, layout: SectionLayout) => {
     try {
       setLoading(true);
-      const title = `Section ${proposal.sections.length + 1}`;
-      const updated = await addSection(proposal, title);
+      const updated = await addSection(proposal, title, layout);
       onUpdateProposal(updated);
-      toast({ title: "Section added", description: "New section has been created." });
+      toast({ title: "Section added", description: `New ${layout} section has been created.` });
     } catch (error) {
       console.error("Error adding section:", error);
       toast({ title: "Error", description: "Failed to add section.", variant: "destructive" });
