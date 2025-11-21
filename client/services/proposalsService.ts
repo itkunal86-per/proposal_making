@@ -370,10 +370,39 @@ export async function getProposalDetails(id: string): Promise<Proposal | undefin
     const list = await getAll();
     const idx = list.findIndex((x) => x.id === normalized.id);
 
-    // If the API response has no sections or minimal sections, preserve the sections from local storage
-    if (normalized.sections.length <= 1 && idx !== -1 && list[idx]?.sections.length > normalized.sections.length) {
-      console.log("API returned minimal sections, preserving detailed sections from local storage");
-      normalized = { ...normalized, sections: list[idx].sections };
+    // Merge with local storage to preserve gap settings and other properties
+    if (idx !== -1 && list[idx]) {
+      const localProposal = list[idx];
+
+      // Merge sections: preserve gap values from local storage if API response doesn't have them
+      normalized = {
+        ...normalized,
+        sections: normalized.sections.map((apiSection, sectionIndex) => {
+          const localSection = localProposal.sections[sectionIndex];
+
+          // If we can find a matching local section by ID, use it for gap values
+          const matchingLocalSection = localSection && localSection.id === apiSection.id
+            ? localSection
+            : localProposal.sections.find(s => s.id === apiSection.id);
+
+          if (matchingLocalSection) {
+            return {
+              ...apiSection,
+              gapAfter: apiSection.gapAfter !== undefined ? apiSection.gapAfter : matchingLocalSection.gapAfter,
+              columnGap: apiSection.columnGap !== undefined ? apiSection.columnGap : matchingLocalSection.columnGap,
+              // Also preserve other properties that might be set locally
+              columnContents: apiSection.columnContents && apiSection.columnContents.length > 0
+                ? apiSection.columnContents
+                : matchingLocalSection.columnContents,
+              columnStyles: apiSection.columnStyles && apiSection.columnStyles.length > 0
+                ? apiSection.columnStyles
+                : matchingLocalSection.columnStyles,
+            };
+          }
+
+          return apiSection;
+        }),
+      };
     }
 
     if (idx === -1) {
