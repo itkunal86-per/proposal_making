@@ -299,6 +299,10 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
             section.layout === "three-column" ? "grid grid-cols-3 gap-6" :
             "space-y-3";
 
+          if (section.layout && section.layout !== "single") {
+            console.log(`Rendering section "${section.title}" with layout: ${section.layout}`, { containerClassName, isMultiColumn });
+          }
+
           return (
           <div key={section.id} data-section-id={section.id} className={containerClassName}>
             {isMultiColumn && (
