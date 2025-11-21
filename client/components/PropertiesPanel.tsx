@@ -750,14 +750,28 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
       handleUpdateSection({ media: newMedia });
     };
 
+    const currentContent = columnIndex >= 0
+      ? ((section as any).columnContents?.[columnIndex] || "")
+      : section.content;
+
+    const handleContentChange = (value: string) => {
+      if (columnIndex >= 0) {
+        const newColumnContents = [...((section as any).columnContents || [])];
+        newColumnContents[columnIndex] = value;
+        handleUpdateSection({ columnContents: newColumnContents });
+      } else {
+        handleUpdateSection({ content: value });
+      }
+    };
+
     return (
       <Card className="p-4 space-y-4 overflow-y-auto max-h-[90vh]">
         <div>
-          <Label className="text-xs font-semibold">Section Content</Label>
+          <Label className="text-xs font-semibold">Section Content {columnIndex >= 0 ? `(Column ${columnIndex + 1})` : ""}</Label>
           <div className="mt-2 relative">
             <VariableInserter
-              value={section.content}
-              onChange={(value) => handleUpdateSection({ content: value })}
+              value={currentContent}
+              onChange={handleContentChange}
               variables={variables || []}
               className="min-h-[120px]"
             />
