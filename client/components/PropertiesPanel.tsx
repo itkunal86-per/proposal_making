@@ -714,7 +714,10 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   }
 
   if (selectedElementType === "section-content") {
-    const sectionId = selectedElementId.replace("section-content-", "");
+    // Handle both old format (section-content-id) and new format (section-content-id-col1)
+    let sectionId = selectedElementId.replace("section-content-", "");
+    // Remove column identifier if present (e.g., "-col1", "-col2", "-col3")
+    sectionId = sectionId.replace(/-col\d+$/, "");
     const section = proposal.sections.find((s) => s.id === sectionId);
 
     if (!section) return null;
