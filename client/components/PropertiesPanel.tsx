@@ -445,6 +445,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     };
 
     const sectionTitleStyles = (section as any).titleStyles || {};
+    const isMultiColumn = section.layout === "two-column" || section.layout === "three-column";
 
     return (
       <Card className="p-4 space-y-4">
