@@ -316,7 +316,14 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
           }
 
           return (
-          <div key={section.id} data-section-id={section.id} className={containerClassName}>
+          <div
+            key={section.id}
+            data-section-id={section.id}
+            className={containerClassName}
+            style={{
+              marginBottom: section.gapAfter ? `${section.gapAfter}px` : "24px"
+            }}
+          >
             {isMultiColumn && (
               <div className="col-span-full">
                 <SelectableElement
