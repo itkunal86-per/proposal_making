@@ -467,7 +467,17 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                         {replaceVariables((section as any).columnContents?.[0] || "", variables)}
                       </SelectableElement>
                     </div>
-                    <div className="p-4 border border-slate-200 rounded bg-slate-50">
+                    <div style={{
+                      backgroundColor: (section as any).columnStyles?.[1]?.backgroundColor || "transparent",
+                      borderWidth: (section as any).columnStyles?.[1]?.borderWidth ? `${(section as any).columnStyles[1].borderWidth}px` : "0px",
+                      borderColor: (section as any).columnStyles?.[1]?.borderColor || "#000000",
+                      borderStyle: (section as any).columnStyles?.[1]?.borderWidth ? "solid" : "none",
+                      borderRadius: (section as any).columnStyles?.[1]?.borderRadius ? `${(section as any).columnStyles[1].borderRadius}px` : "0px",
+                      paddingTop: (section as any).columnStyles?.[1]?.paddingTop ? `${(section as any).columnStyles[1].paddingTop}px` : "0px",
+                      paddingRight: (section as any).columnStyles?.[1]?.paddingRight ? `${(section as any).columnStyles[1].paddingRight}px` : "0px",
+                      paddingBottom: (section as any).columnStyles?.[1]?.paddingBottom ? `${(section as any).columnStyles[1].paddingBottom}px` : "0px",
+                      paddingLeft: (section as any).columnStyles?.[1]?.paddingLeft ? `${(section as any).columnStyles[1].paddingLeft}px` : "0px",
+                    }}>
                       <SelectableElement
                         id={`section-content-${section.id}-col2`}
                         type="section-content"
