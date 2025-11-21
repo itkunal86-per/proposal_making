@@ -153,6 +153,7 @@ function normalizeProposal(raw: z.infer<typeof proposalSchema>): Proposal {
       id: String(s.id!),
       title: s.title!,
       content: s.content!,
+      layout: s.layout || "single",
       media: (s.media ?? []).map((m) => ({
         type: m.type!,
         url: m.url!,
