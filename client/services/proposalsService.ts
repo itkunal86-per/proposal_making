@@ -608,8 +608,9 @@ export async function reorderSection(p: Proposal, from: number, to: number): Pro
 export async function addSection(p: Proposal, title = "New Section", layout: "single" | "two-column" | "three-column" = "single"): Promise<Proposal> {
   const columnCount = layout === "two-column" ? 2 : layout === "three-column" ? 3 : 0;
   const columnContents = columnCount > 0 ? Array(columnCount).fill("") : undefined;
+  const columnStyles = columnCount > 0 ? Array(columnCount).fill({}) : undefined;
 
-  const newSection = { id: uuid(), title, content: "", layout, columnContents, media: [], comments: [] };
+  const newSection = { id: uuid(), title, content: "", layout, columnContents, columnStyles, media: [], comments: [] };
   const updated = {
     ...p,
     sections: [...p.sections, newSection],
