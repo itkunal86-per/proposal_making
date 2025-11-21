@@ -162,7 +162,7 @@ function normalizeProposal(raw: z.infer<typeof proposalSchema>): Proposal {
       title: s.title!,
       content: s.content!,
       layout: s.layout || "single",
-      columnContents: s.columnContents || undefined,
+      columnContents: Array.isArray(s.columnContents) ? s.columnContents : undefined,
       columnStyles: s.columnStyles ? s.columnStyles.map(normalizeStyles) : undefined,
       columnGap: typeof s.columnGap === "number" ? s.columnGap : undefined,
       gapAfter: typeof s.gapAfter === "number" ? s.gapAfter : undefined,
