@@ -839,6 +839,30 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               </div>
             </div>
           </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Gap After Section</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="0"
+                max="100"
+                value={section.gapAfter || 24}
+                onChange={(e) =>
+                  handleUpdateSection({
+                    gapAfter: parseInt(e.target.value)
+                  })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">
+                px
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              Spacing between this section and the next one (default: 24px)
+            </p>
+          </div>
         </div>
       </Card>
     );
