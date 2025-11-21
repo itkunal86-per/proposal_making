@@ -602,13 +602,16 @@ export async function reorderSection(p: Proposal, from: number, to: number): Pro
 }
 
 export async function addSection(p: Proposal, title = "New Section", layout: "single" | "two-column" | "three-column" = "single"): Promise<Proposal> {
-  const newSection = { id: uuid(), title, content: "", layout, media: [], comments: [] };
+  const columnCount = layout === "two-column" ? 2 : layout === "three-column" ? 3 : 0;
+  const columnContents = columnCount > 0 ? Array(columnCount).fill("") : undefined;
+
+  const newSection = { id: uuid(), title, content: "", layout, columnContents, media: [], comments: [] };
   const updated = {
     ...p,
     sections: [...p.sections, newSection],
     updatedAt: Date.now(),
   };
-  console.log("Adding section:", { title, newSectionId: newSection.id, layout, totalSections: updated.sections.length, newSection });
+  console.log("Adding section:", { title, newSectionId: newSection.id, layout, columnCount, totalSections: updated.sections.length, newSection });
   await updateProposal(updated);
   console.log("Add section completed", { sections: updated.sections.map(s => ({ id: s.id, title: s.title, layout: s.layout })) });
   return updated;
