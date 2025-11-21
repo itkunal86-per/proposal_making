@@ -130,7 +130,7 @@ export default function SubscriberSettings() {
   }
 
   function updatePlan(plan: "free" | "pro" | "business") {
-    setData((d) => ({ ...d, subscription: { plan, updatedAt: Date.now() } }));
+    setData((d) => ({ ...d, subscription: { ...d.subscription, plan, updatedAt: Date.now() } }));
     setTimeout(() => save(), 0);
   }
 
