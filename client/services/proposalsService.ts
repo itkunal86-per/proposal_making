@@ -448,7 +448,7 @@ export async function getProposalDetails(id: string): Promise<Proposal | undefin
             const hasLocalLayout = localSection.layout && localSection.layout !== null;
             const hasLocalColumnContents = Array.isArray(localSection.columnContents) && localSection.columnContents.length > 0;
 
-            return {
+            const mergedSection = {
               ...apiSection,
               // Use local layout if API returned null or "single" and local has multi-column
               layout: (hasApiLayout ? apiSection.layout : (hasLocalLayout ? localSection.layout : "single")),
@@ -462,6 +462,18 @@ export async function getProposalDetails(id: string): Promise<Proposal | undefin
               titleStyles: apiSection.titleStyles || localSection.titleStyles,
               contentStyles: apiSection.contentStyles || localSection.contentStyles,
             };
+
+            if (mergedSection.layout !== "single") {
+              console.log("Merged section with multi-column layout:", {
+                id: mergedSection.id,
+                title: mergedSection.title,
+                layout: mergedSection.layout,
+                columnContents: mergedSection.columnContents,
+                columnStyles: mergedSection.columnStyles,
+              });
+            }
+
+            return mergedSection;
           }
           return apiSection;
         }),
