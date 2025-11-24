@@ -138,7 +138,9 @@ function uuid() {
 }
 
 function normalizeStyles(styles: any): Record<string, any> | undefined {
-  if (!styles || Array.isArray(styles)) return undefined;
+  if (!styles) return undefined;
+  if (Array.isArray(styles)) return undefined; // Arrays like [] become undefined
+  if (typeof styles === "object" && Object.keys(styles).length === 0) return undefined; // Empty objects become undefined
   if (typeof styles === "object") return styles;
   return undefined;
 }
