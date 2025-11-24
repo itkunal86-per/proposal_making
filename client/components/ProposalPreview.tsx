@@ -292,6 +292,10 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
         paddingRight={(proposal as any).titleStyles?.paddingRight}
         paddingBottom={(proposal as any).titleStyles?.paddingBottom}
         paddingLeft={(proposal as any).titleStyles?.paddingLeft}
+        marginTop={(proposal as any).titleStyles?.marginTop}
+        marginRight={(proposal as any).titleStyles?.marginRight}
+        marginBottom={(proposal as any).titleStyles?.marginBottom}
+        marginLeft={(proposal as any).titleStyles?.marginLeft}
       >
         {proposal.title}
       </SelectableElement>
