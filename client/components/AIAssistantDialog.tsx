@@ -35,6 +35,8 @@ export const AIAssistantDialog: React.FC<AIAssistantDialogProps> = ({
 }) => {
   const [prompt, setPrompt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [aiContent, setAiContent] = useState<string | null>(null);
+  const [editableContent, setEditableContent] = useState("");
 
   const section = sectionId
     ? proposal.sections.find((s) => s.id === sectionId)
