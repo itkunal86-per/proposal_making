@@ -382,8 +382,6 @@ export async function getProposalDetails(id: string): Promise<Proposal | undefin
           if (matchingLocalSection) {
             return {
               ...apiSection,
-              gapAfter: apiSection.gapAfter !== undefined ? apiSection.gapAfter : matchingLocalSection.gapAfter,
-              columnGap: apiSection.columnGap !== undefined ? apiSection.columnGap : matchingLocalSection.columnGap,
               // Preserve columnContents: use API if present and non-empty, otherwise use local
               columnContents: (Array.isArray(apiSection.columnContents) && apiSection.columnContents.length > 0)
                 ? apiSection.columnContents
@@ -392,6 +390,9 @@ export async function getProposalDetails(id: string): Promise<Proposal | undefin
               columnStyles: (Array.isArray(apiSection.columnStyles) && apiSection.columnStyles.length > 0)
                 ? apiSection.columnStyles
                 : (Array.isArray(matchingLocalSection.columnStyles) ? matchingLocalSection.columnStyles : undefined),
+              // Merge titleStyles and contentStyles from local storage if API response doesn't have them
+              titleStyles: apiSection.titleStyles ?? matchingLocalSection.titleStyles,
+              contentStyles: apiSection.contentStyles ?? matchingLocalSection.contentStyles,
             };
           }
 
