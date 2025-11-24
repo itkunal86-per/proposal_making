@@ -262,12 +262,16 @@ function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmai
   const sections = Array.isArray(apiProposal.sections) && apiProposal.sections.length > 0
     ? (apiProposal.sections as any[]).map((s) => {
         // Handle columnContents - could be array or object
-        let normalizedColumnContents: string[] | undefined;
-        if (Array.isArray(s.columnContents)) {
-          normalizedColumnContents = s.columnContents;
-        } else if (typeof s.columnContents === "object" && s.columnContents !== null && Object.keys(s.columnContents).length > 0) {
-          normalizedColumnContents = undefined;
+      let normalizedColumnContents: string[] | undefined;
+      if (Array.isArray(s.columnContents) && s.columnContents.length > 0) {
+        normalizedColumnContents = s.columnContents;
+      } else if (typeof s.columnContents === "object" && s.columnContents !== null) {
+        const keys = Object.keys(s.columnContents);
+        if (keys.length > 0) {
+          // Convert object to array (e.g., {"0": "content1", "1": "content2"} -> ["content1", "content2"])
+          normalizedColumnContents = keys.sort((a, b) => parseInt(a) - parseInt(b)).map(k => s.columnContents[k]);
         }
+      }
 
         // Handle columnStyles - could be array or object
         let normalizedColumnStyles: Record<string, any>[] | undefined;
