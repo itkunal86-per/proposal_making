@@ -364,40 +364,15 @@ export async function getProposalDetails(id: string): Promise<Proposal | undefin
     const list = readStored() ?? [];
     const idx = list.findIndex((x) => x.id === normalized.id);
 
-    // Merge with local storage to preserve gap settings and other properties
+    // Merge with local storage to preserve all section data (columns, content, styles)
     if (idx !== -1 && list[idx]) {
       const localProposal = list[idx];
 
-      // Merge sections: preserve column content, gap values, and styles from local storage if API response doesn't have them
+      // Completely preserve local sections since API doesn't return section details
+      // The API only returns basic proposal metadata, not section content/layout/styles
       normalized = {
         ...normalized,
-        sections: normalized.sections.map((apiSection, sectionIndex) => {
-          const localSection = localProposal.sections[sectionIndex];
-
-          // If we can find a matching local section by ID, use it for detailed properties
-          const matchingLocalSection = localSection && localSection.id === apiSection.id
-            ? localSection
-            : localProposal.sections.find(s => s.id === apiSection.id);
-
-          if (matchingLocalSection) {
-            return {
-              ...apiSection,
-              // Preserve columnContents: use API if present and non-empty, otherwise use local
-              columnContents: (Array.isArray(apiSection.columnContents) && apiSection.columnContents.length > 0)
-                ? apiSection.columnContents
-                : (Array.isArray(matchingLocalSection.columnContents) ? matchingLocalSection.columnContents : undefined),
-              // Preserve columnStyles: use API if present and non-empty, otherwise use local
-              columnStyles: (Array.isArray(apiSection.columnStyles) && apiSection.columnStyles.length > 0)
-                ? apiSection.columnStyles
-                : (Array.isArray(matchingLocalSection.columnStyles) ? matchingLocalSection.columnStyles : undefined),
-              // Merge titleStyles and contentStyles from local storage if API response doesn't have them
-              titleStyles: apiSection.titleStyles ?? matchingLocalSection.titleStyles,
-              contentStyles: apiSection.contentStyles ?? matchingLocalSection.contentStyles,
-            };
-          }
-
-          return apiSection;
-        }),
+        sections: localProposal.sections,
       };
     }
 
