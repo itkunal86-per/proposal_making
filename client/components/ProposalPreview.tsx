@@ -324,7 +324,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
             className={containerClassName}
             style={{
               gap: isMultiColumn ? `${columnGapValue}px` : undefined,
-              marginBottom: `${gapAfterValue}px !important` as React.CSSProperties
+              marginBottom: `${gapAfterValue}px`
             }}
           >
             {isMultiColumn && (
