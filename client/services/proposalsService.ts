@@ -280,13 +280,18 @@ function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmai
         // Infer layout from columnContents if layout is null
         let inferredLayout: "single" | "two-column" | "three-column" = "single";
         if (!s.layout || s.layout === null) {
-          if (Array.isArray(s.columnContents) && s.columnContents.length === 3) {
-            inferredLayout = "three-column";
-          } else if (Array.isArray(s.columnContents) && s.columnContents.length === 2) {
-            inferredLayout = "two-column";
+          // When layout is null from API, infer from columnContents
+          if (Array.isArray(s.columnContents)) {
+            if (s.columnContents.length === 3) {
+              inferredLayout = "three-column";
+            } else if (s.columnContents.length === 2) {
+              inferredLayout = "two-column";
+            } else {
+              inferredLayout = "single";
+            }
           }
-        } else {
-          inferredLayout = s.layout;
+        } else if (typeof s.layout === "string" && ["single", "two-column", "three-column"].includes(s.layout)) {
+          inferredLayout = s.layout as "single" | "two-column" | "three-column";
         }
 
         return {
