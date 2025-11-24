@@ -10,8 +10,6 @@ export interface ProposalSection {
   layout?: "single" | "two-column" | "three-column";
   columnContents?: string[];
   columnStyles?: Record<string, any>[];
-  columnGap?: number;
-  gapAfter?: number;
   media?: { type: "image" | "video"; url: string }[];
   comments?: { id: string; author: string; text: string; createdAt: number }[];
   titleStyles?: Record<string, any>;
