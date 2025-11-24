@@ -183,32 +183,32 @@ export const AIAssistantDialog: React.FC<AIAssistantDialogProps> = ({
             <div className="grid grid-cols-2 gap-2">
               <Button
                 onClick={() => handleAIWrite("generate", prompt)}
-                disabled={!isEnabled}
+                disabled={!isEnabled || isLoading}
               >
-                Generate
+                {isLoading ? "Generating..." : "Generate"}
               </Button>
               <Button
                 variant="outline"
                 onClick={() => handleAIWrite("rewrite", prompt)}
-                disabled={!isEnabled}
+                disabled={!isEnabled || isLoading}
               >
-                Rewrite
+                {isLoading ? "Rewriting..." : "Rewrite"}
               </Button>
               {targetElementType === "section-content" && (
                 <>
                   <Button
                     variant="outline"
                     onClick={() => handleAIWrite("summarize", prompt)}
-                    disabled={!isEnabled}
+                    disabled={!isEnabled || isLoading}
                   >
-                    Summarize
+                    {isLoading ? "Summarizing..." : "Summarize"}
                   </Button>
                   <Button
                     variant="outline"
                     onClick={() => handleAIWrite("translate", prompt)}
-                    disabled={!isEnabled}
+                    disabled={!isEnabled || isLoading}
                   >
-                    Translate
+                    {isLoading ? "Translating..." : "Translate"}
                   </Button>
                 </>
               )}
