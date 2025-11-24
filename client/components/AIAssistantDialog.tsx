@@ -80,7 +80,7 @@ export const AIAssistantDialog: React.FC<AIAssistantDialogProps> = ({
     return null;
   };
 
-  const handleAIWrite = (
+  const handleAIWrite = async (
     action: "generate" | "rewrite" | "summarize" | "translate",
     promptText: string
   ) => {
@@ -89,38 +89,44 @@ export const AIAssistantDialog: React.FC<AIAssistantDialogProps> = ({
       return;
     }
 
-    if (!activeSection) {
+    if (!activeSection && targetElementType !== "title") {
       toast({ title: "No section selected" });
       return;
     }
 
-    const updatedProposal = { ...proposal };
+    setIsLoading(true);
+    try {
+      const aiResponse = await generateAIContent(promptText);
 
-    if (targetElementType === "title") {
-      updatedProposal.title = promptText;
-    } else if (targetElementType === "section-title") {
-      updatedProposal.sections = proposal.sections.map((s) =>
-        s.id === activeSection!.id ? { ...s, title: promptText } : s
-      );
-    } else if (targetElementType === "section-content") {
-      let newContent = activeSection.content;
-      if (action === "generate") newContent = `${newContent}\n\nGenerated: ${promptText}`;
-      if (action === "rewrite") newContent = `${newContent}\n\nRewritten: ${promptText}`;
-      if (action === "summarize")
-        newContent =
-          newContent.slice(0, Math.max(80, Math.floor(newContent.length * 0.5))) +
-          "...";
-      if (action === "translate")
-        newContent = `${newContent}\n\n[Translated] ${promptText}`;
+      const updatedProposal = { ...proposal };
 
-      updatedProposal.sections = proposal.sections.map((s) =>
-        s.id === activeSection!.id ? { ...s, content: newContent } : s
-      );
+      if (targetElementType === "title") {
+        updatedProposal.title = aiResponse;
+      } else if (targetElementType === "section-title" && activeSection) {
+        updatedProposal.sections = proposal.sections.map((s) =>
+          s.id === activeSection!.id ? { ...s, title: aiResponse } : s
+        );
+      } else if (targetElementType === "section-content" && activeSection) {
+        let newContent = aiResponse;
+        if (action !== "generate") {
+          newContent = `${activeSection.content}\n\n${aiResponse}`;
+        }
+
+        updatedProposal.sections = proposal.sections.map((s) =>
+          s.id === activeSection!.id ? { ...s, content: newContent } : s
+        );
+      }
+
+      onUpdateProposal(updatedProposal);
+      setPrompt("");
+      toast({ title: "Content generated successfully" });
+      onOpenChange(false);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to generate content";
+      toast({ title: "Error", description: errorMessage });
+    } finally {
+      setIsLoading(false);
     }
-
-    onUpdateProposal(updatedProposal);
-    setPrompt("");
-    toast({ title: `${action} via AI assistant` });
   };
 
   const elementPreview = getElementPreview();
