@@ -160,8 +160,12 @@ function normalizeProposal(raw: z.infer<typeof proposalSchema>): Proposal {
       title: s.title!,
       content: s.content!,
       layout: s.layout || "single",
-      columnContents: Array.isArray(s.columnContents) ? s.columnContents : undefined,
-      columnStyles: s.columnStyles ? s.columnStyles.map(normalizeStyles) : undefined,
+      columnContents: Array.isArray(s.columnContents) ? s.columnContents : (
+        typeof s.columnContents === "object" && Object.keys(s.columnContents || {}).length === 0 ? undefined : s.columnContents
+      ),
+      columnStyles: Array.isArray(s.columnStyles) ? s.columnStyles.map(normalizeStyles) : (
+        typeof s.columnStyles === "object" && Object.keys(s.columnStyles || {}).length === 0 ? undefined : s.columnStyles
+      ),
       media: (s.media ?? []).map((m) => ({
         type: m.type!,
         url: m.url!,
