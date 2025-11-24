@@ -15,6 +15,12 @@ interface GenerateProposalResponse {
   }>;
 }
 
+interface ProposalAIResponse {
+  status: boolean;
+  message: string;
+  data: string;
+}
+
 export async function generateProposalFromPrompt(
   request: GenerateProposalRequest
 ): Promise<GenerateProposalResponse> {
