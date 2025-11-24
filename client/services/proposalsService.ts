@@ -155,30 +155,44 @@ function normalizeProposal(raw: z.infer<typeof proposalSchema>): Proposal {
     createdBy: String(raw.createdBy || "system"),
     createdAt: raw.createdAt!,
     updatedAt: raw.updatedAt!,
-    sections: (raw.sections ?? []).map((s) => ({
-      id: String(s.id!),
-      title: s.title!,
-      content: s.content!,
-      layout: s.layout || "single",
-      columnContents: Array.isArray(s.columnContents) ? s.columnContents : (
-        typeof s.columnContents === "object" && Object.keys(s.columnContents || {}).length === 0 ? undefined : s.columnContents
-      ),
-      columnStyles: Array.isArray(s.columnStyles) ? s.columnStyles.map(normalizeStyles) : (
-        typeof s.columnStyles === "object" && Object.keys(s.columnStyles || {}).length === 0 ? undefined : s.columnStyles
-      ),
-      media: (s.media ?? []).map((m) => ({
-        type: m.type!,
-        url: m.url!,
-      })),
-      comments: (s.comments ?? []).map((c) => ({
-        id: String(c.id!),
-        author: c.author!,
-        text: c.text!,
-        createdAt: c.createdAt!,
-      })),
-      titleStyles: normalizeStyles(s.titleStyles),
-      contentStyles: normalizeStyles(s.contentStyles),
-    })),
+    sections: (raw.sections ?? []).map((s) => {
+      // Handle columnContents - could be array or object
+      let normalizedColumnContents: string[] | undefined;
+      if (Array.isArray(s.columnContents)) {
+        normalizedColumnContents = s.columnContents;
+      } else if (typeof s.columnContents === "object" && s.columnContents !== null && Object.keys(s.columnContents).length > 0) {
+        normalizedColumnContents = undefined; // Empty or invalid objects become undefined
+      }
+
+      // Handle columnStyles - could be array or object
+      let normalizedColumnStyles: Record<string, any>[] | undefined;
+      if (Array.isArray(s.columnStyles)) {
+        normalizedColumnStyles = s.columnStyles.map(normalizeStyles).filter((s) => s !== undefined) as Record<string, any>[];
+      } else if (typeof s.columnStyles === "object" && s.columnStyles !== null && Object.keys(s.columnStyles).length === 0) {
+        normalizedColumnStyles = undefined; // Empty objects become undefined
+      }
+
+      return {
+        id: String(s.id!),
+        title: s.title!,
+        content: s.content!,
+        layout: (s.layout && s.layout !== null) ? s.layout : "single",
+        columnContents: normalizedColumnContents,
+        columnStyles: normalizedColumnStyles,
+        media: (s.media ?? []).map((m) => ({
+          type: m.type!,
+          url: m.url!,
+        })),
+        comments: (s.comments ?? []).map((c) => ({
+          id: String(c.id!),
+          author: c.author!,
+          text: c.text!,
+          createdAt: c.createdAt!,
+        })),
+        titleStyles: normalizeStyles(s.titleStyles),
+        contentStyles: normalizeStyles(s.contentStyles),
+      };
+    }),
     pricing: {
       currency: raw.pricing?.currency ?? "USD",
       items: (raw.pricing?.items ?? []).map((i) => ({
