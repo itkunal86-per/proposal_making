@@ -117,15 +117,15 @@ const proposalSchema = z.object({
   createdAt: z.number(),
   updatedAt: z.number(),
   sections: z.array(sectionSchema),
-  pricing: z.object({ currency: z.string(), items: z.array(pricingItemSchema), taxRate: z.number() }),
+  pricing: z.object({ currency: z.string(), items: z.array(pricingItemSchema), taxRate: z.number() }).optional(),
   settings: z.object({
     dueDate: z.string().optional(),
     approvalFlow: z.string().optional(),
     sharing: z.object({ public: z.boolean(), token: z.string().optional(), allowComments: z.boolean() }),
-  }),
+  }).optional(),
   versions: z.array(z.object({ id: idSchema, createdAt: z.number(), note: z.string().optional(), data: z.any() })).optional(),
   titleStyles: z.union([z.record(z.any()), z.array(z.any())]).optional(),
-});
+}).passthrough(); // Allow additional fields from API
 const proposalListSchema = z.array(proposalSchema);
 
 function isBrowser() {
