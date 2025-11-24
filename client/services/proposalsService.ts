@@ -455,6 +455,11 @@ export async function getProposalDetails(id: string): Promise<Proposal | undefin
     // Merge with local storage to preserve layout and column data
     // The API may return null/empty for these fields even if they were set
     if (localProposal) {
+      console.log("Local proposal found, merging sections...", {
+        apiSections: normalized.sections.map(s => ({ id: s.id, title: s.title, layout: s.layout })),
+        localSections: localProposal.sections.map(s => ({ id: s.id, title: s.title, layout: s.layout, columnContents: s.columnContents })),
+      });
+
       normalized = {
         ...normalized,
         sections: normalized.sections.map((apiSection) => {
@@ -486,7 +491,11 @@ export async function getProposalDetails(id: string): Promise<Proposal | undefin
                 id: mergedSection.id,
                 title: mergedSection.title,
                 layout: mergedSection.layout,
+                apiLayout: apiSection.layout,
+                localLayout: localSection.layout,
                 columnContents: mergedSection.columnContents,
+                apiColumnContents: apiSection.columnContents,
+                localColumnContents: localSection.columnContents,
                 columnStyles: mergedSection.columnStyles,
               });
             }
