@@ -98,14 +98,14 @@ const sectionSchema = z.object({
   id: idSchema,
   title: z.string(),
   content: z.string(),
-  layout: z.union([z.literal("single"), z.literal("two-column"), z.literal("three-column"), z.null()]).optional().nullable(),
+  layout: z.union([z.literal("single"), z.literal("two-column"), z.literal("three-column")]).nullable().optional(),
   columnContents: z.union([z.array(z.string()), z.record(z.any())]).optional(),
   columnStyles: z.union([z.array(z.record(z.any())), z.record(z.any())]).optional(),
   media: z.array(z.object({ type: z.union([z.literal("image"), z.literal("video")]), url: z.string() })).optional(),
   comments: z.array(z.object({ id: z.union([z.string(), z.number()]), author: z.string(), text: z.string(), createdAt: z.number() })).optional(),
   titleStyles: z.union([z.record(z.any()), z.array(z.any())]).optional(),
   contentStyles: z.union([z.record(z.any()), z.array(z.any())]).optional(),
-});
+}).passthrough(); // Allow additional fields from API
 const pricingItemSchema = z.object({ id: idSchema, label: z.string(), qty: z.number(), price: z.number() });
 const proposalSchema = z.object({
   id: idSchema,
