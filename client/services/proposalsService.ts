@@ -275,10 +275,19 @@ function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmai
 
         // Handle columnStyles - could be array or object
         let normalizedColumnStyles: Record<string, any>[] | undefined;
-        if (Array.isArray(s.columnStyles)) {
+        if (Array.isArray(s.columnStyles) && s.columnStyles.length > 0) {
           normalizedColumnStyles = s.columnStyles.map(normalizeStyles).filter((s) => s !== undefined) as Record<string, any>[];
-        } else if (typeof s.columnStyles === "object" && s.columnStyles !== null && Object.keys(s.columnStyles).length === 0) {
-          normalizedColumnStyles = undefined;
+        } else if (typeof s.columnStyles === "object" && s.columnStyles !== null) {
+          const keys = Object.keys(s.columnStyles);
+          if (keys.length > 0) {
+            // Convert object to array if keys are numeric
+            const isNumericKeys = keys.every(k => !isNaN(parseInt(k)));
+            if (isNumericKeys) {
+              normalizedColumnStyles = keys.sort((a, b) => parseInt(a) - parseInt(b))
+                .map(k => normalizeStyles(s.columnStyles[k]))
+                .filter((s) => s !== undefined) as Record<string, any>[];
+            }
+          }
         }
 
         // Infer layout from normalizedColumnContents if layout is null
