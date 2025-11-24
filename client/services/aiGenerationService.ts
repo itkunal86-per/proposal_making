@@ -147,11 +147,18 @@ export async function generateProposalContent(
 }
 
 export async function generateAIContent(prompt: string): Promise<string> {
+  const token = getStoredToken();
+
+  if (!token) {
+    throw new Error("Authentication token not found. Please log in again.");
+  }
+
   try {
     const response = await fetch("https://propai-api.hirenq.com/api/ai/generate", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
       },
       body: JSON.stringify({
         prompt,
@@ -161,7 +168,7 @@ export async function generateAIContent(prompt: string): Promise<string> {
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
       throw new Error(
-        error.message || `AI generation failed with status ${response.status}`
+        error.message || error.error || `AI generation failed with status ${response.status}`
       );
     }
 
