@@ -415,23 +415,14 @@ export async function getProposalDetails(id: string): Promise<Proposal | undefin
     }
 
     const json = await res.json();
-    const validated = proposalSchema.safeParse(json);
 
-    if (!validated.success) {
-      console.warn("Invalid proposal details format:", validated.error);
-      console.warn("Falling back to local storage");
-      return getProposal(id);
-    }
-
-    let normalized = normalizeProposal(validated.data);
+    // Convert API response directly (handles all structure variations)
+    let normalized = convertApiProposalToProposal(json);
     const list = readStored() ?? [];
     const idx = list.findIndex((x) => x.id === normalized.id);
 
-    // Use API response directly since it now includes full section details
     // Only merge with local if API is completely empty
     if (normalized.sections.length === 0) {
-      const list = readStored() ?? [];
-      const idx = list.findIndex((x) => x.id === normalized.id);
       if (idx !== -1 && list[idx]?.sections) {
         normalized = {
           ...normalized,
