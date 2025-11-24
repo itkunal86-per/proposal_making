@@ -432,15 +432,37 @@ export async function getProposalDetails(id: string): Promise<Proposal | undefin
     let normalized = convertApiProposalToProposal(json);
     const list = readStored() ?? [];
     const idx = list.findIndex((x) => x.id === normalized.id);
+    const localProposal = idx !== -1 ? list[idx] : null;
 
-    // Only merge with local if API is completely empty
-    if (normalized.sections.length === 0) {
-      if (idx !== -1 && list[idx]?.sections) {
-        normalized = {
-          ...normalized,
-          sections: list[idx].sections,
-        };
-      }
+    // Merge with local storage to preserve layout and column data
+    // The API may return null/empty for these fields even if they were set
+    if (localProposal) {
+      normalized = {
+        ...normalized,
+        sections: normalized.sections.map((apiSection, sectionIndex) => {
+          const localSection = localProposal.sections.find((s) => String(s.id) === String(apiSection.id));
+
+          if (localSection) {
+            return {
+              ...apiSection,
+              // Use local layout if API returned null
+              layout: (apiSection.layout && apiSection.layout !== "single") ? apiSection.layout : localSection.layout,
+              // Use local columnContents if API returned empty
+              columnContents: (apiSection.columnContents && apiSection.columnContents.length > 0)
+                ? apiSection.columnContents
+                : localSection.columnContents,
+              // Use local columnStyles if API returned empty
+              columnStyles: (apiSection.columnStyles && apiSection.columnStyles.length > 0)
+                ? apiSection.columnStyles
+                : localSection.columnStyles,
+              // Use local styles if API didn't return them
+              titleStyles: apiSection.titleStyles || localSection.titleStyles,
+              contentStyles: apiSection.contentStyles || localSection.contentStyles,
+            };
+          }
+          return apiSection;
+        }),
+      };
     }
 
     persist([normalized, ...list.filter(x => x.id !== normalized.id)]);
