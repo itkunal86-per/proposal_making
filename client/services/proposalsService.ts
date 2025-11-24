@@ -146,15 +146,18 @@ function normalizeStyles(styles: any): Record<string, any> | undefined {
 }
 
 function normalizeProposal(raw: z.infer<typeof proposalSchema>): Proposal {
+  const createdAtMs = typeof raw.createdAt === "number" ? raw.createdAt : (typeof raw.createdAt === "string" ? new Date(raw.createdAt).getTime() : Date.now());
+  const updatedAtMs = typeof raw.updatedAt === "number" ? raw.updatedAt : (typeof raw.updatedAt === "string" ? new Date(raw.updatedAt).getTime() : createdAtMs);
+
   return {
     id: String(raw.id!),
     title: raw.title!,
     client: raw.client || "",
     client_id: raw.client_id ? String(raw.client_id) : undefined,
-    status: raw.status!,
+    status: raw.status || "draft",
     createdBy: String(raw.createdBy || "system"),
-    createdAt: raw.createdAt!,
-    updatedAt: raw.updatedAt!,
+    createdAt: createdAtMs,
+    updatedAt: updatedAtMs,
     sections: (raw.sections ?? []).map((s) => {
       // Handle columnContents - could be array or object
       let normalizedColumnContents: string[] | undefined;
