@@ -277,11 +277,23 @@ function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmai
           normalizedColumnStyles = undefined;
         }
 
+        // Infer layout from columnContents if layout is null
+        let inferredLayout: "single" | "two-column" | "three-column" = "single";
+        if (!s.layout || s.layout === null) {
+          if (Array.isArray(s.columnContents) && s.columnContents.length === 3) {
+            inferredLayout = "three-column";
+          } else if (Array.isArray(s.columnContents) && s.columnContents.length === 2) {
+            inferredLayout = "two-column";
+          }
+        } else {
+          inferredLayout = s.layout;
+        }
+
         return {
           id: String(s.id),
           title: s.title || "",
           content: s.content || "",
-          layout: (s.layout && s.layout !== null) ? s.layout : "single",
+          layout: inferredLayout,
           columnContents: normalizedColumnContents,
           columnStyles: normalizedColumnStyles,
           media: Array.isArray(s.media) ? s.media : [],
