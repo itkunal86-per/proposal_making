@@ -101,8 +101,6 @@ const sectionSchema = z.object({
   layout: z.union([z.literal("single"), z.literal("two-column"), z.literal("three-column")]).optional(),
   columnContents: z.array(z.string()).optional(),
   columnStyles: z.array(z.record(z.any())).optional(),
-  columnGap: z.number().optional(),
-  gapAfter: z.number().optional(),
   media: z.array(z.object({ type: z.union([z.literal("image"), z.literal("video")]), url: z.string() })).optional(),
   comments: z.array(z.object({ id: z.union([z.string(), z.number()]), author: z.string(), text: z.string(), createdAt: z.number() })).optional(),
   titleStyles: z.union([z.record(z.any()), z.array(z.any())]).optional(),
