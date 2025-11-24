@@ -1645,12 +1645,12 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                 type="number"
                 min="0"
                 max="100"
-                value={String(typeof section.gapAfter === "number" ? section.gapAfter : 24)}
+                value={String(typeof sectionContentStyles.gapAfter === "number" ? sectionContentStyles.gapAfter : 24)}
                 onChange={(e) => {
                   const value = e.target.value;
                   const numValue = value === "" ? 24 : parseInt(value, 10);
                   handleUpdateSection({
-                    gapAfter: isNaN(numValue) ? 24 : numValue
+                    contentStyles: { ...sectionContentStyles, gapAfter: isNaN(numValue) ? 24 : numValue }
                   });
                 }}
                 className="flex-1"
