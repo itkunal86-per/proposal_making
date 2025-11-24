@@ -244,9 +244,9 @@ function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmai
     createdAt: createdAtMs,
     updatedAt: updatedAtMs,
     sections: [
-      { id: uuid(), title: "Overview", content: "", layout: "single", media: [], comments: [] },
-      { id: uuid(), title: "Scope", content: "", layout: "single", media: [], comments: [] },
-      { id: uuid(), title: "Timeline", content: "", layout: "single", media: [], comments: [] },
+      { id: uuid(), title: "Overview", content: "", layout: "single", titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], comments: [] },
+      { id: uuid(), title: "Scope", content: "", layout: "single", titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], comments: [] },
+      { id: uuid(), title: "Timeline", content: "", layout: "single", titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], comments: [] },
     ],
     pricing: {
       currency: apiProposal.currency || "USD",
