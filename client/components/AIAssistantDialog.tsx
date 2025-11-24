@@ -34,6 +34,7 @@ export const AIAssistantDialog: React.FC<AIAssistantDialogProps> = ({
   onUpdateProposal,
 }) => {
   const [prompt, setPrompt] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const section = sectionId
     ? proposal.sections.find((s) => s.id === sectionId)
