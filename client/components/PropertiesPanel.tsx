@@ -1573,11 +1573,13 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                   type="number"
                   min="0"
                   value={parseInt(sectionContentStyles.marginTop || "0")}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    const numValue = value === "" ? 0 : parseInt(value, 10);
                     handleUpdateSection({
-                      contentStyles: { ...sectionContentStyles, marginTop: e.target.value }
-                    })
-                  }
+                      contentStyles: { ...sectionContentStyles, marginTop: String(isNaN(numValue) ? 0 : numValue) }
+                    });
+                  }}
                   className="mt-1"
                   placeholder="0"
                 />
@@ -1588,11 +1590,13 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                   type="number"
                   min="0"
                   value={parseInt(sectionContentStyles.marginRight || "0")}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    const numValue = value === "" ? 0 : parseInt(value, 10);
                     handleUpdateSection({
-                      contentStyles: { ...sectionContentStyles, marginRight: e.target.value }
-                    })
-                  }
+                      contentStyles: { ...sectionContentStyles, marginRight: String(isNaN(numValue) ? 0 : numValue) }
+                    });
+                  }}
                   className="mt-1"
                   placeholder="0"
                 />
@@ -1603,11 +1607,13 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                   type="number"
                   min="0"
                   value={parseInt(sectionContentStyles.marginBottom || "0")}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    const numValue = value === "" ? 0 : parseInt(value, 10);
                     handleUpdateSection({
-                      contentStyles: { ...sectionContentStyles, marginBottom: e.target.value }
-                    })
-                  }
+                      contentStyles: { ...sectionContentStyles, marginBottom: String(isNaN(numValue) ? 0 : numValue) }
+                    });
+                  }}
                   className="mt-1"
                   placeholder="0"
                 />
@@ -1618,11 +1624,13 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                   type="number"
                   min="0"
                   value={parseInt(sectionContentStyles.marginLeft || "0")}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    const numValue = value === "" ? 0 : parseInt(value, 10);
                     handleUpdateSection({
-                      contentStyles: { ...sectionContentStyles, marginLeft: e.target.value }
-                    })
-                  }
+                      contentStyles: { ...sectionContentStyles, marginLeft: String(isNaN(numValue) ? 0 : numValue) }
+                    });
+                  }}
                   className="mt-1"
                   placeholder="0"
                 />
