@@ -10,8 +10,6 @@ export interface ProposalSection {
   layout?: "single" | "two-column" | "three-column";
   columnContents?: string[];
   columnStyles?: Record<string, any>[];
-  columnGap?: number;
-  gapAfter?: number;
   media?: { type: "image" | "video"; url: string }[];
   comments?: { id: string; author: string; text: string; createdAt: number }[];
   titleStyles?: Record<string, any>;
@@ -100,36 +98,34 @@ const sectionSchema = z.object({
   id: idSchema,
   title: z.string(),
   content: z.string(),
-  layout: z.union([z.literal("single"), z.literal("two-column"), z.literal("three-column")]).optional(),
-  columnContents: z.array(z.string()).optional(),
-  columnStyles: z.array(z.record(z.any())).optional(),
-  columnGap: z.number().optional(),
-  gapAfter: z.number().optional(),
+  layout: z.union([z.literal("single"), z.literal("two-column"), z.literal("three-column")]).nullable().optional(),
+  columnContents: z.union([z.array(z.string()), z.record(z.any())]).optional(),
+  columnStyles: z.union([z.array(z.record(z.any())), z.record(z.any())]).optional(),
   media: z.array(z.object({ type: z.union([z.literal("image"), z.literal("video")]), url: z.string() })).optional(),
   comments: z.array(z.object({ id: z.union([z.string(), z.number()]), author: z.string(), text: z.string(), createdAt: z.number() })).optional(),
   titleStyles: z.union([z.record(z.any()), z.array(z.any())]).optional(),
   contentStyles: z.union([z.record(z.any()), z.array(z.any())]).optional(),
-});
+}).passthrough(); // Allow additional fields from API
 const pricingItemSchema = z.object({ id: idSchema, label: z.string(), qty: z.number(), price: z.number() });
 const proposalSchema = z.object({
   id: idSchema,
   title: z.string(),
   client: z.string().optional(),
   client_id: z.union([z.string(), z.number()]).optional(),
-  status: z.union([z.literal("draft"), z.literal("sent"), z.literal("accepted"), z.literal("declined")]),
+  status: z.union([z.literal("draft"), z.literal("sent"), z.literal("accepted"), z.literal("declined")]).optional(),
   createdBy: z.union([z.string(), z.number()]).optional(),
-  createdAt: z.number(),
-  updatedAt: z.number(),
+  createdAt: z.union([z.number(), z.string()]).optional(),
+  updatedAt: z.union([z.number(), z.string()]).optional(),
   sections: z.array(sectionSchema),
-  pricing: z.object({ currency: z.string(), items: z.array(pricingItemSchema), taxRate: z.number() }),
+  pricing: z.object({ currency: z.string(), items: z.array(pricingItemSchema), taxRate: z.number() }).optional(),
   settings: z.object({
     dueDate: z.string().optional(),
     approvalFlow: z.string().optional(),
     sharing: z.object({ public: z.boolean(), token: z.string().optional(), allowComments: z.boolean() }),
-  }),
+  }).optional(),
   versions: z.array(z.object({ id: idSchema, createdAt: z.number(), note: z.string().optional(), data: z.any() })).optional(),
   titleStyles: z.union([z.record(z.any()), z.array(z.any())]).optional(),
-});
+}).passthrough(); // Allow additional fields from API
 const proposalListSchema = z.array(proposalSchema);
 
 function isBrowser() {
@@ -142,43 +138,64 @@ function uuid() {
 }
 
 function normalizeStyles(styles: any): Record<string, any> | undefined {
-  if (!styles || Array.isArray(styles)) return undefined;
+  if (!styles) return undefined;
+  if (Array.isArray(styles)) return undefined; // Arrays like [] become undefined
+  if (typeof styles === "object" && Object.keys(styles).length === 0) return undefined; // Empty objects become undefined
   if (typeof styles === "object") return styles;
   return undefined;
 }
 
 function normalizeProposal(raw: z.infer<typeof proposalSchema>): Proposal {
+  const createdAtMs = typeof raw.createdAt === "number" ? raw.createdAt : (typeof raw.createdAt === "string" ? new Date(raw.createdAt).getTime() : Date.now());
+  const updatedAtMs = typeof raw.updatedAt === "number" ? raw.updatedAt : (typeof raw.updatedAt === "string" ? new Date(raw.updatedAt).getTime() : createdAtMs);
+
   return {
     id: String(raw.id!),
     title: raw.title!,
     client: raw.client || "",
     client_id: raw.client_id ? String(raw.client_id) : undefined,
-    status: raw.status!,
+    status: raw.status || "draft",
     createdBy: String(raw.createdBy || "system"),
-    createdAt: raw.createdAt!,
-    updatedAt: raw.updatedAt!,
-    sections: (raw.sections ?? []).map((s) => ({
-      id: String(s.id!),
-      title: s.title!,
-      content: s.content!,
-      layout: s.layout || "single",
-      columnContents: Array.isArray(s.columnContents) ? s.columnContents : undefined,
-      columnStyles: s.columnStyles ? s.columnStyles.map(normalizeStyles) : undefined,
-      columnGap: typeof s.columnGap === "number" ? s.columnGap : undefined,
-      gapAfter: typeof s.gapAfter === "number" ? s.gapAfter : undefined,
-      media: (s.media ?? []).map((m) => ({
-        type: m.type!,
-        url: m.url!,
-      })),
-      comments: (s.comments ?? []).map((c) => ({
-        id: String(c.id!),
-        author: c.author!,
-        text: c.text!,
-        createdAt: c.createdAt!,
-      })),
-      titleStyles: normalizeStyles(s.titleStyles),
-      contentStyles: normalizeStyles(s.contentStyles),
-    })),
+    createdAt: createdAtMs,
+    updatedAt: updatedAtMs,
+    sections: (raw.sections ?? []).map((s) => {
+      // Handle columnContents - could be array or object
+      let normalizedColumnContents: string[] | undefined;
+      if (Array.isArray(s.columnContents)) {
+        normalizedColumnContents = s.columnContents;
+      } else if (typeof s.columnContents === "object" && s.columnContents !== null && Object.keys(s.columnContents).length > 0) {
+        normalizedColumnContents = undefined; // Empty or invalid objects become undefined
+      }
+
+      // Handle columnStyles - could be array or object
+      let normalizedColumnStyles: Record<string, any>[] | undefined;
+      if (Array.isArray(s.columnStyles)) {
+        normalizedColumnStyles = s.columnStyles.map(normalizeStyles).filter((s) => s !== undefined) as Record<string, any>[];
+      } else if (typeof s.columnStyles === "object" && s.columnStyles !== null && Object.keys(s.columnStyles).length === 0) {
+        normalizedColumnStyles = undefined; // Empty objects become undefined
+      }
+
+      return {
+        id: String(s.id!),
+        title: s.title!,
+        content: s.content!,
+        layout: (s.layout && s.layout !== null) ? s.layout : "single",
+        columnContents: normalizedColumnContents,
+        columnStyles: normalizedColumnStyles,
+        media: (s.media ?? []).map((m) => ({
+          type: m.type!,
+          url: m.url!,
+        })),
+        comments: (s.comments ?? []).map((c) => ({
+          id: String(c.id!),
+          author: c.author!,
+          text: c.text!,
+          createdAt: c.createdAt!,
+        })),
+        titleStyles: normalizeStyles(s.titleStyles),
+        contentStyles: normalizeStyles(s.contentStyles),
+      };
+    }),
     pricing: {
       currency: raw.pricing?.currency ?? "USD",
       items: (raw.pricing?.items ?? []).map((i) => ({
@@ -238,40 +255,110 @@ export async function persistProposal(p: Proposal) {
 }
 
 function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmail?: string): Proposal {
-  const createdAtMs = new Date(apiProposal.created_at).getTime() || Date.now();
-  const updatedAtMs = apiProposal.updated_at ? new Date(apiProposal.updated_at).getTime() : createdAtMs;
+  const createdAtMs = typeof apiProposal.createdAt === "number" ? apiProposal.createdAt : (apiProposal.created_at ? new Date(apiProposal.created_at).getTime() : Date.now());
+  const updatedAtMs = typeof apiProposal.updatedAt === "number" ? apiProposal.updatedAt : (apiProposal.updated_at ? new Date(apiProposal.updated_at).getTime() : createdAtMs);
+
+  // Handle both old API structure (with created_at) and new API structure (with timestamps)
+  const sections = Array.isArray(apiProposal.sections) && apiProposal.sections.length > 0
+    ? (apiProposal.sections as any[]).map((s) => {
+        // Handle columnContents - could be array or object
+      let normalizedColumnContents: string[] | undefined;
+      if (Array.isArray(s.columnContents) && s.columnContents.length > 0) {
+        normalizedColumnContents = s.columnContents;
+      } else if (typeof s.columnContents === "object" && s.columnContents !== null) {
+        const keys = Object.keys(s.columnContents);
+        if (keys.length > 0) {
+          // Convert object to array (e.g., {"0": "content1", "1": "content2"} -> ["content1", "content2"])
+          normalizedColumnContents = keys.sort((a, b) => parseInt(a) - parseInt(b)).map(k => s.columnContents[k]);
+        }
+      }
+
+        // Handle columnStyles - could be array or object
+        let normalizedColumnStyles: Record<string, any>[] | undefined;
+        if (Array.isArray(s.columnStyles) && s.columnStyles.length > 0) {
+          normalizedColumnStyles = s.columnStyles.map(normalizeStyles).filter((s) => s !== undefined) as Record<string, any>[];
+        } else if (typeof s.columnStyles === "object" && s.columnStyles !== null) {
+          const keys = Object.keys(s.columnStyles);
+          if (keys.length > 0) {
+            // Convert object to array if keys are numeric
+            const isNumericKeys = keys.every(k => !isNaN(parseInt(k)));
+            if (isNumericKeys) {
+              normalizedColumnStyles = keys.sort((a, b) => parseInt(a) - parseInt(b))
+                .map(k => normalizeStyles(s.columnStyles[k]))
+                .filter((s) => s !== undefined) as Record<string, any>[];
+            }
+          }
+        }
+
+        // Infer layout from normalizedColumnContents if layout is null
+        let inferredLayout: "single" | "two-column" | "three-column" = "single";
+        if (!s.layout || s.layout === null) {
+          // When layout is null from API, infer from columnContents
+          if (normalizedColumnContents && Array.isArray(normalizedColumnContents)) {
+            if (normalizedColumnContents.length === 3) {
+              inferredLayout = "three-column";
+            } else if (normalizedColumnContents.length === 2) {
+              inferredLayout = "two-column";
+            } else {
+              inferredLayout = "single";
+            }
+          }
+        } else if (typeof s.layout === "string" && ["single", "two-column", "three-column"].includes(s.layout)) {
+          inferredLayout = s.layout as "single" | "two-column" | "three-column";
+        }
+
+        return {
+          id: String(s.id),
+          title: s.title || "",
+          content: s.content || "",
+          layout: inferredLayout,
+          columnContents: normalizedColumnContents,
+          columnStyles: normalizedColumnStyles,
+          media: Array.isArray(s.media) ? s.media : [],
+          comments: Array.isArray(s.comments) ? s.comments : [],
+          titleStyles: normalizeStyles(s.titleStyles),
+          contentStyles: normalizeStyles(s.contentStyles),
+        };
+      })
+    : [
+      { id: uuid(), title: "Overview", content: "", layout: "single", titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], comments: [] },
+      { id: uuid(), title: "Scope", content: "", layout: "single", titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], comments: [] },
+      { id: uuid(), title: "Timeline", content: "", layout: "single", titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], comments: [] },
+    ];
+
+  const clientName = typeof apiProposal.client === "string" ? apiProposal.client : (apiProposal.client?.name || "");
+  const clientId = typeof apiProposal.client_id === "string" ? apiProposal.client_id : (apiProposal.client_id ? String(apiProposal.client_id) : undefined);
+
   return {
-    id: apiProposal.id,
+    id: String(apiProposal.id),
     title: apiProposal.title,
-    client: apiProposal.client?.name || "",
-    client_id: apiProposal.client_id,
+    client: clientName,
+    client_id: clientId,
     status: apiProposal.status,
-    createdBy: apiProposal.created_by || userEmail || "you@example.com",
+    createdBy: apiProposal.createdBy || apiProposal.created_by || userEmail || "you@example.com",
     createdAt: createdAtMs,
     updatedAt: updatedAtMs,
-    sections: [
-      { id: uuid(), title: "Overview", content: "", layout: "single", media: [], comments: [] },
-      { id: uuid(), title: "Scope", content: "", layout: "single", media: [], comments: [] },
-      { id: uuid(), title: "Timeline", content: "", layout: "single", media: [], comments: [] },
-    ],
+    sections,
     pricing: {
-      currency: apiProposal.currency || "USD",
-      taxRate: apiProposal.tax_rate ?? 0.1,
-      items: [
-        { id: uuid(), label: "Design", qty: 1, price: 3000 },
-        { id: uuid(), label: "Development", qty: 1, price: 9000 },
-      ],
+      currency: (apiProposal.pricing as any)?.currency || apiProposal.currency || "USD",
+      taxRate: (apiProposal.pricing as any)?.taxRate ?? apiProposal.tax_rate ?? 0.1,
+      items: Array.isArray((apiProposal.pricing as any)?.items) ? (apiProposal.pricing as any).items : (
+        Array.isArray(apiProposal.items) ? apiProposal.items : [
+          { id: uuid(), label: "Design", qty: 1, price: 3000 },
+          { id: uuid(), label: "Development", qty: 1, price: 9000 },
+        ]
+      ),
     },
     settings: {
-      dueDate: apiProposal.due_date || undefined,
-      approvalFlow: apiProposal.approval_flow || "Single approver",
+      dueDate: (apiProposal.settings as any)?.dueDate || apiProposal.due_date || undefined,
+      approvalFlow: (apiProposal.settings as any)?.approvalFlow || apiProposal.approval_flow || "Single approver",
       sharing: {
-        public: (apiProposal.sharing_public ?? 0) === 1,
-        token: apiProposal.sharing_token || undefined,
-        allowComments: (apiProposal.sharing_allow_comments ?? 0) === 1,
+        public: ((apiProposal.settings as any)?.sharing?.public ?? apiProposal.sharing_public ?? 0) === 1,
+        token: (apiProposal.settings as any)?.sharing?.token || apiProposal.sharing_token || undefined,
+        allowComments: ((apiProposal.settings as any)?.sharing?.allowComments ?? apiProposal.sharing_allow_comments ?? 0) === 1,
       },
     },
-    versions: [],
+    versions: Array.isArray((apiProposal as any).versions) ? (apiProposal as any).versions : [],
   };
 }
 
@@ -358,49 +445,63 @@ export async function getProposalDetails(id: string): Promise<Proposal | undefin
     }
 
     const json = await res.json();
-    const validated = proposalSchema.safeParse(json);
 
-    if (!validated.success) {
-      console.warn("Invalid proposal details format:", validated.error);
-      console.warn("Falling back to local storage");
-      return getProposal(id);
-    }
-
-    let normalized = normalizeProposal(validated.data);
+    // Convert API response directly (handles all structure variations)
+    let normalized = convertApiProposalToProposal(json);
     const list = readStored() ?? [];
     const idx = list.findIndex((x) => x.id === normalized.id);
+    const localProposal = idx !== -1 ? list[idx] : null;
 
-    // Merge with local storage to preserve gap settings and other properties
-    if (idx !== -1 && list[idx]) {
-      const localProposal = list[idx];
+    // Merge with local storage to preserve layout and column data
+    // The API may return null/empty for these fields even if they were set
+    if (localProposal) {
+      console.log("Local proposal found, merging sections...", {
+        apiSections: normalized.sections.map(s => ({ id: s.id, title: s.title, layout: s.layout })),
+        localSections: localProposal.sections.map(s => ({ id: s.id, title: s.title, layout: s.layout, columnContents: s.columnContents })),
+      });
 
-      // Merge sections: preserve column content, gap values, and styles from local storage if API response doesn't have them
       normalized = {
         ...normalized,
-        sections: normalized.sections.map((apiSection, sectionIndex) => {
-          const localSection = localProposal.sections[sectionIndex];
+        sections: normalized.sections.map((apiSection) => {
+          const localSection = localProposal.sections.find((s) => String(s.id) === String(apiSection.id));
 
-          // If we can find a matching local section by ID, use it for detailed properties
-          const matchingLocalSection = localSection && localSection.id === apiSection.id
-            ? localSection
-            : localProposal.sections.find(s => s.id === apiSection.id);
+          if (localSection) {
+            const hasApiLayout = apiSection.layout && apiSection.layout !== null && apiSection.layout !== "single";
+            const hasApiColumnContents = Array.isArray(apiSection.columnContents) && apiSection.columnContents.length > 0;
+            const hasLocalLayout = localSection.layout && localSection.layout !== null;
+            const hasLocalColumnContents = Array.isArray(localSection.columnContents) && localSection.columnContents.length > 0;
 
-          if (matchingLocalSection) {
-            return {
+            const mergedSection = {
               ...apiSection,
-              gapAfter: apiSection.gapAfter !== undefined ? apiSection.gapAfter : matchingLocalSection.gapAfter,
-              columnGap: apiSection.columnGap !== undefined ? apiSection.columnGap : matchingLocalSection.columnGap,
-              // Preserve columnContents: use API if present and non-empty, otherwise use local
-              columnContents: (Array.isArray(apiSection.columnContents) && apiSection.columnContents.length > 0)
-                ? apiSection.columnContents
-                : (Array.isArray(matchingLocalSection.columnContents) ? matchingLocalSection.columnContents : undefined),
-              // Preserve columnStyles: use API if present and non-empty, otherwise use local
-              columnStyles: (Array.isArray(apiSection.columnStyles) && apiSection.columnStyles.length > 0)
+              // Use local layout if API returned null or "single" and local has multi-column
+              layout: (hasApiLayout ? apiSection.layout : (hasLocalLayout ? localSection.layout : "single")),
+              // Use local columnContents if API returned empty/null
+              columnContents: (hasApiColumnContents ? apiSection.columnContents : localSection.columnContents),
+              // Use local columnStyles if API returned empty/null
+              columnStyles: (apiSection.columnStyles && apiSection.columnStyles.length > 0)
                 ? apiSection.columnStyles
-                : (Array.isArray(matchingLocalSection.columnStyles) ? matchingLocalSection.columnStyles : undefined),
+                : localSection.columnStyles,
+              // Use local styles if API didn't return them
+              titleStyles: apiSection.titleStyles || localSection.titleStyles,
+              contentStyles: apiSection.contentStyles || localSection.contentStyles,
             };
-          }
 
+            if (mergedSection.layout !== "single") {
+              console.log("Merged section with multi-column layout:", {
+                id: mergedSection.id,
+                title: mergedSection.title,
+                layout: mergedSection.layout,
+                apiLayout: apiSection.layout,
+                localLayout: localSection.layout,
+                columnContents: mergedSection.columnContents,
+                apiColumnContents: apiSection.columnContents,
+                localColumnContents: localSection.columnContents,
+                columnStyles: mergedSection.columnStyles,
+              });
+            }
+
+            return mergedSection;
+          }
           return apiSection;
         }),
       };
@@ -504,9 +605,9 @@ export async function createProposal(partial?: Partial<Proposal>): Promise<Propo
     createdAt: now,
     updatedAt: now,
     sections: partial?.sections ?? [
-      { id: uuid(), title: "Overview", content: "", media: [], comments: [] },
-      { id: uuid(), title: "Scope", content: "", media: [], comments: [] },
-      { id: uuid(), title: "Timeline", content: "", media: [], comments: [] },
+      { id: uuid(), title: "Overview", content: "", layout: "single", titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], comments: [] },
+      { id: uuid(), title: "Scope", content: "", layout: "single", titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], comments: [] },
+      { id: uuid(), title: "Timeline", content: "", layout: "single", titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], comments: [] },
     ],
     pricing: partial?.pricing ?? {
       currency: "USD",
@@ -659,9 +760,10 @@ export async function addSection(p: Proposal, title = "New Section", layout: "si
   const columnCount = layout === "two-column" ? 2 : layout === "three-column" ? 3 : 0;
   const columnContents = columnCount > 0 ? Array(columnCount).fill("") : undefined;
   const columnStyles = columnCount > 0 ? Array(columnCount).fill({}) : undefined;
-  const columnGap = columnCount > 0 ? 24 : undefined;
+  const titleStyles = columnCount > 0 ? { columnGap: 24 } : {};
+  const contentStyles = { gapAfter: 24 };
 
-  const newSection = { id: uuid(), title, content: "", layout, columnContents, columnStyles, columnGap, media: [], comments: [] };
+  const newSection = { id: uuid(), title, content: "", layout, columnContents, columnStyles, titleStyles, contentStyles, media: [], comments: [] };
   const updated = {
     ...p,
     sections: [...p.sections, newSection],

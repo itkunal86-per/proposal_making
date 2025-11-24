@@ -114,44 +114,105 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                 </div>
 
                 {/* Section Content */}
-                <div
-                  className="relative"
-                  style={{
-                    color: (section as any).contentStyles?.color,
-                    fontSize: `${(section as any).contentStyles?.fontSize || 16}px`,
-                    textAlign: ((section as any).contentStyles?.textAlign || "left") as any,
-                    backgroundColor: (section as any).contentStyles?.backgroundColor,
-                    backgroundImage: (section as any).contentStyles?.backgroundImage ? `url(${(section as any).contentStyles?.backgroundImage})` : undefined,
-                    backgroundSize: (section as any).contentStyles?.backgroundSize || "cover",
-                    backgroundPosition: "center",
-                    backgroundRepeat: "no-repeat",
-                    padding: `${(section as any).contentStyles?.paddingTop || 0}px ${(section as any).contentStyles?.paddingRight || 0}px ${(section as any).contentStyles?.paddingBottom || 0}px ${(section as any).contentStyles?.paddingLeft || 0}px`,
-                    borderRadius: (section as any).contentStyles?.borderRadius ? `${(section as any).contentStyles?.borderRadius}px` : undefined,
-                    fontWeight: (section as any).contentStyles?.bold ? "bold" : "normal",
-                    fontStyle: (section as any).contentStyles?.italic ? "italic" : "normal",
-                    textDecoration: (section as any).contentStyles?.underline ? "underline" : (section as any).contentStyles?.strikethrough ? "line-through" : "none",
-                    whiteSpace: "pre-wrap",
-                    wordBreak: "break-word",
-                  }}
-                >
-                  {(section as any).contentStyles?.backgroundImage && (section as any).contentStyles?.backgroundOpacity && (
-                    <div
-                      style={{
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        backgroundColor: `rgba(255, 255, 255, ${(100 - parseInt((section as any).contentStyles?.backgroundOpacity || "100")) / 100})`,
-                        borderRadius: (section as any).contentStyles?.borderRadius ? `${(section as any).contentStyles?.borderRadius}px` : undefined,
-                        pointerEvents: "none",
-                      }}
-                    />
-                  )}
-                  <div style={{ position: "relative", zIndex: 1 }}>
-                    {replaceVariables(section.content, variables)}
+                {section.layout !== "two-column" && section.layout !== "three-column" ? (
+                  <div
+                    className="relative"
+                    style={{
+                      color: (section as any).contentStyles?.color,
+                      fontSize: `${(section as any).contentStyles?.fontSize || 16}px`,
+                      textAlign: ((section as any).contentStyles?.textAlign || "left") as any,
+                      backgroundColor: (section as any).contentStyles?.backgroundColor,
+                      backgroundImage: (section as any).contentStyles?.backgroundImage ? `url(${(section as any).contentStyles?.backgroundImage})` : undefined,
+                      backgroundSize: (section as any).contentStyles?.backgroundSize || "cover",
+                      backgroundPosition: "center",
+                      backgroundRepeat: "no-repeat",
+                      padding: `${(section as any).contentStyles?.paddingTop || 0}px ${(section as any).contentStyles?.paddingRight || 0}px ${(section as any).contentStyles?.paddingBottom || 0}px ${(section as any).contentStyles?.paddingLeft || 0}px`,
+                      borderRadius: (section as any).contentStyles?.borderRadius ? `${(section as any).contentStyles?.borderRadius}px` : undefined,
+                      fontWeight: (section as any).contentStyles?.bold ? "bold" : "normal",
+                      fontStyle: (section as any).contentStyles?.italic ? "italic" : "normal",
+                      textDecoration: (section as any).contentStyles?.underline ? "underline" : (section as any).contentStyles?.strikethrough ? "line-through" : "none",
+                      whiteSpace: "pre-wrap",
+                      wordBreak: "break-word",
+                    }}
+                  >
+                    {(section as any).contentStyles?.backgroundImage && (section as any).contentStyles?.backgroundOpacity && (
+                      <div
+                        style={{
+                          position: "absolute",
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          backgroundColor: `rgba(255, 255, 255, ${(100 - parseInt((section as any).contentStyles?.backgroundOpacity || "100")) / 100})`,
+                          borderRadius: (section as any).contentStyles?.borderRadius ? `${(section as any).contentStyles?.borderRadius}px` : undefined,
+                          pointerEvents: "none",
+                        }}
+                      />
+                    )}
+                    <div style={{ position: "relative", zIndex: 1 }}>
+                      {replaceVariables(section.content, variables)}
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: section.layout === "two-column" ? "1fr 1fr" : "1fr 1fr 1fr",
+                      gap: `${typeof (section as any).titleStyles?.columnGap === "number" ? (section as any).titleStyles.columnGap : 24}px`,
+                    }}
+                  >
+                    {section.layout === "two-column" && [(section as any).columnContents?.[0], (section as any).columnContents?.[1]].map((content, colIndex) => (
+                      <div
+                        key={colIndex}
+                        className="relative"
+                        style={{
+                          color: (section as any).contentStyles?.color,
+                          fontSize: `${(section as any).contentStyles?.fontSize || 16}px`,
+                          textAlign: ((section as any).contentStyles?.textAlign || "left") as any,
+                          backgroundColor: (section as any).columnStyles?.[colIndex]?.backgroundColor || (section as any).contentStyles?.backgroundColor,
+                          backgroundImage: (section as any).columnStyles?.[colIndex]?.backgroundImage ? `url(${(section as any).columnStyles[colIndex].backgroundImage})` : undefined,
+                          backgroundSize: (section as any).contentStyles?.backgroundSize || "cover",
+                          padding: `${(section as any).columnStyles?.[colIndex]?.paddingTop || (section as any).contentStyles?.paddingTop || 0}px ${(section as any).columnStyles?.[colIndex]?.paddingRight || (section as any).contentStyles?.paddingRight || 0}px ${(section as any).columnStyles?.[colIndex]?.paddingBottom || (section as any).contentStyles?.paddingBottom || 0}px ${(section as any).columnStyles?.[colIndex]?.paddingLeft || (section as any).contentStyles?.paddingLeft || 0}px`,
+                          borderRadius: (section as any).contentStyles?.borderRadius ? `${(section as any).contentStyles?.borderRadius}px` : undefined,
+                          fontWeight: (section as any).contentStyles?.bold ? "bold" : "normal",
+                          fontStyle: (section as any).contentStyles?.italic ? "italic" : "normal",
+                          textDecoration: (section as any).contentStyles?.underline ? "underline" : (section as any).contentStyles?.strikethrough ? "line-through" : "none",
+                          whiteSpace: "pre-wrap",
+                          wordBreak: "break-word",
+                        }}
+                      >
+                        <div style={{ position: "relative", zIndex: 1 }}>
+                          {replaceVariables(content || "", variables)}
+                        </div>
+                      </div>
+                    ))}
+                    {section.layout === "three-column" && [(section as any).columnContents?.[0], (section as any).columnContents?.[1], (section as any).columnContents?.[2]].map((content, colIndex) => (
+                      <div
+                        key={colIndex}
+                        className="relative"
+                        style={{
+                          color: (section as any).contentStyles?.color,
+                          fontSize: `${(section as any).contentStyles?.fontSize || 16}px`,
+                          textAlign: ((section as any).contentStyles?.textAlign || "left") as any,
+                          backgroundColor: (section as any).columnStyles?.[colIndex]?.backgroundColor || (section as any).contentStyles?.backgroundColor,
+                          backgroundImage: (section as any).columnStyles?.[colIndex]?.backgroundImage ? `url(${(section as any).columnStyles[colIndex].backgroundImage})` : undefined,
+                          backgroundSize: (section as any).contentStyles?.backgroundSize || "cover",
+                          padding: `${(section as any).columnStyles?.[colIndex]?.paddingTop || (section as any).contentStyles?.paddingTop || 0}px ${(section as any).columnStyles?.[colIndex]?.paddingRight || (section as any).contentStyles?.paddingRight || 0}px ${(section as any).columnStyles?.[colIndex]?.paddingBottom || (section as any).contentStyles?.paddingBottom || 0}px ${(section as any).columnStyles?.[colIndex]?.paddingLeft || (section as any).contentStyles?.paddingLeft || 0}px`,
+                          borderRadius: (section as any).contentStyles?.borderRadius ? `${(section as any).contentStyles?.borderRadius}px` : undefined,
+                          fontWeight: (section as any).contentStyles?.bold ? "bold" : "normal",
+                          fontStyle: (section as any).contentStyles?.italic ? "italic" : "normal",
+                          textDecoration: (section as any).contentStyles?.underline ? "underline" : (section as any).contentStyles?.strikethrough ? "line-through" : "none",
+                          whiteSpace: "pre-wrap",
+                          wordBreak: "break-word",
+                        }}
+                      >
+                        <div style={{ position: "relative", zIndex: 1 }}>
+                          {replaceVariables(content || "", variables)}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
 
                 {/* Media */}
                 {section.media && section.media.length > 0 && (

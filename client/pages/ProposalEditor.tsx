@@ -75,6 +75,15 @@ export default function ProposalEditor() {
         nav("/proposals");
         return;
       }
+      console.log("Loaded proposal from getProposalDetails:", {
+        id: found.id,
+        sections: found.sections.map(s => ({
+          id: s.id,
+          title: s.title,
+          layout: s.layout,
+          columnContents: (s as any).columnContents,
+        })),
+      });
       setP(found);
 
       try {

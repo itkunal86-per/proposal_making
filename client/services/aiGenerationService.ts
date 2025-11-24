@@ -1,4 +1,5 @@
 import { Proposal, ProposalSection } from "./proposalsService";
+import { getStoredToken } from "@/lib/auth";
 
 interface GenerateProposalRequest {
   prompt: string;
@@ -13,6 +14,12 @@ interface GenerateProposalResponse {
     content: string;
     layout?: "single" | "two-column" | "three-column";
   }>;
+}
+
+interface ProposalAIResponse {
+  status: boolean;
+  message: string;
+  data: string;
 }
 
 export async function generateProposalFromPrompt(
@@ -137,4 +144,45 @@ export async function generateProposalContent(
   };
 
   return updatedProposal;
+}
+
+export async function generateAIContent(prompt: string): Promise<string> {
+  const token = getStoredToken();
+
+  if (!token) {
+    throw new Error("Authentication token not found. Please log in again.");
+  }
+
+  try {
+    const response = await fetch("https://propai-api.hirenq.com/api/ai/generate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        prompt,
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(
+        error.message || error.error || `AI generation failed with status ${response.status}`
+      );
+    }
+
+    const data: ProposalAIResponse = await response.json();
+
+    if (!data.status) {
+      throw new Error(data.message || "AI generation failed");
+    }
+
+    return data.data;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`Failed to generate AI content: ${error.message}`);
+    }
+    throw new Error("Failed to generate AI content: Unknown error");
+  }
 }

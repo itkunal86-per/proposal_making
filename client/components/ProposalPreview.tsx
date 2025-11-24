@@ -292,6 +292,10 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
         paddingRight={(proposal as any).titleStyles?.paddingRight}
         paddingBottom={(proposal as any).titleStyles?.paddingBottom}
         paddingLeft={(proposal as any).titleStyles?.paddingLeft}
+        marginTop={(proposal as any).titleStyles?.marginTop}
+        marginRight={(proposal as any).titleStyles?.marginRight}
+        marginBottom={(proposal as any).titleStyles?.marginBottom}
+        marginLeft={(proposal as any).titleStyles?.marginLeft}
       >
         {proposal.title}
       </SelectableElement>
@@ -305,8 +309,17 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
 
       <div className="border-t">
         {proposal.sections.map((section, index) => {
+          console.log(`Section "${section.title}":`, {
+            layout: section.layout,
+            columnContents: (section as any).columnContents,
+            columnStyles: (section as any).columnStyles,
+            titleStyles: (section as any).titleStyles,
+            contentStyles: (section as any).contentStyles,
+          });
+
           const isMultiColumn = section.layout === "two-column" || section.layout === "three-column";
-          const columnGapValue = typeof section.columnGap === "number" ? section.columnGap : 24;
+          const columnGapValue = typeof (section as any).titleStyles?.columnGap === "number" ? (section as any).titleStyles.columnGap : 24;
+          const gapAfterValue = typeof (section as any).contentStyles?.gapAfter === "number" ? (section as any).contentStyles.gapAfter : 24;
           const containerClassName =
             section.layout === "two-column" ? "grid grid-cols-2" :
             section.layout === "three-column" ? "grid grid-cols-3" :
@@ -323,7 +336,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
             className={containerClassName}
             style={{
               gap: isMultiColumn ? `${columnGapValue}px` : undefined,
-              marginBottom: typeof section.gapAfter === "number" ? `${section.gapAfter}px` : "24px"
+              marginBottom: `${gapAfterValue}px`
             }}
           >
             {isMultiColumn && (
@@ -352,6 +365,10 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                   paddingRight={(section as any).titleStyles?.paddingRight}
                   paddingBottom={(section as any).titleStyles?.paddingBottom}
                   paddingLeft={(section as any).titleStyles?.paddingLeft}
+                  marginTop={(section as any).titleStyles?.marginTop}
+                  marginRight={(section as any).titleStyles?.marginRight}
+                  marginBottom={(section as any).titleStyles?.marginBottom}
+                  marginLeft={(section as any).titleStyles?.marginLeft}
                   bold={(section as any).titleStyles?.bold}
                   italic={(section as any).titleStyles?.italic}
                   underline={(section as any).titleStyles?.underline}
@@ -389,6 +406,10 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                 paddingRight={(section as any).titleStyles?.paddingRight}
                 paddingBottom={(section as any).titleStyles?.paddingBottom}
                 paddingLeft={(section as any).titleStyles?.paddingLeft}
+                marginTop={(section as any).titleStyles?.marginTop}
+                marginRight={(section as any).titleStyles?.marginRight}
+                marginBottom={(section as any).titleStyles?.marginBottom}
+                marginLeft={(section as any).titleStyles?.marginLeft}
                 bold={(section as any).titleStyles?.bold}
                 italic={(section as any).titleStyles?.italic}
                 underline={(section as any).titleStyles?.underline}
@@ -426,6 +447,10 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                 paddingRight={(section as any).contentStyles?.paddingRight}
                 paddingBottom={(section as any).contentStyles?.paddingBottom}
                 paddingLeft={(section as any).contentStyles?.paddingLeft}
+                marginTop={(section as any).contentStyles?.marginTop}
+                marginRight={(section as any).contentStyles?.marginRight}
+                marginBottom={(section as any).contentStyles?.marginBottom}
+                marginLeft={(section as any).contentStyles?.marginLeft}
                 bold={(section as any).contentStyles?.bold}
                 italic={(section as any).contentStyles?.italic}
                 underline={(section as any).contentStyles?.underline}
@@ -481,6 +506,10 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                         paddingRight={(section as any).contentStyles?.paddingRight}
                         paddingBottom={(section as any).contentStyles?.paddingBottom}
                         paddingLeft={(section as any).contentStyles?.paddingLeft}
+                        marginTop={(section as any).contentStyles?.marginTop}
+                        marginRight={(section as any).contentStyles?.marginRight}
+                        marginBottom={(section as any).contentStyles?.marginBottom}
+                        marginLeft={(section as any).contentStyles?.marginLeft}
                         bold={(section as any).contentStyles?.bold}
                         italic={(section as any).contentStyles?.italic}
                         underline={(section as any).contentStyles?.underline}
@@ -527,6 +556,10 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                         paddingRight={(section as any).contentStyles?.paddingRight}
                         paddingBottom={(section as any).contentStyles?.paddingBottom}
                         paddingLeft={(section as any).contentStyles?.paddingLeft}
+                        marginTop={(section as any).contentStyles?.marginTop}
+                        marginRight={(section as any).contentStyles?.marginRight}
+                        marginBottom={(section as any).contentStyles?.marginBottom}
+                        marginLeft={(section as any).contentStyles?.marginLeft}
                         bold={(section as any).contentStyles?.bold}
                         italic={(section as any).contentStyles?.italic}
                         underline={(section as any).contentStyles?.underline}
@@ -565,7 +598,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                           onSelectElement(`section-content-${section.id}-col1`, "section-content")
                         }
                         onAI={() => onAIElement?.(`section-content-${section.id}-col1`, "section-content")}
-                        value={section.content}
+                        value={(section as any).columnContents?.[0] || section.content}
                         color={(section as any).contentStyles?.color}
                         fontSize={(section as any).contentStyles?.fontSize}
                         textAlign={(section as any).contentStyles?.textAlign}
@@ -581,6 +614,10 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                         paddingRight={(section as any).contentStyles?.paddingRight}
                         paddingBottom={(section as any).contentStyles?.paddingBottom}
                         paddingLeft={(section as any).contentStyles?.paddingLeft}
+                        marginTop={(section as any).contentStyles?.marginTop}
+                        marginRight={(section as any).contentStyles?.marginRight}
+                        marginBottom={(section as any).contentStyles?.marginBottom}
+                        marginLeft={(section as any).contentStyles?.marginLeft}
                         bold={(section as any).contentStyles?.bold}
                         italic={(section as any).contentStyles?.italic}
                         underline={(section as any).contentStyles?.underline}
@@ -611,7 +648,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                           onSelectElement(`section-content-${section.id}-col2`, "section-content")
                         }
                         onAI={() => onAIElement?.(`section-content-${section.id}-col2`, "section-content")}
-                        value={section.content}
+                        value={(section as any).columnContents?.[1] || section.content}
                         color={(section as any).contentStyles?.color}
                         fontSize={(section as any).contentStyles?.fontSize}
                         textAlign={(section as any).contentStyles?.textAlign}
@@ -627,6 +664,10 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                         paddingRight={(section as any).contentStyles?.paddingRight}
                         paddingBottom={(section as any).contentStyles?.paddingBottom}
                         paddingLeft={(section as any).contentStyles?.paddingLeft}
+                        marginTop={(section as any).contentStyles?.marginTop}
+                        marginRight={(section as any).contentStyles?.marginRight}
+                        marginBottom={(section as any).contentStyles?.marginBottom}
+                        marginLeft={(section as any).contentStyles?.marginLeft}
                         bold={(section as any).contentStyles?.bold}
                         italic={(section as any).contentStyles?.italic}
                         underline={(section as any).contentStyles?.underline}
@@ -657,7 +698,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                           onSelectElement(`section-content-${section.id}-col3`, "section-content")
                         }
                         onAI={() => onAIElement?.(`section-content-${section.id}-col3`, "section-content")}
-                        value={section.content}
+                        value={(section as any).columnContents?.[2] || section.content}
                         color={(section as any).contentStyles?.color}
                         fontSize={(section as any).contentStyles?.fontSize}
                         textAlign={(section as any).contentStyles?.textAlign}
@@ -673,6 +714,10 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                         paddingRight={(section as any).contentStyles?.paddingRight}
                         paddingBottom={(section as any).contentStyles?.paddingBottom}
                         paddingLeft={(section as any).contentStyles?.paddingLeft}
+                        marginTop={(section as any).contentStyles?.marginTop}
+                        marginRight={(section as any).contentStyles?.marginRight}
+                        marginBottom={(section as any).contentStyles?.marginBottom}
+                        marginLeft={(section as any).contentStyles?.marginLeft}
                         bold={(section as any).contentStyles?.bold}
                         italic={(section as any).contentStyles?.italic}
                         underline={(section as any).contentStyles?.underline}

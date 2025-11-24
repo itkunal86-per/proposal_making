@@ -838,30 +838,6 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             </div>
           </div>
 
-          <div>
-            <Label className="text-xs font-semibold">Gap After Section</Label>
-            <div className="flex gap-2 mt-2">
-              <Input
-                type="number"
-                min="0"
-                max="100"
-                value={String(typeof section.gapAfter === "number" ? section.gapAfter : 24)}
-                onChange={(e) =>
-                  handleUpdateSection({
-                    gapAfter: parseInt(e.target.value) || 0
-                  })
-                }
-                className="flex-1"
-              />
-              <span className="text-sm text-muted-foreground self-center">
-                px
-              </span>
-            </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              Spacing between this section and the next one (default: 24px)
-            </p>
-          </div>
-
           {isMultiColumn && (
             <div>
               <Label className="text-xs font-semibold">Gap Between Columns</Label>
@@ -870,12 +846,14 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                   type="number"
                   min="0"
                   max="100"
-                  value={String(typeof section.columnGap === "number" ? section.columnGap : 24)}
-                  onChange={(e) =>
+                  value={String(typeof sectionTitleStyles.columnGap === "number" ? sectionTitleStyles.columnGap : 24)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    const numValue = value === "" ? 24 : parseInt(value, 10);
                     handleUpdateSection({
-                      columnGap: parseInt(e.target.value) || 0
-                    })
-                  }
+                      titleStyles: { ...sectionTitleStyles, columnGap: isNaN(numValue) ? 24 : numValue }
+                    });
+                  }}
                   className="flex-1"
                 />
                 <span className="text-sm text-muted-foreground self-center">
@@ -1569,11 +1547,13 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                   type="number"
                   min="0"
                   value={parseInt(sectionContentStyles.marginTop || "0")}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    const numValue = value === "" ? 0 : parseInt(value, 10);
                     handleUpdateSection({
-                      contentStyles: { ...sectionContentStyles, marginTop: e.target.value }
-                    })
-                  }
+                      contentStyles: { ...sectionContentStyles, marginTop: String(isNaN(numValue) ? 0 : numValue) }
+                    });
+                  }}
                   className="mt-1"
                   placeholder="0"
                 />
@@ -1584,11 +1564,13 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                   type="number"
                   min="0"
                   value={parseInt(sectionContentStyles.marginRight || "0")}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    const numValue = value === "" ? 0 : parseInt(value, 10);
                     handleUpdateSection({
-                      contentStyles: { ...sectionContentStyles, marginRight: e.target.value }
-                    })
-                  }
+                      contentStyles: { ...sectionContentStyles, marginRight: String(isNaN(numValue) ? 0 : numValue) }
+                    });
+                  }}
                   className="mt-1"
                   placeholder="0"
                 />
@@ -1599,11 +1581,13 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                   type="number"
                   min="0"
                   value={parseInt(sectionContentStyles.marginBottom || "0")}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    const numValue = value === "" ? 0 : parseInt(value, 10);
                     handleUpdateSection({
-                      contentStyles: { ...sectionContentStyles, marginBottom: e.target.value }
-                    })
-                  }
+                      contentStyles: { ...sectionContentStyles, marginBottom: String(isNaN(numValue) ? 0 : numValue) }
+                    });
+                  }}
                   className="mt-1"
                   placeholder="0"
                 />
@@ -1614,11 +1598,13 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                   type="number"
                   min="0"
                   value={parseInt(sectionContentStyles.marginLeft || "0")}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    const numValue = value === "" ? 0 : parseInt(value, 10);
                     handleUpdateSection({
-                      contentStyles: { ...sectionContentStyles, marginLeft: e.target.value }
-                    })
-                  }
+                      contentStyles: { ...sectionContentStyles, marginLeft: String(isNaN(numValue) ? 0 : numValue) }
+                    });
+                  }}
                   className="mt-1"
                   placeholder="0"
                 />
@@ -1633,12 +1619,14 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                 type="number"
                 min="0"
                 max="100"
-                value={String(typeof section.gapAfter === "number" ? section.gapAfter : 24)}
-                onChange={(e) =>
+                value={String(typeof sectionContentStyles.gapAfter === "number" ? sectionContentStyles.gapAfter : 24)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  const numValue = value === "" ? 24 : parseInt(value, 10);
                   handleUpdateSection({
-                    gapAfter: parseInt(e.target.value) || 0
-                  })
-                }
+                    contentStyles: { ...sectionContentStyles, gapAfter: isNaN(numValue) ? 24 : numValue }
+                  });
+                }}
                 className="flex-1"
               />
               <span className="text-sm text-muted-foreground self-center">
