@@ -112,10 +112,10 @@ const proposalSchema = z.object({
   title: z.string(),
   client: z.string().optional(),
   client_id: z.union([z.string(), z.number()]).optional(),
-  status: z.union([z.literal("draft"), z.literal("sent"), z.literal("accepted"), z.literal("declined")]),
+  status: z.union([z.literal("draft"), z.literal("sent"), z.literal("accepted"), z.literal("declined")]).optional(),
   createdBy: z.union([z.string(), z.number()]).optional(),
-  createdAt: z.number(),
-  updatedAt: z.number(),
+  createdAt: z.union([z.number(), z.string()]).optional(),
+  updatedAt: z.union([z.number(), z.string()]).optional(),
   sections: z.array(sectionSchema),
   pricing: z.object({ currency: z.string(), items: z.array(pricingItemSchema), taxRate: z.number() }).optional(),
   settings: z.object({
