@@ -1,4 +1,5 @@
 import { Proposal, ProposalSection } from "./proposalsService";
+import { getStoredToken } from "@/lib/auth";
 
 interface GenerateProposalRequest {
   prompt: string;
