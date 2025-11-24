@@ -162,72 +162,110 @@ export const AIAssistantDialog: React.FC<AIAssistantDialogProps> = ({
           </div>
         )}
 
-        {isEnabled && elementPreview && (
+        {isEnabled && (
           <div className="space-y-4">
-            <div className="p-3 bg-slate-50 rounded border border-slate-200">
-              <Label className="text-xs font-semibold block text-slate-700">
-                {elementPreview.label}
-              </Label>
-              <p className="text-xs text-slate-600 mt-1 line-clamp-2">
-                {elementPreview.value.substring(0, 150)}
-                {elementPreview.value.length > 150 ? "..." : ""}
-              </p>
-            </div>
-
-            <Separator />
-
-            <div className="space-y-2">
-              <Label htmlFor="ai-prompt" className="text-xs font-semibold">
-                Prompt
-              </Label>
-              <Textarea
-                id="ai-prompt"
-                placeholder={
-                  targetElementType === "title"
-                    ? "Enter new title or describe what you want..."
-                    : targetElementType === "section-title"
-                    ? "Enter new section title or describe what you want..."
-                    : "Tell the AI what you'd like to generate, rewrite, summarize, or translate..."
-                }
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                className="min-h-[100px]"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-2">
-              <Button
-                onClick={() => handleAIWrite("generate", prompt)}
-                disabled={!isEnabled || isLoading}
-              >
-                {isLoading ? "Generating..." : "Generate"}
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => handleAIWrite("rewrite", prompt)}
-                disabled={!isEnabled || isLoading}
-              >
-                {isLoading ? "Rewriting..." : "Rewrite"}
-              </Button>
-              {targetElementType === "section-content" && (
-                <>
+            {aiContent && (
+              <>
+                <div className="space-y-2">
+                  <Label className="text-xs font-semibold">Content</Label>
+                  <Textarea
+                    value={editableContent}
+                    onChange={(e) => setEditableContent(e.target.value)}
+                    className="min-h-[200px]"
+                    placeholder="Edit the generated content here..."
+                  />
+                </div>
+                <div className="flex gap-2">
                   <Button
-                    variant="outline"
-                    onClick={() => handleAIWrite("summarize", prompt)}
-                    disabled={!isEnabled || isLoading}
+                    onClick={handleAddToProposal}
+                    className="flex-1"
                   >
-                    {isLoading ? "Summarizing..." : "Summarize"}
+                    Add to Proposal
                   </Button>
                   <Button
                     variant="outline"
-                    onClick={() => handleAIWrite("translate", prompt)}
+                    onClick={() => {
+                      setAiContent(null);
+                      setEditableContent("");
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+                <Separator />
+              </>
+            )}
+
+            {elementPreview && !aiContent && (
+              <div className="p-3 bg-slate-50 rounded border border-slate-200">
+                <Label className="text-xs font-semibold block text-slate-700">
+                  {elementPreview.label}
+                </Label>
+                <p className="text-xs text-slate-600 mt-1 line-clamp-2">
+                  {elementPreview.value.substring(0, 150)}
+                  {elementPreview.value.length > 150 ? "..." : ""}
+                </p>
+              </div>
+            )}
+
+            {!aiContent && (
+              <>
+                {elementPreview && <Separator />}
+
+                <div className="space-y-2">
+                  <Label htmlFor="ai-prompt" className="text-xs font-semibold">
+                    Prompt
+                  </Label>
+                  <Textarea
+                    id="ai-prompt"
+                    placeholder={
+                      targetElementType === "title"
+                        ? "Enter new title or describe what you want..."
+                        : targetElementType === "section-title"
+                        ? "Enter new section title or describe what you want..."
+                        : "Tell the AI what you'd like to generate, rewrite, summarize, or translate..."
+                    }
+                    value={prompt}
+                    onChange={(e) => setPrompt(e.target.value)}
+                    className="min-h-[100px]"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    onClick={() => handleAIWrite("generate", prompt)}
                     disabled={!isEnabled || isLoading}
                   >
-                    {isLoading ? "Translating..." : "Translate"}
+                    {isLoading ? "Generating..." : "Generate"}
                   </Button>
-                </>
-              )}
-            </div>
+                  <Button
+                    variant="outline"
+                    onClick={() => handleAIWrite("rewrite", prompt)}
+                    disabled={!isEnabled || isLoading}
+                  >
+                    {isLoading ? "Rewriting..." : "Rewrite"}
+                  </Button>
+                  {targetElementType === "section-content" && (
+                    <>
+                      <Button
+                        variant="outline"
+                        onClick={() => handleAIWrite("summarize", prompt)}
+                        disabled={!isEnabled || isLoading}
+                      >
+                        {isLoading ? "Summarizing..." : "Summarize"}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => handleAIWrite("translate", prompt)}
+                        disabled={!isEnabled || isLoading}
+                      >
+                        {isLoading ? "Translating..." : "Translate"}
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </>
+            )}
           </div>
         )}
       </DialogContent>
