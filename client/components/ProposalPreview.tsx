@@ -311,7 +311,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
           const containerClassName =
             section.layout === "two-column" ? "grid grid-cols-2" :
             section.layout === "three-column" ? "grid grid-cols-3" :
-            "block";
+            "space-y-3";
 
           if (section.layout && section.layout !== "single") {
             console.log(`Rendering section "${section.title}" with layout: ${section.layout}`, { containerClassName, isMultiColumn });
@@ -324,8 +324,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
             className={containerClassName}
             style={{
               gap: isMultiColumn ? `${columnGapValue}px` : undefined,
-              marginBottom: `${gapAfterValue}px`,
-              display: isMultiColumn ? undefined : "block"
+              marginBottom: `${gapAfterValue}px !important` as React.CSSProperties
             }}
           >
             {isMultiColumn && (
