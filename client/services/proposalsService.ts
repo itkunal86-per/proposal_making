@@ -257,22 +257,36 @@ function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmai
 
   // Handle both old API structure (with created_at) and new API structure (with timestamps)
   const sections = Array.isArray(apiProposal.sections) && apiProposal.sections.length > 0
-    ? (apiProposal.sections as any[]).map((s) => ({
-        id: String(s.id),
-        title: s.title || "",
-        content: s.content || "",
-        layout: s.layout || "single",
-        columnContents: Array.isArray(s.columnContents) ? s.columnContents : (
-          typeof s.columnContents === "object" && Object.keys(s.columnContents || {}).length === 0 ? undefined : s.columnContents
-        ),
-        columnStyles: Array.isArray(s.columnStyles) ? s.columnStyles : (
-          typeof s.columnStyles === "object" && Object.keys(s.columnStyles || {}).length === 0 ? undefined : s.columnStyles
-        ),
-        media: Array.isArray(s.media) ? s.media : [],
-        comments: Array.isArray(s.comments) ? s.comments : [],
-        titleStyles: normalizeStyles(s.titleStyles),
-        contentStyles: normalizeStyles(s.contentStyles),
-      }))
+    ? (apiProposal.sections as any[]).map((s) => {
+        // Handle columnContents - could be array or object
+        let normalizedColumnContents: string[] | undefined;
+        if (Array.isArray(s.columnContents)) {
+          normalizedColumnContents = s.columnContents;
+        } else if (typeof s.columnContents === "object" && s.columnContents !== null && Object.keys(s.columnContents).length > 0) {
+          normalizedColumnContents = undefined;
+        }
+
+        // Handle columnStyles - could be array or object
+        let normalizedColumnStyles: Record<string, any>[] | undefined;
+        if (Array.isArray(s.columnStyles)) {
+          normalizedColumnStyles = s.columnStyles.map(normalizeStyles).filter((s) => s !== undefined) as Record<string, any>[];
+        } else if (typeof s.columnStyles === "object" && s.columnStyles !== null && Object.keys(s.columnStyles).length === 0) {
+          normalizedColumnStyles = undefined;
+        }
+
+        return {
+          id: String(s.id),
+          title: s.title || "",
+          content: s.content || "",
+          layout: (s.layout && s.layout !== null) ? s.layout : "single",
+          columnContents: normalizedColumnContents,
+          columnStyles: normalizedColumnStyles,
+          media: Array.isArray(s.media) ? s.media : [],
+          comments: Array.isArray(s.comments) ? s.comments : [],
+          titleStyles: normalizeStyles(s.titleStyles),
+          contentStyles: normalizeStyles(s.contentStyles),
+        };
+      })
     : [
       { id: uuid(), title: "Overview", content: "", layout: "single", titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], comments: [] },
       { id: uuid(), title: "Scope", content: "", layout: "single", titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], comments: [] },
