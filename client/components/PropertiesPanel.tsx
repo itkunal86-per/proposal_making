@@ -838,32 +838,6 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             </div>
           </div>
 
-          <div>
-            <Label className="text-xs font-semibold">Gap After Section</Label>
-            <div className="flex gap-2 mt-2">
-              <Input
-                type="number"
-                min="0"
-                max="100"
-                value={String(typeof sectionTitleStyles.gapAfter === "number" ? sectionTitleStyles.gapAfter : 24)}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  const numValue = value === "" ? 24 : parseInt(value, 10);
-                  handleUpdateSection({
-                    titleStyles: { ...sectionTitleStyles, gapAfter: isNaN(numValue) ? 24 : numValue }
-                  });
-                }}
-                className="flex-1"
-              />
-              <span className="text-sm text-muted-foreground self-center">
-                px
-              </span>
-            </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              Spacing between this section and the next one (default: 24px)
-            </p>
-          </div>
-
           {isMultiColumn && (
             <div>
               <Label className="text-xs font-semibold">Gap Between Columns</Label>
