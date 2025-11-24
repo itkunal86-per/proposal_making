@@ -370,40 +370,15 @@ export async function getProposalDetails(id: string): Promise<Proposal | undefin
     const list = readStored() ?? [];
     const idx = list.findIndex((x) => x.id === normalized.id);
 
-    // Merge with local storage to preserve section details (columns, content, styles)
-    if (idx !== -1 && list[idx]) {
-      const localProposal = list[idx];
-
-      // If API sections are empty or only have default data, use local sections
-      // Otherwise, merge API sections with local details (layout, columnContents, columnStyles, styles)
-      if (normalized.sections.length === 0 ||
-          (normalized.sections.length === localProposal.sections.length &&
-           normalized.sections.every(s => !s.content && !s.columnContents))) {
-        // API returned empty sections, use local storage completely
+    // Use API response directly since it now includes full section details
+    // Only merge with local if API is completely empty
+    if (normalized.sections.length === 0) {
+      const list = readStored() ?? [];
+      const idx = list.findIndex((x) => x.id === normalized.id);
+      if (idx !== -1 && list[idx]?.sections) {
         normalized = {
           ...normalized,
-          sections: localProposal.sections,
-        };
-      } else {
-        // API has some data, merge with local for column details
-        normalized = {
-          ...normalized,
-          sections: normalized.sections.map((apiSection) => {
-            const matchingLocalSection = localProposal.sections.find(s => s.id === apiSection.id);
-
-            if (matchingLocalSection) {
-              return {
-                ...apiSection,
-                layout: apiSection.layout || matchingLocalSection.layout,
-                columnContents: apiSection.columnContents || matchingLocalSection.columnContents,
-                columnStyles: apiSection.columnStyles || matchingLocalSection.columnStyles,
-                titleStyles: apiSection.titleStyles || matchingLocalSection.titleStyles,
-                contentStyles: apiSection.contentStyles || matchingLocalSection.contentStyles,
-              };
-            }
-
-            return apiSection;
-          }),
+          sections: list[idx].sections,
         };
       }
     }
