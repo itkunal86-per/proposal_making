@@ -846,11 +846,13 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                 min="0"
                 max="100"
                 value={String(typeof section.gapAfter === "number" ? section.gapAfter : 24)}
-                onChange={(e) =>
+                onChange={(e) => {
+                  const value = e.target.value;
+                  const numValue = value === "" ? 24 : parseInt(value, 10);
                   handleUpdateSection({
-                    gapAfter: parseInt(e.target.value) || 0
-                  })
-                }
+                    gapAfter: isNaN(numValue) ? 24 : numValue
+                  });
+                }}
                 className="flex-1"
               />
               <span className="text-sm text-muted-foreground self-center">
@@ -871,11 +873,13 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                   min="0"
                   max="100"
                   value={String(typeof section.columnGap === "number" ? section.columnGap : 24)}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    const numValue = value === "" ? 24 : parseInt(value, 10);
                     handleUpdateSection({
-                      columnGap: parseInt(e.target.value) || 0
-                    })
-                  }
+                      columnGap: isNaN(numValue) ? 24 : numValue
+                    });
+                  }}
                   className="flex-1"
                 />
                 <span className="text-sm text-muted-foreground self-center">
