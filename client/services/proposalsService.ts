@@ -238,40 +238,66 @@ export async function persistProposal(p: Proposal) {
 }
 
 function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmail?: string): Proposal {
-  const createdAtMs = new Date(apiProposal.created_at).getTime() || Date.now();
-  const updatedAtMs = apiProposal.updated_at ? new Date(apiProposal.updated_at).getTime() : createdAtMs;
-  return {
-    id: apiProposal.id,
-    title: apiProposal.title,
-    client: apiProposal.client?.name || "",
-    client_id: apiProposal.client_id,
-    status: apiProposal.status,
-    createdBy: apiProposal.created_by || userEmail || "you@example.com",
-    createdAt: createdAtMs,
-    updatedAt: updatedAtMs,
-    sections: [
+  const createdAtMs = typeof apiProposal.createdAt === "number" ? apiProposal.createdAt : (apiProposal.created_at ? new Date(apiProposal.created_at).getTime() : Date.now());
+  const updatedAtMs = typeof apiProposal.updatedAt === "number" ? apiProposal.updatedAt : (apiProposal.updated_at ? new Date(apiProposal.updated_at).getTime() : createdAtMs);
+
+  // Handle both old API structure (with created_at) and new API structure (with timestamps)
+  const sections = Array.isArray(apiProposal.sections) && apiProposal.sections.length > 0
+    ? (apiProposal.sections as any[]).map((s) => ({
+        id: String(s.id),
+        title: s.title || "",
+        content: s.content || "",
+        layout: s.layout || "single",
+        columnContents: Array.isArray(s.columnContents) ? s.columnContents : (
+          typeof s.columnContents === "object" && Object.keys(s.columnContents || {}).length === 0 ? undefined : s.columnContents
+        ),
+        columnStyles: Array.isArray(s.columnStyles) ? s.columnStyles : (
+          typeof s.columnStyles === "object" && Object.keys(s.columnStyles || {}).length === 0 ? undefined : s.columnStyles
+        ),
+        media: Array.isArray(s.media) ? s.media : [],
+        comments: Array.isArray(s.comments) ? s.comments : [],
+        titleStyles: normalizeStyles(s.titleStyles),
+        contentStyles: normalizeStyles(s.contentStyles),
+      }))
+    : [
       { id: uuid(), title: "Overview", content: "", layout: "single", titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], comments: [] },
       { id: uuid(), title: "Scope", content: "", layout: "single", titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], comments: [] },
       { id: uuid(), title: "Timeline", content: "", layout: "single", titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], comments: [] },
-    ],
+    ];
+
+  const clientName = typeof apiProposal.client === "string" ? apiProposal.client : (apiProposal.client?.name || "");
+  const clientId = typeof apiProposal.client_id === "string" ? apiProposal.client_id : (apiProposal.client_id ? String(apiProposal.client_id) : undefined);
+
+  return {
+    id: String(apiProposal.id),
+    title: apiProposal.title,
+    client: clientName,
+    client_id: clientId,
+    status: apiProposal.status,
+    createdBy: apiProposal.createdBy || apiProposal.created_by || userEmail || "you@example.com",
+    createdAt: createdAtMs,
+    updatedAt: updatedAtMs,
+    sections,
     pricing: {
-      currency: apiProposal.currency || "USD",
-      taxRate: apiProposal.tax_rate ?? 0.1,
-      items: [
-        { id: uuid(), label: "Design", qty: 1, price: 3000 },
-        { id: uuid(), label: "Development", qty: 1, price: 9000 },
-      ],
+      currency: (apiProposal.pricing as any)?.currency || apiProposal.currency || "USD",
+      taxRate: (apiProposal.pricing as any)?.taxRate ?? apiProposal.tax_rate ?? 0.1,
+      items: Array.isArray((apiProposal.pricing as any)?.items) ? (apiProposal.pricing as any).items : (
+        Array.isArray(apiProposal.items) ? apiProposal.items : [
+          { id: uuid(), label: "Design", qty: 1, price: 3000 },
+          { id: uuid(), label: "Development", qty: 1, price: 9000 },
+        ]
+      ),
     },
     settings: {
-      dueDate: apiProposal.due_date || undefined,
-      approvalFlow: apiProposal.approval_flow || "Single approver",
+      dueDate: (apiProposal.settings as any)?.dueDate || apiProposal.due_date || undefined,
+      approvalFlow: (apiProposal.settings as any)?.approvalFlow || apiProposal.approval_flow || "Single approver",
       sharing: {
-        public: (apiProposal.sharing_public ?? 0) === 1,
-        token: apiProposal.sharing_token || undefined,
-        allowComments: (apiProposal.sharing_allow_comments ?? 0) === 1,
+        public: ((apiProposal.settings as any)?.sharing?.public ?? apiProposal.sharing_public ?? 0) === 1,
+        token: (apiProposal.settings as any)?.sharing?.token || apiProposal.sharing_token || undefined,
+        allowComments: ((apiProposal.settings as any)?.sharing?.allowComments ?? apiProposal.sharing_allow_comments ?? 0) === 1,
       },
     },
-    versions: [],
+    versions: Array.isArray((apiProposal as any).versions) ? (apiProposal as any).versions : [],
   };
 }
 
