@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Proposal, ProposalSection } from "@/services/proposalsService";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
+import { generateAIContent } from "@/services/aiGenerationService";
 
 interface AIAssistantDialogProps {
   open: boolean;
