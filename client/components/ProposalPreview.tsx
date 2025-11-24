@@ -648,7 +648,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                           onSelectElement(`section-content-${section.id}-col2`, "section-content")
                         }
                         onAI={() => onAIElement?.(`section-content-${section.id}-col2`, "section-content")}
-                        value={section.content}
+                        value={(section as any).columnContents?.[1] || section.content}
                         color={(section as any).contentStyles?.color}
                         fontSize={(section as any).contentStyles?.fontSize}
                         textAlign={(section as any).contentStyles?.textAlign}
