@@ -439,19 +439,22 @@ export async function getProposalDetails(id: string): Promise<Proposal | undefin
     if (localProposal) {
       normalized = {
         ...normalized,
-        sections: normalized.sections.map((apiSection, sectionIndex) => {
+        sections: normalized.sections.map((apiSection) => {
           const localSection = localProposal.sections.find((s) => String(s.id) === String(apiSection.id));
 
           if (localSection) {
+            const hasApiLayout = apiSection.layout && apiSection.layout !== null && apiSection.layout !== "single";
+            const hasApiColumnContents = Array.isArray(apiSection.columnContents) && apiSection.columnContents.length > 0;
+            const hasLocalLayout = localSection.layout && localSection.layout !== null;
+            const hasLocalColumnContents = Array.isArray(localSection.columnContents) && localSection.columnContents.length > 0;
+
             return {
               ...apiSection,
-              // Use local layout if API returned null
-              layout: (apiSection.layout && apiSection.layout !== "single") ? apiSection.layout : localSection.layout,
-              // Use local columnContents if API returned empty
-              columnContents: (apiSection.columnContents && apiSection.columnContents.length > 0)
-                ? apiSection.columnContents
-                : localSection.columnContents,
-              // Use local columnStyles if API returned empty
+              // Use local layout if API returned null or "single" and local has multi-column
+              layout: (hasApiLayout ? apiSection.layout : (hasLocalLayout ? localSection.layout : "single")),
+              // Use local columnContents if API returned empty/null
+              columnContents: (hasApiColumnContents ? apiSection.columnContents : localSection.columnContents),
+              // Use local columnStyles if API returned empty/null
               columnStyles: (apiSection.columnStyles && apiSection.columnStyles.length > 0)
                 ? apiSection.columnStyles
                 : localSection.columnStyles,
