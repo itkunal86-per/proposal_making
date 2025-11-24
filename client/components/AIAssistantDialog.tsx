@@ -99,36 +99,49 @@ export const AIAssistantDialog: React.FC<AIAssistantDialogProps> = ({
     setIsLoading(true);
     try {
       const aiResponse = await generateAIContent(promptText);
-
-      const updatedProposal = { ...proposal };
-
-      if (targetElementType === "title") {
-        updatedProposal.title = aiResponse;
-      } else if (targetElementType === "section-title" && activeSection) {
-        updatedProposal.sections = proposal.sections.map((s) =>
-          s.id === activeSection!.id ? { ...s, title: aiResponse } : s
-        );
-      } else if (targetElementType === "section-content" && activeSection) {
-        let newContent = aiResponse;
-        if (action !== "generate") {
-          newContent = `${activeSection.content}\n\n${aiResponse}`;
-        }
-
-        updatedProposal.sections = proposal.sections.map((s) =>
-          s.id === activeSection!.id ? { ...s, content: newContent } : s
-        );
-      }
-
-      onUpdateProposal(updatedProposal);
+      setAiContent(aiResponse);
+      setEditableContent(aiResponse);
       setPrompt("");
       toast({ title: "Content generated successfully" });
-      onOpenChange(false);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Failed to generate content";
       toast({ title: "Error", description: errorMessage });
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleAddToProposal = () => {
+    if (!editableContent.trim()) {
+      toast({ title: "Content is empty" });
+      return;
+    }
+
+    if (!activeSection && targetElementType !== "title") {
+      toast({ title: "No section selected" });
+      return;
+    }
+
+    const updatedProposal = { ...proposal };
+
+    if (targetElementType === "title") {
+      updatedProposal.title = editableContent;
+    } else if (targetElementType === "section-title" && activeSection) {
+      updatedProposal.sections = proposal.sections.map((s) =>
+        s.id === activeSection!.id ? { ...s, title: editableContent } : s
+      );
+    } else if (targetElementType === "section-content" && activeSection) {
+      updatedProposal.sections = proposal.sections.map((s) =>
+        s.id === activeSection!.id ? { ...s, content: editableContent } : s
+      );
+    }
+
+    onUpdateProposal(updatedProposal);
+    setAiContent(null);
+    setEditableContent("");
+    setPrompt("");
+    toast({ title: "Content added to proposal" });
+    onOpenChange(false);
   };
 
   const elementPreview = getElementPreview();
