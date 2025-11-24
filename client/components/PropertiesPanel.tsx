@@ -845,12 +845,12 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                 type="number"
                 min="0"
                 max="100"
-                value={String(typeof section.gapAfter === "number" ? section.gapAfter : 24)}
+                value={String(typeof sectionTitleStyles.gapAfter === "number" ? sectionTitleStyles.gapAfter : 24)}
                 onChange={(e) => {
                   const value = e.target.value;
                   const numValue = value === "" ? 24 : parseInt(value, 10);
                   handleUpdateSection({
-                    gapAfter: isNaN(numValue) ? 24 : numValue
+                    titleStyles: { ...sectionTitleStyles, gapAfter: isNaN(numValue) ? 24 : numValue }
                   });
                 }}
                 className="flex-1"
@@ -872,12 +872,12 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                   type="number"
                   min="0"
                   max="100"
-                  value={String(typeof section.columnGap === "number" ? section.columnGap : 24)}
+                  value={String(typeof sectionTitleStyles.columnGap === "number" ? sectionTitleStyles.columnGap : 24)}
                   onChange={(e) => {
                     const value = e.target.value;
                     const numValue = value === "" ? 24 : parseInt(value, 10);
                     handleUpdateSection({
-                      columnGap: isNaN(numValue) ? 24 : numValue
+                      titleStyles: { ...sectionTitleStyles, columnGap: isNaN(numValue) ? 24 : numValue }
                     });
                   }}
                   className="flex-1"
