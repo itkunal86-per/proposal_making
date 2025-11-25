@@ -925,17 +925,13 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
       <Card className="p-4 space-y-4 overflow-y-auto max-h-[90vh]">
         <div>
           <Label className="text-xs font-semibold">Section Content {columnIndex >= 0 ? `(Column ${columnIndex + 1})` : ""}</Label>
-          <div className="mt-2 relative">
-            <VariableInserter
+          <div className="mt-2">
+            <RichTextEditor
               value={currentContent}
               onChange={handleContentChange}
               variables={variables || []}
-              className="min-h-[120px]"
+              placeholder="Enter your section content with rich text formatting..."
             />
-          </div>
-          <div className="mt-2 text-xs text-slate-500 bg-blue-50 border border-blue-200 rounded-lg p-3">
-            <p className="font-medium mb-1">💡 Add Variables</p>
-            <p>Type a single brace to insert variables like {"{{variable_name}}"}</p>
           </div>
         </div>
 
