@@ -126,12 +126,21 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   };
 
   const execCommand = (command: string, value?: string) => {
-    editorRef.current?.focus();
-    document.execCommand(command, false, value);
-    
-    // Capture the content after the command is executed
+    if (!editorRef.current) return;
+
+    // Ensure editor has focus
+    editorRef.current.focus();
+
+    // For undo/redo, we need to ensure there's a valid execution context
+    // by adding a small delay to ensure focus is complete
     setTimeout(() => {
-      captureContent();
+      try {
+        document.execCommand(command, false, value);
+        // Capture the content after the command is executed
+        captureContent();
+      } catch (error) {
+        console.error(`Failed to execute command: ${command}`, error);
+      }
     }, 0);
   };
 
