@@ -55,7 +55,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen">
+      <div className="flex w-full min-h-screen">
         <Sidebar collapsible="offcanvas" className="border-r">
           <SidebarHeader>
             <div className="flex items-center justify-between gap-2 px-2 py-1.5">
