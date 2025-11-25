@@ -39,7 +39,12 @@ const ToolbarButton = ({
   title: string;
 }) => (
   <button
-    onClick={onClick}
+    onMouseDown={(e) => {
+      e.preventDefault();
+      if (!disabled) {
+        onClick();
+      }
+    }}
     disabled={disabled}
     title={title}
     className={cn(
