@@ -2,7 +2,7 @@ import React from "react";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Proposal } from "@/services/proposalsService";
-import { replaceVariables } from "@/lib/variableUtils";
+import { replaceVariables, decodeHtmlEntities } from "@/lib/variableUtils";
 
 interface ProposalPreviewModalProps {
   proposal: Proposal;
@@ -150,7 +150,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                     <div
                       style={{ position: "relative", zIndex: 1 }}
                       dangerouslySetInnerHTML={{
-                        __html: replaceVariables(section.content, variables),
+                        __html: decodeHtmlEntities(replaceVariables(section.content, variables)),
                       }}
                     />
                   </div>
@@ -183,7 +183,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                         <div
                           style={{ position: "relative", zIndex: 1 }}
                           dangerouslySetInnerHTML={{
-                            __html: replaceVariables(content || "", variables),
+                            __html: decodeHtmlEntities(replaceVariables(content || "", variables)),
                           }}
                         />
                       </div>
@@ -209,7 +209,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                         <div
                           style={{ position: "relative", zIndex: 1 }}
                           dangerouslySetInnerHTML={{
-                            __html: replaceVariables(content || "", variables),
+                            __html: decodeHtmlEntities(replaceVariables(content || "", variables)),
                           }}
                         />
                       </div>

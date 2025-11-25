@@ -39,7 +39,12 @@ const ToolbarButton = ({
   title: string;
 }) => (
   <button
-    onClick={onClick}
+    onMouseDown={(e) => {
+      e.preventDefault();
+      if (!disabled) {
+        onClick();
+      }
+    }}
     disabled={disabled}
     title={title}
     className={cn(
@@ -68,13 +73,18 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     searchTerm: "",
   });
 
-  // Initialize editor content only once
+  // Initialize editor content and update when value prop changes
   useEffect(() => {
-    if (editorRef.current && !isInitializedRef.current) {
-      editorRef.current.innerHTML = value || "";
-      isInitializedRef.current = true;
+    if (editorRef.current) {
+      // Only set innerHTML if the content has actually changed
+      if (editorRef.current.innerHTML !== (value || "")) {
+        editorRef.current.innerHTML = value || "";
+      }
+      if (!isInitializedRef.current) {
+        isInitializedRef.current = true;
+      }
     }
-  }, []);
+  }, [value]);
 
   const captureContent = () => {
     if (!editorRef.current) return;
@@ -121,12 +131,21 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   };
 
   const execCommand = (command: string, value?: string) => {
-    editorRef.current?.focus();
-    document.execCommand(command, false, value);
-    
-    // Capture the content after the command is executed
+    if (!editorRef.current) return;
+
+    // Ensure editor has focus
+    editorRef.current.focus();
+
+    // For undo/redo, we need to ensure there's a valid execution context
+    // by adding a small delay to ensure focus is complete
     setTimeout(() => {
-      captureContent();
+      try {
+        document.execCommand(command, false, value);
+        // Capture the content after the command is executed
+        captureContent();
+      } catch (error) {
+        console.error(`Failed to execute command: ${command}`, error);
+      }
     }, 0);
   };
 

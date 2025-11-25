@@ -2,7 +2,7 @@ import React from "react";
 import { Proposal, ProposalSection } from "@/services/proposalsService";
 import { Button } from "@/components/ui/button";
 import { Sparkles } from "lucide-react";
-import { replaceVariables } from "@/lib/variableUtils";
+import { replaceVariables, decodeHtmlEntities } from "@/lib/variableUtils";
 
 interface ElementProps {
   id: string;
@@ -167,43 +167,14 @@ const SelectableElement: React.FC<ElementProps> = ({
 
   const renderContent = () => {
     const content = children || (type === "section-content" ? "Click to add content..." : "");
-    const isHtml = typeof content === "string" && content.includes("<");
 
-    if (bulletList && content) {
-      const lines = String(content).split('\n').filter(line => line.trim());
-      return (
-        <ul className="list-disc list-inside space-y-1" style={{ fontFamily: code ? "ui-monospace, SFMono-Regular, Menlo, Courier, monospace" : "inherit" }}>
-          {lines.map((line, idx) => (
-            <li key={idx} style={{ fontWeight: bold ? "bold" : "normal", fontStyle: italic ? "italic" : "normal", textDecoration: underline ? "underline" : strikethrough ? "line-through" : "none" }}>
-              {line}
-            </li>
-          ))}
-        </ul>
-      );
-    }
+    // Check for both literal HTML tags and encoded HTML entities
+    const isHtml = typeof content === "string" && (content.includes("<") || content.includes("&lt;") || content.includes("&amp;"));
+    const decodedContent = isHtml && typeof content === "string" ? decodeHtmlEntities(content) : content;
 
-    if (numberList && content) {
-      const lines = String(content).split('\n').filter(line => line.trim());
-      return (
-        <ol className="list-decimal list-inside space-y-1" style={{ fontFamily: code ? "ui-monospace, SFMono-Regular, Menlo, Courier, monospace" : "inherit" }}>
-          {lines.map((line, idx) => (
-            <li key={idx} style={{ fontWeight: bold ? "bold" : "normal", fontStyle: italic ? "italic" : "normal", textDecoration: underline ? "underline" : strikethrough ? "line-through" : "none" }}>
-              {line}
-            </li>
-          ))}
-        </ol>
-      );
-    }
-
-    if (code && content) {
-      return (
-        <div style={{ fontFamily: "ui-monospace, SFMono-Regular, Menlo, Courier, monospace", whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
-          {content}
-        </div>
-      );
-    }
-
-    if (isHtml && typeof content === "string") {
+    // Prioritize HTML rendering - if content has HTML tags, render as HTML
+    // This ensures rich text editor content (with ul/li, nested divs, etc.) displays correctly
+    if (isHtml && typeof decodedContent === "string") {
       return (
         <div
           style={{
@@ -211,12 +182,20 @@ const SelectableElement: React.FC<ElementProps> = ({
             fontStyle: italic ? "italic" : "normal",
             textDecoration: underline ? "underline" : strikethrough ? "line-through" : "none",
           }}
-          dangerouslySetInnerHTML={{ __html: content }}
+          dangerouslySetInnerHTML={{ __html: decodedContent }}
         />
       );
     }
 
-    return <div style={{ fontWeight: bold ? "bold" : "normal", fontStyle: italic ? "italic" : "normal", textDecoration: underline ? "underline" : strikethrough ? "line-through" : "none" }}>{content}</div>;
+    if (code && content) {
+      return (
+        <div style={{ fontFamily: "ui-monospace, SFMono-Regular, Menlo, Courier, monospace", whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+          {decodedContent}
+        </div>
+      );
+    }
+
+    return <div style={{ fontWeight: bold ? "bold" : "normal", fontStyle: italic ? "italic" : "normal", textDecoration: underline ? "underline" : strikethrough ? "line-through" : "none" }}>{decodedContent}</div>;
   };
 
   return (
