@@ -711,21 +711,56 @@ export async function deleteProposal(id: string) {
 }
 
 export async function duplicateProposal(id: string): Promise<Proposal | undefined> {
-  const list = await getAll();
-  const src = list.find((p) => p.id === id);
-  if (!src) return;
-  const copy: Proposal = {
-    ...src,
-    id: uuid(),
-    title: `${src.title} (Copy)`,
-    createdAt: Date.now(),
-    updatedAt: Date.now(),
-    client_id: src.client_id,
-    sections: src.sections.map((s) => ({ ...s, id: uuid() })),
-    pricing: { ...src.pricing, items: src.pricing.items.map((i) => ({ ...i, id: uuid() })) },
-  };
-  persist([copy, ...list]);
-  return copy;
+  try {
+    const token = await getStoredToken();
+    const response = await fetch(`${PROPOSALS_ENDPOINT}/${id}/duplicate`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      console.error("Failed to duplicate proposal:", response.statusText);
+      return undefined;
+    }
+
+    const data = await response.json();
+
+    // Transform API response to Proposal interface
+    const newProposal: Proposal = {
+      id: String(data.id),
+      title: data.title,
+      client: data.client || "",
+      client_id: String(data.client_id),
+      status: data.status as ProposalStatus,
+      content: "",
+      createdAt: new Date(data.created_at).getTime(),
+      updatedAt: new Date(data.updated_at).getTime(),
+      createdBy: data.created_by || "",
+      sections: [],
+      pricing: {
+        currency: data.currency || "USD",
+        items: [],
+        taxRate: parseFloat(data.tax_rate) || 0,
+      },
+      settings: {
+        sharing: {
+          token: data.sharing_token || uuid(),
+          public: false,
+        },
+      },
+    };
+
+    // Persist the new proposal locally
+    persist([newProposal, ...(await getAll())]);
+
+    return newProposal;
+  } catch (error) {
+    console.error("Error duplicating proposal:", error);
+    return undefined;
+  }
 }
 
 export async function toggleShare(p: Proposal, makePublic: boolean): Promise<Proposal> {
