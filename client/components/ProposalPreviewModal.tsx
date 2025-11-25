@@ -158,7 +158,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                     style={{
                       display: "grid",
                       gridTemplateColumns: section.layout === "two-column" ? "1fr 1fr" : "1fr 1fr 1fr",
-                      gap: `${typeof (section as any).titleStyles?.columnGap === "number" ? (section as any).titleStyles.columnGap : 24}px`,
+                      gap: `${typeof (section as any).titleStyles?.columnGap === "number" ? (section as any).titleStyles.columnGap : 0}px`,
                     }}
                   >
                     {section.layout === "two-column" && [(section as any).columnContents?.[0], (section as any).columnContents?.[1]].map((content, colIndex) => (
