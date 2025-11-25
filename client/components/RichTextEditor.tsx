@@ -1,18 +1,13 @@
-'use client';
-
-import React, { useEffect, useRef, useState } from "react";
-import { useEditor, EditorContent } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
-import Placeholder from "@tiptap/extension-placeholder";
+import React, { useRef, useState, useEffect } from "react";
 import {
   Bold,
   Italic,
+  Underline,
   List,
   ListOrdered,
   Undo2,
   Redo2,
   Heading2,
-  Code,
   Quote,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -28,7 +23,6 @@ interface RichTextEditorProps {
 interface VariableDropdown {
   visible: boolean;
   searchTerm: string;
-  selectedIndex: number;
 }
 
 const ToolbarButton = ({
@@ -66,66 +60,69 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   className = "",
   placeholder = "Enter text...",
 }) => {
+  const editorRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [mounted, setMounted] = useState(false);
   const [dropdown, setDropdown] = useState<VariableDropdown>({
     visible: false,
     searchTerm: "",
-    selectedIndex: 0,
   });
+  const [isFocused, setIsFocused] = useState(false);
 
-  const editor = useEditor({
-    extensions: [
-      StarterKit.configure({
-        heading: {
-          levels: [2, 3],
-        },
-      }),
-      Placeholder.configure({
-        placeholder,
-      }),
-    ],
-    content: value || "<p></p>",
-    onUpdate: ({ editor }) => {
-      const html = editor.getHTML();
-      onChange(html);
-    },
-    onSelectionUpdate: ({ editor }) => {
-      if (!editor) return;
+  // Initialize editor with value
+  useEffect(() => {
+    if (editorRef.current && !isFocused) {
+      editorRef.current.innerHTML = value || "";
+    }
+  }, [value, isFocused]);
 
-      const { selection } = editor.state;
-      const { $from } = selection;
-      const textBefore = $from.parent.textContent.substring(0, $from.parentOffset);
-      const lastBraceIndex = textBefore.lastIndexOf("{");
+  const handleInput = () => {
+    if (!editorRef.current) return;
+    onChange(editorRef.current.innerHTML);
 
-      if (lastBraceIndex !== -1) {
-        const afterLastBrace = textBefore.substring(lastBraceIndex);
-        const isOpeningBrace = afterLastBrace === "{" || afterLastBrace === "{{";
-        const isInsideVariable = afterLastBrace.match(/^\{\{[a-zA-Z0-9\s]*$/);
+    // Check for variable insertion trigger
+    const selection = window.getSelection();
+    if (!selection || !selection.rangeCount) return;
 
-        if (isOpeningBrace || isInsideVariable) {
-          let searchTerm = "";
-          if (isInsideVariable) {
-            searchTerm = afterLastBrace.substring(2);
-          }
+    const range = selection.getRangeAt(0);
+    const preCaretRange = range.cloneRange();
+    preCaretRange.selectNodeContents(editorRef.current);
+    preCaretRange.setEnd(range.endContainer, range.endOffset);
 
-          setDropdown({
-            visible: true,
-            searchTerm,
-            selectedIndex: 0,
-          });
-        } else {
-          setDropdown({ ...dropdown, visible: false });
+    const text = preCaretRange.toString();
+    const lastBraceIndex = text.lastIndexOf("{");
+
+    if (lastBraceIndex !== -1) {
+      const afterLastBrace = text.substring(lastBraceIndex);
+      const isOpeningBrace = afterLastBrace === "{" || afterLastBrace === "{{";
+      const isInsideVariable = afterLastBrace.match(/^\{\{[a-zA-Z0-9\s]*$/);
+
+      if (isOpeningBrace || isInsideVariable) {
+        let searchTerm = "";
+        if (isInsideVariable) {
+          searchTerm = afterLastBrace.substring(2);
         }
+
+        setDropdown({
+          visible: true,
+          searchTerm,
+        });
       } else {
         setDropdown({ ...dropdown, visible: false });
       }
-    },
-  });
+    } else {
+      setDropdown({ ...dropdown, visible: false });
+    }
+  };
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const execCommand = (command: string, value?: string) => {
+    editorRef.current?.focus();
+    document.execCommand(command, false, value);
+    handleInput();
+  };
+
+  const isCommandActive = (command: string): boolean => {
+    return document.queryCommandState(command);
+  };
 
   const getFilteredVariables = () => {
     if (!dropdown.searchTerm) return variables;
@@ -135,96 +132,131 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   };
 
   const handleVariableSelect = (variableName: string) => {
-    if (!editor) return;
+    if (!editorRef.current) return;
 
-    const { selection } = editor.state;
-    const { $from } = selection;
-    const textBefore = $from.parent.textContent.substring(0, $from.parentOffset);
-    const lastBraceIndex = textBefore.lastIndexOf("{");
+    const selection = window.getSelection();
+    if (!selection || !selection.rangeCount) return;
+
+    const range = selection.getRangeAt(0);
+    const preCaretRange = range.cloneRange();
+    preCaretRange.selectNodeContents(editorRef.current);
+    preCaretRange.setEnd(range.endContainer, range.endOffset);
+
+    const text = preCaretRange.toString();
+    const lastBraceIndex = text.lastIndexOf("{");
 
     if (lastBraceIndex === -1) return;
 
-    const nodeStart = $from.start();
-    const deleteStart = nodeStart + lastBraceIndex;
-    const deleteEnd = $from.pos;
+    // Find and delete the opening brace(s)
+    editorRef.current.focus();
+    range.setStart(range.endContainer, range.endOffset);
 
-    editor
-      .chain()
-      .deleteRange({ from: deleteStart, to: deleteEnd })
-      .insertContent(`{{${variableName}}} `)
-      .focus()
-      .run();
+    // Move cursor back to the brace position
+    const preText = text.substring(0, lastBraceIndex);
+    const walker = document.createTreeWalker(
+      editorRef.current,
+      NodeFilter.SHOW_TEXT,
+      null
+    );
 
-    setDropdown({ ...dropdown, visible: false });
+    let node;
+    let charCount = 0;
+    let startNode = range.endContainer;
+    let startOffset = 0;
+
+    while ((node = walker.nextNode())) {
+      const nodeLen = (node.textContent || "").length;
+      if (charCount + nodeLen >= lastBraceIndex) {
+        startNode = node;
+        startOffset = lastBraceIndex - charCount;
+        break;
+      }
+      charCount += nodeLen;
+    }
+
+    // Delete from brace position to cursor
+    const deleteRange = document.createRange();
+    deleteRange.setStart(startNode, startOffset);
+    deleteRange.setEnd(range.endContainer, range.endOffset);
+    deleteRange.deleteContents();
+
+    // Insert variable
+    const variableNode = document.createTextNode(`{{${variableName}}} `);
+    deleteRange.insertNode(variableNode);
+
+    // Move cursor after the variable
+    const newRange = document.createRange();
+    newRange.setStartAfter(variableNode);
+    newRange.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(newRange);
+
+    setDropdown({ visible: false, searchTerm: "" });
+    handleInput();
   };
 
   const filteredVariables = getFilteredVariables();
 
-  if (!mounted || !editor) {
-    return (
-      <div className={cn("border rounded-lg bg-slate-50 p-4", className)}>
-        <div className="text-muted-foreground text-sm">Loading editor...</div>
-      </div>
-    );
-  }
-
   return (
-    <div ref={containerRef} className={cn("border rounded-lg overflow-hidden", className)}>
+    <div
+      ref={containerRef}
+      className={cn("border rounded-lg overflow-hidden", className)}
+    >
       {/* Toolbar */}
       <div className="bg-slate-50 border-b border-slate-200 p-2 flex gap-1 flex-wrap">
         <ToolbarButton
-          onClick={() => editor.chain().focus().toggleBold().run()}
-          isActive={editor.isActive("bold")}
+          onClick={() => execCommand("bold")}
+          isActive={isCommandActive("bold")}
           title="Bold (Ctrl+B)"
         >
           <Bold className="w-4 h-4" />
         </ToolbarButton>
 
         <ToolbarButton
-          onClick={() => editor.chain().focus().toggleItalic().run()}
-          isActive={editor.isActive("italic")}
+          onClick={() => execCommand("italic")}
+          isActive={isCommandActive("italic")}
           title="Italic (Ctrl+I)"
         >
           <Italic className="w-4 h-4" />
         </ToolbarButton>
 
+        <ToolbarButton
+          onClick={() => execCommand("underline")}
+          isActive={isCommandActive("underline")}
+          title="Underline (Ctrl+U)"
+        >
+          <Underline className="w-4 h-4" />
+        </ToolbarButton>
+
         <div className="w-px bg-slate-300 mx-1" />
 
         <ToolbarButton
-          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-          isActive={editor.isActive("heading", { level: 2 })}
+          onClick={() => execCommand("formatBlock", "<h2>")}
+          isActive={isCommandActive("formatBlock")}
           title="Heading 2"
         >
           <Heading2 className="w-4 h-4" />
         </ToolbarButton>
 
         <ToolbarButton
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
-          isActive={editor.isActive("bulletList")}
+          onClick={() => execCommand("insertUnorderedList")}
+          isActive={isCommandActive("insertUnorderedList")}
           title="Bullet List"
         >
           <List className="w-4 h-4" />
         </ToolbarButton>
 
         <ToolbarButton
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          isActive={editor.isActive("orderedList")}
+          onClick={() => execCommand("insertOrderedList")}
+          isActive={isCommandActive("insertOrderedList")}
           title="Ordered List"
         >
           <ListOrdered className="w-4 h-4" />
         </ToolbarButton>
 
         <ToolbarButton
-          onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-          isActive={editor.isActive("codeBlock")}
-          title="Code Block"
-        >
-          <Code className="w-4 h-4" />
-        </ToolbarButton>
-
-        <ToolbarButton
-          onClick={() => editor.chain().focus().toggleBlockquote().run()}
-          isActive={editor.isActive("blockquote")}
+          onClick={() => execCommand("formatBlock", "<blockquote>")}
+          isActive={isCommandActive("formatBlock")}
           title="Blockquote"
         >
           <Quote className="w-4 h-4" />
@@ -233,16 +265,16 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
         <div className="w-px bg-slate-300 mx-1" />
 
         <ToolbarButton
-          onClick={() => editor.chain().focus().undo().run()}
-          disabled={!editor.can().undo()}
+          onClick={() => execCommand("undo")}
+          disabled={!document.queryCommandEnabled("undo")}
           title="Undo (Ctrl+Z)"
         >
           <Undo2 className="w-4 h-4" />
         </ToolbarButton>
 
         <ToolbarButton
-          onClick={() => editor.chain().focus().redo().run()}
-          disabled={!editor.can().redo()}
+          onClick={() => execCommand("redo")}
+          disabled={!document.queryCommandEnabled("redo")}
           title="Redo (Ctrl+Y)"
         >
           <Redo2 className="w-4 h-4" />
@@ -251,13 +283,25 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
       {/* Editor */}
       <div className="relative">
-        <EditorContent
-          editor={editor}
+        <div
+          ref={editorRef}
+          contentEditable
+          suppressContentEditableWarning
+          onInput={handleInput}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => {
+            setIsFocused(false);
+            handleInput();
+          }}
           className={cn(
-            "prose prose-sm max-w-none",
-            "p-4 min-h-[200px] focus:outline-none",
-            "[&_.is-empty:before]:text-muted-foreground"
+            "p-4 min-h-[200px] focus:outline-none prose prose-sm max-w-none",
+            "text-foreground bg-white"
           )}
+          style={{
+            wordWrap: "break-word",
+            overflowWrap: "break-word",
+          }}
+          data-placeholder={placeholder}
         />
 
         {/* Variable dropdown */}
@@ -270,21 +314,18 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
               minWidth: "250px",
             }}
           >
-            {filteredVariables.map((variable, index) => (
+            {filteredVariables.map((variable) => (
               <button
                 key={variable.id}
                 onClick={() => handleVariableSelect(variable.name)}
-                className={cn(
-                  "w-full text-left px-3 py-2 transition-colors text-sm border-b last:border-b-0",
-                  index === dropdown.selectedIndex
-                    ? "bg-blue-100"
-                    : "hover:bg-blue-50"
-                )}
+                className="w-full text-left px-3 py-2 hover:bg-blue-50 transition-colors text-sm border-b last:border-b-0"
                 type="button"
               >
                 <div className="font-medium text-slate-900">{variable.name}</div>
                 {variable.value && (
-                  <div className="text-xs text-slate-500 truncate">{variable.value}</div>
+                  <div className="text-xs text-slate-500 truncate">
+                    {variable.value}
+                  </div>
                 )}
               </button>
             ))}
