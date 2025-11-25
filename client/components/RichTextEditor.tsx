@@ -62,22 +62,28 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 }) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const isInitializedRef = useRef(false);
   const [dropdown, setDropdown] = useState<VariableDropdown>({
     visible: false,
     searchTerm: "",
   });
-  const [isFocused, setIsFocused] = useState(false);
 
-  // Initialize editor with value
+  // Initialize editor content only once
   useEffect(() => {
-    if (editorRef.current && !isFocused) {
+    if (editorRef.current && !isInitializedRef.current) {
       editorRef.current.innerHTML = value || "";
+      isInitializedRef.current = true;
     }
-  }, [value, isFocused]);
+  }, []);
+
+  const captureContent = () => {
+    if (!editorRef.current) return;
+    const content = editorRef.current.innerHTML;
+    onChange(content);
+  };
 
   const handleInput = () => {
-    if (!editorRef.current) return;
-    onChange(editorRef.current.innerHTML);
+    captureContent();
 
     // Check for variable insertion trigger
     const selection = window.getSelection();
@@ -85,7 +91,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
     const range = selection.getRangeAt(0);
     const preCaretRange = range.cloneRange();
-    preCaretRange.selectNodeContents(editorRef.current);
+    preCaretRange.selectNodeContents(editorRef.current!);
     preCaretRange.setEnd(range.endContainer, range.endOffset);
 
     const text = preCaretRange.toString();
@@ -117,7 +123,11 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   const execCommand = (command: string, value?: string) => {
     editorRef.current?.focus();
     document.execCommand(command, false, value);
-    handleInput();
+    
+    // Capture the content after the command is executed
+    setTimeout(() => {
+      captureContent();
+    }, 0);
   };
 
   const isCommandActive = (command: string): boolean => {
@@ -192,7 +202,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     selection.addRange(newRange);
 
     setDropdown({ visible: false, searchTerm: "" });
-    handleInput();
+    captureContent();
   };
 
   const filteredVariables = getFilteredVariables();
@@ -288,11 +298,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           contentEditable
           suppressContentEditableWarning
           onInput={handleInput}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => {
-            setIsFocused(false);
-            handleInput();
-          }}
+          onBlur={() => captureContent()}
           className={cn(
             "p-4 min-h-[200px] focus:outline-none prose prose-sm max-w-none",
             "text-foreground bg-white"
