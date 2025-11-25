@@ -735,7 +735,6 @@ export async function duplicateProposal(id: string): Promise<Proposal | undefine
       client: data.client || "",
       client_id: String(data.client_id),
       status: data.status as ProposalStatus,
-      content: "",
       createdAt: new Date(data.created_at).getTime(),
       updatedAt: new Date(data.updated_at).getTime(),
       createdBy: data.created_by || "",
@@ -746,11 +745,14 @@ export async function duplicateProposal(id: string): Promise<Proposal | undefine
         taxRate: parseFloat(data.tax_rate) || 0,
       },
       settings: {
+        dueDate: data.due_date || undefined,
         sharing: {
           token: data.sharing_token || uuid(),
           public: false,
+          allowComments: false,
         },
       },
+      versions: [],
     };
 
     // Persist the new proposal locally
