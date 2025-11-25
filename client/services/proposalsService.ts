@@ -259,7 +259,7 @@ function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmai
   const updatedAtMs = apiProposal.updated_at ? new Date(apiProposal.updated_at).getTime() : createdAtMs;
 
   // Handle both old API structure (with created_at) and new API structure (with timestamps)
-  const sections = Array.isArray((apiProposal as any).sections) && (apiProposal as any).sections.length > 0
+  const sections: ProposalSection[] = Array.isArray((apiProposal as any).sections) && (apiProposal as any).sections.length > 0
     ? ((apiProposal as any).sections as any[]).map((s) => {
         // Handle columnContents - could be array or object
       let normalizedColumnContents: string[] | undefined;
@@ -321,9 +321,9 @@ function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmai
         };
       })
     : [
-      { id: uuid(), title: "Overview", content: "", layout: "single", titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], comments: [] },
-      { id: uuid(), title: "Scope", content: "", layout: "single", titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], comments: [] },
-      { id: uuid(), title: "Timeline", content: "", layout: "single", titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], comments: [] },
+      { id: uuid(), title: "Overview", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], comments: [] },
+      { id: uuid(), title: "Scope", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], comments: [] },
+      { id: uuid(), title: "Timeline", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], comments: [] },
     ];
 
   const clientName = typeof apiProposal.client === "string" ? apiProposal.client : (apiProposal.client?.name || "");
