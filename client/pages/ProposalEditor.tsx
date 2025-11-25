@@ -255,17 +255,6 @@ export default function ProposalEditor() {
               >
                 Preview Proposal
               </Button>
-              <Button
-                onClick={() => {
-                  setAIElementId(undefined);
-                  setAIElementType(undefined);
-                  setAIDialogOpen(true);
-                }}
-                variant="outline"
-                size="sm"
-              >
-                Ask AI
-              </Button>
               <div className="text-xs text-muted-foreground whitespace-nowrap">
                 {saving ? "Saving..." : "Saved"}
               </div>
