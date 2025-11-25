@@ -74,9 +74,18 @@ export default function AdminTemplates() {
   }
 
   async function onDuplicate(id: string) {
-    const p = await duplicateProposal(id);
-    if (p) toast({ title: "Template duplicated" });
-    await refresh();
+    try {
+      const p = await duplicateProposal(id);
+      if (p) {
+        toast({ title: "Template duplicated successfully" });
+        await refresh();
+        nav(`/proposals/${p.id}/edit`);
+      } else {
+        toast({ title: "Failed to duplicate template", variant: "destructive" });
+      }
+    } catch (error) {
+      toast({ title: "Error duplicating template", variant: "destructive" });
+    }
   }
 
   async function onExportPDF(p: Proposal) {

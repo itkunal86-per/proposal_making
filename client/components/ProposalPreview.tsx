@@ -117,10 +117,10 @@ const SelectableElement: React.FC<ElementProps> = ({
     paddingRight: paddingRight ? `${paddingRight}px` : isCodeOnly ? "12px" : "0px",
     paddingBottom: paddingBottom ? `${paddingBottom}px` : isCodeOnly ? "12px" : "0px",
     paddingLeft: paddingLeft ? `${paddingLeft}px` : isCodeOnly ? "12px" : "0px",
-    marginTop: marginTop ? `${marginTop}px` : "0px",
-    marginRight: marginRight ? `${marginRight}px` : "0px",
-    marginBottom: marginBottom ? `${marginBottom}px` : "0px",
-    marginLeft: marginLeft ? `${marginLeft}px` : "0px",
+    marginTop: marginTop ? `${marginTop}px` : undefined,
+    marginRight: marginRight ? `${marginRight}px` : undefined,
+    marginBottom: marginBottom ? `${marginBottom}px` : undefined,
+    marginLeft: marginLeft ? `${marginLeft}px` : undefined,
     fontWeight: bold ? "bold" : "normal",
     fontStyle: italic ? "italic" : "normal",
     textDecoration: underline ? "underline" : strikethrough ? "line-through" : "none",
@@ -318,8 +318,8 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
           });
 
           const isMultiColumn = section.layout === "two-column" || section.layout === "three-column";
-          const columnGapValue = typeof (section as any).titleStyles?.columnGap === "number" ? (section as any).titleStyles.columnGap : 24;
-          const gapAfterValue = typeof (section as any).contentStyles?.gapAfter === "number" ? (section as any).contentStyles.gapAfter : 24;
+          const columnGapValue = typeof (section as any).titleStyles?.columnGap === "number" && (section as any).titleStyles.columnGap !== 24 ? (section as any).titleStyles.columnGap : 0;
+          const gapAfterValue = typeof (section as any).contentStyles?.gapAfter === "number" ? (section as any).contentStyles.gapAfter : 10;
           const containerClassName =
             section.layout === "two-column" ? "grid grid-cols-2" :
             section.layout === "three-column" ? "grid grid-cols-3" :
@@ -531,6 +531,10 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                       paddingRight: (section as any).columnStyles?.[1]?.paddingRight ? `${(section as any).columnStyles[1].paddingRight}px` : "0px",
                       paddingBottom: (section as any).columnStyles?.[1]?.paddingBottom ? `${(section as any).columnStyles[1].paddingBottom}px` : "0px",
                       paddingLeft: (section as any).columnStyles?.[1]?.paddingLeft ? `${(section as any).columnStyles[1].paddingLeft}px` : "0px",
+                      marginTop: (section as any).columnStyles?.[1]?.marginTop ? `${(section as any).columnStyles[1].marginTop}px` : "0px",
+                      marginRight: (section as any).columnStyles?.[1]?.marginRight ? `${(section as any).columnStyles[1].marginRight}px` : "0px",
+                      marginBottom: (section as any).columnStyles?.[1]?.marginBottom ? `${(section as any).columnStyles[1].marginBottom}px` : "0px",
+                      marginLeft: (section as any).columnStyles?.[1]?.marginLeft ? `${(section as any).columnStyles[1].marginLeft}px` : "0px",
                     }}>
                       <SelectableElement
                         id={`section-content-${section.id}-col2`}
@@ -639,6 +643,10 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                       paddingRight: (section as any).columnStyles?.[1]?.paddingRight ? `${(section as any).columnStyles[1].paddingRight}px` : "0px",
                       paddingBottom: (section as any).columnStyles?.[1]?.paddingBottom ? `${(section as any).columnStyles[1].paddingBottom}px` : "0px",
                       paddingLeft: (section as any).columnStyles?.[1]?.paddingLeft ? `${(section as any).columnStyles[1].paddingLeft}px` : "0px",
+                      marginTop: (section as any).columnStyles?.[1]?.marginTop ? `${(section as any).columnStyles[1].marginTop}px` : "0px",
+                      marginRight: (section as any).columnStyles?.[1]?.marginRight ? `${(section as any).columnStyles[1].marginRight}px` : "0px",
+                      marginBottom: (section as any).columnStyles?.[1]?.marginBottom ? `${(section as any).columnStyles[1].marginBottom}px` : "0px",
+                      marginLeft: (section as any).columnStyles?.[1]?.marginLeft ? `${(section as any).columnStyles[1].marginLeft}px` : "0px",
                     }}>
                       <SelectableElement
                         id={`section-content-${section.id}-col2`}
@@ -689,6 +697,10 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                       paddingRight: (section as any).columnStyles?.[2]?.paddingRight ? `${(section as any).columnStyles[2].paddingRight}px` : "0px",
                       paddingBottom: (section as any).columnStyles?.[2]?.paddingBottom ? `${(section as any).columnStyles[2].paddingBottom}px` : "0px",
                       paddingLeft: (section as any).columnStyles?.[2]?.paddingLeft ? `${(section as any).columnStyles[2].paddingLeft}px` : "0px",
+                      marginTop: (section as any).columnStyles?.[2]?.marginTop ? `${(section as any).columnStyles[2].marginTop}px` : "0px",
+                      marginRight: (section as any).columnStyles?.[2]?.marginRight ? `${(section as any).columnStyles[2].marginRight}px` : "0px",
+                      marginBottom: (section as any).columnStyles?.[2]?.marginBottom ? `${(section as any).columnStyles[2].marginBottom}px` : "0px",
+                      marginLeft: (section as any).columnStyles?.[2]?.marginLeft ? `${(section as any).columnStyles[2].marginLeft}px` : "0px",
                     }}>
                       <SelectableElement
                         id={`section-content-${section.id}-col3`}

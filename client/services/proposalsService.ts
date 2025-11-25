@@ -711,21 +711,58 @@ export async function deleteProposal(id: string) {
 }
 
 export async function duplicateProposal(id: string): Promise<Proposal | undefined> {
-  const list = await getAll();
-  const src = list.find((p) => p.id === id);
-  if (!src) return;
-  const copy: Proposal = {
-    ...src,
-    id: uuid(),
-    title: `${src.title} (Copy)`,
-    createdAt: Date.now(),
-    updatedAt: Date.now(),
-    client_id: src.client_id,
-    sections: src.sections.map((s) => ({ ...s, id: uuid() })),
-    pricing: { ...src.pricing, items: src.pricing.items.map((i) => ({ ...i, id: uuid() })) },
-  };
-  persist([copy, ...list]);
-  return copy;
+  try {
+    const token = await getStoredToken();
+    const response = await fetch(`${PROPOSALS_ENDPOINT}/${id}/duplicate`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      console.error("Failed to duplicate proposal:", response.statusText);
+      return undefined;
+    }
+
+    const data = await response.json();
+
+    // Transform API response to Proposal interface
+    const newProposal: Proposal = {
+      id: String(data.id),
+      title: data.title,
+      client: data.client || "",
+      client_id: String(data.client_id),
+      status: data.status as ProposalStatus,
+      createdAt: new Date(data.created_at).getTime(),
+      updatedAt: new Date(data.updated_at).getTime(),
+      createdBy: data.created_by || "",
+      sections: [],
+      pricing: {
+        currency: data.currency || "USD",
+        items: [],
+        taxRate: parseFloat(data.tax_rate) || 0,
+      },
+      settings: {
+        dueDate: data.due_date || undefined,
+        sharing: {
+          token: data.sharing_token || uuid(),
+          public: false,
+          allowComments: false,
+        },
+      },
+      versions: [],
+    };
+
+    // Persist the new proposal locally
+    persist([newProposal, ...(await getAll())]);
+
+    return newProposal;
+  } catch (error) {
+    console.error("Error duplicating proposal:", error);
+    return undefined;
+  }
 }
 
 export async function toggleShare(p: Proposal, makePublic: boolean): Promise<Proposal> {
@@ -759,9 +796,14 @@ export async function reorderSection(p: Proposal, from: number, to: number): Pro
 export async function addSection(p: Proposal, title = "New Section", layout: "single" | "two-column" | "three-column" = "single"): Promise<Proposal> {
   const columnCount = layout === "two-column" ? 2 : layout === "three-column" ? 3 : 0;
   const columnContents = columnCount > 0 ? Array(columnCount).fill("") : undefined;
-  const columnStyles = columnCount > 0 ? Array(columnCount).fill({}) : undefined;
-  const titleStyles = columnCount > 0 ? { columnGap: 24 } : {};
-  const contentStyles = { gapAfter: 24 };
+  const columnStyles = columnCount > 0 ? Array(columnCount).fill({
+    marginTop: 0,
+    marginRight: 0,
+    marginBottom: 0,
+    marginLeft: 0,
+  }) : undefined;
+  const titleStyles = columnCount > 0 ? { columnGap: 0 } : {};
+  const contentStyles = { gapAfter: 10 };
 
   const newSection = { id: uuid(), title, content: "", layout, columnContents, columnStyles, titleStyles, contentStyles, media: [], comments: [] };
   const updated = {
