@@ -1,4 +1,14 @@
 /**
+ * Decode HTML entities to proper HTML
+ * Handles both encoded entities like &lt; and &amp; and literal tags
+ */
+export function decodeHtmlEntities(text: string): string {
+  const textarea = document.createElement("textarea");
+  textarea.innerHTML = text;
+  return textarea.value;
+}
+
+/**
  * Replace {{variable_name}} placeholders with actual values
  * Works with both plain text and HTML content
  */
