@@ -124,7 +124,12 @@ export async function generateProposalContent(
       const columnCount =
         layout === "two-column" ? 2 : layout === "three-column" ? 3 : 0;
       const columnContents = columnCount > 0 ? Array(columnCount).fill("") : undefined;
-      const columnStyles = columnCount > 0 ? Array(columnCount).fill({}) : undefined;
+      const columnStyles = columnCount > 0 ? Array(columnCount).fill({
+        marginTop: 0,
+        marginRight: 0,
+        marginBottom: 0,
+        marginLeft: 0,
+      }) : undefined;
       const columnGap = columnCount > 0 ? 24 : undefined;
 
       return {
