@@ -2,7 +2,7 @@ import React from "react";
 import { Proposal, ProposalSection } from "@/services/proposalsService";
 import { Button } from "@/components/ui/button";
 import { Sparkles } from "lucide-react";
-import { replaceVariables } from "@/lib/variableUtils";
+import { replaceVariables, decodeHtmlEntities } from "@/lib/variableUtils";
 
 interface ElementProps {
   id: string;
