@@ -116,7 +116,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                 {/* Section Content */}
                 {section.layout !== "two-column" && section.layout !== "three-column" ? (
                   <div
-                    className="relative"
+                    className="relative prose prose-sm max-w-none"
                     style={{
                       color: (section as any).contentStyles?.color,
                       fontSize: `${(section as any).contentStyles?.fontSize || 16}px`,
@@ -131,8 +131,6 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                       fontWeight: (section as any).contentStyles?.bold ? "bold" : "normal",
                       fontStyle: (section as any).contentStyles?.italic ? "italic" : "normal",
                       textDecoration: (section as any).contentStyles?.underline ? "underline" : (section as any).contentStyles?.strikethrough ? "line-through" : "none",
-                      whiteSpace: "pre-wrap",
-                      wordBreak: "break-word",
                     }}
                   >
                     {(section as any).contentStyles?.backgroundImage && (section as any).contentStyles?.backgroundOpacity && (
@@ -149,9 +147,12 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                         }}
                       />
                     )}
-                    <div style={{ position: "relative", zIndex: 1 }}>
-                      {replaceVariables(section.content, variables)}
-                    </div>
+                    <div
+                      style={{ position: "relative", zIndex: 1 }}
+                      dangerouslySetInnerHTML={{
+                        __html: replaceVariables(section.content, variables),
+                      }}
+                    />
                   </div>
                 ) : (
                   <div
