@@ -130,7 +130,7 @@ export async function generateProposalContent(
         marginBottom: 0,
         marginLeft: 0,
       }) : undefined;
-      const columnGap = columnCount > 0 ? 24 : undefined;
+      const columnGap = columnCount > 0 ? 0 : undefined;
 
       return {
         id,
