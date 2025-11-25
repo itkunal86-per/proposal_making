@@ -2,7 +2,7 @@ import React from "react";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Proposal } from "@/services/proposalsService";
-import { replaceVariables } from "@/lib/variableUtils";
+import { replaceVariables, decodeHtmlEntities } from "@/lib/variableUtils";
 
 interface ProposalPreviewModalProps {
   proposal: Proposal;
