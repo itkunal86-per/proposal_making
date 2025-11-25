@@ -167,7 +167,17 @@ const SelectableElement: React.FC<ElementProps> = ({
 
   const renderContent = () => {
     const content = children || (type === "section-content" ? "Click to add content..." : "");
-    const isHtml = typeof content === "string" && content.includes("<");
+
+    // Decode HTML entities if present
+    const decodeHtmlEntities = (text: string): string => {
+      const textarea = document.createElement("textarea");
+      textarea.innerHTML = text;
+      return textarea.value;
+    };
+
+    // Check for both literal HTML tags and encoded HTML entities
+    const isHtml = typeof content === "string" && (content.includes("<") || content.includes("&lt;") || content.includes("&amp;"));
+    const decodedContent = isHtml && typeof content === "string" ? decodeHtmlEntities(content) : content;
 
     if (bulletList && content) {
       const lines = String(content).split('\n').filter(line => line.trim());
