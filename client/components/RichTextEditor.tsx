@@ -68,13 +68,18 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     searchTerm: "",
   });
 
-  // Initialize editor content only once
+  // Initialize editor content and update when value prop changes
   useEffect(() => {
-    if (editorRef.current && !isInitializedRef.current) {
-      editorRef.current.innerHTML = value || "";
-      isInitializedRef.current = true;
+    if (editorRef.current) {
+      // Only set innerHTML if the content has actually changed
+      if (editorRef.current.innerHTML !== (value || "")) {
+        editorRef.current.innerHTML = value || "";
+      }
+      if (!isInitializedRef.current) {
+        isInitializedRef.current = true;
+      }
     }
-  }, []);
+  }, [value]);
 
   const captureContent = () => {
     if (!editorRef.current) return;
