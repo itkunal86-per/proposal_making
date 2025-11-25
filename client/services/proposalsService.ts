@@ -340,22 +340,22 @@ function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmai
     updatedAt: updatedAtMs,
     sections,
     pricing: {
-      currency: (apiProposal.pricing as any)?.currency || apiProposal.currency || "USD",
-      taxRate: (apiProposal.pricing as any)?.taxRate ?? apiProposal.tax_rate ?? 0.1,
-      items: Array.isArray((apiProposal.pricing as any)?.items) ? (apiProposal.pricing as any).items : (
-        Array.isArray(apiProposal.items) ? apiProposal.items : [
+      currency: ((apiProposal as any).pricing as any)?.currency || (apiProposal as any).currency || "USD",
+      taxRate: ((apiProposal as any).pricing as any)?.taxRate ?? apiProposal.tax_rate ?? 0.1,
+      items: Array.isArray(((apiProposal as any).pricing as any)?.items) ? ((apiProposal as any).pricing as any).items : (
+        Array.isArray((apiProposal as any).items) ? (apiProposal as any).items : [
           { id: uuid(), label: "Design", qty: 1, price: 3000 },
           { id: uuid(), label: "Development", qty: 1, price: 9000 },
         ]
       ),
     },
     settings: {
-      dueDate: (apiProposal.settings as any)?.dueDate || apiProposal.due_date || undefined,
-      approvalFlow: (apiProposal.settings as any)?.approvalFlow || apiProposal.approval_flow || "Single approver",
+      dueDate: ((apiProposal as any).settings as any)?.dueDate || apiProposal.due_date || undefined,
+      approvalFlow: ((apiProposal as any).settings as any)?.approvalFlow || apiProposal.approval_flow || "Single approver",
       sharing: {
-        public: ((apiProposal.settings as any)?.sharing?.public ?? apiProposal.sharing_public ?? 0) === 1,
-        token: (apiProposal.settings as any)?.sharing?.token || apiProposal.sharing_token || undefined,
-        allowComments: ((apiProposal.settings as any)?.sharing?.allowComments ?? apiProposal.sharing_allow_comments ?? 0) === 1,
+        public: (((apiProposal as any).settings as any)?.sharing?.public ?? apiProposal.sharing_public ?? 0) === 1,
+        token: ((apiProposal as any).settings as any)?.sharing?.token || apiProposal.sharing_token || undefined,
+        allowComments: (((apiProposal as any).settings as any)?.sharing?.allowComments ?? apiProposal.sharing_allow_comments ?? 0) === 1,
       },
     },
     versions: Array.isArray((apiProposal as any).versions) ? (apiProposal as any).versions : [],
