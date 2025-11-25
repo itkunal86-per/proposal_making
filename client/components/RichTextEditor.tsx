@@ -1,8 +1,9 @@
-import React, { useRef, useState } from "react";
+'use client';
+
+import React, { useEffect, useRef, useState } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
-import { Button } from "@/components/ui/button";
 import {
   Bold,
   Italic,
@@ -52,6 +53,7 @@ const ToolbarButton = ({
       isActive && "bg-slate-200",
       disabled && "opacity-50 cursor-not-allowed"
     )}
+    type="button"
   >
     {children}
   </button>
@@ -65,6 +67,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   placeholder = "Enter text...",
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
   const [dropdown, setDropdown] = useState<VariableDropdown>({
     visible: false,
     searchTerm: "",
@@ -82,12 +85,14 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
         placeholder,
       }),
     ],
-    content: value,
+    content: value || "<p></p>",
     onUpdate: ({ editor }) => {
       const html = editor.getHTML();
       onChange(html);
     },
     onSelectionUpdate: ({ editor }) => {
+      if (!editor) return;
+
       const { selection } = editor.state;
       const { $from } = selection;
       const textBefore = $from.parent.textContent.substring(0, $from.parentOffset);
@@ -118,6 +123,10 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     },
   });
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const getFilteredVariables = () => {
     if (!dropdown.searchTerm) return variables;
     return variables.filter((v) =>
@@ -128,7 +137,8 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   const handleVariableSelect = (variableName: string) => {
     if (!editor) return;
 
-    const { $from } = editor.state.selection;
+    const { selection } = editor.state;
+    const { $from } = selection;
     const textBefore = $from.parent.textContent.substring(0, $from.parentOffset);
     const lastBraceIndex = textBefore.lastIndexOf("{");
 
@@ -150,8 +160,12 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
   const filteredVariables = getFilteredVariables();
 
-  if (!editor) {
-    return null;
+  if (!mounted || !editor) {
+    return (
+      <div className={cn("border rounded-lg bg-slate-50 p-4", className)}>
+        <div className="text-muted-foreground text-sm">Loading editor...</div>
+      </div>
+    );
   }
 
   return (
