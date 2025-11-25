@@ -334,10 +334,10 @@ function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmai
         };
       })
     : [
-      { id: uuid(), title: "Overview", content: "", layout: "single", titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], comments: [] },
-      { id: uuid(), title: "Scope", content: "", layout: "single", titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], comments: [] },
-      { id: uuid(), title: "Timeline", content: "", layout: "single", titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], comments: [] },
-    ];
+      { id: uuid(), title: "Overview", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], comments: [] },
+      { id: uuid(), title: "Scope", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], comments: [] },
+      { id: uuid(), title: "Timeline", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], comments: [] },
+    ] as ProposalSection[];
 
   const clientName = typeof apiProposal.client === "string" ? apiProposal.client : (apiProposal.client?.name || "");
   const clientId = typeof apiProposal.client_id === "string" ? apiProposal.client_id : (apiProposal.client_id ? String(apiProposal.client_id) : undefined);
