@@ -168,9 +168,18 @@ export default function MyProposals() {
   }
 
   async function onDuplicate(id: string) {
-    const p = await duplicateProposal(id);
-    if (p) toast({ title: "Proposal duplicated" });
-    await refresh();
+    try {
+      const p = await duplicateProposal(id);
+      if (p) {
+        toast({ title: "Proposal duplicated successfully" });
+        await refresh();
+        nav(`/proposals/${p.id}/edit`);
+      } else {
+        toast({ title: "Failed to duplicate proposal", variant: "destructive" });
+      }
+    } catch (error) {
+      toast({ title: "Error duplicating proposal", variant: "destructive" });
+    }
   }
 
   return (
