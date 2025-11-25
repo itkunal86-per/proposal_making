@@ -180,7 +180,7 @@ const SelectableElement: React.FC<ElementProps> = ({
     const decodedContent = isHtml && typeof content === "string" ? decodeHtmlEntities(content) : content;
 
     if (bulletList && content) {
-      const lines = String(content).split('\n').filter(line => line.trim());
+      const lines = String(decodedContent).split('\n').filter(line => line.trim());
       return (
         <ul className="list-disc list-inside space-y-1" style={{ fontFamily: code ? "ui-monospace, SFMono-Regular, Menlo, Courier, monospace" : "inherit" }}>
           {lines.map((line, idx) => (
@@ -193,7 +193,7 @@ const SelectableElement: React.FC<ElementProps> = ({
     }
 
     if (numberList && content) {
-      const lines = String(content).split('\n').filter(line => line.trim());
+      const lines = String(decodedContent).split('\n').filter(line => line.trim());
       return (
         <ol className="list-decimal list-inside space-y-1" style={{ fontFamily: code ? "ui-monospace, SFMono-Regular, Menlo, Courier, monospace" : "inherit" }}>
           {lines.map((line, idx) => (
@@ -208,12 +208,12 @@ const SelectableElement: React.FC<ElementProps> = ({
     if (code && content) {
       return (
         <div style={{ fontFamily: "ui-monospace, SFMono-Regular, Menlo, Courier, monospace", whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
-          {content}
+          {decodedContent}
         </div>
       );
     }
 
-    if (isHtml && typeof content === "string") {
+    if (isHtml && typeof decodedContent === "string") {
       return (
         <div
           style={{
@@ -221,12 +221,12 @@ const SelectableElement: React.FC<ElementProps> = ({
             fontStyle: italic ? "italic" : "normal",
             textDecoration: underline ? "underline" : strikethrough ? "line-through" : "none",
           }}
-          dangerouslySetInnerHTML={{ __html: content }}
+          dangerouslySetInnerHTML={{ __html: decodedContent }}
         />
       );
     }
 
-    return <div style={{ fontWeight: bold ? "bold" : "normal", fontStyle: italic ? "italic" : "normal", textDecoration: underline ? "underline" : strikethrough ? "line-through" : "none" }}>{content}</div>;
+    return <div style={{ fontWeight: bold ? "bold" : "normal", fontStyle: italic ? "italic" : "normal", textDecoration: underline ? "underline" : strikethrough ? "line-through" : "none" }}>{decodedContent}</div>;
   };
 
   return (
