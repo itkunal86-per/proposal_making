@@ -167,6 +167,7 @@ const SelectableElement: React.FC<ElementProps> = ({
 
   const renderContent = () => {
     const content = children || (type === "section-content" ? "Click to add content..." : "");
+    const isHtml = typeof content === "string" && content.includes("<");
 
     if (bulletList && content) {
       const lines = String(content).split('\n').filter(line => line.trim());
@@ -199,6 +200,19 @@ const SelectableElement: React.FC<ElementProps> = ({
         <div style={{ fontFamily: "ui-monospace, SFMono-Regular, Menlo, Courier, monospace", whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
           {content}
         </div>
+      );
+    }
+
+    if (isHtml && typeof content === "string") {
+      return (
+        <div
+          style={{
+            fontWeight: bold ? "bold" : "normal",
+            fontStyle: italic ? "italic" : "normal",
+            textDecoration: underline ? "underline" : strikethrough ? "line-through" : "none",
+          }}
+          dangerouslySetInnerHTML={{ __html: content }}
+        />
       );
     }
 
@@ -459,7 +473,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                 numberList={(section as any).contentStyles?.numberList}
                 code={(section as any).contentStyles?.code}
               >
-                {replaceVariables(section.content, variables)}
+                {replaceVariables(section.content || "", variables)}
               </SelectableElement>
             )}
 

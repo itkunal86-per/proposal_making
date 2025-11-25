@@ -1,11 +1,12 @@
 /**
  * Replace {{variable_name}} placeholders with actual values
+ * Works with both plain text and HTML content
  */
 export function replaceVariables(
-  text: string,
+  content: string,
   variables: Array<{ id: string | number; name: string; value: string }>
 ): string {
-  let result = text;
+  let result = content;
 
   for (const variable of variables) {
     const placeholder = `{{${variable.name}}}`;
