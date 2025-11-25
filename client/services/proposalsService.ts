@@ -73,6 +73,19 @@ interface ApiProposalResponse {
     id: string;
     name: string;
   };
+  pricing?: {
+    currency?: string;
+    items?: ProposalPricingItem[];
+    taxRate?: number;
+  };
+  items?: ProposalPricingItem[];
+  settings?: {
+    dueDate?: string;
+    approvalFlow?: string;
+    sharing?: { public: boolean; token?: string; allowComments: boolean };
+  };
+  sections?: any[];
+  versions?: any[];
 }
 
 export interface CreateProposalInput {
@@ -321,10 +334,10 @@ function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmai
         };
       })
     : [
-      { id: uuid(), title: "Overview", content: "", layout: "single", titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], comments: [] },
-      { id: uuid(), title: "Scope", content: "", layout: "single", titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], comments: [] },
-      { id: uuid(), title: "Timeline", content: "", layout: "single", titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], comments: [] },
-    ];
+      { id: uuid(), title: "Overview", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], comments: [] },
+      { id: uuid(), title: "Scope", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], comments: [] },
+      { id: uuid(), title: "Timeline", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], comments: [] },
+    ] as ProposalSection[];
 
   const clientName = typeof apiProposal.client === "string" ? apiProposal.client : (apiProposal.client?.name || "");
   const clientId = typeof apiProposal.client_id === "string" ? apiProposal.client_id : (apiProposal.client_id ? String(apiProposal.client_id) : undefined);
@@ -605,10 +618,10 @@ export async function createProposal(partial?: Partial<Proposal>): Promise<Propo
     createdAt: now,
     updatedAt: now,
     sections: partial?.sections ?? [
-      { id: uuid(), title: "Overview", content: "", layout: "single", titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], comments: [] },
-      { id: uuid(), title: "Scope", content: "", layout: "single", titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], comments: [] },
-      { id: uuid(), title: "Timeline", content: "", layout: "single", titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], comments: [] },
-    ],
+      { id: uuid(), title: "Overview", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], comments: [] },
+      { id: uuid(), title: "Scope", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], comments: [] },
+      { id: uuid(), title: "Timeline", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], comments: [] },
+    ] as ProposalSection[],
     pricing: partial?.pricing ?? {
       currency: "USD",
       taxRate: 0.1,
