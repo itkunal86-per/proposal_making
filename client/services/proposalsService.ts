@@ -759,7 +759,12 @@ export async function reorderSection(p: Proposal, from: number, to: number): Pro
 export async function addSection(p: Proposal, title = "New Section", layout: "single" | "two-column" | "three-column" = "single"): Promise<Proposal> {
   const columnCount = layout === "two-column" ? 2 : layout === "three-column" ? 3 : 0;
   const columnContents = columnCount > 0 ? Array(columnCount).fill("") : undefined;
-  const columnStyles = columnCount > 0 ? Array(columnCount).fill({}) : undefined;
+  const columnStyles = columnCount > 0 ? Array(columnCount).fill({
+    marginTop: 0,
+    marginRight: 0,
+    marginBottom: 0,
+    marginLeft: 0,
+  }) : undefined;
   const titleStyles = columnCount > 0 ? { columnGap: 24 } : {};
   const contentStyles = { gapAfter: 24 };
 
