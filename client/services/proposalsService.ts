@@ -73,6 +73,19 @@ interface ApiProposalResponse {
     id: string;
     name: string;
   };
+  pricing?: {
+    currency?: string;
+    items?: ProposalPricingItem[];
+    taxRate?: number;
+  };
+  items?: ProposalPricingItem[];
+  settings?: {
+    dueDate?: string;
+    approvalFlow?: string;
+    sharing?: { public: boolean; token?: string; allowComments: boolean };
+  };
+  sections?: any[];
+  versions?: any[];
 }
 
 export interface CreateProposalInput {
