@@ -318,7 +318,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
           });
 
           const isMultiColumn = section.layout === "two-column" || section.layout === "three-column";
-          const columnGapValue = typeof (section as any).titleStyles?.columnGap === "number" ? (section as any).titleStyles.columnGap : 0;
+          const columnGapValue = typeof (section as any).titleStyles?.columnGap === "number" && (section as any).titleStyles.columnGap !== 24 ? (section as any).titleStyles.columnGap : 0;
           const gapAfterValue = typeof (section as any).contentStyles?.gapAfter === "number" ? (section as any).contentStyles.gapAfter : 24;
           const containerClassName =
             section.layout === "two-column" ? "grid grid-cols-2" :
