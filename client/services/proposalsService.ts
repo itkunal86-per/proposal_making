@@ -255,12 +255,12 @@ export async function persistProposal(p: Proposal) {
 }
 
 function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmail?: string): Proposal {
-  const createdAtMs = typeof apiProposal.createdAt === "number" ? apiProposal.createdAt : (apiProposal.created_at ? new Date(apiProposal.created_at).getTime() : Date.now());
-  const updatedAtMs = typeof apiProposal.updatedAt === "number" ? apiProposal.updatedAt : (apiProposal.updated_at ? new Date(apiProposal.updated_at).getTime() : createdAtMs);
+  const createdAtMs = apiProposal.created_at ? new Date(apiProposal.created_at).getTime() : Date.now();
+  const updatedAtMs = apiProposal.updated_at ? new Date(apiProposal.updated_at).getTime() : createdAtMs;
 
   // Handle both old API structure (with created_at) and new API structure (with timestamps)
-  const sections = Array.isArray(apiProposal.sections) && apiProposal.sections.length > 0
-    ? (apiProposal.sections as any[]).map((s) => {
+  const sections = Array.isArray((apiProposal as any).sections) && (apiProposal as any).sections.length > 0
+    ? ((apiProposal as any).sections as any[]).map((s) => {
         // Handle columnContents - could be array or object
       let normalizedColumnContents: string[] | undefined;
       if (Array.isArray(s.columnContents) && s.columnContents.length > 0) {
@@ -335,7 +335,7 @@ function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmai
     client: clientName,
     client_id: clientId,
     status: apiProposal.status,
-    createdBy: apiProposal.createdBy || apiProposal.created_by || userEmail || "you@example.com",
+    createdBy: apiProposal.created_by || userEmail || "you@example.com",
     createdAt: createdAtMs,
     updatedAt: updatedAtMs,
     sections,
