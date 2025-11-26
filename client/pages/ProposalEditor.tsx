@@ -271,13 +271,22 @@ export default function ProposalEditor() {
 
             // Handle undo/redo
             if (format === "undo" || format === "redo") {
-              // Try to execute undo/redo on the currently focused element
               try {
-                document.execCommand(format, false);
-                toast({
-                  title: format === "undo" ? "Undo" : "Redo",
-                  description: format === "undo" ? "Last action undone" : "Last action redone",
-                });
+                // Find and focus the contentEditable element
+                const contentEditableElement = document.querySelector('[contenteditable="true"]') as HTMLElement;
+                if (contentEditableElement) {
+                  contentEditableElement.focus();
+                  document.execCommand(format, false);
+                  toast({
+                    title: format === "undo" ? "Undo" : "Redo",
+                    description: format === "undo" ? "Last action undone" : "Last action redone",
+                  });
+                } else {
+                  toast({
+                    title: "No editor active",
+                    description: "Please click in the editor area first",
+                  });
+                }
               } catch (error) {
                 console.error(`Failed to execute ${format}:`, error);
               }
