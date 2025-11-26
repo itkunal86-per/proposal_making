@@ -272,8 +272,11 @@ export default function ProposalEditor() {
             // Handle undo/redo
             if (format === "undo" || format === "redo") {
               try {
-                // Find the contentEditable element
-                const contentEditableElement = document.querySelector('[contenteditable="true"]') as HTMLElement;
+                // Find the contentEditable element - try multiple selectors
+                let contentEditableElement = document.querySelector('[data-testid="rich-text-editor"]') as HTMLElement;
+                if (!contentEditableElement) {
+                  contentEditableElement = document.querySelector('[contenteditable="true"]') as HTMLElement;
+                }
                 if (contentEditableElement) {
                   // Save the current selection
                   const selection = window.getSelection();
