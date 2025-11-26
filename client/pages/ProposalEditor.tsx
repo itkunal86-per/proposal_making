@@ -272,26 +272,33 @@ export default function ProposalEditor() {
             // Handle undo/redo
             if (format === "undo" || format === "redo") {
               try {
-                // Find and focus the contentEditable element
+                // Find the contentEditable element
                 const contentEditableElement = document.querySelector('[contenteditable="true"]') as HTMLElement;
                 if (contentEditableElement) {
+                  // Save the current selection
+                  const selection = window.getSelection();
+                  let savedRange: Range | null = null;
+                  if (selection && selection.rangeCount > 0) {
+                    savedRange = selection.getRangeAt(0).cloneRange();
+                  }
+
+                  // Focus and restore selection
                   contentEditableElement.focus();
-                  // Use setTimeout to ensure focus is complete
-                  setTimeout(() => {
-                    try {
-                      document.execCommand(format, false);
-                      toast({
-                        title: format === "undo" ? "Undo" : "Redo",
-                        description: format === "undo" ? "Last action undone" : "Last action redone",
-                      });
-                    } catch (error) {
-                      console.error(`Failed to execute ${format}:`, error);
-                    }
-                  }, 0);
+                  if (savedRange) {
+                    selection?.removeAllRanges();
+                    selection?.addRange(savedRange);
+                  }
+
+                  // Execute command
+                  document.execCommand(format, false);
+                  toast({
+                    title: format === "undo" ? "Undo" : "Redo",
+                    description: format === "undo" ? "Last action undone" : "Last action redone",
+                  });
                 } else {
                   toast({
                     title: "No editor active",
-                    description: "Please click in the editor area first",
+                    description: "Please click in the editor to activate it first",
                   });
                 }
               } catch (error) {
@@ -303,48 +310,59 @@ export default function ProposalEditor() {
             // Handle content formatting commands (heading2, bulletList, numberList, blockquote)
             const contentFormats = ["heading2", "bulletList", "numberList", "blockquote"];
             if (contentFormats.includes(format)) {
-              // Try to find and use the RichTextEditor's contentEditable element
               try {
-                // Look for any contentEditable element in the document
+                // Find the contentEditable element
                 const contentEditableElement = document.querySelector('[contenteditable="true"]') as HTMLElement;
 
                 if (contentEditableElement) {
+                  // Save the current selection
+                  const selection = window.getSelection();
+                  let savedRange: Range | null = null;
+                  if (selection && selection.rangeCount > 0) {
+                    savedRange = selection.getRangeAt(0).cloneRange();
+                  } else if (contentEditableElement) {
+                    // If no selection, create range at the end
+                    const range = document.createRange();
+                    range.selectNodeContents(contentEditableElement);
+                    range.collapse(false);
+                    savedRange = range;
+                  }
+
                   // Focus the editor
                   contentEditableElement.focus();
 
-                  // Use setTimeout to ensure focus is complete
-                  setTimeout(() => {
-                    try {
-                      let command = "";
-                      let value_param = "";
-                      if (format === "heading2") {
-                        command = "formatBlock";
-                        value_param = "<h2>";
-                      } else if (format === "bulletList") {
-                        command = "insertUnorderedList";
-                      } else if (format === "numberList") {
-                        command = "insertOrderedList";
-                      } else if (format === "blockquote") {
-                        command = "formatBlock";
-                        value_param = "<blockquote>";
-                      }
+                  // Restore selection before executing command
+                  if (savedRange) {
+                    selection?.removeAllRanges();
+                    selection?.addRange(savedRange);
+                  }
 
-                      if (command) {
-                        document.execCommand(command, false, value_param);
-                      }
-                    } catch (error) {
-                      console.error(`Failed to execute ${format}:`, error);
-                    }
-                  }, 0);
+                  // Execute command immediately (no setTimeout)
+                  let command = "";
+                  let value_param = "";
+                  if (format === "heading2") {
+                    command = "formatBlock";
+                    value_param = "<h2>";
+                  } else if (format === "bulletList") {
+                    command = "insertUnorderedList";
+                  } else if (format === "numberList") {
+                    command = "insertOrderedList";
+                  } else if (format === "blockquote") {
+                    command = "formatBlock";
+                    value_param = "<blockquote>";
+                  }
 
-                  toast({
-                    title: "Formatting applied",
-                    description: `${format} applied successfully`,
-                  });
+                  if (command) {
+                    document.execCommand(command, false, value_param);
+                    toast({
+                      title: "Formatting applied",
+                      description: `${format} applied successfully`,
+                    });
+                  }
                 } else {
                   toast({
                     title: "No editor active",
-                    description: "Please click in the editor area first",
+                    description: "Please click in the editor to activate it first",
                   });
                 }
               } catch (error) {
