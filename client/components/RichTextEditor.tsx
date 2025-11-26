@@ -133,18 +133,24 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   const execCommand = (command: string, value?: string) => {
     if (!editorRef.current) return;
 
-    // Save the current selection/range
+    // Save the current selection/range before focus changes
     const selection = window.getSelection();
     let savedRange: Range | null = null;
 
     if (selection && selection.rangeCount > 0) {
       savedRange = selection.getRangeAt(0).cloneRange();
+    } else {
+      // If no selection, create a range at the end of the editor
+      const range = document.createRange();
+      range.selectNodeContents(editorRef.current);
+      range.collapse(false);
+      savedRange = range;
     }
 
     // Ensure editor has focus
     editorRef.current.focus();
 
-    // Restore the selection before executing the command
+    // Restore the selection immediately
     if (savedRange) {
       const sel = window.getSelection();
       if (sel) {
@@ -153,17 +159,14 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
       }
     }
 
-    // For undo/redo, we need to ensure there's a valid execution context
-    // by adding a small delay to ensure focus is complete
-    setTimeout(() => {
-      try {
-        document.execCommand(command, false, value);
-        // Capture the content after the command is executed
-        captureContent();
-      } catch (error) {
-        console.error(`Failed to execute command: ${command}`, error);
-      }
-    }, 0);
+    // Execute the command with proper focus and selection
+    try {
+      document.execCommand(command, false, value);
+      // Capture the content after the command is executed
+      captureContent();
+    } catch (error) {
+      console.error(`Failed to execute command: ${command}`, error);
+    }
   };
 
   const isCommandActive = (command: string): boolean => {
