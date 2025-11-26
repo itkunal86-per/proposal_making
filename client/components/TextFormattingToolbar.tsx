@@ -15,6 +15,8 @@ import {
   Undo2,
   Redo2,
   ChevronDown,
+  Heading2,
+  Quote,
 } from "lucide-react";
 import {
   Select,
