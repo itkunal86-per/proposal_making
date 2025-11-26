@@ -314,8 +314,11 @@ export default function ProposalEditor() {
             const contentFormats = ["heading2", "bulletList", "numberList", "blockquote"];
             if (contentFormats.includes(format)) {
               try {
-                // Find the contentEditable element
-                const contentEditableElement = document.querySelector('[contenteditable="true"]') as HTMLElement;
+                // Find the contentEditable element - try multiple selectors
+                let contentEditableElement = document.querySelector('[data-testid="rich-text-editor"]') as HTMLElement;
+                if (!contentEditableElement) {
+                  contentEditableElement = document.querySelector('[contenteditable="true"]') as HTMLElement;
+                }
                 console.log("Found contentEditable element:", contentEditableElement);
 
                 if (contentEditableElement) {
