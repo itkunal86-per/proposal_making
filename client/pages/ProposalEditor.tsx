@@ -316,10 +316,20 @@ export default function ProposalEditor() {
               try {
                 // Find the contentEditable element - try multiple selectors
                 let contentEditableElement = document.querySelector('[data-testid="rich-text-editor"]') as HTMLElement;
+                console.log("Searched for [data-testid='rich-text-editor']:", contentEditableElement);
+
                 if (!contentEditableElement) {
                   contentEditableElement = document.querySelector('[contenteditable="true"]') as HTMLElement;
+                  console.log("Searched for [contenteditable='true']:", contentEditableElement);
                 }
-                console.log("Found contentEditable element:", contentEditableElement);
+
+                if (!contentEditableElement) {
+                  contentEditableElement = document.querySelector('[contenteditable]') as HTMLElement;
+                  console.log("Searched for [contenteditable]:", contentEditableElement);
+                }
+
+                console.log("Final found element:", contentEditableElement);
+                console.log("All contenteditable elements in document:", document.querySelectorAll('[contenteditable]'));
 
                 if (contentEditableElement) {
                   // Save the current selection
