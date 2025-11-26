@@ -169,7 +169,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
       <div className="relative">
         <div
           ref={editorRef}
-          contentEditable
+          contentEditable="true"
           suppressContentEditableWarning
           onInput={handleInput}
           onBlur={() => captureContent()}
@@ -182,6 +182,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             overflowWrap: "break-word",
           }}
           data-placeholder={placeholder}
+          data-testid="rich-text-editor"
         />
 
         {/* Variable dropdown */}
