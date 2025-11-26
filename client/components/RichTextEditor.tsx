@@ -133,8 +133,25 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   const execCommand = (command: string, value?: string) => {
     if (!editorRef.current) return;
 
+    // Save the current selection/range
+    const selection = window.getSelection();
+    let savedRange: Range | null = null;
+
+    if (selection && selection.rangeCount > 0) {
+      savedRange = selection.getRangeAt(0).cloneRange();
+    }
+
     // Ensure editor has focus
     editorRef.current.focus();
+
+    // Restore the selection before executing the command
+    if (savedRange) {
+      const sel = window.getSelection();
+      if (sel) {
+        sel.removeAllRanges();
+        sel.addRange(savedRange);
+      }
+    }
 
     // For undo/redo, we need to ensure there's a valid execution context
     // by adding a small delay to ensure focus is complete
