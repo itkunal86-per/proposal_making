@@ -271,10 +271,44 @@ export default function ProposalEditor() {
 
             // Handle undo/redo
             if (format === "undo" || format === "redo") {
-              toast({
-                title: format === "undo" ? "Undo" : "Redo",
-                description: "History tracking will be available in a future update",
-              });
+              // Try to execute undo/redo on the currently focused element
+              try {
+                document.execCommand(format, false);
+                toast({
+                  title: format === "undo" ? "Undo" : "Redo",
+                  description: format === "undo" ? "Last action undone" : "Last action redone",
+                });
+              } catch (error) {
+                console.error(`Failed to execute ${format}:`, error);
+              }
+              return;
+            }
+
+            // Handle content formatting commands (heading2, bulletList, numberList, blockquote)
+            const contentFormats = ["heading2", "bulletList", "numberList", "blockquote"];
+            if (contentFormats.includes(format)) {
+              // Try to execute on focused element
+              try {
+                let command = "";
+                let value_param = "";
+                if (format === "heading2") {
+                  command = "formatBlock";
+                  value_param = "<h2>";
+                } else if (format === "bulletList") {
+                  command = "insertUnorderedList";
+                } else if (format === "numberList") {
+                  command = "insertOrderedList";
+                } else if (format === "blockquote") {
+                  command = "formatBlock";
+                  value_param = "<blockquote>";
+                }
+
+                if (command) {
+                  document.execCommand(command, false, value_param);
+                }
+              } catch (error) {
+                console.error(`Failed to execute ${format}:`, error);
+              }
               return;
             }
 
