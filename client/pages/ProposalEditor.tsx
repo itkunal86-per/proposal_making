@@ -276,11 +276,18 @@ export default function ProposalEditor() {
                 const contentEditableElement = document.querySelector('[contenteditable="true"]') as HTMLElement;
                 if (contentEditableElement) {
                   contentEditableElement.focus();
-                  document.execCommand(format, false);
-                  toast({
-                    title: format === "undo" ? "Undo" : "Redo",
-                    description: format === "undo" ? "Last action undone" : "Last action redone",
-                  });
+                  // Use setTimeout to ensure focus is complete
+                  setTimeout(() => {
+                    try {
+                      document.execCommand(format, false);
+                      toast({
+                        title: format === "undo" ? "Undo" : "Redo",
+                        description: format === "undo" ? "Last action undone" : "Last action redone",
+                      });
+                    } catch (error) {
+                      console.error(`Failed to execute ${format}:`, error);
+                    }
+                  }, 0);
                 } else {
                   toast({
                     title: "No editor active",
