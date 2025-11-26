@@ -1,15 +1,4 @@
 import React, { useRef, useState, useEffect } from "react";
-import {
-  Bold,
-  Italic,
-  Underline,
-  List,
-  ListOrdered,
-  Undo2,
-  Redo2,
-  Heading2,
-  Quote,
-} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface RichTextEditorProps {
@@ -24,39 +13,6 @@ interface VariableDropdown {
   visible: boolean;
   searchTerm: string;
 }
-
-const ToolbarButton = ({
-  onClick,
-  isActive,
-  disabled,
-  children,
-  title,
-}: {
-  onClick: () => void;
-  isActive?: boolean;
-  disabled?: boolean;
-  children: React.ReactNode;
-  title: string;
-}) => (
-  <button
-    onMouseDown={(e) => {
-      e.preventDefault();
-      if (!disabled) {
-        onClick();
-      }
-    }}
-    disabled={disabled}
-    title={title}
-    className={cn(
-      "p-2 rounded hover:bg-slate-100 transition-colors",
-      isActive && "bg-slate-200",
-      disabled && "opacity-50 cursor-not-allowed"
-    )}
-    type="button"
-  >
-    {children}
-  </button>
-);
 
 export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   value,
