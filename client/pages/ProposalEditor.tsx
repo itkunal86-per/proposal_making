@@ -271,10 +271,133 @@ export default function ProposalEditor() {
 
             // Handle undo/redo
             if (format === "undo" || format === "redo") {
-              toast({
-                title: format === "undo" ? "Undo" : "Redo",
-                description: "History tracking will be available in a future update",
-              });
+              try {
+                // Find the contentEditable element - try multiple selectors
+                let contentEditableElement = document.querySelector('[data-testid="rich-text-editor"]') as HTMLElement;
+                if (!contentEditableElement) {
+                  contentEditableElement = document.querySelector('[contenteditable="true"]') as HTMLElement;
+                }
+                if (contentEditableElement) {
+                  // Save the current selection
+                  const selection = window.getSelection();
+                  let savedRange: Range | null = null;
+                  if (selection && selection.rangeCount > 0) {
+                    savedRange = selection.getRangeAt(0).cloneRange();
+                  }
+
+                  // Focus and restore selection
+                  contentEditableElement.focus();
+                  if (savedRange) {
+                    selection?.removeAllRanges();
+                    selection?.addRange(savedRange);
+                  }
+
+                  // Execute command
+                  document.execCommand(format, false);
+                  toast({
+                    title: format === "undo" ? "Undo" : "Redo",
+                    description: format === "undo" ? "Last action undone" : "Last action redone",
+                  });
+                } else {
+                  toast({
+                    title: "No editor active",
+                    description: "Please click in the editor to activate it first",
+                  });
+                }
+              } catch (error) {
+                console.error(`Failed to execute ${format}:`, error);
+              }
+              return;
+            }
+
+            // Handle content formatting commands (heading2, bulletList, numberList, blockquote)
+            const contentFormats = ["heading2", "bulletList", "numberList", "blockquote"];
+            if (contentFormats.includes(format)) {
+              try {
+                // Find the contentEditable element - try multiple selectors
+                let contentEditableElement = document.querySelector('[data-testid="rich-text-editor"]') as HTMLElement;
+                console.log("Searched for [data-testid='rich-text-editor']:", contentEditableElement);
+
+                if (!contentEditableElement) {
+                  contentEditableElement = document.querySelector('[contenteditable="true"]') as HTMLElement;
+                  console.log("Searched for [contenteditable='true']:", contentEditableElement);
+                }
+
+                if (!contentEditableElement) {
+                  contentEditableElement = document.querySelector('[contenteditable]') as HTMLElement;
+                  console.log("Searched for [contenteditable]:", contentEditableElement);
+                }
+
+                console.log("Final found element:", contentEditableElement);
+                console.log("All contenteditable elements in document:", document.querySelectorAll('[contenteditable]'));
+
+                if (contentEditableElement) {
+                  // Save the current selection
+                  const selection = window.getSelection();
+                  console.log("Current selection:", selection);
+                  let savedRange: Range | null = null;
+                  if (selection && selection.rangeCount > 0) {
+                    savedRange = selection.getRangeAt(0).cloneRange();
+                    console.log("Saved range from selection");
+                  } else if (contentEditableElement) {
+                    // If no selection, create range at the end
+                    const range = document.createRange();
+                    range.selectNodeContents(contentEditableElement);
+                    range.collapse(false);
+                    savedRange = range;
+                    console.log("Created new range at end of editor");
+                  }
+
+                  // Focus the editor
+                  contentEditableElement.focus();
+                  console.log("Focused editor");
+
+                  // Restore selection before executing command
+                  if (savedRange) {
+                    selection?.removeAllRanges();
+                    selection?.addRange(savedRange);
+                    console.log("Restored selection");
+                  }
+
+                  // Execute command immediately (no setTimeout)
+                  let command = "";
+                  let value_param = "";
+                  if (format === "heading2") {
+                    command = "formatBlock";
+                    value_param = "<h2>";
+                  } else if (format === "bulletList") {
+                    command = "insertUnorderedList";
+                  } else if (format === "numberList") {
+                    command = "insertOrderedList";
+                  } else if (format === "blockquote") {
+                    command = "formatBlock";
+                    value_param = "<blockquote>";
+                  }
+
+                  if (command) {
+                    const result = document.execCommand(command, false, value_param);
+                    console.log(`execCommand("${command}", false, "${value_param}") returned:`, result);
+                    console.log("Editor content after command:", contentEditableElement.innerHTML);
+
+                    toast({
+                      title: "Formatting applied",
+                      description: `${format} applied successfully`,
+                    });
+                  }
+                } else {
+                  console.log("No contentEditable element found");
+                  toast({
+                    title: "No editor active",
+                    description: "Please click in the editor to activate it first",
+                  });
+                }
+              } catch (error) {
+                console.error(`Failed to execute ${format}:`, error);
+                toast({
+                  title: "Error",
+                  description: `Failed to apply ${format}`,
+                });
+              }
               return;
             }
 

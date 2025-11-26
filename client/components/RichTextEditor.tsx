@@ -1,15 +1,4 @@
 import React, { useRef, useState, useEffect } from "react";
-import {
-  Bold,
-  Italic,
-  Underline,
-  List,
-  ListOrdered,
-  Undo2,
-  Redo2,
-  Heading2,
-  Quote,
-} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface RichTextEditorProps {
@@ -24,39 +13,6 @@ interface VariableDropdown {
   visible: boolean;
   searchTerm: string;
 }
-
-const ToolbarButton = ({
-  onClick,
-  isActive,
-  disabled,
-  children,
-  title,
-}: {
-  onClick: () => void;
-  isActive?: boolean;
-  disabled?: boolean;
-  children: React.ReactNode;
-  title: string;
-}) => (
-  <button
-    onMouseDown={(e) => {
-      e.preventDefault();
-      if (!disabled) {
-        onClick();
-      }
-    }}
-    disabled={disabled}
-    title={title}
-    className={cn(
-      "p-2 rounded hover:bg-slate-100 transition-colors",
-      isActive && "bg-slate-200",
-      disabled && "opacity-50 cursor-not-allowed"
-    )}
-    type="button"
-  >
-    {children}
-  </button>
-);
 
 export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   value,
@@ -130,28 +86,6 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     }
   };
 
-  const execCommand = (command: string, value?: string) => {
-    if (!editorRef.current) return;
-
-    // Ensure editor has focus
-    editorRef.current.focus();
-
-    // For undo/redo, we need to ensure there's a valid execution context
-    // by adding a small delay to ensure focus is complete
-    setTimeout(() => {
-      try {
-        document.execCommand(command, false, value);
-        // Capture the content after the command is executed
-        captureContent();
-      } catch (error) {
-        console.error(`Failed to execute command: ${command}`, error);
-      }
-    }, 0);
-  };
-
-  const isCommandActive = (command: string): boolean => {
-    return document.queryCommandState(command);
-  };
 
   const getFilteredVariables = () => {
     if (!dropdown.searchTerm) return variables;
@@ -231,90 +165,11 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
       ref={containerRef}
       className={cn("border rounded-lg overflow-hidden", className)}
     >
-      {/* Toolbar */}
-      <div className="bg-slate-50 border-b border-slate-200 p-2 flex gap-1 flex-wrap">
-        <ToolbarButton
-          onClick={() => execCommand("bold")}
-          isActive={isCommandActive("bold")}
-          title="Bold (Ctrl+B)"
-        >
-          <Bold className="w-4 h-4" />
-        </ToolbarButton>
-
-        <ToolbarButton
-          onClick={() => execCommand("italic")}
-          isActive={isCommandActive("italic")}
-          title="Italic (Ctrl+I)"
-        >
-          <Italic className="w-4 h-4" />
-        </ToolbarButton>
-
-        <ToolbarButton
-          onClick={() => execCommand("underline")}
-          isActive={isCommandActive("underline")}
-          title="Underline (Ctrl+U)"
-        >
-          <Underline className="w-4 h-4" />
-        </ToolbarButton>
-
-        <div className="w-px bg-slate-300 mx-1" />
-
-        <ToolbarButton
-          onClick={() => execCommand("formatBlock", "<h2>")}
-          isActive={isCommandActive("formatBlock")}
-          title="Heading 2"
-        >
-          <Heading2 className="w-4 h-4" />
-        </ToolbarButton>
-
-        <ToolbarButton
-          onClick={() => execCommand("insertUnorderedList")}
-          isActive={isCommandActive("insertUnorderedList")}
-          title="Bullet List"
-        >
-          <List className="w-4 h-4" />
-        </ToolbarButton>
-
-        <ToolbarButton
-          onClick={() => execCommand("insertOrderedList")}
-          isActive={isCommandActive("insertOrderedList")}
-          title="Ordered List"
-        >
-          <ListOrdered className="w-4 h-4" />
-        </ToolbarButton>
-
-        <ToolbarButton
-          onClick={() => execCommand("formatBlock", "<blockquote>")}
-          isActive={isCommandActive("formatBlock")}
-          title="Blockquote"
-        >
-          <Quote className="w-4 h-4" />
-        </ToolbarButton>
-
-        <div className="w-px bg-slate-300 mx-1" />
-
-        <ToolbarButton
-          onClick={() => execCommand("undo")}
-          disabled={!document.queryCommandEnabled("undo")}
-          title="Undo (Ctrl+Z)"
-        >
-          <Undo2 className="w-4 h-4" />
-        </ToolbarButton>
-
-        <ToolbarButton
-          onClick={() => execCommand("redo")}
-          disabled={!document.queryCommandEnabled("redo")}
-          title="Redo (Ctrl+Y)"
-        >
-          <Redo2 className="w-4 h-4" />
-        </ToolbarButton>
-      </div>
-
       {/* Editor */}
       <div className="relative">
         <div
           ref={editorRef}
-          contentEditable
+          contentEditable="true"
           suppressContentEditableWarning
           onInput={handleInput}
           onBlur={() => captureContent()}
@@ -327,6 +182,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             overflowWrap: "break-word",
           }}
           data-placeholder={placeholder}
+          data-testid="rich-text-editor"
         />
 
         {/* Variable dropdown */}
