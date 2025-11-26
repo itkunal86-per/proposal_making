@@ -312,27 +312,35 @@ export default function ProposalEditor() {
                   // Focus the editor
                   contentEditableElement.focus();
 
-                  let command = "";
-                  let value_param = "";
-                  if (format === "heading2") {
-                    command = "formatBlock";
-                    value_param = "<h2>";
-                  } else if (format === "bulletList") {
-                    command = "insertUnorderedList";
-                  } else if (format === "numberList") {
-                    command = "insertOrderedList";
-                  } else if (format === "blockquote") {
-                    command = "formatBlock";
-                    value_param = "<blockquote>";
-                  }
+                  // Use setTimeout to ensure focus is complete
+                  setTimeout(() => {
+                    try {
+                      let command = "";
+                      let value_param = "";
+                      if (format === "heading2") {
+                        command = "formatBlock";
+                        value_param = "<h2>";
+                      } else if (format === "bulletList") {
+                        command = "insertUnorderedList";
+                      } else if (format === "numberList") {
+                        command = "insertOrderedList";
+                      } else if (format === "blockquote") {
+                        command = "formatBlock";
+                        value_param = "<blockquote>";
+                      }
 
-                  if (command) {
-                    document.execCommand(command, false, value_param);
-                    toast({
-                      title: "Formatting applied",
-                      description: `${format} applied successfully`,
-                    });
-                  }
+                      if (command) {
+                        document.execCommand(command, false, value_param);
+                      }
+                    } catch (error) {
+                      console.error(`Failed to execute ${format}:`, error);
+                    }
+                  }, 0);
+
+                  toast({
+                    title: "Formatting applied",
+                    description: `${format} applied successfully`,
+                  });
                 } else {
                   toast({
                     title: "No editor active",
