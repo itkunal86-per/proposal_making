@@ -244,6 +244,21 @@ export const TextFormattingToolbar: React.FC<TextFormattingToolbarProps> = ({
 
       <div className="w-px h-6 bg-slate-200" />
 
+      {/* Heading Button */}
+      <Button
+        variant="ghost"
+        size="sm"
+        className={`h-9 w-9 p-0 ${
+          activeFormats.has("heading2")
+            ? "bg-slate-200 text-slate-900"
+            : "hover:bg-slate-100"
+        }`}
+        onClick={() => toggleFormat("heading2")}
+        title="Heading 2"
+      >
+        <Heading2 className="w-4 h-4" />
+      </Button>
+
       {/* List Buttons */}
       <Button
         variant="ghost"
@@ -271,6 +286,21 @@ export const TextFormattingToolbar: React.FC<TextFormattingToolbarProps> = ({
         title="Numbered list"
       >
         <ListOrdered className="w-4 h-4" />
+      </Button>
+
+      {/* Blockquote Button */}
+      <Button
+        variant="ghost"
+        size="sm"
+        className={`h-9 w-9 p-0 ${
+          activeFormats.has("blockquote")
+            ? "bg-slate-200 text-slate-900"
+            : "hover:bg-slate-100"
+        }`}
+        onClick={() => toggleFormat("blockquote")}
+        title="Block quote"
+      >
+        <Quote className="w-4 h-4" />
       </Button>
 
       <div className="w-px h-6 bg-slate-200" />
