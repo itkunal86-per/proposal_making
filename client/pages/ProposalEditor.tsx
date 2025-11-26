@@ -313,28 +313,34 @@ export default function ProposalEditor() {
               try {
                 // Find the contentEditable element
                 const contentEditableElement = document.querySelector('[contenteditable="true"]') as HTMLElement;
+                console.log("Found contentEditable element:", contentEditableElement);
 
                 if (contentEditableElement) {
                   // Save the current selection
                   const selection = window.getSelection();
+                  console.log("Current selection:", selection);
                   let savedRange: Range | null = null;
                   if (selection && selection.rangeCount > 0) {
                     savedRange = selection.getRangeAt(0).cloneRange();
+                    console.log("Saved range from selection");
                   } else if (contentEditableElement) {
                     // If no selection, create range at the end
                     const range = document.createRange();
                     range.selectNodeContents(contentEditableElement);
                     range.collapse(false);
                     savedRange = range;
+                    console.log("Created new range at end of editor");
                   }
 
                   // Focus the editor
                   contentEditableElement.focus();
+                  console.log("Focused editor");
 
                   // Restore selection before executing command
                   if (savedRange) {
                     selection?.removeAllRanges();
                     selection?.addRange(savedRange);
+                    console.log("Restored selection");
                   }
 
                   // Execute command immediately (no setTimeout)
@@ -353,13 +359,17 @@ export default function ProposalEditor() {
                   }
 
                   if (command) {
-                    document.execCommand(command, false, value_param);
+                    const result = document.execCommand(command, false, value_param);
+                    console.log(`execCommand("${command}", false, "${value_param}") returned:`, result);
+                    console.log("Editor content after command:", contentEditableElement.innerHTML);
+
                     toast({
                       title: "Formatting applied",
                       description: `${format} applied successfully`,
                     });
                   }
                 } else {
+                  console.log("No contentEditable element found");
                   toast({
                     title: "No editor active",
                     description: "Please click in the editor to activate it first",
