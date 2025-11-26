@@ -287,11 +287,15 @@ export default function ProposalEditor() {
             // Handle content formatting commands (heading2, bulletList, numberList, blockquote)
             const contentFormats = ["heading2", "bulletList", "numberList", "blockquote"];
             if (contentFormats.includes(format)) {
-              // Try to execute on focused element
+              // Try to find and use the RichTextEditor's contentEditable element
               try {
-                // Find and focus the currently active contentEditable element
-                const activeElement = document.activeElement as HTMLElement;
-                if (activeElement && activeElement.getAttribute("contenteditable") === "true") {
+                // Look for any contentEditable element in the document
+                const contentEditableElement = document.querySelector('[contenteditable="true"]') as HTMLElement;
+
+                if (contentEditableElement) {
+                  // Focus the editor
+                  contentEditableElement.focus();
+
                   let command = "";
                   let value_param = "";
                   if (format === "heading2") {
@@ -316,7 +320,7 @@ export default function ProposalEditor() {
                 } else {
                   toast({
                     title: "No editor active",
-                    description: "Please click in the editor to apply formatting",
+                    description: "Please click in the editor area first",
                   });
                 }
               } catch (error) {
