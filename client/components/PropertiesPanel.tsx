@@ -1136,6 +1136,61 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                     </div>
                   </div>
                 </div>
+
+                <div>
+                  <label className="text-xs font-medium block">Background Image</label>
+                  <Input
+                    value={(section as any).columnStyles?.[columnIndex]?.backgroundImage || ""}
+                    onChange={(e) => {
+                      const newColumnStyles = [...((section as any).columnStyles || [])];
+                      newColumnStyles[columnIndex] = { ...newColumnStyles[columnIndex], backgroundImage: e.target.value };
+                      handleUpdateSection({ columnStyles: newColumnStyles });
+                    }}
+                    placeholder="https://example.com/image.jpg"
+                    className="text-xs mt-2"
+                  />
+                </div>
+
+                {(section as any).columnStyles?.[columnIndex]?.backgroundImage && (
+                  <>
+                    <div>
+                      <label className="text-xs font-medium">Background Size</label>
+                      <select
+                        value={(section as any).columnStyles?.[columnIndex]?.backgroundSize || "cover"}
+                        onChange={(e) => {
+                          const newColumnStyles = [...((section as any).columnStyles || [])];
+                          newColumnStyles[columnIndex] = { ...newColumnStyles[columnIndex], backgroundSize: e.target.value };
+                          handleUpdateSection({ columnStyles: newColumnStyles });
+                        }}
+                        className="w-full mt-2 px-3 py-2 border rounded-md text-sm"
+                      >
+                        <option value="cover">Cover</option>
+                        <option value="contain">Contain</option>
+                        <option value="stretch">Stretch</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium">Background Opacity</label>
+                      <div className="flex gap-2 mt-2 items-center">
+                        <input
+                          type="range"
+                          min="0"
+                          max="100"
+                          value={parseInt((section as any).columnStyles?.[columnIndex]?.backgroundOpacity || "100")}
+                          onChange={(e) => {
+                            const newColumnStyles = [...((section as any).columnStyles || [])];
+                            newColumnStyles[columnIndex] = { ...newColumnStyles[columnIndex], backgroundOpacity: e.target.value };
+                            handleUpdateSection({ columnStyles: newColumnStyles });
+                          }}
+                          className="flex-1"
+                        />
+                        <span className="text-sm font-medium w-12 text-center">
+                          {parseInt((section as any).columnStyles?.[columnIndex]?.backgroundOpacity || "100")}%
+                        </span>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 
