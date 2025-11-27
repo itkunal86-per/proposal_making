@@ -436,7 +436,6 @@ export default function ProposalEditor() {
                         ? columnIndex >= 0
                           ? {
                               ...s,
-                              columnStyles: (s as any).columnStyles ? [...(s as any).columnStyles] : [],
                               columnStyles: ((s as any).columnStyles || []).map((style: any, idx: number) =>
                                 idx === columnIndex ? { ...style, [format]: value } : style
                               ),
