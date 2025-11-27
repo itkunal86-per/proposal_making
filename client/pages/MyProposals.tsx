@@ -144,7 +144,7 @@ export default function MyProposals() {
     await refresh();
 
     if (result.data) {
-      nav(`/proposals/${result.data.id}/edit`);
+      nav(`/my/proposals/${result.data.id}/edit`);
     }
   }
 
