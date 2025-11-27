@@ -489,32 +489,32 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                         }
                         onAI={() => onAIElement?.(`section-content-${section.id}-col1`, "section-content")}
                         value={section.content}
-                        color={(section as any).contentStyles?.color}
-                        fontSize={(section as any).contentStyles?.fontSize}
-                        textAlign={(section as any).contentStyles?.textAlign}
+                        color={(section as any).columnStyles?.[0]?.color || (section as any).contentStyles?.color}
+                        fontSize={(section as any).columnStyles?.[0]?.fontSize || (section as any).contentStyles?.fontSize}
+                        textAlign={(section as any).columnStyles?.[0]?.textAlign || (section as any).contentStyles?.textAlign}
                         backgroundColor="transparent"
                         backgroundImage={undefined}
                         backgroundSize={undefined}
                         backgroundOpacity={undefined}
-                        borderColor={(section as any).contentStyles?.borderColor}
-                        borderWidth={(section as any).contentStyles?.borderWidth}
-                        borderRadius={(section as any).contentStyles?.borderRadius}
-                        borderStyle={(section as any).contentStyles?.borderStyle}
-                        paddingTop={(section as any).contentStyles?.paddingTop}
-                        paddingRight={(section as any).contentStyles?.paddingRight}
-                        paddingBottom={(section as any).contentStyles?.paddingBottom}
-                        paddingLeft={(section as any).contentStyles?.paddingLeft}
-                        marginTop={(section as any).contentStyles?.marginTop}
-                        marginRight={(section as any).contentStyles?.marginRight}
-                        marginBottom={(section as any).contentStyles?.marginBottom}
-                        marginLeft={(section as any).contentStyles?.marginLeft}
-                        bold={(section as any).contentStyles?.bold}
-                        italic={(section as any).contentStyles?.italic}
-                        underline={(section as any).contentStyles?.underline}
-                        strikethrough={(section as any).contentStyles?.strikethrough}
-                        bulletList={(section as any).contentStyles?.bulletList}
-                        numberList={(section as any).contentStyles?.numberList}
-                        code={(section as any).contentStyles?.code}
+                        borderColor={(section as any).columnStyles?.[0]?.borderColor || (section as any).contentStyles?.borderColor}
+                        borderWidth={(section as any).columnStyles?.[0]?.borderWidth || (section as any).contentStyles?.borderWidth}
+                        borderRadius={(section as any).columnStyles?.[0]?.borderRadius || (section as any).contentStyles?.borderRadius}
+                        borderStyle={(section as any).columnStyles?.[0]?.borderStyle || (section as any).contentStyles?.borderStyle}
+                        paddingTop={(section as any).columnStyles?.[0]?.paddingTop || (section as any).contentStyles?.paddingTop}
+                        paddingRight={(section as any).columnStyles?.[0]?.paddingRight || (section as any).contentStyles?.paddingRight}
+                        paddingBottom={(section as any).columnStyles?.[0]?.paddingBottom || (section as any).contentStyles?.paddingBottom}
+                        paddingLeft={(section as any).columnStyles?.[0]?.paddingLeft || (section as any).contentStyles?.paddingLeft}
+                        marginTop={(section as any).columnStyles?.[0]?.marginTop || (section as any).contentStyles?.marginTop}
+                        marginRight={(section as any).columnStyles?.[0]?.marginRight || (section as any).contentStyles?.marginRight}
+                        marginBottom={(section as any).columnStyles?.[0]?.marginBottom || (section as any).contentStyles?.marginBottom}
+                        marginLeft={(section as any).columnStyles?.[0]?.marginLeft || (section as any).contentStyles?.marginLeft}
+                        bold={(section as any).columnStyles?.[0]?.bold || (section as any).contentStyles?.bold}
+                        italic={(section as any).columnStyles?.[0]?.italic || (section as any).contentStyles?.italic}
+                        underline={(section as any).columnStyles?.[0]?.underline || (section as any).contentStyles?.underline}
+                        strikethrough={(section as any).columnStyles?.[0]?.strikethrough || (section as any).contentStyles?.strikethrough}
+                        bulletList={(section as any).columnStyles?.[0]?.bulletList || (section as any).contentStyles?.bulletList}
+                        numberList={(section as any).columnStyles?.[0]?.numberList || (section as any).contentStyles?.numberList}
+                        code={(section as any).columnStyles?.[0]?.code || (section as any).contentStyles?.code}
                       >
                         {replaceVariables((section as any).columnContents?.[0] || "", variables)}
                       </SelectableElement>
