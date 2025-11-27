@@ -521,6 +521,10 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                     </div>
                     <div style={{
                       backgroundColor: (section as any).columnStyles?.[1]?.backgroundColor || "transparent",
+                      backgroundImage: (section as any).columnStyles?.[1]?.backgroundImage ? `url(${(section as any).columnStyles[1].backgroundImage})` : undefined,
+                      backgroundSize: (section as any).columnStyles?.[1]?.backgroundSize || "cover",
+                      backgroundPosition: "center",
+                      backgroundRepeat: "no-repeat",
                       borderWidth: (section as any).columnStyles?.[1]?.borderWidth ? `${(section as any).columnStyles[1].borderWidth}px` : "0px",
                       borderColor: (section as any).columnStyles?.[1]?.borderColor || "#000000",
                       borderStyle: (section as any).columnStyles?.[1]?.borderWidth ? "solid" : "none",
@@ -533,6 +537,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                       marginRight: (section as any).columnStyles?.[1]?.marginRight ? `${(section as any).columnStyles[1].marginRight}px` : "0px",
                       marginBottom: (section as any).columnStyles?.[1]?.marginBottom ? `${(section as any).columnStyles[1].marginBottom}px` : "0px",
                       marginLeft: (section as any).columnStyles?.[1]?.marginLeft ? `${(section as any).columnStyles[1].marginLeft}px` : "0px",
+                      position: (section as any).columnStyles?.[1]?.backgroundImage ? "relative" : "static",
                     }}>
                       <SelectableElement
                         id={`section-content-${section.id}-col2`}
@@ -546,10 +551,10 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                         color={(section as any).contentStyles?.color}
                         fontSize={(section as any).contentStyles?.fontSize}
                         textAlign={(section as any).contentStyles?.textAlign}
-                        backgroundColor={(section as any).contentStyles?.backgroundColor}
-                        backgroundImage={(section as any).contentStyles?.backgroundImage}
-                        backgroundSize={(section as any).contentStyles?.backgroundSize}
-                        backgroundOpacity={(section as any).contentStyles?.backgroundOpacity}
+                        backgroundColor="transparent"
+                        backgroundImage={undefined}
+                        backgroundSize={undefined}
+                        backgroundOpacity={undefined}
                         borderColor={(section as any).contentStyles?.borderColor}
                         borderWidth={(section as any).contentStyles?.borderWidth}
                         borderRadius={(section as any).contentStyles?.borderRadius}
