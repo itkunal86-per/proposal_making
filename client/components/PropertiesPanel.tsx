@@ -1280,6 +1280,52 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                         <u>U</u>
                       </Button>
                     </div>
+
+                    <div>
+                      <label className="text-xs font-medium">Border Width</label>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="10"
+                        value={(section as any).columnStyles?.[columnIndex]?.borderWidth || 0}
+                        onChange={(e) => {
+                          const newColumnStyles = [...((section as any).columnStyles || [])];
+                          newColumnStyles[columnIndex] = { ...newColumnStyles[columnIndex], borderWidth: parseInt(e.target.value) };
+                          handleUpdateSection({ columnStyles: newColumnStyles });
+                        }}
+                        className="text-xs"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-medium">Border Color</label>
+                      <Input
+                        type="color"
+                        value={(section as any).columnStyles?.[columnIndex]?.borderColor || "#000000"}
+                        onChange={(e) => {
+                          const newColumnStyles = [...((section as any).columnStyles || [])];
+                          newColumnStyles[columnIndex] = { ...newColumnStyles[columnIndex], borderColor: e.target.value };
+                          handleUpdateSection({ columnStyles: newColumnStyles });
+                        }}
+                        className="h-8 cursor-pointer"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-medium">Border Radius</label>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="50"
+                        value={(section as any).columnStyles?.[columnIndex]?.borderRadius || 0}
+                        onChange={(e) => {
+                          const newColumnStyles = [...((section as any).columnStyles || [])];
+                          newColumnStyles[columnIndex] = { ...newColumnStyles[columnIndex], borderRadius: parseInt(e.target.value) };
+                          handleUpdateSection({ columnStyles: newColumnStyles });
+                        }}
+                        className="text-xs"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
