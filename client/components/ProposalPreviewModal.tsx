@@ -162,58 +162,98 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                       gap: `${typeof (section as any).titleStyles?.columnGap === "number" ? (section as any).titleStyles.columnGap : 0}px`,
                     }}
                   >
-                    {section.layout === "two-column" && [(section as any).columnContents?.[0], (section as any).columnContents?.[1]].map((content, colIndex) => (
-                      <div
-                        key={colIndex}
-                        className="relative prose prose-sm max-w-none"
-                        style={{
-                          color: (section as any).contentStyles?.color,
-                          fontSize: `${(section as any).contentStyles?.fontSize || 16}px`,
-                          textAlign: ((section as any).contentStyles?.textAlign || "left") as any,
-                          backgroundColor: (section as any).columnStyles?.[colIndex]?.backgroundColor || (section as any).contentStyles?.backgroundColor,
-                          backgroundImage: (section as any).columnStyles?.[colIndex]?.backgroundImage ? `url(${(section as any).columnStyles[colIndex].backgroundImage})` : undefined,
-                          backgroundSize: (section as any).contentStyles?.backgroundSize || "cover",
-                          padding: `${(section as any).columnStyles?.[colIndex]?.paddingTop || (section as any).contentStyles?.paddingTop || 0}px ${(section as any).columnStyles?.[colIndex]?.paddingRight || (section as any).contentStyles?.paddingRight || 0}px ${(section as any).columnStyles?.[colIndex]?.paddingBottom || (section as any).contentStyles?.paddingBottom || 0}px ${(section as any).columnStyles?.[colIndex]?.paddingLeft || (section as any).contentStyles?.paddingLeft || 0}px`,
-                          borderRadius: (section as any).contentStyles?.borderRadius ? `${(section as any).contentStyles?.borderRadius}px` : undefined,
-                          fontWeight: (section as any).contentStyles?.bold ? "bold" : "normal",
-                          fontStyle: (section as any).contentStyles?.italic ? "italic" : "normal",
-                          textDecoration: (section as any).contentStyles?.underline ? "underline" : (section as any).contentStyles?.strikethrough ? "line-through" : "none",
-                        }}
-                      >
+                    {section.layout === "two-column" && [(section as any).columnContents?.[0], (section as any).columnContents?.[1]].map((content, colIndex) => {
+                      const columnStyle = (section as any).columnStyles?.[colIndex];
+                      const contentStyle = (section as any).contentStyles;
+                      const borderWidth = columnStyle?.borderWidth || contentStyle?.borderWidth || 0;
+                      const borderColor = columnStyle?.borderColor || contentStyle?.borderColor || "#000000";
+                      const borderStyle = borderWidth > 0 ? "solid" : "none";
+
+                      return (
                         <div
-                          style={{ position: "relative", zIndex: 1 }}
-                          dangerouslySetInnerHTML={{
-                            __html: decodeHtmlEntities(replaceVariables(content || "", variables)),
+                          key={colIndex}
+                          className="relative prose prose-sm max-w-none"
+                          style={{
+                            color: columnStyle?.color || contentStyle?.color,
+                            fontSize: `${columnStyle?.fontSize || contentStyle?.fontSize || 16}px`,
+                            textAlign: ((columnStyle?.textAlign || contentStyle?.textAlign || "left") as any),
+                            backgroundColor: columnStyle?.backgroundColor || contentStyle?.backgroundColor,
+                            backgroundImage: columnStyle?.backgroundImage ? `url(${columnStyle.backgroundImage})` : undefined,
+                            backgroundSize: columnStyle?.backgroundSize || contentStyle?.backgroundSize || "cover",
+                            backgroundPosition: "center",
+                            backgroundRepeat: "no-repeat",
+                            paddingTop: `${columnStyle?.paddingTop || contentStyle?.paddingTop || 0}px`,
+                            paddingRight: `${columnStyle?.paddingRight || contentStyle?.paddingRight || 0}px`,
+                            paddingBottom: `${columnStyle?.paddingBottom || contentStyle?.paddingBottom || 0}px`,
+                            paddingLeft: `${columnStyle?.paddingLeft || contentStyle?.paddingLeft || 0}px`,
+                            marginTop: `${columnStyle?.marginTop || contentStyle?.marginTop || 0}px`,
+                            marginRight: `${columnStyle?.marginRight || contentStyle?.marginRight || 0}px`,
+                            marginBottom: `${columnStyle?.marginBottom || contentStyle?.marginBottom || 0}px`,
+                            marginLeft: `${columnStyle?.marginLeft || contentStyle?.marginLeft || 0}px`,
+                            borderWidth: `${borderWidth}px`,
+                            borderColor: borderColor,
+                            borderStyle: borderStyle,
+                            borderRadius: (columnStyle?.borderRadius || contentStyle?.borderRadius) ? `${columnStyle?.borderRadius || contentStyle?.borderRadius}px` : undefined,
+                            fontWeight: columnStyle?.bold || contentStyle?.bold ? "bold" : "normal",
+                            fontStyle: columnStyle?.italic || contentStyle?.italic ? "italic" : "normal",
+                            textDecoration: columnStyle?.underline || contentStyle?.underline ? "underline" : columnStyle?.strikethrough || contentStyle?.strikethrough ? "line-through" : "none",
                           }}
-                        />
-                      </div>
-                    ))}
-                    {section.layout === "three-column" && [(section as any).columnContents?.[0], (section as any).columnContents?.[1], (section as any).columnContents?.[2]].map((content, colIndex) => (
-                      <div
-                        key={colIndex}
-                        className="relative prose prose-sm max-w-none"
-                        style={{
-                          color: (section as any).contentStyles?.color,
-                          fontSize: `${(section as any).contentStyles?.fontSize || 16}px`,
-                          textAlign: ((section as any).contentStyles?.textAlign || "left") as any,
-                          backgroundColor: (section as any).columnStyles?.[colIndex]?.backgroundColor || (section as any).contentStyles?.backgroundColor,
-                          backgroundImage: (section as any).columnStyles?.[colIndex]?.backgroundImage ? `url(${(section as any).columnStyles[colIndex].backgroundImage})` : undefined,
-                          backgroundSize: (section as any).contentStyles?.backgroundSize || "cover",
-                          padding: `${(section as any).columnStyles?.[colIndex]?.paddingTop || (section as any).contentStyles?.paddingTop || 0}px ${(section as any).columnStyles?.[colIndex]?.paddingRight || (section as any).contentStyles?.paddingRight || 0}px ${(section as any).columnStyles?.[colIndex]?.paddingBottom || (section as any).contentStyles?.paddingBottom || 0}px ${(section as any).columnStyles?.[colIndex]?.paddingLeft || (section as any).contentStyles?.paddingLeft || 0}px`,
-                          borderRadius: (section as any).contentStyles?.borderRadius ? `${(section as any).contentStyles?.borderRadius}px` : undefined,
-                          fontWeight: (section as any).contentStyles?.bold ? "bold" : "normal",
-                          fontStyle: (section as any).contentStyles?.italic ? "italic" : "normal",
-                          textDecoration: (section as any).contentStyles?.underline ? "underline" : (section as any).contentStyles?.strikethrough ? "line-through" : "none",
-                        }}
-                      >
+                        >
+                          <div
+                            style={{ position: "relative", zIndex: 1 }}
+                            dangerouslySetInnerHTML={{
+                              __html: decodeHtmlEntities(replaceVariables(content || "", variables)),
+                            }}
+                          />
+                        </div>
+                      );
+                    })}
+                    {section.layout === "three-column" && [(section as any).columnContents?.[0], (section as any).columnContents?.[1], (section as any).columnContents?.[2]].map((content, colIndex) => {
+                      const columnStyle = (section as any).columnStyles?.[colIndex];
+                      const contentStyle = (section as any).contentStyles;
+                      const borderWidth = columnStyle?.borderWidth || contentStyle?.borderWidth || 0;
+                      const borderColor = columnStyle?.borderColor || contentStyle?.borderColor || "#000000";
+                      const borderStyle = borderWidth > 0 ? "solid" : "none";
+
+                      return (
                         <div
-                          style={{ position: "relative", zIndex: 1 }}
-                          dangerouslySetInnerHTML={{
-                            __html: decodeHtmlEntities(replaceVariables(content || "", variables)),
+                          key={colIndex}
+                          className="relative prose prose-sm max-w-none"
+                          style={{
+                            color: columnStyle?.color || contentStyle?.color,
+                            fontSize: `${columnStyle?.fontSize || contentStyle?.fontSize || 16}px`,
+                            textAlign: ((columnStyle?.textAlign || contentStyle?.textAlign || "left") as any),
+                            backgroundColor: columnStyle?.backgroundColor || contentStyle?.backgroundColor,
+                            backgroundImage: columnStyle?.backgroundImage ? `url(${columnStyle.backgroundImage})` : undefined,
+                            backgroundSize: columnStyle?.backgroundSize || contentStyle?.backgroundSize || "cover",
+                            backgroundPosition: "center",
+                            backgroundRepeat: "no-repeat",
+                            paddingTop: `${columnStyle?.paddingTop || contentStyle?.paddingTop || 0}px`,
+                            paddingRight: `${columnStyle?.paddingRight || contentStyle?.paddingRight || 0}px`,
+                            paddingBottom: `${columnStyle?.paddingBottom || contentStyle?.paddingBottom || 0}px`,
+                            paddingLeft: `${columnStyle?.paddingLeft || contentStyle?.paddingLeft || 0}px`,
+                            marginTop: `${columnStyle?.marginTop || contentStyle?.marginTop || 0}px`,
+                            marginRight: `${columnStyle?.marginRight || contentStyle?.marginRight || 0}px`,
+                            marginBottom: `${columnStyle?.marginBottom || contentStyle?.marginBottom || 0}px`,
+                            marginLeft: `${columnStyle?.marginLeft || contentStyle?.marginLeft || 0}px`,
+                            borderWidth: `${borderWidth}px`,
+                            borderColor: borderColor,
+                            borderStyle: borderStyle,
+                            borderRadius: (columnStyle?.borderRadius || contentStyle?.borderRadius) ? `${columnStyle?.borderRadius || contentStyle?.borderRadius}px` : undefined,
+                            fontWeight: columnStyle?.bold || contentStyle?.bold ? "bold" : "normal",
+                            fontStyle: columnStyle?.italic || contentStyle?.italic ? "italic" : "normal",
+                            textDecoration: columnStyle?.underline || contentStyle?.underline ? "underline" : columnStyle?.strikethrough || contentStyle?.strikethrough ? "line-through" : "none",
                           }}
-                        />
-                      </div>
-                    ))}
+                        >
+                          <div
+                            style={{ position: "relative", zIndex: 1 }}
+                            dangerouslySetInnerHTML={{
+                              __html: decodeHtmlEntities(replaceVariables(content || "", variables)),
+                            }}
+                          />
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
 

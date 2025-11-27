@@ -1136,6 +1136,198 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                     </div>
                   </div>
                 </div>
+
+                <div>
+                  <label className="text-xs font-medium block">Background Image</label>
+                  <Input
+                    value={(section as any).columnStyles?.[columnIndex]?.backgroundImage || ""}
+                    onChange={(e) => {
+                      const newColumnStyles = [...((section as any).columnStyles || [])];
+                      newColumnStyles[columnIndex] = { ...newColumnStyles[columnIndex], backgroundImage: e.target.value };
+                      handleUpdateSection({ columnStyles: newColumnStyles });
+                    }}
+                    placeholder="https://example.com/image.jpg"
+                    className="text-xs mt-2"
+                  />
+                </div>
+
+                {(section as any).columnStyles?.[columnIndex]?.backgroundImage && (
+                  <>
+                    <div>
+                      <label className="text-xs font-medium">Background Size</label>
+                      <select
+                        value={(section as any).columnStyles?.[columnIndex]?.backgroundSize || "cover"}
+                        onChange={(e) => {
+                          const newColumnStyles = [...((section as any).columnStyles || [])];
+                          newColumnStyles[columnIndex] = { ...newColumnStyles[columnIndex], backgroundSize: e.target.value };
+                          handleUpdateSection({ columnStyles: newColumnStyles });
+                        }}
+                        className="w-full mt-2 px-3 py-2 border rounded-md text-sm"
+                      >
+                        <option value="cover">Cover</option>
+                        <option value="contain">Contain</option>
+                        <option value="stretch">Stretch</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium">Background Opacity</label>
+                      <div className="flex gap-2 mt-2 items-center">
+                        <input
+                          type="range"
+                          min="0"
+                          max="100"
+                          value={parseInt((section as any).columnStyles?.[columnIndex]?.backgroundOpacity || "100")}
+                          onChange={(e) => {
+                            const newColumnStyles = [...((section as any).columnStyles || [])];
+                            newColumnStyles[columnIndex] = { ...newColumnStyles[columnIndex], backgroundOpacity: e.target.value };
+                            handleUpdateSection({ columnStyles: newColumnStyles });
+                          }}
+                          className="flex-1"
+                        />
+                        <span className="text-sm font-medium w-12 text-center">
+                          {parseInt((section as any).columnStyles?.[columnIndex]?.backgroundOpacity || "100")}%
+                        </span>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                <div>
+                  <Label className="text-xs font-semibold mb-2 block">Text Formatting</Label>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-xs font-medium">Text Color</label>
+                      <Input
+                        type="color"
+                        value={(section as any).columnStyles?.[columnIndex]?.color || "#000000"}
+                        onChange={(e) => {
+                          const newColumnStyles = [...((section as any).columnStyles || [])];
+                          newColumnStyles[columnIndex] = { ...newColumnStyles[columnIndex], color: e.target.value };
+                          handleUpdateSection({ columnStyles: newColumnStyles });
+                        }}
+                        className="h-8 cursor-pointer"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-medium">Font Size</label>
+                      <Input
+                        type="number"
+                        min="8"
+                        max="72"
+                        value={(section as any).columnStyles?.[columnIndex]?.fontSize || 16}
+                        onChange={(e) => {
+                          const newColumnStyles = [...((section as any).columnStyles || [])];
+                          newColumnStyles[columnIndex] = { ...newColumnStyles[columnIndex], fontSize: e.target.value };
+                          handleUpdateSection({ columnStyles: newColumnStyles });
+                        }}
+                        className="text-xs"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-medium">Text Align</label>
+                      <select
+                        value={(section as any).columnStyles?.[columnIndex]?.textAlign || "left"}
+                        onChange={(e) => {
+                          const newColumnStyles = [...((section as any).columnStyles || [])];
+                          newColumnStyles[columnIndex] = { ...newColumnStyles[columnIndex], textAlign: e.target.value };
+                          handleUpdateSection({ columnStyles: newColumnStyles });
+                        }}
+                        className="w-full mt-2 px-3 py-2 border rounded-md text-sm"
+                      >
+                        <option value="left">Left</option>
+                        <option value="center">Center</option>
+                        <option value="right">Right</option>
+                      </select>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={() => {
+                          const newColumnStyles = [...((section as any).columnStyles || [])];
+                          newColumnStyles[columnIndex] = { ...newColumnStyles[columnIndex], bold: !(section as any).columnStyles?.[columnIndex]?.bold };
+                          handleUpdateSection({ columnStyles: newColumnStyles });
+                        }}
+                        variant={(section as any).columnStyles?.[columnIndex]?.bold ? "default" : "outline"}
+                        size="sm"
+                        className="flex-1"
+                      >
+                        <strong>B</strong>
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          const newColumnStyles = [...((section as any).columnStyles || [])];
+                          newColumnStyles[columnIndex] = { ...newColumnStyles[columnIndex], italic: !(section as any).columnStyles?.[columnIndex]?.italic };
+                          handleUpdateSection({ columnStyles: newColumnStyles });
+                        }}
+                        variant={(section as any).columnStyles?.[columnIndex]?.italic ? "default" : "outline"}
+                        size="sm"
+                        className="flex-1"
+                      >
+                        <em>I</em>
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          const newColumnStyles = [...((section as any).columnStyles || [])];
+                          newColumnStyles[columnIndex] = { ...newColumnStyles[columnIndex], underline: !(section as any).columnStyles?.[columnIndex]?.underline };
+                          handleUpdateSection({ columnStyles: newColumnStyles });
+                        }}
+                        variant={(section as any).columnStyles?.[columnIndex]?.underline ? "default" : "outline"}
+                        size="sm"
+                        className="flex-1"
+                      >
+                        <u>U</u>
+                      </Button>
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-medium">Border Width</label>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="10"
+                        value={(section as any).columnStyles?.[columnIndex]?.borderWidth || 0}
+                        onChange={(e) => {
+                          const newColumnStyles = [...((section as any).columnStyles || [])];
+                          newColumnStyles[columnIndex] = { ...newColumnStyles[columnIndex], borderWidth: parseInt(e.target.value) };
+                          handleUpdateSection({ columnStyles: newColumnStyles });
+                        }}
+                        className="text-xs"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-medium">Border Color</label>
+                      <Input
+                        type="color"
+                        value={(section as any).columnStyles?.[columnIndex]?.borderColor || "#000000"}
+                        onChange={(e) => {
+                          const newColumnStyles = [...((section as any).columnStyles || [])];
+                          newColumnStyles[columnIndex] = { ...newColumnStyles[columnIndex], borderColor: e.target.value };
+                          handleUpdateSection({ columnStyles: newColumnStyles });
+                        }}
+                        className="h-8 cursor-pointer"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-medium">Border Radius</label>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="50"
+                        value={(section as any).columnStyles?.[columnIndex]?.borderRadius || 0}
+                        onChange={(e) => {
+                          const newColumnStyles = [...((section as any).columnStyles || [])];
+                          newColumnStyles[columnIndex] = { ...newColumnStyles[columnIndex], borderRadius: parseInt(e.target.value) };
+                          handleUpdateSection({ columnStyles: newColumnStyles });
+                        }}
+                        className="text-xs"
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
