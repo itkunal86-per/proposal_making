@@ -167,17 +167,17 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                         key={colIndex}
                         className="relative prose prose-sm max-w-none"
                         style={{
-                          color: (section as any).contentStyles?.color,
-                          fontSize: `${(section as any).contentStyles?.fontSize || 16}px`,
-                          textAlign: ((section as any).contentStyles?.textAlign || "left") as any,
+                          color: (section as any).columnStyles?.[colIndex]?.color || (section as any).contentStyles?.color,
+                          fontSize: `${(section as any).columnStyles?.[colIndex]?.fontSize || (section as any).contentStyles?.fontSize || 16}px`,
+                          textAlign: ((section as any).columnStyles?.[colIndex]?.textAlign || (section as any).contentStyles?.textAlign || "left") as any,
                           backgroundColor: (section as any).columnStyles?.[colIndex]?.backgroundColor || (section as any).contentStyles?.backgroundColor,
                           backgroundImage: (section as any).columnStyles?.[colIndex]?.backgroundImage ? `url(${(section as any).columnStyles[colIndex].backgroundImage})` : undefined,
                           backgroundSize: (section as any).contentStyles?.backgroundSize || "cover",
                           padding: `${(section as any).columnStyles?.[colIndex]?.paddingTop || (section as any).contentStyles?.paddingTop || 0}px ${(section as any).columnStyles?.[colIndex]?.paddingRight || (section as any).contentStyles?.paddingRight || 0}px ${(section as any).columnStyles?.[colIndex]?.paddingBottom || (section as any).contentStyles?.paddingBottom || 0}px ${(section as any).columnStyles?.[colIndex]?.paddingLeft || (section as any).contentStyles?.paddingLeft || 0}px`,
                           borderRadius: (section as any).contentStyles?.borderRadius ? `${(section as any).contentStyles?.borderRadius}px` : undefined,
-                          fontWeight: (section as any).contentStyles?.bold ? "bold" : "normal",
-                          fontStyle: (section as any).contentStyles?.italic ? "italic" : "normal",
-                          textDecoration: (section as any).contentStyles?.underline ? "underline" : (section as any).contentStyles?.strikethrough ? "line-through" : "none",
+                          fontWeight: (section as any).columnStyles?.[colIndex]?.bold || (section as any).contentStyles?.bold ? "bold" : "normal",
+                          fontStyle: (section as any).columnStyles?.[colIndex]?.italic || (section as any).contentStyles?.italic ? "italic" : "normal",
+                          textDecoration: (section as any).columnStyles?.[colIndex]?.underline || (section as any).contentStyles?.underline ? "underline" : (section as any).columnStyles?.[colIndex]?.strikethrough || (section as any).contentStyles?.strikethrough ? "line-through" : "none",
                         }}
                       >
                         <div
