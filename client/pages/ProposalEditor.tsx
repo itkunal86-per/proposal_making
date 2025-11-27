@@ -425,6 +425,7 @@ export default function ProposalEditor() {
                 // Handle both old format (section-content-id) and new format (section-content-id-col1)
                 let sectionId = selectedElementId.replace("section-content-", "");
                 const colMatch = sectionId.match(/-col(\d+)$/);
+                const columnIndex = colMatch ? parseInt(colMatch[1]) - 1 : -1; // col1 = index 0, col2 = index 1, etc.
                 sectionId = sectionId.replace(/-col\d+$/, "");
                 const section = p.sections.find((s) => s.id === sectionId);
                 if (section) {
@@ -432,7 +433,15 @@ export default function ProposalEditor() {
                     ...p,
                     sections: p.sections.map((s) =>
                       s.id === sectionId
-                        ? { ...s, contentStyles: { ...(s as any).contentStyles, [format]: value } }
+                        ? columnIndex >= 0
+                          ? {
+                              ...s,
+                              columnStyles: (s as any).columnStyles ? [...(s as any).columnStyles] : [],
+                              columnStyles: ((s as any).columnStyles || []).map((style: any, idx: number) =>
+                                idx === columnIndex ? { ...style, [format]: value } : style
+                              ),
+                            }
+                          : { ...s, contentStyles: { ...(s as any).contentStyles, [format]: value } }
                         : s
                     ),
                   };
