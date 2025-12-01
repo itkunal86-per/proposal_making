@@ -73,10 +73,43 @@ const INTEGRATIONS: Integration[] = [
   },
 ];
 
+interface NavItem {
+  href: string;
+  label: string;
+}
+
+const navByRole: Record<UserRole, NavItem[]> = {
+  admin: [
+    { href: "/dashboard", label: "Dashboard" },
+    { href: "/admin/users", label: "Users" },
+    { href: "/admin/packages", label: "Packages" },
+    { href: "/admin/templates", label: "Templates" },
+    { href: "/admin/settings", label: "Settings" },
+  ],
+  subscriber: [
+    { href: "/my/proposals", label: "My Proposals" },
+    { href: "/my/clients", label: "My Clients" },
+    { href: "/integrations", label: "Integrations" },
+    { href: "/my/settings", label: "Settings" },
+  ],
+};
+
 export default function Integrations() {
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [integrations, setIntegrations] = useState<Integration[]>(INTEGRATIONS);
   const [openGoHighLevel, setOpenGoHighLevel] = useState(false);
   const [openHubSpot, setOpenHubSpot] = useState(false);
+
+  const navItems = useMemo(() => {
+    return user ? navByRole[user.role] : [];
+  }, [user]);
+
+  const handleSignOut = () => {
+    signOut();
+    navigate("/login", { replace: true });
+  };
 
   useEffect(() => {
     const stored = localStorage.getItem("integrations");
