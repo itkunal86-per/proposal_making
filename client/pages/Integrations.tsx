@@ -115,81 +115,18 @@ export default function Integrations() {
   };
 
   return (
-    <SidebarProvider>
-      <div className="flex w-full min-h-screen">
-        <Sidebar collapsible="offcanvas" className="border-r">
-          <SidebarHeader>
-            <div className="flex items-center justify-between gap-2 px-2 py-1.5">
-              <div className="flex items-center gap-2">
-                <div className="h-6 w-6 rounded-md bg-gradient-to-br from-primary to-cyan-500" />
-                <span className="text-sm font-semibold">Proposal AI</span>
-              </div>
-              {user && (
-                <span className="rounded-full bg-sidebar-accent px-2 py-0.5 text-xs font-medium text-sidebar-accent-foreground">
-                  {user.role === "admin" ? "Admin" : "Subscriber"}
-                </span>
-              )}
-            </div>
-          </SidebarHeader>
-          <SidebarContent>
-            <SidebarGroup>
-              <SidebarGroupLabel>Menu</SidebarGroupLabel>
-              <SidebarMenu>
-                {navItems.map((item) => {
-                  const active =
-                    location.pathname === item.href ||
-                    location.pathname.startsWith(`${item.href}/`);
-                  return (
-                    <SidebarMenuItem key={item.href}>
-                      <SidebarMenuButton asChild>
-                        <Link
-                          to={item.href}
-                          className={cn(
-                            "flex items-center gap-2",
-                            active && "bg-sidebar-accent text-sidebar-accent-foreground",
-                          )}
-                          aria-current={active ? "page" : undefined}
-                        >
-                          <span>{item.label}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  );
-                })}
-              </SidebarMenu>
-            </SidebarGroup>
-          </SidebarContent>
-          {user && (
-            <SidebarFooter>
-              <div className="rounded-lg border bg-background p-3 text-xs">
-                <div className="font-medium text-foreground">{user.name}</div>
-                {user.company && (
-                  <div className="text-muted-foreground">{user.company}</div>
-                )}
-                <div className="mt-3 flex items-center justify-between gap-2">
-                  <span className="text-muted-foreground">{user.email}</span>
-                  <Button variant="outline" size="sm" onClick={handleSignOut}>
-                    Sign out
-                  </Button>
-                </div>
-              </div>
-            </SidebarFooter>
-          )}
-          <SidebarRail />
-        </Sidebar>
-        <SidebarInset className="flex min-h-screen w-full flex-col">
-          <main className="flex-1">
-            <section className="container py-6">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <h1 className="text-2xl font-bold">Integrations</h1>
-                  <p className="text-muted-foreground">
-                    Connect your favorite tools to streamline your workflow
-                  </p>
-                </div>
-              </div>
+    <AppShell>
+      <section className="container py-6">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-bold">Integrations</h1>
+            <p className="text-muted-foreground">
+              Connect your favorite tools to streamline your workflow
+            </p>
+          </div>
+        </div>
 
-              <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
           {integrations.map((integration) => (
             <Card
               key={integration.id}
@@ -273,11 +210,8 @@ export default function Integrations() {
               </div>
             </Card>
           ))}
-              </div>
-            </section>
-          </main>
-        </SidebarInset>
-      </div>
+        </div>
+      </section>
 
       <GoHighLevelDialog
         open={openGoHighLevel}
@@ -289,7 +223,7 @@ export default function Integrations() {
         onOpenChange={setOpenHubSpot}
         onConnect={handleHubSpotConnect}
       />
-    </SidebarProvider>
+    </AppShell>
   );
 }
 
