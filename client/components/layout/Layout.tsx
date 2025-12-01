@@ -5,7 +5,7 @@ import Footer from "./Footer";
 
 export default function Layout({ children }: { children: ReactNode }) {
   const { pathname } = useLocation();
-  const appShellPrefixes = ["/dashboard", "/admin", "/my"];
+  const appShellPrefixes = ["/dashboard", "/admin", "/my", "/integrations"];
   const usesAppShell = appShellPrefixes.some((prefix) => pathname.startsWith(prefix));
   const hideHeader = usesAppShell;
   const hideFooter =
