@@ -71,7 +71,7 @@ export default function SubscriberSettings() {
     <AppShell>
       <section className="container py-6">
         <h1 className="text-2xl font-bold">My Settings</h1>
-        <p className="text-muted-foreground">Manage your profile, CRM integration, and subscription.</p>
+        <p className="text-muted-foreground">Manage your profile and subscription.</p>
 
         {/* Profile */}
         <Card className="mt-4 p-4 space-y-4">
