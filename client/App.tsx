@@ -24,6 +24,7 @@ import AdminSettings from "./pages/AdminSettings";
 import AdminUsers from "./pages/AdminUsers";
 import MyProposals from "./pages/MyProposals";
 import MyClients from "./pages/MyClients";
+import Integrations from "./pages/Integrations";
 import SubscriberSettings from "./pages/SubscriberSettings";
 import { AuthProvider } from "@/providers/AuthProvider";
 import { RequireAuth, RequireRole } from "@/components/auth/RouteGuards";
