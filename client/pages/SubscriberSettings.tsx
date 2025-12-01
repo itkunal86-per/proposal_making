@@ -89,32 +89,6 @@ export default function SubscriberSettings() {
           </div>
           <Separator />
 
-          {/* CRM */}
-          <div className="space-y-2">
-            <h2 className="text-lg font-semibold">CRM Integration</h2>
-            <div className="grid gap-2">
-              <Label>GHL API key</Label>
-              <Input value={data.crm?.ghlApiKey ?? ""} onChange={(e) => setData((d) => ({ ...d, crm: { ...d.crm, ghlApiKey: e.target.value } }))} />
-            </div>
-            <div className="grid gap-2">
-              <Label>Location ID</Label>
-              <Input value={data.crm?.ghlLocationId ?? ""} onChange={(e) => setData((d) => ({ ...d, crm: { ...d.crm, ghlLocationId: e.target.value } }))} />
-            </div>
-            <div className="flex items-center gap-2">
-              <label className="text-sm"><input type="checkbox" className="mr-2" checked={data.crm.syncClients} onChange={(e) => setData((d) => ({ ...d, crm: { ...d.crm, syncClients: e.target.checked } }))} /> Sync clients</label>
-              <label className="text-sm"><input type="checkbox" className="mr-2" checked={data.crm.syncProposals} onChange={(e) => setData((d) => ({ ...d, crm: { ...d.crm, syncProposals: e.target.checked } }))} /> Sync proposals</label>
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={testConnection}>Test connection</Button>
-              <Button onClick={syncNow}>Sync now</Button>
-            </div>
-            {data.crm.lastSyncedAt && (
-              <div className="text-xs text-muted-foreground">Last synced: {new Date(data.crm.lastSyncedAt).toLocaleString()}</div>
-            )}
-          </div>
-
-          <Separator />
-
           {/* Subscription */}
           <div className="space-y-2">
             <h2 className="text-lg font-semibold">Subscription</h2>
