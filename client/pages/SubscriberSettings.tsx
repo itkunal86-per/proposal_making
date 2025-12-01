@@ -25,12 +25,6 @@ export default function SubscriberSettings() {
     name: "",
     company: "",
     email: "",
-    crm: {
-      ghlApiKey: "",
-      ghlLocationId: "",
-      syncClients: true,
-      syncProposals: true,
-    },
     subscription: {
       plan: "free",
     },
