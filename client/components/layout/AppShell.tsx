@@ -35,6 +35,7 @@ const navByRole: Record<UserRole, NavItem[]> = {
   subscriber: [
     { href: "/my/proposals", label: "My Proposals" },
     { href: "/my/clients", label: "My Clients" },
+    { href: "/integrations", label: "Integrations" },
     { href: "/my/settings", label: "Settings" },
   ],
 };
