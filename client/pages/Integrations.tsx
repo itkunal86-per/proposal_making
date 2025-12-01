@@ -115,101 +115,103 @@ export default function Integrations() {
   };
 
   return (
-    <div className="container py-6">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold">Integrations</h1>
-          <p className="text-muted-foreground">
-            Connect your favorite tools to streamline your workflow
-          </p>
+    <AppShell>
+      <section className="container py-6">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-bold">Integrations</h1>
+            <p className="text-muted-foreground">
+              Connect your favorite tools to streamline your workflow
+            </p>
+          </div>
         </div>
-      </div>
 
-      <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-        {integrations.map((integration) => (
-          <Card
-            key={integration.id}
-            className="overflow-hidden hover:shadow-lg transition-shadow"
-          >
-            <div className="p-6 space-y-4">
-              {/* Header */}
-              <div className="flex items-start justify-between">
-                <div className="flex items-start gap-4">
-                  <div className="text-4xl">{integration.logo}</div>
-                  <div className="flex-1">
-                    <h2 className="text-xl font-semibold">{integration.name}</h2>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {integration.description}
-                    </p>
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+          {integrations.map((integration) => (
+            <Card
+              key={integration.id}
+              className="overflow-hidden hover:shadow-lg transition-shadow"
+            >
+              <div className="p-6 space-y-4">
+                {/* Header */}
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start gap-4">
+                    <div className="text-4xl">{integration.logo}</div>
+                    <div className="flex-1">
+                      <h2 className="text-xl font-semibold">{integration.name}</h2>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {integration.description}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Status */}
-              <div className="flex items-center gap-2">
-                {integration.status === "connected" ? (
-                  <>
-                    <CheckCircle className="w-5 h-5 text-green-600" />
-                    <span className="text-sm font-medium text-green-600">
-                      Connected
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    <AlertCircle className="w-5 h-5 text-gray-400" />
-                    <span className="text-sm font-medium text-muted-foreground">
-                      Not connected
-                    </span>
-                  </>
-                )}
-              </div>
+                {/* Status */}
+                <div className="flex items-center gap-2">
+                  {integration.status === "connected" ? (
+                    <>
+                      <CheckCircle className="w-5 h-5 text-green-600" />
+                      <span className="text-sm font-medium text-green-600">
+                        Connected
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <AlertCircle className="w-5 h-5 text-gray-400" />
+                      <span className="text-sm font-medium text-muted-foreground">
+                        Not connected
+                      </span>
+                    </>
+                  )}
+                </div>
 
-              {/* Features */}
-              <div>
-                <h3 className="text-xs font-semibold text-muted-foreground mb-2">
-                  Features
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {integration.features.map((feature) => (
-                    <span
-                      key={feature}
-                      className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700"
+                {/* Features */}
+                <div>
+                  <h3 className="text-xs font-semibold text-muted-foreground mb-2">
+                    Features
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {integration.features.map((feature) => (
+                      <span
+                        key={feature}
+                        className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700"
+                      >
+                        {feature}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="pt-4 border-t">
+                  {integration.status === "connected" ? (
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => handleDisconnect(integration.id)}
                     >
-                      {feature}
-                    </span>
-                  ))}
+                      Disconnect
+                    </Button>
+                  ) : (
+                    <Button
+                      className="w-full"
+                      onClick={() => {
+                        if (integration.id === "gohighlevel") {
+                          setOpenGoHighLevel(true);
+                        } else {
+                          setOpenHubSpot(true);
+                        }
+                      }}
+                    >
+                      Connect
+                    </Button>
+                  )}
                 </div>
               </div>
-
-              {/* Actions */}
-              <div className="pt-4 border-t">
-                {integration.status === "connected" ? (
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => handleDisconnect(integration.id)}
-                  >
-                    Disconnect
-                  </Button>
-                ) : (
-                  <Button
-                    className="w-full"
-                    onClick={() => {
-                      if (integration.id === "gohighlevel") {
-                        setOpenGoHighLevel(true);
-                      } else {
-                        setOpenHubSpot(true);
-                      }
-                    }}
-                  >
-                    Connect
-                  </Button>
-                )}
-              </div>
-            </div>
-          </Card>
-        ))}
-      </div>
+            </Card>
+          ))}
+        </div>
+      </section>
 
       <GoHighLevelDialog
         open={openGoHighLevel}
@@ -221,7 +223,7 @@ export default function Integrations() {
         onOpenChange={setOpenHubSpot}
         onConnect={handleHubSpotConnect}
       />
-    </div>
+    </AppShell>
   );
 }
 
