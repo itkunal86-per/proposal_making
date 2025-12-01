@@ -57,49 +57,6 @@ export default function SubscriberSettings() {
     } catch {}
   }, [key, user]);
 
-  async function testConnection() {
-    const apiKey = data.crm.ghlApiKey.trim();
-    const location = data.crm.ghlLocationId.trim();
-    if (!apiKey || !location) {
-      toast({ title: "Enter API key and Location ID", variant: "destructive" });
-      return;
-    }
-    try {
-      // Mock connection test - simulate API validation
-      if (!apiKey.startsWith("ghl_")) {
-        throw new Error("Invalid API key format");
-      }
-      // Simulate a successful connection check
-      toast({ title: "Connection OK" });
-    } catch (e: any) {
-      toast({ title: "Connection failed", description: e.message, variant: "destructive" });
-    }
-  }
-
-  async function syncNow() {
-    const apiKey = data.crm.ghlApiKey.trim();
-    const location = data.crm.ghlLocationId.trim();
-    if (!apiKey || !location) {
-      toast({ title: "Enter API key and Location ID", variant: "destructive" });
-      return;
-    }
-    try {
-      const { listProposals } = await import("@/services/proposalsService");
-      const { listClients } = await import("@/services/clientsService");
-      const proposals = data.crm.syncProposals ? (await listProposals()).length : 0;
-      const clients = data.crm.syncClients ? (await listClients()).length : 0;
-
-      // Mock sync - in production this will connect to your Laravel API
-      setData((d) => ({
-        ...d,
-        crm: { ...d.crm, lastSyncedAt: Date.now() },
-      }));
-      toast({ title: "Sync scheduled", description: `${clients} clients, ${proposals} proposals` });
-    } catch (e: any) {
-      toast({ title: "Sync failed", description: e.message, variant: "destructive" });
-    }
-  }
-
   function save() {
     localStorage.setItem(key, JSON.stringify(data));
     toast({ title: "Settings saved" });
