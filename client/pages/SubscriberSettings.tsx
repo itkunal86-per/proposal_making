@@ -39,13 +39,6 @@ export default function SubscriberSettings() {
           name: parsed.name ?? "",
           company: parsed.company ?? "",
           email: parsed.email ?? "",
-          crm: {
-            ghlApiKey: parsed.crm?.ghlApiKey ?? "",
-            ghlLocationId: parsed.crm?.ghlLocationId ?? "",
-            syncClients: parsed.crm?.syncClients ?? true,
-            syncProposals: parsed.crm?.syncProposals ?? true,
-            lastSyncedAt: parsed.crm?.lastSyncedAt,
-          },
           subscription: {
             plan: parsed.subscription?.plan ?? "free",
             updatedAt: parsed.subscription?.updatedAt,
@@ -56,12 +49,6 @@ export default function SubscriberSettings() {
           name: user.name ?? "",
           company: user.company ?? "",
           email: user.email ?? "",
-          crm: {
-            ghlApiKey: "",
-            ghlLocationId: "",
-            syncClients: true,
-            syncProposals: true,
-          },
           subscription: {
             plan: "free",
           },
