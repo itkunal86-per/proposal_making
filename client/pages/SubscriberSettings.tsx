@@ -12,13 +12,6 @@ interface ProfileData {
   name: string;
   company?: string;
   email: string;
-  crm?: {
-    ghlApiKey: string;
-    ghlLocationId: string;
-    syncClients: boolean;
-    syncProposals: boolean;
-    lastSyncedAt?: number;
-  };
   subscription?: {
     plan: "free" | "pro" | "business";
     updatedAt?: number;
