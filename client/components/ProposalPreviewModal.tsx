@@ -23,20 +23,86 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
   variables = [],
   onClose,
 }) => {
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  const handleExportPDF = async () => {
+    try {
+      const response = await import("html2pdf.js");
+      const html2pdf = response.default;
+
+      const element = contentRef.current;
+      if (!element) {
+        toast({ title: "Error", description: "Could not find content to export" });
+        return;
+      }
+
+      const opt = {
+        margin: 10,
+        filename: `${proposal.title}.pdf`,
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { orientation: "portrait", unit: "mm", format: "a4" },
+      };
+
+      html2pdf().set(opt).from(element).save();
+      toast({ title: "Success", description: "Proposal exported as PDF" });
+    } catch (error) {
+      console.error("PDF export error:", error);
+      toast({ title: "Error", description: "Failed to export PDF" });
+    }
+  };
+
+  const handleShareLink = () => {
+    toast({ title: "Coming soon", description: "Share link feature will be available soon" });
+  };
+
+  const handleSendEmail = () => {
+    toast({ title: "Coming soon", description: "Send email feature will be available soon" });
+  };
+
   return (
     <div className="fixed inset-0 bg-black/50 z-40">
       <div className="fixed inset-0 z-50 flex flex-col bg-white">
         {/* Header */}
         <div className="border-b border-slate-200 px-6 py-4 flex items-center justify-between">
           <h1 className="text-2xl font-bold">{proposal.title}</h1>
-          <Button
-            onClick={onClose}
-            variant="ghost"
-            size="sm"
-            className="h-8 w-8 p-0"
-          >
-            <X className="w-5 h-5" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <Share2 className="w-4 h-4" />
+                  Share
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuItem onClick={handleShareLink}>
+                  <LinkIcon className="w-4 h-4 mr-2" />
+                  Share Link
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleExportPDF}>
+                  <Download className="w-4 h-4 mr-2" />
+                  Export PDF
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSendEmail}>
+                  <Mail className="w-4 h-4 mr-2" />
+                  Send Email
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <Button
+              onClick={onClose}
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0"
+            >
+              <X className="w-5 h-5" />
+            </Button>
+          </div>
         </div>
 
         {/* Content */}
