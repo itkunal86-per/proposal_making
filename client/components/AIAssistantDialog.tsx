@@ -251,27 +251,25 @@ export const AIAssistantDialog: React.FC<AIAssistantDialogProps> = ({
   const [aiContent, setAiContent] = useState<string | null>(null);
   const [editableContent, setEditableContent] = useState("");
 
-  const section = sectionId
-    ? proposal.sections.find((s) => s.id === sectionId)
-    : null;
-
-  // If elementId is provided, extract section from element ID
-  let activeSection = section;
+  // Extract section ID from elementId first, then fall back to sectionId
+  let activeSection: typeof proposal.sections[0] | null = null;
   let targetElementId = elementId;
   let targetElementType = elementType;
 
-  if (elementId && !section) {
+  if (elementId && (elementId.includes("section-") || elementId.includes("media-"))) {
     // Extract section ID from element ID (e.g., "section-content-abc123" -> "abc123")
-    if (elementId.includes("section-") || elementId.includes("media-")) {
-      const parts = elementId.split("-");
-      if (elementId.startsWith("section-")) {
-        const sid = elementId.replace(/^section-(title|content)-/, "");
-        activeSection = proposal.sections.find((s) => s.id === sid);
-      } else if (elementId.startsWith("media-")) {
-        const sid = elementId.split("-")[1];
-        activeSection = proposal.sections.find((s) => s.id === sid);
-      }
+    if (elementId.startsWith("section-")) {
+      const sid = elementId.replace(/^section-(title|content)-/, "");
+      activeSection = proposal.sections.find((s) => s.id === sid) || null;
+    } else if (elementId.startsWith("media-")) {
+      const sid = elementId.split("-")[1];
+      activeSection = proposal.sections.find((s) => s.id === sid) || null;
     }
+  }
+
+  // Only use sectionId as fallback if we couldn't extract from elementId
+  if (!activeSection && sectionId) {
+    activeSection = proposal.sections.find((s) => s.id === sectionId) || null;
   }
 
   const getElementPreview = (): { label: string; value: string } | null => {
