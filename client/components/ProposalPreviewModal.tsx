@@ -1,6 +1,14 @@
-import React from "react";
-import { X } from "lucide-react";
+import React, { useRef } from "react";
+import { X, Share2, Download, Mail, Link as LinkIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import { toast } from "@/hooks/use-toast";
 import { Proposal } from "@/services/proposalsService";
 import { replaceVariables, decodeHtmlEntities } from "@/lib/variableUtils";
 
