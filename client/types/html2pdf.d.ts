@@ -12,8 +12,8 @@ declare module "html2pdf.js" {
       useCORS?: boolean;
     };
     jsPDF?: {
-      orientation?: "portrait" | "landscape";
-      unit?: "mm" | "cm" | "in" | "px" | "pc" | "em" | "ex";
+      orientation?: string;
+      unit?: string;
       format?: string;
     };
   }
@@ -22,9 +22,7 @@ declare module "html2pdf.js" {
     set(options: Html2PdfOptions): Html2Pdf;
     from(element: HTMLElement | string): Html2Pdf;
     save(): void;
-    output(type: "dataurlstring" | "datauri" | "datauristring"): string;
-    output(type: "blob"): Blob;
-    output(type: "arraybuffer"): ArrayBuffer;
+    output(type: string): any;
   }
 
   function html2pdf(): Html2Pdf;
