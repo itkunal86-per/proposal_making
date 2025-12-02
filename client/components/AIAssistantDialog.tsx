@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -13,6 +13,107 @@ import { Proposal, ProposalSection } from "@/services/proposalsService";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 import { generateAIContent } from "@/services/aiGenerationService";
+
+interface RichContentEditorProps {
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  className?: string;
+}
+
+const RichContentEditor: React.FC<RichContentEditorProps> = ({
+  value,
+  onChange,
+  placeholder,
+  className = "",
+}) => {
+  const editorRef = useRef<HTMLDivElement>(null);
+  const [isUpdatingFromProp, setIsUpdatingFromProp] = useState(false);
+
+  const parseAndRenderContent = (content: string): JSX.Element[] => {
+    const result: JSX.Element[] = [];
+    let lastIndex = 0;
+    const regex = /{!!\s*([\s\S]*?)\s*!!}/g;
+    let match;
+
+    while ((match = regex.exec(content)) !== null) {
+      if (match.index > lastIndex) {
+        const textBefore = content.substring(lastIndex, match.index);
+        if (textBefore) {
+          result.push(
+            <React.Fragment key={`text-${lastIndex}`}>
+              {textBefore}
+            </React.Fragment>
+          );
+        }
+      }
+
+      const htmlContent = match[1];
+      result.push(
+        <span
+          key={`html-${match.index}`}
+          className="rich-html-block"
+          dangerouslySetInnerHTML={{ __html: htmlContent }}
+          style={{ display: "inline" }}
+        />
+      );
+
+      lastIndex = regex.lastIndex;
+    }
+
+    if (lastIndex < content.length) {
+      result.push(
+        <React.Fragment key={`text-end`}>
+          {content.substring(lastIndex)}
+        </React.Fragment>
+      );
+    }
+
+    return result.length > 0
+      ? result
+      : [
+          <span key="placeholder" className="text-gray-400">
+            {placeholder}
+          </span>,
+        ];
+  };
+
+  useEffect(() => {
+    if (editorRef.current && isUpdatingFromProp) {
+      editorRef.current.focus();
+      setIsUpdatingFromProp(false);
+    }
+  }, [isUpdatingFromProp]);
+
+  const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
+    const newContent = e.currentTarget.textContent || "";
+    onChange(newContent);
+  };
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const text = e.clipboardData.getData("text/plain");
+    document.execCommand("insertText", false, text);
+  };
+
+  return (
+    <div
+      ref={editorRef}
+      contentEditable
+      suppressContentEditableWarning
+      onInput={handleInput}
+      onPaste={handlePaste}
+      className={`border rounded-md p-3 bg-white text-sm min-h-[200px] max-h-[300px] overflow-y-auto focus:outline-none focus:ring-2 focus:ring-ring ${className}`}
+      style={{
+        wordBreak: "break-word",
+        whiteSpace: "pre-wrap",
+        fontFamily: "inherit",
+      }}
+    >
+      {parseAndRenderContent(value)}
+    </div>
+  );
+};
 
 interface AIAssistantDialogProps {
   open: boolean;
