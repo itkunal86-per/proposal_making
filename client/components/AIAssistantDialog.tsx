@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -9,10 +9,211 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
-import { Proposal, ProposalSection } from "@/services/proposalsService";
-import { Input } from "@/components/ui/input";
+import { Proposal } from "@/services/proposalsService";
 import { toast } from "@/hooks/use-toast";
 import { generateAIContent } from "@/services/aiGenerationService";
+
+interface HtmlRendererProps {
+  content: string;
+  maxLength?: number;
+  showEllipsis?: boolean;
+}
+
+const getPlainTextLength = (html: string): number => {
+  const div = document.createElement("div");
+  div.innerHTML = html;
+  return div.innerText.length;
+};
+
+const truncateHtml = (html: string, maxLength: number): string => {
+  let length = 0;
+  const div = document.createElement("div");
+  const parser = new DOMParser();
+
+  try {
+    const doc = parser.parseFromString(html, "text/html");
+    let result = "";
+
+    const walk = (node: Node): boolean => {
+      if (length >= maxLength) return false;
+
+      if (node.nodeType === Node.TEXT_NODE) {
+        const text = node.textContent || "";
+        const remaining = maxLength - length;
+        if (text.length > remaining) {
+          result += text.substring(0, remaining);
+          length = maxLength;
+          return false;
+        }
+        result += text;
+        length += text.length;
+        return true;
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        const element = node as Element;
+        result += `<${element.tagName.toLowerCase()}>`;
+
+        for (let i = 0; i < element.attributes.length; i++) {
+          const attr = element.attributes[i];
+          result = result.slice(0, -1) + ` ${attr.name}="${attr.value}">`;
+        }
+
+        for (let i = 0; i < node.childNodes.length; i++) {
+          if (!walk(node.childNodes[i])) break;
+        }
+
+        result += `</${element.tagName.toLowerCase()}>`;
+        return length < maxLength;
+      }
+
+      return true;
+    };
+
+    for (let i = 0; i < doc.body.childNodes.length; i++) {
+      if (!walk(doc.body.childNodes[i])) break;
+    }
+
+    return result;
+  } catch (e) {
+    return html.substring(0, maxLength);
+  }
+};
+
+const HtmlRenderer: React.FC<HtmlRendererProps> = ({
+  content,
+  maxLength,
+  showEllipsis = true
+}) => {
+  const hasHTMLMarkup = /{!!\s*([\s\S]*?)\s*!!}/.test(content) || /<[^>]+>/.test(content);
+
+  if (!content.trim()) {
+    return <span className="text-gray-400">No content</span>;
+  }
+
+  let htmlToRender = content;
+  let isTruncated = false;
+
+  if (maxLength) {
+    const textLength = getPlainTextLength(content);
+    if (textLength > maxLength) {
+      htmlToRender = truncateHtml(content, maxLength);
+      isTruncated = true;
+    }
+  }
+
+  if (/{!!\s*([\s\S]*?)\s*!!}/.test(htmlToRender)) {
+    const regex = /{!!\s*([\s\S]*?)\s*!!}/g;
+    const parts: JSX.Element[] = [];
+    let lastIndex = 0;
+    let match;
+    let keyCounter = 0;
+
+    while ((match = regex.exec(htmlToRender)) !== null) {
+      if (match.index > lastIndex) {
+        const textBefore = htmlToRender.substring(lastIndex, match.index);
+        if (textBefore) {
+          parts.push(
+            <React.Fragment key={`text-${keyCounter++}`}>
+              {textBefore}
+            </React.Fragment>
+          );
+        }
+      }
+
+      parts.push(
+        <span
+          key={`html-${keyCounter++}`}
+          dangerouslySetInnerHTML={{ __html: match[1] }}
+        />
+      );
+
+      lastIndex = regex.lastIndex;
+    }
+
+    if (lastIndex < htmlToRender.length) {
+      parts.push(
+        <React.Fragment key={`text-end`}>
+          {htmlToRender.substring(lastIndex)}
+        </React.Fragment>
+      );
+    }
+
+    return (
+      <>
+        {parts}
+        {isTruncated && showEllipsis && <span className="text-gray-500">...</span>}
+      </>
+    );
+  }
+
+  if (hasHTMLMarkup) {
+    return (
+      <>
+        <span dangerouslySetInnerHTML={{ __html: htmlToRender }} />
+        {isTruncated && showEllipsis && <span className="text-gray-500">...</span>}
+      </>
+    );
+  }
+
+  return (
+    <>
+      {htmlToRender}
+      {isTruncated && showEllipsis && <span className="text-gray-500">...</span>}
+    </>
+  );
+};
+
+interface RichContentEditorProps {
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  className?: string;
+}
+
+const RichContentEditor: React.FC<RichContentEditorProps> = ({
+  value,
+  onChange,
+  placeholder,
+  className = "",
+}) => {
+  const editorRef = useRef<HTMLDivElement>(null);
+
+  const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
+    const newContent = e.currentTarget.innerText || "";
+    onChange(newContent);
+  };
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const text = e.clipboardData.getData("text/plain");
+    document.execCommand("insertText", false, text);
+  };
+
+  return (
+    <div className="space-y-2">
+      <div
+        ref={editorRef}
+        contentEditable
+        suppressContentEditableWarning
+        onInput={handleInput}
+        onPaste={handlePaste}
+        className={`border rounded-md p-3 bg-white text-sm min-h-[200px] max-h-[300px] overflow-y-auto focus:outline-none focus:ring-2 focus:ring-ring ${className}`}
+        style={{
+          wordBreak: "break-word",
+          whiteSpace: "pre-wrap",
+          fontFamily: "inherit",
+        }}
+      >
+        {value}
+      </div>
+      <div className="p-3 bg-gray-50 rounded border border-gray-200 min-h-[100px]">
+        <div className="text-xs font-semibold text-gray-700 mb-2">Preview:</div>
+        <div className="text-sm text-gray-800 [&_*]:all-auto">
+          <HtmlRenderer content={value} />
+        </div>
+      </div>
+    </div>
+  );
+};
 
 interface AIAssistantDialogProps {
   open: boolean;
@@ -168,10 +369,9 @@ export const AIAssistantDialog: React.FC<AIAssistantDialogProps> = ({
               <>
                 <div className="space-y-2">
                   <Label className="text-xs font-semibold">Content</Label>
-                  <Textarea
+                  <RichContentEditor
                     value={editableContent}
-                    onChange={(e) => setEditableContent(e.target.value)}
-                    className="min-h-[200px]"
+                    onChange={setEditableContent}
                     placeholder="Edit the generated content here..."
                   />
                 </div>
@@ -201,10 +401,9 @@ export const AIAssistantDialog: React.FC<AIAssistantDialogProps> = ({
                 <Label className="text-xs font-semibold block text-slate-700">
                   {elementPreview.label}
                 </Label>
-                <p className="text-xs text-slate-600 mt-1 line-clamp-2">
-                  {elementPreview.value.substring(0, 150)}
-                  {elementPreview.value.length > 150 ? "..." : ""}
-                </p>
+                <div className="text-sm text-slate-700 mt-2 [&_*]:all-auto line-clamp-3">
+                  <HtmlRenderer content={elementPreview.value} maxLength={200} showEllipsis={true} />
+                </div>
               </div>
             )}
 
