@@ -205,7 +205,7 @@ const RichContentEditor: React.FC<RichContentEditorProps> = ({
       >
         {value}
       </div>
-      <div className="p-3 bg-gray-50 rounded border border-gray-200 min-h-[100px]">
+      <div className="p-3 bg-gray-50 rounded border border-gray-200 min-h-[100px] max-h-[300px] overflow-y-auto">
         <div className="text-xs font-semibold text-gray-700 mb-2">Preview:</div>
         <div className="text-sm text-gray-800 [&_*]:all-auto">
           <HtmlRenderer content={value} />
