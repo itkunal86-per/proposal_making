@@ -380,11 +380,12 @@ export const AIAssistantDialog: React.FC<AIAssistantDialogProps> = ({
             {aiContent && (
               <>
                 <div className="space-y-2">
-                  <Label className="text-xs font-semibold">Content</Label>
+                  <Label className="text-xs font-semibold">Preview</Label>
                   <RichContentEditor
                     value={editableContent}
                     onChange={setEditableContent}
                     placeholder="Edit the generated content here..."
+                    previewOnly={true}
                   />
                 </div>
                 <div className="flex gap-2">
