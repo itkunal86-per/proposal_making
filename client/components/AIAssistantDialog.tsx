@@ -19,9 +19,63 @@ interface HtmlRendererProps {
   showEllipsis?: boolean;
 }
 
-const extractTextContent = (content: string): string => {
-  const regex = /{!!\s*([\s\S]*?)\s*!!}/g;
-  return content.replace(regex, "");
+const getPlainTextLength = (html: string): number => {
+  const div = document.createElement("div");
+  div.innerHTML = html;
+  return div.innerText.length;
+};
+
+const truncateHtml = (html: string, maxLength: number): string => {
+  let length = 0;
+  const div = document.createElement("div");
+  const parser = new DOMParser();
+
+  try {
+    const doc = parser.parseFromString(html, "text/html");
+    let result = "";
+
+    const walk = (node: Node): boolean => {
+      if (length >= maxLength) return false;
+
+      if (node.nodeType === Node.TEXT_NODE) {
+        const text = node.textContent || "";
+        const remaining = maxLength - length;
+        if (text.length > remaining) {
+          result += text.substring(0, remaining);
+          length = maxLength;
+          return false;
+        }
+        result += text;
+        length += text.length;
+        return true;
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        const element = node as Element;
+        result += `<${element.tagName.toLowerCase()}>`;
+
+        for (let i = 0; i < element.attributes.length; i++) {
+          const attr = element.attributes[i];
+          result = result.slice(0, -1) + ` ${attr.name}="${attr.value}">`;
+        }
+
+        for (let i = 0; i < node.childNodes.length; i++) {
+          if (!walk(node.childNodes[i])) break;
+        }
+
+        result += `</${element.tagName.toLowerCase()}>`;
+        return length < maxLength;
+      }
+
+      return true;
+    };
+
+    for (let i = 0; i < doc.body.childNodes.length; i++) {
+      if (!walk(doc.body.childNodes[i])) break;
+    }
+
+    return result;
+  } catch (e) {
+    return html.substring(0, maxLength);
+  }
 };
 
 const HtmlRenderer: React.FC<HtmlRendererProps> = ({
@@ -29,84 +83,81 @@ const HtmlRenderer: React.FC<HtmlRendererProps> = ({
   maxLength,
   showEllipsis = true
 }) => {
-  const result: JSX.Element[] = [];
-  let lastIndex = 0;
-  const regex = /{!!\s*([\s\S]*?)\s*!!}/g;
-  let match;
-  let keyCounter = 0;
-  let charCount = 0;
-  let truncated = false;
+  const hasHTMLMarkup = /{!!\s*([\s\S]*?)\s*!!}/.test(content) || /<[^>]+>/.test(content);
 
-  while ((match = regex.exec(content)) !== null && (!maxLength || charCount < maxLength)) {
-    if (match.index > lastIndex) {
-      const textBefore = content.substring(lastIndex, match.index);
-      if (textBefore) {
-        const textToAdd = maxLength && charCount + textBefore.length > maxLength
-          ? textBefore.substring(0, maxLength - charCount)
-          : textBefore;
-
-        result.push(
-          <React.Fragment key={`text-${keyCounter++}`}>
-            {textToAdd}
-          </React.Fragment>
-        );
-        charCount += textToAdd.length;
-
-        if (maxLength && charCount >= maxLength) {
-          truncated = true;
-          break;
-        }
-      }
-    }
-
-    const htmlContent = match[1];
-    const htmlText = extractTextContent(htmlContent);
-    const remainingSpace = maxLength ? maxLength - charCount : Infinity;
-
-    if (remainingSpace > 0) {
-      result.push(
-        <span
-          key={`html-${keyCounter++}`}
-          dangerouslySetInnerHTML={{
-            __html: maxLength && htmlText.length > remainingSpace
-              ? htmlContent.substring(0, remainingSpace)
-              : htmlContent
-          }}
-        />
-      );
-      charCount += htmlText.length;
-
-      if (maxLength && charCount >= maxLength) {
-        truncated = true;
-        break;
-      }
-    }
-
-    lastIndex = regex.lastIndex;
+  if (!content.trim()) {
+    return <span className="text-gray-400">No content</span>;
   }
 
-  if (lastIndex < content.length && (!maxLength || charCount < maxLength)) {
-    const remaining = content.substring(lastIndex);
-    const textToAdd = maxLength && charCount + remaining.length > maxLength
-      ? remaining.substring(0, maxLength - charCount)
-      : remaining;
+  let htmlToRender = content;
+  let isTruncated = false;
 
-    result.push(
-      <React.Fragment key={`text-${keyCounter++}`}>
-        {textToAdd}
-      </React.Fragment>
-    );
-    charCount += textToAdd.length;
-
-    if (maxLength && charCount >= maxLength) {
-      truncated = true;
+  if (maxLength) {
+    const textLength = getPlainTextLength(content);
+    if (textLength > maxLength) {
+      htmlToRender = truncateHtml(content, maxLength);
+      isTruncated = true;
     }
+  }
+
+  if (/{!!\s*([\s\S]*?)\s*!!}/.test(htmlToRender)) {
+    const regex = /{!!\s*([\s\S]*?)\s*!!}/g;
+    const parts: JSX.Element[] = [];
+    let lastIndex = 0;
+    let match;
+    let keyCounter = 0;
+
+    while ((match = regex.exec(htmlToRender)) !== null) {
+      if (match.index > lastIndex) {
+        const textBefore = htmlToRender.substring(lastIndex, match.index);
+        if (textBefore) {
+          parts.push(
+            <React.Fragment key={`text-${keyCounter++}`}>
+              {textBefore}
+            </React.Fragment>
+          );
+        }
+      }
+
+      parts.push(
+        <span
+          key={`html-${keyCounter++}`}
+          dangerouslySetInnerHTML={{ __html: match[1] }}
+        />
+      );
+
+      lastIndex = regex.lastIndex;
+    }
+
+    if (lastIndex < htmlToRender.length) {
+      parts.push(
+        <React.Fragment key={`text-end`}>
+          {htmlToRender.substring(lastIndex)}
+        </React.Fragment>
+      );
+    }
+
+    return (
+      <>
+        {parts}
+        {isTruncated && showEllipsis && <span className="text-gray-500">...</span>}
+      </>
+    );
+  }
+
+  if (hasHTMLMarkup) {
+    return (
+      <>
+        <span dangerouslySetInnerHTML={{ __html: htmlToRender }} />
+        {isTruncated && showEllipsis && <span className="text-gray-500">...</span>}
+      </>
+    );
   }
 
   return (
     <>
-      {result.length > 0 ? result : <span className="text-gray-400">No content</span>}
-      {truncated && showEllipsis && <span className="text-gray-500">...</span>}
+      {htmlToRender}
+      {isTruncated && showEllipsis && <span className="text-gray-500">...</span>}
     </>
   );
 };
