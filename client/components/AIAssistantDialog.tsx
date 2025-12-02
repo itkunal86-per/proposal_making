@@ -298,10 +298,9 @@ export const AIAssistantDialog: React.FC<AIAssistantDialogProps> = ({
                 <Label className="text-xs font-semibold block text-slate-700">
                   {elementPreview.label}
                 </Label>
-                <p className="text-xs text-slate-600 mt-1 line-clamp-2">
-                  {elementPreview.value.substring(0, 150)}
-                  {elementPreview.value.length > 150 ? "..." : ""}
-                </p>
+                <div className="text-sm text-slate-700 mt-2 [&_*]:all-auto">
+                  <HtmlRenderer content={elementPreview.value} />
+                </div>
               </div>
             )}
 
