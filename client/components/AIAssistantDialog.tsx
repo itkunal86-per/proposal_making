@@ -15,47 +15,100 @@ import { generateAIContent } from "@/services/aiGenerationService";
 
 interface HtmlRendererProps {
   content: string;
+  maxLength?: number;
+  showEllipsis?: boolean;
 }
 
-const HtmlRenderer: React.FC<HtmlRendererProps> = ({ content }) => {
+const extractTextContent = (content: string): string => {
+  const regex = /{!!\s*([\s\S]*?)\s*!!}/g;
+  return content.replace(regex, "");
+};
+
+const HtmlRenderer: React.FC<HtmlRendererProps> = ({
+  content,
+  maxLength,
+  showEllipsis = true
+}) => {
   const result: JSX.Element[] = [];
   let lastIndex = 0;
   const regex = /{!!\s*([\s\S]*?)\s*!!}/g;
   let match;
   let keyCounter = 0;
+  let charCount = 0;
+  let truncated = false;
 
-  while ((match = regex.exec(content)) !== null) {
+  while ((match = regex.exec(content)) !== null && (!maxLength || charCount < maxLength)) {
     if (match.index > lastIndex) {
       const textBefore = content.substring(lastIndex, match.index);
       if (textBefore) {
+        const textToAdd = maxLength && charCount + textBefore.length > maxLength
+          ? textBefore.substring(0, maxLength - charCount)
+          : textBefore;
+
         result.push(
           <React.Fragment key={`text-${keyCounter++}`}>
-            {textBefore}
+            {textToAdd}
           </React.Fragment>
         );
+        charCount += textToAdd.length;
+
+        if (maxLength && charCount >= maxLength) {
+          truncated = true;
+          break;
+        }
       }
     }
 
     const htmlContent = match[1];
-    result.push(
-      <span
-        key={`html-${keyCounter++}`}
-        dangerouslySetInnerHTML={{ __html: htmlContent }}
-      />
-    );
+    const htmlText = extractTextContent(htmlContent);
+    const remainingSpace = maxLength ? maxLength - charCount : Infinity;
+
+    if (remainingSpace > 0) {
+      result.push(
+        <span
+          key={`html-${keyCounter++}`}
+          dangerouslySetInnerHTML={{
+            __html: maxLength && htmlText.length > remainingSpace
+              ? htmlContent.substring(0, remainingSpace)
+              : htmlContent
+          }}
+        />
+      );
+      charCount += htmlText.length;
+
+      if (maxLength && charCount >= maxLength) {
+        truncated = true;
+        break;
+      }
+    }
 
     lastIndex = regex.lastIndex;
   }
 
-  if (lastIndex < content.length) {
+  if (lastIndex < content.length && (!maxLength || charCount < maxLength)) {
+    const remaining = content.substring(lastIndex);
+    const textToAdd = maxLength && charCount + remaining.length > maxLength
+      ? remaining.substring(0, maxLength - charCount)
+      : remaining;
+
     result.push(
       <React.Fragment key={`text-${keyCounter++}`}>
-        {content.substring(lastIndex)}
+        {textToAdd}
       </React.Fragment>
     );
+    charCount += textToAdd.length;
+
+    if (maxLength && charCount >= maxLength) {
+      truncated = true;
+    }
   }
 
-  return result.length > 0 ? <>{result}</> : <span className="text-gray-400">No content</span>;
+  return (
+    <>
+      {result.length > 0 ? result : <span className="text-gray-400">No content</span>}
+      {truncated && showEllipsis && <span className="text-gray-500">...</span>}
+    </>
+  );
 };
 
 interface RichContentEditorProps {
