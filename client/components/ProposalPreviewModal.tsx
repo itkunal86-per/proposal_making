@@ -36,7 +36,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
         return;
       }
 
-      const opt = {
+      const opt: any = {
         margin: 10,
         filename: `${proposal.title}.pdf`,
         image: { type: "jpeg", quality: 0.98 },
