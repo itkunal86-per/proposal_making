@@ -167,6 +167,7 @@ interface RichContentEditorProps {
   onChange: (value: string) => void;
   placeholder?: string;
   className?: string;
+  previewOnly?: boolean;
 }
 
 const RichContentEditor: React.FC<RichContentEditorProps> = ({
@@ -174,6 +175,7 @@ const RichContentEditor: React.FC<RichContentEditorProps> = ({
   onChange,
   placeholder,
   className = "",
+  previewOnly = false,
 }) => {
   const editorRef = useRef<HTMLDivElement>(null);
 
@@ -187,6 +189,16 @@ const RichContentEditor: React.FC<RichContentEditorProps> = ({
     const text = e.clipboardData.getData("text/plain");
     document.execCommand("insertText", false, text);
   };
+
+  if (previewOnly) {
+    return (
+      <div className="p-3 bg-gray-50 rounded border border-gray-200 min-h-[100px] max-h-[400px] overflow-y-auto">
+        <div className="text-sm text-gray-800 [&_*]:all-auto">
+          <HtmlRenderer content={value} />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-2">
