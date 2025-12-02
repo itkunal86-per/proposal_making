@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -9,8 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
-import { Proposal, ProposalSection } from "@/services/proposalsService";
-import { Input } from "@/components/ui/input";
+import { Proposal } from "@/services/proposalsService";
 import { toast } from "@/hooks/use-toast";
 import { generateAIContent } from "@/services/aiGenerationService";
 
