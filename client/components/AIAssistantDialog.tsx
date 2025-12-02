@@ -269,10 +269,9 @@ export const AIAssistantDialog: React.FC<AIAssistantDialogProps> = ({
               <>
                 <div className="space-y-2">
                   <Label className="text-xs font-semibold">Content</Label>
-                  <Textarea
+                  <RichContentEditor
                     value={editableContent}
-                    onChange={(e) => setEditableContent(e.target.value)}
-                    className="min-h-[200px]"
+                    onChange={setEditableContent}
                     placeholder="Edit the generated content here..."
                   />
                 </div>
