@@ -14,6 +14,51 @@ import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 import { generateAIContent } from "@/services/aiGenerationService";
 
+interface HtmlRendererProps {
+  content: string;
+}
+
+const HtmlRenderer: React.FC<HtmlRendererProps> = ({ content }) => {
+  const result: JSX.Element[] = [];
+  let lastIndex = 0;
+  const regex = /{!!\s*([\s\S]*?)\s*!!}/g;
+  let match;
+  let keyCounter = 0;
+
+  while ((match = regex.exec(content)) !== null) {
+    if (match.index > lastIndex) {
+      const textBefore = content.substring(lastIndex, match.index);
+      if (textBefore) {
+        result.push(
+          <React.Fragment key={`text-${keyCounter++}`}>
+            {textBefore}
+          </React.Fragment>
+        );
+      }
+    }
+
+    const htmlContent = match[1];
+    result.push(
+      <span
+        key={`html-${keyCounter++}`}
+        dangerouslySetInnerHTML={{ __html: htmlContent }}
+      />
+    );
+
+    lastIndex = regex.lastIndex;
+  }
+
+  if (lastIndex < content.length) {
+    result.push(
+      <React.Fragment key={`text-${keyCounter++}`}>
+        {content.substring(lastIndex)}
+      </React.Fragment>
+    );
+  }
+
+  return result.length > 0 ? <>{result}</> : <span className="text-gray-400">No content</span>;
+};
+
 interface RichContentEditorProps {
   value: string;
   onChange: (value: string) => void;
@@ -28,65 +73,9 @@ const RichContentEditor: React.FC<RichContentEditorProps> = ({
   className = "",
 }) => {
   const editorRef = useRef<HTMLDivElement>(null);
-  const [isUpdatingFromProp, setIsUpdatingFromProp] = useState(false);
-
-  const parseAndRenderContent = (content: string): JSX.Element[] => {
-    const result: JSX.Element[] = [];
-    let lastIndex = 0;
-    const regex = /{!!\s*([\s\S]*?)\s*!!}/g;
-    let match;
-
-    while ((match = regex.exec(content)) !== null) {
-      if (match.index > lastIndex) {
-        const textBefore = content.substring(lastIndex, match.index);
-        if (textBefore) {
-          result.push(
-            <React.Fragment key={`text-${lastIndex}`}>
-              {textBefore}
-            </React.Fragment>
-          );
-        }
-      }
-
-      const htmlContent = match[1];
-      result.push(
-        <span
-          key={`html-${match.index}`}
-          className="rich-html-block"
-          dangerouslySetInnerHTML={{ __html: htmlContent }}
-          style={{ display: "inline" }}
-        />
-      );
-
-      lastIndex = regex.lastIndex;
-    }
-
-    if (lastIndex < content.length) {
-      result.push(
-        <React.Fragment key={`text-end`}>
-          {content.substring(lastIndex)}
-        </React.Fragment>
-      );
-    }
-
-    return result.length > 0
-      ? result
-      : [
-          <span key="placeholder" className="text-gray-400">
-            {placeholder}
-          </span>,
-        ];
-  };
-
-  useEffect(() => {
-    if (editorRef.current && isUpdatingFromProp) {
-      editorRef.current.focus();
-      setIsUpdatingFromProp(false);
-    }
-  }, [isUpdatingFromProp]);
 
   const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
-    const newContent = e.currentTarget.textContent || "";
+    const newContent = e.currentTarget.innerText || "";
     onChange(newContent);
   };
 
@@ -97,20 +86,28 @@ const RichContentEditor: React.FC<RichContentEditorProps> = ({
   };
 
   return (
-    <div
-      ref={editorRef}
-      contentEditable
-      suppressContentEditableWarning
-      onInput={handleInput}
-      onPaste={handlePaste}
-      className={`border rounded-md p-3 bg-white text-sm min-h-[200px] max-h-[300px] overflow-y-auto focus:outline-none focus:ring-2 focus:ring-ring ${className}`}
-      style={{
-        wordBreak: "break-word",
-        whiteSpace: "pre-wrap",
-        fontFamily: "inherit",
-      }}
-    >
-      {parseAndRenderContent(value)}
+    <div className="space-y-2">
+      <div
+        ref={editorRef}
+        contentEditable
+        suppressContentEditableWarning
+        onInput={handleInput}
+        onPaste={handlePaste}
+        className={`border rounded-md p-3 bg-white text-sm min-h-[200px] max-h-[300px] overflow-y-auto focus:outline-none focus:ring-2 focus:ring-ring ${className}`}
+        style={{
+          wordBreak: "break-word",
+          whiteSpace: "pre-wrap",
+          fontFamily: "inherit",
+        }}
+      >
+        {value}
+      </div>
+      <div className="p-3 bg-gray-50 rounded border border-gray-200 min-h-[100px]">
+        <div className="text-xs font-semibold text-gray-700 mb-2">Preview:</div>
+        <div className="text-sm text-gray-800 [&_*]:all-auto">
+          <HtmlRenderer content={value} />
+        </div>
+      </div>
     </div>
   );
 };
