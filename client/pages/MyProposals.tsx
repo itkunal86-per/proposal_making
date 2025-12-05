@@ -47,6 +47,7 @@ export default function MyProposals() {
   const [isGenerateDialogOpen, setIsGenerateDialogOpen] = useState(false);
   const [baseProposalForGeneration, setBaseProposalForGeneration] = useState<Proposal | null>(null);
   const [previewProposal, setPreviewProposal] = useState<Proposal | null>(null);
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
   const [formData, setFormData] = useState<CreateProposalInput>({
     title: "",
     client_id: "",
