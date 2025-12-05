@@ -138,10 +138,20 @@ export default function Integrations() {
   };
 
   const handleDisconnect = async (integrationId: string) => {
+    const settingsResponse = await fetchSettings();
+    if (!settingsResponse.success || !settingsResponse.data) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch current settings",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const params = {
-      ghl_api_key: integrationId === "gohighlevel" ? "" : "",
-      location_id: integrationId === "gohighlevel" ? "" : "",
-      hubspot_api_key: integrationId === "hubspot" ? "" : "",
+      ghl_api_key: integrationId === "gohighlevel" ? "" : (settingsResponse.data.ghl_api_key || ""),
+      location_id: integrationId === "gohighlevel" ? "" : (settingsResponse.data.location_id || ""),
+      hubspot_api_key: integrationId === "hubspot" ? "" : (settingsResponse.data.hubspot_api_key || ""),
     };
 
     const response = await updateIntegrationSettings(params);
