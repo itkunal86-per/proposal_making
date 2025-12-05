@@ -252,7 +252,7 @@ export default function MyProposals() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => setPreviewProposal(r)}>
+                          <DropdownMenuItem onClick={() => onPreview(r.id)} disabled={isLoadingPreview}>
                             Preview
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => nav(`/proposals/${r.id}/edit`)}>
