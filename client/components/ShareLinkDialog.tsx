@@ -23,36 +23,49 @@ export const ShareLinkDialog: React.FC<ShareLinkDialogProps> = ({
   const [shareLink, setShareLink] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (open && !shareToken) {
       generateShareLink();
     }
-  }, [open, shareToken]);
+  }, [open]);
 
   const generateShareLink = async () => {
     setIsLoading(true);
+    setError(null);
     try {
       const result = await enableProposalSharing(proposalId);
+      console.log("Share result:", result);
+
       if (result.success && result.token) {
         setShareToken(result.token);
         const link = `${window.location.origin}/proposal/${result.token}`;
         setShareLink(link);
+        console.log("Generated share link:", link);
       } else {
-        toast({ title: "Error", description: result.error || "Failed to generate share link", variant: "destructive" });
+        const errorMsg = result.error || "Failed to generate share link";
+        setError(errorMsg);
+        console.error("Share error:", errorMsg);
+        toast({ title: "Error", description: errorMsg, variant: "destructive" });
       }
     } catch (error) {
-      toast({ title: "Error", description: "Failed to generate share link", variant: "destructive" });
+      console.error("Share link error:", error);
+      const errorMsg = "Failed to generate share link";
+      setError(errorMsg);
+      toast({ title: "Error", description: errorMsg, variant: "destructive" });
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(shareLink);
-    setCopied(true);
-    toast({ title: "Success", description: "Link copied to clipboard" });
-    setTimeout(() => setCopied(false), 2000);
+    if (shareLink) {
+      navigator.clipboard.writeText(shareLink);
+      setCopied(true);
+      toast({ title: "Success", description: "Link copied to clipboard" });
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
   return (
@@ -69,7 +82,14 @@ export const ShareLinkDialog: React.FC<ShareLinkDialogProps> = ({
             <div className="flex items-center justify-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
-          ) : (
+          ) : error ? (
+            <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
+              {error}
+              <Button onClick={generateShareLink} variant="ghost" size="sm" className="mt-2">
+                Try Again
+              </Button>
+            </div>
+          ) : shareLink ? (
             <>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Share Link</label>
@@ -98,7 +118,7 @@ export const ShareLinkDialog: React.FC<ShareLinkDialogProps> = ({
                 Anyone with this link can view the proposal without signing in.
               </p>
             </>
-          )}
+          ) : null}
         </div>
       </DialogContent>
     </Dialog>
