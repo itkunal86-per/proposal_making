@@ -17,6 +17,7 @@ import Dashboard from "./pages/Dashboard";
 import ProposalEditor from "./pages/ProposalEditor";
 import ProposalSettings from "./pages/ProposalSettings";
 import ProposalView from "./pages/ProposalView";
+import ProposalPublicView from "./pages/ProposalPublicView";
 import AcceptInvite from "./pages/AcceptInvite";
 import AdminPackages from "./pages/AdminPackages";
 import AdminTemplates from "./pages/AdminTemplates";
