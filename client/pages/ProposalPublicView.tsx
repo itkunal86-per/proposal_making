@@ -35,33 +35,6 @@ export default function ProposalPublicView() {
     loadProposal();
   }, [token]);
 
-  const handleExportPDF = async () => {
-    try {
-      const response = await import("html2pdf.js");
-      const html2pdf = response.default;
-
-      const element = contentRef.current;
-      if (!element) {
-        toast({ title: "Error", description: "Could not find content to export" });
-        return;
-      }
-
-      const opt = {
-        margin: 10,
-        filename: `${proposal?.title}.pdf`,
-        image: { type: "jpeg" as const, quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { orientation: "portrait" as const, unit: "mm" as const, format: "a4" as const },
-      };
-
-      html2pdf().set(opt).from(element).save();
-      toast({ title: "Success", description: "Proposal exported as PDF" });
-    } catch (error) {
-      console.error("PDF export error:", error);
-      toast({ title: "Error", description: "Failed to export PDF" });
-    }
-  };
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
