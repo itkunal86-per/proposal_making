@@ -5,17 +5,14 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/hooks/useAuth";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "@/hooks/use-toast";
+import { fetchSettings, updateSettings } from "@/services/settingsService";
 
 interface ProfileData {
-  name: string;
-  company?: string;
+  fullname: string;
+  company: string;
   email: string;
-  subscription?: {
-    plan: "free" | "pro" | "business";
-    updatedAt?: number;
-  };
 }
 
 export default function SubscriberSettings() {
