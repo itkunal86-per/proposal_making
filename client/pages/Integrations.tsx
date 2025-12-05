@@ -88,10 +88,13 @@ export default function Integrations() {
   }
 
   const handleGoHighLevelConnect = async (credentials: GoHighLevelCredentials) => {
+    const settingsResponse = await fetchSettings();
+    const currentSettings = settingsResponse.success ? settingsResponse.data : null;
+
     const response = await updateIntegrationSettings({
       ghl_api_key: credentials.apiKey,
       location_id: credentials.locationId,
-      hubspot_api_key: "",
+      hubspot_api_key: currentSettings?.hubspot_api_key || "",
     });
 
     if (response.success) {
@@ -113,10 +116,13 @@ export default function Integrations() {
   };
 
   const handleHubSpotConnect = async (credentials: HubSpotCredentials) => {
+    const settingsResponse = await fetchSettings();
+    const currentSettings = settingsResponse.success ? settingsResponse.data : null;
+
     const response = await updateIntegrationSettings({
       hubspot_api_key: credentials.accessToken,
-      ghl_api_key: "",
-      location_id: "",
+      ghl_api_key: currentSettings?.ghl_api_key || "",
+      location_id: currentSettings?.location_id || "",
     });
 
     if (response.success) {
