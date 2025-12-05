@@ -119,3 +119,46 @@ export async function updateSettings(params: UpdateSettingsParams): Promise<Upda
     };
   }
 }
+
+export async function updateIntegrationSettings(
+  params: IntegrationSettings
+): Promise<UpdateSettingsResponse> {
+  try {
+    const token = getStoredToken();
+    if (!token) {
+      return {
+        success: false,
+        error: "Authentication token not found. Please log in again.",
+      };
+    }
+
+    const response = await fetch(API_ENDPOINT, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(params),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      return {
+        success: false,
+        error: errorData.error || `Failed to update integrations (${response.status})`,
+      };
+    }
+
+    const data: SettingsData = await response.json();
+    return {
+      success: true,
+      data,
+    };
+  } catch (err) {
+    console.error("Network error updating integrations:", err);
+    return {
+      success: false,
+      error: "Network error. Please try again.",
+    };
+  }
+}
