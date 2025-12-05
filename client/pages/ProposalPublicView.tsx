@@ -91,20 +91,6 @@ export default function ProposalPublicView() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <div className="border-b border-slate-200 px-6 py-4 bg-white sticky top-0 z-10 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">{proposal.title}</h1>
-        <Button
-          onClick={handleExportPDF}
-          variant="outline"
-          size="sm"
-          className="flex items-center gap-2"
-        >
-          <Download className="w-4 h-4" />
-          Export PDF
-        </Button>
-      </div>
-
       {/* Content */}
       <div className="flex-1 overflow-y-auto">
         <div ref={contentRef} className="max-w-4xl mx-auto bg-white p-8 shadow-sm mt-6 mb-6">
