@@ -55,7 +55,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
   };
 
   const handleShareLink = () => {
-    toast({ title: "Coming soon", description: "Share link feature will be available soon" });
+    setShowShareDialog(true);
   };
 
   const handleSendEmail = () => {
