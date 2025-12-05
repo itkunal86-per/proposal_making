@@ -119,6 +119,7 @@ export const ShareLinkDialog: React.FC<ShareLinkDialogProps> = ({
                 <label className="text-sm font-medium">Share Link</label>
                 <div className="flex gap-2">
                   <Input
+                    ref={inputRef}
                     type="text"
                     value={shareLink}
                     readOnly
