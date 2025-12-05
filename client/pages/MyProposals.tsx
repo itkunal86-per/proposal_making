@@ -398,6 +398,13 @@ export default function MyProposals() {
           onProposalGenerated={handleProposalGenerated}
         />
       )}
+
+      {previewProposal && (
+        <ProposalPreviewModal
+          proposal={previewProposal}
+          onClose={() => setPreviewProposal(null)}
+        />
+      )}
     </AppShell>
   );
 }
