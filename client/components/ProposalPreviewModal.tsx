@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { X, Share2, Download, Mail, Link as LinkIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,6 +11,7 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { Proposal } from "@/services/proposalsService";
 import { replaceVariables, decodeHtmlEntities } from "@/lib/variableUtils";
+import { ShareLinkDialog } from "@/components/ShareLinkDialog";
 
 interface ProposalPreviewModalProps {
   proposal: Proposal;
@@ -24,6 +25,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
   onClose,
 }) => {
   const contentRef = useRef<HTMLDivElement>(null);
+  const [showShareDialog, setShowShareDialog] = useState(false);
 
   const handleExportPDF = async () => {
     try {
@@ -53,7 +55,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
   };
 
   const handleShareLink = () => {
-    toast({ title: "Coming soon", description: "Share link feature will be available soon" });
+    setShowShareDialog(true);
   };
 
   const handleSendEmail = () => {
@@ -365,6 +367,13 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
           </div>
         </div>
       </div>
+
+      <ShareLinkDialog
+        open={showShareDialog}
+        onOpenChange={setShowShareDialog}
+        proposalId={proposal.id}
+        proposalTitle={proposal.title}
+      />
     </div>
   );
 };

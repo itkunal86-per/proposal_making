@@ -17,6 +17,7 @@ import Dashboard from "./pages/Dashboard";
 import ProposalEditor from "./pages/ProposalEditor";
 import ProposalSettings from "./pages/ProposalSettings";
 import ProposalView from "./pages/ProposalView";
+import ProposalPublicView from "./pages/ProposalPublicView";
 import AcceptInvite from "./pages/AcceptInvite";
 import AdminPackages from "./pages/AdminPackages";
 import AdminTemplates from "./pages/AdminTemplates";
@@ -46,6 +47,7 @@ const App = () => (
               <Route path="/reset" element={<Reset />} />
               <Route path="/register" element={<Register />} />
               <Route path="/p/:token" element={<ProposalView />} />
+              <Route path="/proposal/:token" element={<ProposalPublicView />} />
               <Route path="/invite/:token" element={<AcceptInvite />} />
 
               <Route element={<RequireAuth />}>

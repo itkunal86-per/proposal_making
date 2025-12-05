@@ -9,7 +9,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "@/hooks/use-toast";
+import { MoreVertical } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { type ClientRecord, type ClientStatus, type CreateClientResult, type UpdateClientResult, type DeleteClientResult, listClients, createClient, updateClient, deleteClient } from "@/services/clientsService";
 
@@ -153,9 +155,23 @@ export default function MyClients() {
                       </Badge>
                     </TableCell>
                     <TableCell>{new Date(r.createdAt).toLocaleDateString()}</TableCell>
-                    <TableCell className="text-right space-x-1 whitespace-nowrap">
-                      <Button variant="outline" size="sm" onClick={() => setOpenEdit(r)}>Edit</Button>
-                      <Button variant="destructive" size="sm" onClick={() => showDeleteConfirm(r.id, r.name)}>Delete</Button>
+                    <TableCell className="text-right whitespace-nowrap">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => setOpenEdit(r)}>
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={() => showDeleteConfirm(r.id, r.name)} className="text-destructive">
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </TableCell>
                   </TableRow>
                 ))}

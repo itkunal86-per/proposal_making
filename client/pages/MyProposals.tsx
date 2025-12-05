@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -21,10 +22,12 @@ import {
   createProposal,
   updateProposal,
   persistProposal,
+  getProposalDetails,
 } from "@/services/proposalsService";
 import { type ClientRecord, listClients } from "@/services/clientsService";
 import { GenerateProposalDialog } from "@/components/GenerateProposalDialog";
-import { Wand2 } from "lucide-react";
+import { ProposalPreviewModal } from "@/components/ProposalPreviewModal";
+import { Wand2, MoreVertical } from "lucide-react";
 
 export default function MyProposals() {
   const { user } = useAuth();
@@ -43,6 +46,8 @@ export default function MyProposals() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isGenerateDialogOpen, setIsGenerateDialogOpen] = useState(false);
   const [baseProposalForGeneration, setBaseProposalForGeneration] = useState<Proposal | null>(null);
+  const [previewProposal, setPreviewProposal] = useState<Proposal | null>(null);
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
   const [formData, setFormData] = useState<CreateProposalInput>({
     title: "",
     client_id: "",
@@ -182,6 +187,22 @@ export default function MyProposals() {
     }
   }
 
+  async function onPreview(proposalId: string) {
+    try {
+      setIsLoadingPreview(true);
+      const details = await getProposalDetails(proposalId);
+      if (details) {
+        setPreviewProposal(details);
+      } else {
+        toast({ title: "Failed to load proposal", variant: "destructive" });
+      }
+    } catch (error) {
+      toast({ title: "Error loading proposal", variant: "destructive" });
+    } finally {
+      setIsLoadingPreview(false);
+    }
+  }
+
   return (
     <AppShell>
       <section className="container py-6">
@@ -223,10 +244,29 @@ export default function MyProposals() {
                     <TableCell>{r.client || "—"}</TableCell>
                     <TableCell className="capitalize">{r.status}</TableCell>
                     <TableCell>{new Date(r.updatedAt).toLocaleString()}</TableCell>
-                    <TableCell className="text-right space-x-1 whitespace-nowrap">
-                      <Button variant="outline" size="sm" onClick={() => nav(`/proposals/${r.id}/edit`)}>Edit</Button>
-                      <Button variant="outline" size="sm" onClick={() => onDuplicate(r.id)}>Duplicate</Button>
-                      <Button variant="destructive" size="sm" onClick={() => onDeleteClick(r.id)}>Delete</Button>
+                    <TableCell className="text-right whitespace-nowrap">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => onPreview(r.id)} disabled={isLoadingPreview}>
+                            Preview
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => nav(`/proposals/${r.id}/edit`)}>
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => onDuplicate(r.id)}>
+                            Duplicate
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={() => onDeleteClick(r.id)} className="text-destructive">
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -374,6 +414,13 @@ export default function MyProposals() {
           onOpenChange={setIsGenerateDialogOpen}
           baseProposal={baseProposalForGeneration}
           onProposalGenerated={handleProposalGenerated}
+        />
+      )}
+
+      {previewProposal && (
+        <ProposalPreviewModal
+          proposal={previewProposal}
+          onClose={() => setPreviewProposal(null)}
         />
       )}
     </AppShell>

@@ -847,3 +847,99 @@ export function valueTotal(p: Proposal): number {
   const tax = subtotal * (p.pricing.taxRate ?? 0);
   return subtotal + tax;
 }
+
+export async function enableProposalSharing(proposalId: string): Promise<{ success: boolean; token?: string; error?: string }> {
+  const authToken = getStoredToken();
+  if (!authToken) {
+    return { success: false, error: "No authentication token available" };
+  }
+
+  try {
+    // Get the proposal details first
+    const proposal = await getProposalDetails(proposalId);
+    if (!proposal) {
+      return { success: false, error: "Proposal not found" };
+    }
+
+    // Check if sharing is already enabled
+    if (proposal.settings?.sharing?.public && proposal.settings?.sharing?.token) {
+      console.log("Sharing already enabled with token:", proposal.settings.sharing.token);
+      return { success: true, token: proposal.settings.sharing.token };
+    }
+
+    // Generate a sharing token if not present
+    const sharingToken = proposal.settings?.sharing?.token || uuid();
+
+    // Update the proposal with sharing enabled
+    const updatedProposal = {
+      ...proposal,
+      settings: {
+        ...proposal.settings,
+        sharing: {
+          public: true,
+          token: sharingToken,
+          allowComments: proposal.settings?.sharing?.allowComments ?? true,
+        },
+      },
+    };
+
+    // Save the updated proposal
+    const res = await fetch(`${PROPOSALS_ENDPOINT}/${proposalId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${authToken}`,
+      },
+      body: JSON.stringify(updatedProposal),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      console.error("Failed to update proposal sharing:", errorData);
+      return { success: false, error: "Failed to enable sharing" };
+    }
+
+    const data: ApiProposalResponse = await res.json();
+    console.log("Sharing enabled, response data:", {
+      id: data.id,
+      sharing_token: data.sharing_token,
+      settings_sharing: (data.settings as any)?.sharing,
+    });
+
+    // Try to extract the token from multiple possible locations
+    let returnToken = sharingToken;
+
+    // Check top-level sharing_token field
+    if (data.sharing_token) {
+      returnToken = data.sharing_token;
+      console.log("Token found in sharing_token:", returnToken);
+    }
+    // Check settings.sharing.token
+    else if ((data.settings as any)?.sharing?.token) {
+      returnToken = (data.settings as any).sharing.token;
+      console.log("Token found in settings.sharing.token:", returnToken);
+    }
+
+    return { success: true, token: returnToken };
+  } catch (err) {
+    console.error("Failed to enable sharing:", err);
+    return { success: false, error: "Failed to enable sharing" };
+  }
+}
+
+export async function getPublicProposal(sharingToken: string): Promise<Proposal | null> {
+  try {
+    const res = await fetch(`https://propai-api.hirenq.com/api/public/${sharingToken}`);
+
+    if (!res.ok) {
+      console.error("Failed to fetch public proposal:", res.statusText);
+      return null;
+    }
+
+    const data: ApiProposalResponse = await res.json();
+    return convertApiProposalToProposal(data);
+  } catch (err) {
+    console.error("Failed to fetch public proposal:", err);
+    return null;
+  }
+}
