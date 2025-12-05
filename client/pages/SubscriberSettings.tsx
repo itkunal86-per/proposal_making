@@ -68,6 +68,20 @@ export default function SubscriberSettings() {
     setSaving(false);
   }
 
+  if (loading) {
+    return (
+      <AppShell>
+        <section className="container py-6">
+          <h1 className="text-2xl font-bold">My Settings</h1>
+          <p className="text-muted-foreground">Manage your profile and subscription.</p>
+          <Card className="mt-4 p-4 space-y-4">
+            <div>Loading settings...</div>
+          </Card>
+        </section>
+      </AppShell>
+    );
+  }
+
   return (
     <AppShell>
       <section className="container py-6">
@@ -77,21 +91,39 @@ export default function SubscriberSettings() {
         {/* Profile */}
         <Card className="mt-4 p-4 space-y-4">
           <div className="grid gap-2">
-            <Label htmlFor="name">Full name</Label>
-            <Input id="name" value={data.name ?? ""} onChange={(e) => setData((d) => ({ ...d, name: e.target.value }))} />
+            <Label htmlFor="fullname">Full name</Label>
+            <Input
+              id="fullname"
+              value={data.fullname}
+              onChange={(e) => setData((d) => ({ ...d, fullname: e.target.value }))}
+              disabled={saving}
+            />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="company">Company</Label>
-            <Input id="company" value={data.company ?? ""} onChange={(e) => setData((d) => ({ ...d, company: e.target.value }))} />
+            <Input
+              id="company"
+              value={data.company}
+              onChange={(e) => setData((d) => ({ ...d, company: e.target.value }))}
+              disabled={saving}
+            />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" value={data.email ?? ""} onChange={(e) => setData((d) => ({ ...d, email: e.target.value }))} />
+            <Input
+              id="email"
+              type="email"
+              value={data.email}
+              onChange={(e) => setData((d) => ({ ...d, email: e.target.value }))}
+              disabled={saving}
+            />
           </div>
           <Separator />
 
           <div className="flex justify-end">
-            <Button onClick={save}>Save Settings</Button>
+            <Button onClick={save} disabled={saving}>
+              {saving ? "Saving..." : "Save Settings"}
+            </Button>
           </div>
         </Card>
       </section>
