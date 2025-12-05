@@ -847,3 +847,48 @@ export function valueTotal(p: Proposal): number {
   const tax = subtotal * (p.pricing.taxRate ?? 0);
   return subtotal + tax;
 }
+
+export async function enableProposalSharing(proposalId: string): Promise<{ success: boolean; token?: string; error?: string }> {
+  const token = getStoredToken();
+  if (!token) {
+    return { success: false, error: "No authentication token available" };
+  }
+
+  try {
+    const res = await fetch(`${PROPOSALS_ENDPOINT}/${proposalId}/sharing/enable`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      return { success: false, error: errorData.error || "Failed to enable sharing" };
+    }
+
+    const data = await res.json();
+    return { success: true, token: data.token };
+  } catch (err) {
+    console.error("Failed to enable sharing:", err);
+    return { success: false, error: "Network error. Please try again." };
+  }
+}
+
+export async function getPublicProposal(sharingToken: string): Promise<Proposal | null> {
+  try {
+    const res = await fetch(`https://propai-api.hirenq.com/api/public/${sharingToken}`);
+
+    if (!res.ok) {
+      console.error("Failed to fetch public proposal:", res.statusText);
+      return null;
+    }
+
+    const data: ApiProposalResponse = await res.json();
+    return convertApiProposalToProposal(data);
+  } catch (err) {
+    console.error("Failed to fetch public proposal:", err);
+    return null;
+  }
+}
