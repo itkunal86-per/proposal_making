@@ -464,10 +464,13 @@ function HubSpotDialog({
             <Button
               variant="outline"
               onClick={() => onOpenChange(false)}
+              disabled={submitting}
             >
               Cancel
             </Button>
-            <Button onClick={submit}>Connect</Button>
+            <Button onClick={submit} disabled={submitting}>
+              {submitting ? "Connecting..." : "Connect"}
+            </Button>
           </div>
         </div>
       </DialogContent>
