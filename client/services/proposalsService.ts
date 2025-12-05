@@ -849,8 +849,30 @@ export function valueTotal(p: Proposal): number {
 }
 
 export async function enableProposalSharing(proposalId: string): Promise<{ success: boolean; token?: string; error?: string }> {
+  const token = getStoredToken();
+  if (!token) {
+    return { success: false, error: "No authentication token available" };
+  }
+
   try {
-    // Get the proposal details first
+    // First, try to call the API endpoint to generate sharing token
+    const res = await fetch(`${PROPOSALS_ENDPOINT}/${proposalId}/sharing`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+      body: JSON.stringify({ enabled: true }),
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      console.log("Sharing enabled via API:", data);
+      return { success: true, token: data.sharing_token || data.token };
+    }
+
+    // Fallback: Get the proposal details and update locally
+    console.log("API endpoint not available, using fallback approach");
     const proposal = await getProposalDetails(proposalId);
     if (!proposal) {
       return { success: false, error: "Proposal not found" };
