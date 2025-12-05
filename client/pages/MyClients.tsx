@@ -155,9 +155,23 @@ export default function MyClients() {
                       </Badge>
                     </TableCell>
                     <TableCell>{new Date(r.createdAt).toLocaleDateString()}</TableCell>
-                    <TableCell className="text-right space-x-1 whitespace-nowrap">
-                      <Button variant="outline" size="sm" onClick={() => setOpenEdit(r)}>Edit</Button>
-                      <Button variant="destructive" size="sm" onClick={() => showDeleteConfirm(r.id, r.name)}>Delete</Button>
+                    <TableCell className="text-right whitespace-nowrap">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => setOpenEdit(r)}>
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={() => showDeleteConfirm(r.id, r.name)} className="text-destructive">
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </TableCell>
                   </TableRow>
                 ))}
