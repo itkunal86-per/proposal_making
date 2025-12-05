@@ -17,51 +17,55 @@ interface ProfileData {
 
 export default function SubscriberSettings() {
   const { user } = useAuth();
-  const key = useMemo(() => (user ? `subscriber_settings_${user.id}` : "subscriber_settings_anonymous"), [user]);
   const [data, setData] = useState<ProfileData>({
-    name: "",
+    fullname: "",
     company: "",
     email: "",
-    subscription: {
-      plan: "free",
-    },
   });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(key);
-      if (raw) {
-        const parsed = JSON.parse(raw) as ProfileData;
-        setData({
-          name: parsed.name ?? "",
-          company: parsed.company ?? "",
-          email: parsed.email ?? "",
-          subscription: {
-            plan: parsed.subscription?.plan ?? "free",
-            updatedAt: parsed.subscription?.updatedAt,
-          },
-        });
-      } else if (user) {
-        setData({
-          name: user.name ?? "",
-          company: user.company ?? "",
-          email: user.email ?? "",
-          subscription: {
-            plan: "free",
-          },
-        });
-      }
-    } catch {}
-  }, [key, user]);
+    loadSettings();
+  }, []);
 
-  function save() {
-    localStorage.setItem(key, JSON.stringify(data));
-    toast({ title: "Settings saved" });
+  async function loadSettings() {
+    setLoading(true);
+    const response = await fetchSettings();
+    if (response.success && response.data) {
+      setData({
+        fullname: response.data.fullname ?? "",
+        company: response.data.company ?? "",
+        email: response.data.email ?? "",
+      });
+    } else {
+      toast({
+        title: "Error",
+        description: response.error || "Failed to load settings",
+        variant: "destructive",
+      });
+    }
+    setLoading(false);
   }
 
-  function updatePlan(plan: "free" | "pro" | "business") {
-    setData((d) => ({ ...d, subscription: { ...d.subscription, plan, updatedAt: Date.now() } }));
-    setTimeout(() => save(), 0);
+  async function save() {
+    setSaving(true);
+    const response = await updateSettings({
+      fullname: data.fullname,
+      company: data.company,
+      email: data.email,
+    });
+
+    if (response.success) {
+      toast({ title: "Settings saved" });
+    } else {
+      toast({
+        title: "Error",
+        description: response.error || "Failed to save settings",
+        variant: "destructive",
+      });
+    }
+    setSaving(false);
   }
 
   return (
