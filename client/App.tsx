@@ -47,6 +47,7 @@ const App = () => (
               <Route path="/reset" element={<Reset />} />
               <Route path="/register" element={<Register />} />
               <Route path="/p/:token" element={<ProposalView />} />
+              <Route path="/proposal/:token" element={<ProposalPublicView />} />
               <Route path="/invite/:token" element={<AcceptInvite />} />
 
               <Route element={<RequireAuth />}>
