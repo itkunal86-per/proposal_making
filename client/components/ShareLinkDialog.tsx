@@ -63,15 +63,31 @@ export const ShareLinkDialog: React.FC<ShareLinkDialogProps> = ({
   };
 
   const handleCopy = async () => {
-    if (shareLink) {
-      try {
-        await navigator.clipboard.writeText(shareLink);
-        setCopied(true);
-        toast({ title: "Success", description: "Link copied to clipboard" });
-        setTimeout(() => setCopied(false), 2000);
-      } catch (err) {
-        console.error("Failed to copy to clipboard:", err);
-        toast({ title: "Error", description: "Failed to copy link", variant: "destructive" });
+    if (!shareLink) return;
+
+    try {
+      await navigator.clipboard.writeText(shareLink);
+      setCopied(true);
+      toast({ title: "Success", description: "Link copied to clipboard" });
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Clipboard API blocked, using fallback:", err);
+      // Fallback: select the text in the input field
+      if (inputRef.current) {
+        inputRef.current.select();
+        try {
+          document.execCommand("copy");
+          setCopied(true);
+          toast({ title: "Success", description: "Link copied to clipboard" });
+          setTimeout(() => setCopied(false), 2000);
+        } catch (fallbackErr) {
+          console.error("Copy fallback failed:", fallbackErr);
+          toast({
+            title: "Manual Copy Required",
+            description: "Please select and copy the link manually",
+            variant: "default",
+          });
+        }
       }
     }
   };
