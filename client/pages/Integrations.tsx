@@ -163,6 +163,24 @@ export default function Integrations() {
     }
   };
 
+  if (loading) {
+    return (
+      <AppShell>
+        <section className="container py-6">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h1 className="text-2xl font-bold">Integrations</h1>
+              <p className="text-muted-foreground">
+                Connect your favorite tools to streamline your workflow
+              </p>
+            </div>
+          </div>
+          <div className="mt-6">Loading integrations...</div>
+        </section>
+      </AppShell>
+    );
+  }
+
   return (
     <AppShell>
       <section className="container py-6">
