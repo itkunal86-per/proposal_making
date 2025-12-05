@@ -61,58 +61,106 @@ export default function Integrations() {
   const [integrations, setIntegrations] = useState<Integration[]>(INTEGRATIONS);
   const [openGoHighLevel, setOpenGoHighLevel] = useState(false);
   const [openHubSpot, setOpenHubSpot] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const stored = localStorage.getItem("integrations");
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        setIntegrations(parsed);
-      } catch (error) {
-        console.error("Failed to parse stored integrations:", error);
-      }
-    }
+    loadIntegrations();
   }, []);
 
-  const handleGoHighLevelConnect = (credentials: GoHighLevelCredentials) => {
-    const updated = integrations.map((i) =>
-      i.id === "gohighlevel"
-        ? { ...i, status: "connected" as const }
-        : i
-    );
-    setIntegrations(updated);
-    localStorage.setItem("integrations", JSON.stringify(updated));
-    localStorage.setItem(
-      "gohighlevel_credentials",
-      JSON.stringify(credentials)
-    );
-    setOpenGoHighLevel(false);
-    toast({ title: "GoHighLevel connected successfully" });
+  async function loadIntegrations() {
+    setLoading(true);
+    const response = await fetchSettings();
+    if (response.success && response.data) {
+      const hasGhlKey = !!response.data.ghl_api_key?.trim();
+      const hasHubSpotKey = !!response.data.hubspot_api_key?.trim();
+
+      const updated = integrations.map((i) => {
+        if (i.id === "gohighlevel") {
+          return { ...i, status: hasGhlKey ? "connected" as const : "disconnected" as const };
+        } else if (i.id === "hubspot") {
+          return { ...i, status: hasHubSpotKey ? "connected" as const : "disconnected" as const };
+        }
+        return i;
+      });
+      setIntegrations(updated);
+    }
+    setLoading(false);
+  }
+
+  const handleGoHighLevelConnect = async (credentials: GoHighLevelCredentials) => {
+    const response = await updateIntegrationSettings({
+      ghl_api_key: credentials.apiKey,
+      location_id: credentials.locationId,
+      hubspot_api_key: "",
+    });
+
+    if (response.success) {
+      const updated = integrations.map((i) =>
+        i.id === "gohighlevel"
+          ? { ...i, status: "connected" as const }
+          : i
+      );
+      setIntegrations(updated);
+      setOpenGoHighLevel(false);
+      toast({ title: "GoHighLevel connected successfully" });
+    } else {
+      toast({
+        title: "Error",
+        description: response.error || "Failed to connect GoHighLevel",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleHubSpotConnect = (credentials: HubSpotCredentials) => {
-    const updated = integrations.map((i) =>
-      i.id === "hubspot"
-        ? { ...i, status: "connected" as const }
-        : i
-    );
-    setIntegrations(updated);
-    localStorage.setItem("integrations", JSON.stringify(updated));
-    localStorage.setItem("hubspot_credentials", JSON.stringify(credentials));
-    setOpenHubSpot(false);
-    toast({ title: "HubSpot connected successfully" });
+  const handleHubSpotConnect = async (credentials: HubSpotCredentials) => {
+    const response = await updateIntegrationSettings({
+      hubspot_api_key: credentials.accessToken,
+      ghl_api_key: "",
+      location_id: "",
+    });
+
+    if (response.success) {
+      const updated = integrations.map((i) =>
+        i.id === "hubspot"
+          ? { ...i, status: "connected" as const }
+          : i
+      );
+      setIntegrations(updated);
+      setOpenHubSpot(false);
+      toast({ title: "HubSpot connected successfully" });
+    } else {
+      toast({
+        title: "Error",
+        description: response.error || "Failed to connect HubSpot",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleDisconnect = (integrationId: string) => {
-    const updated = integrations.map((i) =>
-      i.id === integrationId
-        ? { ...i, status: "disconnected" as const }
-        : i
-    );
-    setIntegrations(updated);
-    localStorage.setItem("integrations", JSON.stringify(updated));
-    localStorage.removeItem(`${integrationId}_credentials`);
-    toast({ title: `${integrationId === "gohighlevel" ? "GoHighLevel" : "HubSpot"} disconnected` });
+  const handleDisconnect = async (integrationId: string) => {
+    const params = {
+      ghl_api_key: integrationId === "gohighlevel" ? "" : "",
+      location_id: integrationId === "gohighlevel" ? "" : "",
+      hubspot_api_key: integrationId === "hubspot" ? "" : "",
+    };
+
+    const response = await updateIntegrationSettings(params);
+
+    if (response.success) {
+      const updated = integrations.map((i) =>
+        i.id === integrationId
+          ? { ...i, status: "disconnected" as const }
+          : i
+      );
+      setIntegrations(updated);
+      toast({ title: `${integrationId === "gohighlevel" ? "GoHighLevel" : "HubSpot"} disconnected` });
+    } else {
+      toast({
+        title: "Error",
+        description: response.error || "Failed to disconnect",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
