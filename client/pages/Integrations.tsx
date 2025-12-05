@@ -306,6 +306,7 @@ function GoHighLevelDialog({
   const [apiKey, setApiKey] = useState("");
   const [locationId, setLocationId] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (!open) {
@@ -315,7 +316,7 @@ function GoHighLevelDialog({
     }
   }, [open]);
 
-  function submit() {
+  async function submit() {
     const newErrors: Record<string, string> = {};
 
     if (!apiKey.trim()) {
@@ -330,7 +331,9 @@ function GoHighLevelDialog({
       return;
     }
 
-    onConnect({ apiKey: apiKey.trim(), locationId: locationId.trim() });
+    setSubmitting(true);
+    await onConnect({ apiKey: apiKey.trim(), locationId: locationId.trim() });
+    setSubmitting(false);
   }
 
   return (
