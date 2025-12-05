@@ -25,6 +25,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
   onClose,
 }) => {
   const contentRef = useRef<HTMLDivElement>(null);
+  const [showShareDialog, setShowShareDialog] = useState(false);
 
   const handleExportPDF = async () => {
     try {
