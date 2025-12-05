@@ -27,6 +27,12 @@ export interface UpdateSettingsParams {
   email: string;
 }
 
+export interface IntegrationSettings {
+  hubspot_api_key: string;
+  ghl_api_key: string;
+  location_id: string;
+}
+
 export interface UpdateSettingsResponse {
   success: boolean;
   data?: SettingsData;
