@@ -5,66 +5,81 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/hooks/useAuth";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "@/hooks/use-toast";
+import { fetchSettings, updateSettings } from "@/services/settingsService";
 
 interface ProfileData {
-  name: string;
-  company?: string;
+  fullname: string;
+  company: string;
   email: string;
-  subscription?: {
-    plan: "free" | "pro" | "business";
-    updatedAt?: number;
-  };
 }
 
 export default function SubscriberSettings() {
   const { user } = useAuth();
-  const key = useMemo(() => (user ? `subscriber_settings_${user.id}` : "subscriber_settings_anonymous"), [user]);
   const [data, setData] = useState<ProfileData>({
-    name: "",
+    fullname: "",
     company: "",
     email: "",
-    subscription: {
-      plan: "free",
-    },
   });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(key);
-      if (raw) {
-        const parsed = JSON.parse(raw) as ProfileData;
-        setData({
-          name: parsed.name ?? "",
-          company: parsed.company ?? "",
-          email: parsed.email ?? "",
-          subscription: {
-            plan: parsed.subscription?.plan ?? "free",
-            updatedAt: parsed.subscription?.updatedAt,
-          },
-        });
-      } else if (user) {
-        setData({
-          name: user.name ?? "",
-          company: user.company ?? "",
-          email: user.email ?? "",
-          subscription: {
-            plan: "free",
-          },
-        });
-      }
-    } catch {}
-  }, [key, user]);
+    loadSettings();
+  }, []);
 
-  function save() {
-    localStorage.setItem(key, JSON.stringify(data));
-    toast({ title: "Settings saved" });
+  async function loadSettings() {
+    setLoading(true);
+    const response = await fetchSettings();
+    if (response.success && response.data) {
+      setData({
+        fullname: response.data.fullname ?? "",
+        company: response.data.company ?? "",
+        email: response.data.email ?? "",
+      });
+    } else {
+      toast({
+        title: "Error",
+        description: response.error || "Failed to load settings",
+        variant: "destructive",
+      });
+    }
+    setLoading(false);
   }
 
-  function updatePlan(plan: "free" | "pro" | "business") {
-    setData((d) => ({ ...d, subscription: { ...d.subscription, plan, updatedAt: Date.now() } }));
-    setTimeout(() => save(), 0);
+  async function save() {
+    setSaving(true);
+    const response = await updateSettings({
+      fullname: data.fullname,
+      company: data.company,
+      email: data.email,
+    });
+
+    if (response.success) {
+      toast({ title: "Settings saved" });
+    } else {
+      toast({
+        title: "Error",
+        description: response.error || "Failed to save settings",
+        variant: "destructive",
+      });
+    }
+    setSaving(false);
+  }
+
+  if (loading) {
+    return (
+      <AppShell>
+        <section className="container py-6">
+          <h1 className="text-2xl font-bold">My Settings</h1>
+          <p className="text-muted-foreground">Manage your profile and subscription.</p>
+          <Card className="mt-4 p-4 space-y-4">
+            <div>Loading settings...</div>
+          </Card>
+        </section>
+      </AppShell>
+    );
   }
 
   return (
@@ -76,38 +91,39 @@ export default function SubscriberSettings() {
         {/* Profile */}
         <Card className="mt-4 p-4 space-y-4">
           <div className="grid gap-2">
-            <Label htmlFor="name">Full name</Label>
-            <Input id="name" value={data.name ?? ""} onChange={(e) => setData((d) => ({ ...d, name: e.target.value }))} />
+            <Label htmlFor="fullname">Full name</Label>
+            <Input
+              id="fullname"
+              value={data.fullname}
+              onChange={(e) => setData((d) => ({ ...d, fullname: e.target.value }))}
+              disabled={saving}
+            />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="company">Company</Label>
-            <Input id="company" value={data.company ?? ""} onChange={(e) => setData((d) => ({ ...d, company: e.target.value }))} />
+            <Input
+              id="company"
+              value={data.company}
+              onChange={(e) => setData((d) => ({ ...d, company: e.target.value }))}
+              disabled={saving}
+            />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" value={data.email ?? ""} onChange={(e) => setData((d) => ({ ...d, email: e.target.value }))} />
+            <Input
+              id="email"
+              type="email"
+              value={data.email}
+              onChange={(e) => setData((d) => ({ ...d, email: e.target.value }))}
+              disabled={saving}
+            />
           </div>
-          <Separator />
-
-          {/* Subscription */}
-          <div className="space-y-2">
-            <h2 className="text-lg font-semibold">Subscription</h2>
-            <div className="flex gap-2">
-              {(["free", "pro", "business"] as const).map((p) => (
-                <Button key={p} variant={data.subscription.plan === p ? "default" : "outline"} onClick={() => updatePlan(p)}>
-                  {p}
-                </Button>
-              ))}
-            </div>
-            {data.subscription.updatedAt && (
-              <div className="text-xs text-muted-foreground">Updated: {new Date(data.subscription.updatedAt).toLocaleString()}</div>
-            )}
-          </div>
-
           <Separator />
 
           <div className="flex justify-end">
-            <Button onClick={save}>Save Settings</Button>
+            <Button onClick={save} disabled={saving}>
+              {saving ? "Saving..." : "Save Settings"}
+            </Button>
           </div>
         </Card>
       </section>

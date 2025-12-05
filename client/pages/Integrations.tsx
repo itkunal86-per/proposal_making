@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Separator } from "@/components/ui/separator";
 import { CheckCircle, AlertCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { fetchSettings, updateIntegrationSettings } from "@/services/settingsService";
 
 interface Integration {
   id: string;
@@ -60,59 +61,141 @@ export default function Integrations() {
   const [integrations, setIntegrations] = useState<Integration[]>(INTEGRATIONS);
   const [openGoHighLevel, setOpenGoHighLevel] = useState(false);
   const [openHubSpot, setOpenHubSpot] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const stored = localStorage.getItem("integrations");
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        setIntegrations(parsed);
-      } catch (error) {
-        console.error("Failed to parse stored integrations:", error);
-      }
-    }
+    loadIntegrations();
   }, []);
 
-  const handleGoHighLevelConnect = (credentials: GoHighLevelCredentials) => {
-    const updated = integrations.map((i) =>
-      i.id === "gohighlevel"
-        ? { ...i, status: "connected" as const }
-        : i
-    );
-    setIntegrations(updated);
-    localStorage.setItem("integrations", JSON.stringify(updated));
-    localStorage.setItem(
-      "gohighlevel_credentials",
-      JSON.stringify(credentials)
-    );
-    setOpenGoHighLevel(false);
-    toast({ title: "GoHighLevel connected successfully" });
+  async function loadIntegrations() {
+    setLoading(true);
+    const response = await fetchSettings();
+    if (response.success && response.data) {
+      const hasGhlKey = !!response.data.ghl_api_key?.trim();
+      const hasHubSpotKey = !!response.data.hubspot_api_key?.trim();
+
+      const updated = integrations.map((i) => {
+        if (i.id === "gohighlevel") {
+          return { ...i, status: hasGhlKey ? "connected" as const : "disconnected" as const };
+        } else if (i.id === "hubspot") {
+          return { ...i, status: hasHubSpotKey ? "connected" as const : "disconnected" as const };
+        }
+        return i;
+      });
+      setIntegrations(updated);
+    }
+    setLoading(false);
+  }
+
+  const handleGoHighLevelConnect = async (credentials: GoHighLevelCredentials) => {
+    const settingsResponse = await fetchSettings();
+    const currentSettings = settingsResponse.success ? settingsResponse.data : null;
+
+    const response = await updateIntegrationSettings({
+      ghl_api_key: credentials.apiKey,
+      location_id: credentials.locationId,
+      hubspot_api_key: currentSettings?.hubspot_api_key || "",
+    });
+
+    if (response.success) {
+      const updated = integrations.map((i) =>
+        i.id === "gohighlevel"
+          ? { ...i, status: "connected" as const }
+          : i
+      );
+      setIntegrations(updated);
+      setOpenGoHighLevel(false);
+      toast({ title: "GoHighLevel connected successfully" });
+    } else {
+      toast({
+        title: "Error",
+        description: response.error || "Failed to connect GoHighLevel",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleHubSpotConnect = (credentials: HubSpotCredentials) => {
-    const updated = integrations.map((i) =>
-      i.id === "hubspot"
-        ? { ...i, status: "connected" as const }
-        : i
-    );
-    setIntegrations(updated);
-    localStorage.setItem("integrations", JSON.stringify(updated));
-    localStorage.setItem("hubspot_credentials", JSON.stringify(credentials));
-    setOpenHubSpot(false);
-    toast({ title: "HubSpot connected successfully" });
+  const handleHubSpotConnect = async (credentials: HubSpotCredentials) => {
+    const settingsResponse = await fetchSettings();
+    const currentSettings = settingsResponse.success ? settingsResponse.data : null;
+
+    const response = await updateIntegrationSettings({
+      hubspot_api_key: credentials.accessToken,
+      ghl_api_key: currentSettings?.ghl_api_key || "",
+      location_id: currentSettings?.location_id || "",
+    });
+
+    if (response.success) {
+      const updated = integrations.map((i) =>
+        i.id === "hubspot"
+          ? { ...i, status: "connected" as const }
+          : i
+      );
+      setIntegrations(updated);
+      setOpenHubSpot(false);
+      toast({ title: "HubSpot connected successfully" });
+    } else {
+      toast({
+        title: "Error",
+        description: response.error || "Failed to connect HubSpot",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleDisconnect = (integrationId: string) => {
-    const updated = integrations.map((i) =>
-      i.id === integrationId
-        ? { ...i, status: "disconnected" as const }
-        : i
-    );
-    setIntegrations(updated);
-    localStorage.setItem("integrations", JSON.stringify(updated));
-    localStorage.removeItem(`${integrationId}_credentials`);
-    toast({ title: `${integrationId === "gohighlevel" ? "GoHighLevel" : "HubSpot"} disconnected` });
+  const handleDisconnect = async (integrationId: string) => {
+    const settingsResponse = await fetchSettings();
+    if (!settingsResponse.success || !settingsResponse.data) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch current settings",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const params = {
+      ghl_api_key: integrationId === "gohighlevel" ? "" : (settingsResponse.data.ghl_api_key || ""),
+      location_id: integrationId === "gohighlevel" ? "" : (settingsResponse.data.location_id || ""),
+      hubspot_api_key: integrationId === "hubspot" ? "" : (settingsResponse.data.hubspot_api_key || ""),
+    };
+
+    const response = await updateIntegrationSettings(params);
+
+    if (response.success) {
+      const updated = integrations.map((i) =>
+        i.id === integrationId
+          ? { ...i, status: "disconnected" as const }
+          : i
+      );
+      setIntegrations(updated);
+      toast({ title: `${integrationId === "gohighlevel" ? "GoHighLevel" : "HubSpot"} disconnected` });
+    } else {
+      toast({
+        title: "Error",
+        description: response.error || "Failed to disconnect",
+        variant: "destructive",
+      });
+    }
   };
+
+  if (loading) {
+    return (
+      <AppShell>
+        <section className="container py-6">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h1 className="text-2xl font-bold">Integrations</h1>
+              <p className="text-muted-foreground">
+                Connect your favorite tools to streamline your workflow
+              </p>
+            </div>
+          </div>
+          <div className="mt-6">Loading integrations...</div>
+        </section>
+      </AppShell>
+    );
+  }
 
   return (
     <AppShell>
@@ -239,6 +322,7 @@ function GoHighLevelDialog({
   const [apiKey, setApiKey] = useState("");
   const [locationId, setLocationId] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (!open) {
@@ -248,7 +332,7 @@ function GoHighLevelDialog({
     }
   }, [open]);
 
-  function submit() {
+  async function submit() {
     const newErrors: Record<string, string> = {};
 
     if (!apiKey.trim()) {
@@ -263,7 +347,9 @@ function GoHighLevelDialog({
       return;
     }
 
-    onConnect({ apiKey: apiKey.trim(), locationId: locationId.trim() });
+    setSubmitting(true);
+    await onConnect({ apiKey: apiKey.trim(), locationId: locationId.trim() });
+    setSubmitting(false);
   }
 
   return (
@@ -313,10 +399,13 @@ function GoHighLevelDialog({
             <Button
               variant="outline"
               onClick={() => onOpenChange(false)}
+              disabled={submitting}
             >
               Cancel
             </Button>
-            <Button onClick={submit}>Connect</Button>
+            <Button onClick={submit} disabled={submitting}>
+              {submitting ? "Connecting..." : "Connect"}
+            </Button>
           </div>
         </div>
       </DialogContent>
@@ -335,6 +424,7 @@ function HubSpotDialog({
 }) {
   const [accessToken, setAccessToken] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (!open) {
@@ -343,7 +433,7 @@ function HubSpotDialog({
     }
   }, [open]);
 
-  function submit() {
+  async function submit() {
     const newErrors: Record<string, string> = {};
 
     if (!accessToken.trim()) {
@@ -355,7 +445,9 @@ function HubSpotDialog({
       return;
     }
 
-    onConnect({ accessToken: accessToken.trim() });
+    setSubmitting(true);
+    await onConnect({ accessToken: accessToken.trim() });
+    setSubmitting(false);
   }
 
   return (
@@ -388,10 +480,13 @@ function HubSpotDialog({
             <Button
               variant="outline"
               onClick={() => onOpenChange(false)}
+              disabled={submitting}
             >
               Cancel
             </Button>
-            <Button onClick={submit}>Connect</Button>
+            <Button onClick={submit} disabled={submitting}>
+              {submitting ? "Connecting..." : "Connect"}
+            </Button>
           </div>
         </div>
       </DialogContent>
