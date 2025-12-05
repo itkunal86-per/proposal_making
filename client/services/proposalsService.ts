@@ -929,7 +929,7 @@ export async function enableProposalSharing(proposalId: string): Promise<{ succe
 
 export async function getPublicProposal(sharingToken: string): Promise<Proposal | null> {
   try {
-    const res = await fetch(`https://propai-api.hirenq.com/api/public/${sharingToken}`);
+    const res = await fetch(`https://propai-api.hirenq.com/api/public/proposal/${sharingToken}`);
 
     if (!res.ok) {
       console.error("Failed to fetch public proposal:", res.statusText);
