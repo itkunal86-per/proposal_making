@@ -234,6 +234,9 @@ export default function MyProposals() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => setPreviewProposal(r)}>
+                            Preview
+                          </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => nav(`/proposals/${r.id}/edit`)}>
                             Edit
                           </DropdownMenuItem>
