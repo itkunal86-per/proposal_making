@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -19,6 +19,7 @@ export const ShareLinkDialog: React.FC<ShareLinkDialogProps> = ({
   proposalId,
   proposalTitle,
 }) => {
+  const inputRef = useRef<HTMLInputElement>(null);
   const [shareToken, setShareToken] = useState<string | null>(null);
   const [shareLink, setShareLink] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
