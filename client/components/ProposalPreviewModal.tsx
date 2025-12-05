@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { X, Share2, Download, Mail, Link as LinkIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,6 +11,7 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { Proposal } from "@/services/proposalsService";
 import { replaceVariables, decodeHtmlEntities } from "@/lib/variableUtils";
+import { ShareLinkDialog } from "@/components/ShareLinkDialog";
 
 interface ProposalPreviewModalProps {
   proposal: Proposal;
