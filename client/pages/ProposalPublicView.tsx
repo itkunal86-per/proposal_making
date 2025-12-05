@@ -1,10 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { getPublicProposal, type Proposal } from "@/services/proposalsService";
-import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
 import { replaceVariables, decodeHtmlEntities } from "@/lib/variableUtils";
-import { toast } from "@/hooks/use-toast";
 
 export default function ProposalPublicView() {
   const { token } = useParams<{ token: string }>();
