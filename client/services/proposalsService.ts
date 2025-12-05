@@ -849,30 +849,13 @@ export function valueTotal(p: Proposal): number {
 }
 
 export async function enableProposalSharing(proposalId: string): Promise<{ success: boolean; token?: string; error?: string }> {
-  const token = getStoredToken();
-  if (!token) {
+  const authToken = getStoredToken();
+  if (!authToken) {
     return { success: false, error: "No authentication token available" };
   }
 
   try {
-    // First, try to call the API endpoint to generate sharing token
-    const res = await fetch(`${PROPOSALS_ENDPOINT}/${proposalId}/sharing`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`,
-      },
-      body: JSON.stringify({ enabled: true }),
-    });
-
-    if (res.ok) {
-      const data = await res.json();
-      console.log("Sharing enabled via API:", data);
-      return { success: true, token: data.sharing_token || data.token };
-    }
-
-    // Fallback: Get the proposal details and update locally
-    console.log("API endpoint not available, using fallback approach");
+    // Get the proposal details first
     const proposal = await getProposalDetails(proposalId);
     if (!proposal) {
       return { success: false, error: "Proposal not found" };
@@ -880,29 +863,55 @@ export async function enableProposalSharing(proposalId: string): Promise<{ succe
 
     // Check if sharing is already enabled
     if (proposal.settings?.sharing?.public && proposal.settings?.sharing?.token) {
+      console.log("Sharing already enabled with token:", proposal.settings.sharing.token);
       return { success: true, token: proposal.settings.sharing.token };
     }
 
-    // Generate a new sharing token if needed
-    const sharingToken = proposal.settings?.sharing?.token || uuid();
-
-    // Update the proposal with sharing enabled
+    // Update the proposal with sharing enabled - let the API generate the token
     const updatedProposal = {
       ...proposal,
       settings: {
         ...proposal.settings,
         sharing: {
           public: true,
-          token: sharingToken,
           allowComments: proposal.settings?.sharing?.allowComments ?? true,
+          // Don't set token - let the API generate it
         },
       },
     };
 
-    // Save the updated proposal
-    await updateProposal(updatedProposal);
+    // Save the updated proposal - the API should generate and return the sharing token
+    const res = await fetch(`${PROPOSALS_ENDPOINT}/${proposalId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${authToken}`,
+      },
+      body: JSON.stringify(updatedProposal),
+    });
 
-    return { success: true, token: sharingToken };
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      console.error("Failed to update proposal sharing:", errorData);
+      return { success: false, error: "Failed to enable sharing" };
+    }
+
+    const data: ApiProposalResponse = await res.json();
+    console.log("Sharing enabled, response:", data);
+
+    // Extract the token from the response
+    const sharingToken = data.sharing_token;
+    if (sharingToken) {
+      return { success: true, token: sharingToken };
+    }
+
+    // If no token in response, try to extract from settings
+    const settings = data.settings as any;
+    if (settings?.sharing?.token) {
+      return { success: true, token: settings.sharing.token };
+    }
+
+    return { success: false, error: "No sharing token received from API" };
   } catch (err) {
     console.error("Failed to enable sharing:", err);
     return { success: false, error: "Failed to enable sharing" };
