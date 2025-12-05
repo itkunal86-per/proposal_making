@@ -9,7 +9,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "@/hooks/use-toast";
+import { MoreVertical } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { type ClientRecord, type ClientStatus, type CreateClientResult, type UpdateClientResult, type DeleteClientResult, listClients, createClient, updateClient, deleteClient } from "@/services/clientsService";
 
