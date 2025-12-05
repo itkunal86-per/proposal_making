@@ -59,12 +59,17 @@ export const ShareLinkDialog: React.FC<ShareLinkDialogProps> = ({
     }
   };
 
-  const handleCopy = () => {
+  const handleCopy = async () => {
     if (shareLink) {
-      navigator.clipboard.writeText(shareLink);
-      setCopied(true);
-      toast({ title: "Success", description: "Link copied to clipboard" });
-      setTimeout(() => setCopied(false), 2000);
+      try {
+        await navigator.clipboard.writeText(shareLink);
+        setCopied(true);
+        toast({ title: "Success", description: "Link copied to clipboard" });
+        setTimeout(() => setCopied(false), 2000);
+      } catch (err) {
+        console.error("Failed to copy to clipboard:", err);
+        toast({ title: "Error", description: "Failed to copy link", variant: "destructive" });
+      }
     }
   };
 
