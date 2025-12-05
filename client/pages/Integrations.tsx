@@ -383,10 +383,13 @@ function GoHighLevelDialog({
             <Button
               variant="outline"
               onClick={() => onOpenChange(false)}
+              disabled={submitting}
             >
               Cancel
             </Button>
-            <Button onClick={submit}>Connect</Button>
+            <Button onClick={submit} disabled={submitting}>
+              {submitting ? "Connecting..." : "Connect"}
+            </Button>
           </div>
         </div>
       </DialogContent>
@@ -405,6 +408,7 @@ function HubSpotDialog({
 }) {
   const [accessToken, setAccessToken] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (!open) {
@@ -413,7 +417,7 @@ function HubSpotDialog({
     }
   }, [open]);
 
-  function submit() {
+  async function submit() {
     const newErrors: Record<string, string> = {};
 
     if (!accessToken.trim()) {
@@ -425,7 +429,9 @@ function HubSpotDialog({
       return;
     }
 
-    onConnect({ accessToken: accessToken.trim() });
+    setSubmitting(true);
+    await onConnect({ accessToken: accessToken.trim() });
+    setSubmitting(false);
   }
 
   return (
