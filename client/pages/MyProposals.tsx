@@ -187,6 +187,22 @@ export default function MyProposals() {
     }
   }
 
+  async function onPreview(proposalId: string) {
+    try {
+      setIsLoadingPreview(true);
+      const details = await getProposalDetails(proposalId);
+      if (details) {
+        setPreviewProposal(details);
+      } else {
+        toast({ title: "Failed to load proposal", variant: "destructive" });
+      }
+    } catch (error) {
+      toast({ title: "Error loading proposal", variant: "destructive" });
+    } finally {
+      setIsLoadingPreview(false);
+    }
+  }
+
   return (
     <AppShell>
       <section className="container py-6">
