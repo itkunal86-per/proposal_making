@@ -224,10 +224,26 @@ export default function MyProposals() {
                     <TableCell>{r.client || "—"}</TableCell>
                     <TableCell className="capitalize">{r.status}</TableCell>
                     <TableCell>{new Date(r.updatedAt).toLocaleString()}</TableCell>
-                    <TableCell className="text-right space-x-1 whitespace-nowrap">
-                      <Button variant="outline" size="sm" onClick={() => nav(`/proposals/${r.id}/edit`)}>Edit</Button>
-                      <Button variant="outline" size="sm" onClick={() => onDuplicate(r.id)}>Duplicate</Button>
-                      <Button variant="destructive" size="sm" onClick={() => onDeleteClick(r.id)}>Delete</Button>
+                    <TableCell className="text-right whitespace-nowrap">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => nav(`/proposals/${r.id}/edit`)}>
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => onDuplicate(r.id)}>
+                            Duplicate
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={() => onDeleteClick(r.id)} className="text-destructive">
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </TableCell>
                   </TableRow>
                 ))}
