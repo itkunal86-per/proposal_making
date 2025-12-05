@@ -849,30 +849,41 @@ export function valueTotal(p: Proposal): number {
 }
 
 export async function enableProposalSharing(proposalId: string): Promise<{ success: boolean; token?: string; error?: string }> {
-  const token = getStoredToken();
-  if (!token) {
-    return { success: false, error: "No authentication token available" };
-  }
-
   try {
-    const res = await fetch(`${PROPOSALS_ENDPOINT}/${proposalId}/sharing/enable`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`,
-      },
-    });
-
-    if (!res.ok) {
-      const errorData = await res.json().catch(() => ({}));
-      return { success: false, error: errorData.error || "Failed to enable sharing" };
+    // Get the proposal details first
+    const proposal = await getProposalDetails(proposalId);
+    if (!proposal) {
+      return { success: false, error: "Proposal not found" };
     }
 
-    const data = await res.json();
-    return { success: true, token: data.token };
+    // Check if sharing is already enabled
+    if (proposal.settings?.sharing?.public && proposal.settings?.sharing?.token) {
+      return { success: true, token: proposal.settings.sharing.token };
+    }
+
+    // Generate a new sharing token if needed
+    const sharingToken = proposal.settings?.sharing?.token || uuid();
+
+    // Update the proposal with sharing enabled
+    const updatedProposal = {
+      ...proposal,
+      settings: {
+        ...proposal.settings,
+        sharing: {
+          public: true,
+          token: sharingToken,
+          allowComments: proposal.settings?.sharing?.allowComments ?? true,
+        },
+      },
+    };
+
+    // Save the updated proposal
+    await updateProposal(updatedProposal);
+
+    return { success: true, token: sharingToken };
   } catch (err) {
     console.error("Failed to enable sharing:", err);
-    return { success: false, error: "Network error. Please try again." };
+    return { success: false, error: "Failed to enable sharing" };
   }
 }
 
