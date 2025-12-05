@@ -37,10 +37,12 @@ export const ShareLinkDialog: React.FC<ShareLinkDialogProps> = ({
     try {
       const result = await enableProposalSharing(proposalId);
       console.log("Share result:", result);
+      console.log("Token received:", result.token);
 
       if (result.success && result.token) {
         setShareToken(result.token);
         const link = `${window.location.origin}/proposal/${result.token}`;
+        console.log("Link being set:", link);
         setShareLink(link);
         console.log("Generated share link:", link);
       } else {
