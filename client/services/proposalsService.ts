@@ -867,20 +867,23 @@ export async function enableProposalSharing(proposalId: string): Promise<{ succe
       return { success: true, token: proposal.settings.sharing.token };
     }
 
-    // Update the proposal with sharing enabled - let the API generate the token
+    // Generate a sharing token if not present
+    const sharingToken = proposal.settings?.sharing?.token || uuid();
+
+    // Update the proposal with sharing enabled
     const updatedProposal = {
       ...proposal,
       settings: {
         ...proposal.settings,
         sharing: {
           public: true,
+          token: sharingToken,
           allowComments: proposal.settings?.sharing?.allowComments ?? true,
-          // Don't set token - let the API generate it
         },
       },
     };
 
-    // Save the updated proposal - the API should generate and return the sharing token
+    // Save the updated proposal
     const res = await fetch(`${PROPOSALS_ENDPOINT}/${proposalId}`, {
       method: "PUT",
       headers: {
@@ -897,21 +900,27 @@ export async function enableProposalSharing(proposalId: string): Promise<{ succe
     }
 
     const data: ApiProposalResponse = await res.json();
-    console.log("Sharing enabled, response:", data);
+    console.log("Sharing enabled, response data:", {
+      id: data.id,
+      sharing_token: data.sharing_token,
+      settings_sharing: (data.settings as any)?.sharing,
+    });
 
-    // Extract the token from the response
-    const sharingToken = data.sharing_token;
-    if (sharingToken) {
-      return { success: true, token: sharingToken };
+    // Try to extract the token from multiple possible locations
+    let returnToken = sharingToken;
+
+    // Check top-level sharing_token field
+    if (data.sharing_token) {
+      returnToken = data.sharing_token;
+      console.log("Token found in sharing_token:", returnToken);
+    }
+    // Check settings.sharing.token
+    else if ((data.settings as any)?.sharing?.token) {
+      returnToken = (data.settings as any).sharing.token;
+      console.log("Token found in settings.sharing.token:", returnToken);
     }
 
-    // If no token in response, try to extract from settings
-    const settings = data.settings as any;
-    if (settings?.sharing?.token) {
-      return { success: true, token: settings.sharing.token };
-    }
-
-    return { success: false, error: "No sharing token received from API" };
+    return { success: true, token: returnToken };
   } catch (err) {
     console.error("Failed to enable sharing:", err);
     return { success: false, error: "Failed to enable sharing" };
