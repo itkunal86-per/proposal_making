@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -19,6 +19,7 @@ export const ShareLinkDialog: React.FC<ShareLinkDialogProps> = ({
   proposalId,
   proposalTitle,
 }) => {
+  const inputRef = useRef<HTMLInputElement>(null);
   const [shareToken, setShareToken] = useState<string | null>(null);
   const [shareLink, setShareLink] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
@@ -37,10 +38,12 @@ export const ShareLinkDialog: React.FC<ShareLinkDialogProps> = ({
     try {
       const result = await enableProposalSharing(proposalId);
       console.log("Share result:", result);
+      console.log("Token received:", result.token);
 
       if (result.success && result.token) {
         setShareToken(result.token);
         const link = `${window.location.origin}/proposal/${result.token}`;
+        console.log("Link being set:", link);
         setShareLink(link);
         console.log("Generated share link:", link);
       } else {
@@ -59,12 +62,33 @@ export const ShareLinkDialog: React.FC<ShareLinkDialogProps> = ({
     }
   };
 
-  const handleCopy = () => {
-    if (shareLink) {
-      navigator.clipboard.writeText(shareLink);
+  const handleCopy = async () => {
+    if (!shareLink) return;
+
+    try {
+      await navigator.clipboard.writeText(shareLink);
       setCopied(true);
       toast({ title: "Success", description: "Link copied to clipboard" });
       setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Clipboard API blocked, using fallback:", err);
+      // Fallback: select the text in the input field
+      if (inputRef.current) {
+        inputRef.current.select();
+        try {
+          document.execCommand("copy");
+          setCopied(true);
+          toast({ title: "Success", description: "Link copied to clipboard" });
+          setTimeout(() => setCopied(false), 2000);
+        } catch (fallbackErr) {
+          console.error("Copy fallback failed:", fallbackErr);
+          toast({
+            title: "Manual Copy Required",
+            description: "Please select and copy the link manually",
+            variant: "default",
+          });
+        }
+      }
     }
   };
 
@@ -95,6 +119,7 @@ export const ShareLinkDialog: React.FC<ShareLinkDialogProps> = ({
                 <label className="text-sm font-medium">Share Link</label>
                 <div className="flex gap-2">
                   <Input
+                    ref={inputRef}
                     type="text"
                     value={shareLink}
                     readOnly

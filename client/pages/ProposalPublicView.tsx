@@ -1,10 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { getPublicProposal, type Proposal } from "@/services/proposalsService";
-import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
 import { replaceVariables, decodeHtmlEntities } from "@/lib/variableUtils";
-import { toast } from "@/hooks/use-toast";
 
 export default function ProposalPublicView() {
   const { token } = useParams<{ token: string }>();
@@ -38,33 +35,6 @@ export default function ProposalPublicView() {
     loadProposal();
   }, [token]);
 
-  const handleExportPDF = async () => {
-    try {
-      const response = await import("html2pdf.js");
-      const html2pdf = response.default;
-
-      const element = contentRef.current;
-      if (!element) {
-        toast({ title: "Error", description: "Could not find content to export" });
-        return;
-      }
-
-      const opt = {
-        margin: 10,
-        filename: `${proposal?.title}.pdf`,
-        image: { type: "jpeg" as const, quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { orientation: "portrait" as const, unit: "mm" as const, format: "a4" as const },
-      };
-
-      html2pdf().set(opt).from(element).save();
-      toast({ title: "Success", description: "Proposal exported as PDF" });
-    } catch (error) {
-      console.error("PDF export error:", error);
-      toast({ title: "Error", description: "Failed to export PDF" });
-    }
-  };
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -91,20 +61,6 @@ export default function ProposalPublicView() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <div className="border-b border-slate-200 px-6 py-4 bg-white sticky top-0 z-10 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">{proposal.title}</h1>
-        <Button
-          onClick={handleExportPDF}
-          variant="outline"
-          size="sm"
-          className="flex items-center gap-2"
-        >
-          <Download className="w-4 h-4" />
-          Export PDF
-        </Button>
-      </div>
-
       {/* Content */}
       <div className="flex-1 overflow-y-auto">
         <div ref={contentRef} className="max-w-4xl mx-auto bg-white p-8 shadow-sm mt-6 mb-6">

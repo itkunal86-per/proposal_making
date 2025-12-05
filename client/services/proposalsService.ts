@@ -855,20 +855,20 @@ export async function enableProposalSharing(proposalId: string): Promise<{ succe
   }
 
   try {
-    // Get the proposal details first
+    // Get the proposal details first to retrieve existing sharing_token
     const proposal = await getProposalDetails(proposalId);
     if (!proposal) {
       return { success: false, error: "Proposal not found" };
     }
 
-    // Check if sharing is already enabled
-    if (proposal.settings?.sharing?.public && proposal.settings?.sharing?.token) {
-      console.log("Sharing already enabled with token:", proposal.settings.sharing.token);
-      return { success: true, token: proposal.settings.sharing.token };
-    }
-
-    // Generate a sharing token if not present
+    // Use existing token from proposal, or generate new one if not present
     const sharingToken = proposal.settings?.sharing?.token || uuid();
+
+    // If sharing is already enabled and we have a token, return it
+    if (proposal.settings?.sharing?.public && sharingToken) {
+      console.log("Sharing already enabled with existing token:", sharingToken);
+      return { success: true, token: sharingToken };
+    }
 
     // Update the proposal with sharing enabled
     const updatedProposal = {
@@ -906,18 +906,18 @@ export async function enableProposalSharing(proposalId: string): Promise<{ succe
       settings_sharing: (data.settings as any)?.sharing,
     });
 
-    // Try to extract the token from multiple possible locations
+    // Try to extract the token from the API response - prefer existing token we sent
     let returnToken = sharingToken;
 
     // Check top-level sharing_token field
     if (data.sharing_token) {
       returnToken = data.sharing_token;
-      console.log("Token found in sharing_token:", returnToken);
+      console.log("Token from API sharing_token:", returnToken);
     }
     // Check settings.sharing.token
     else if ((data.settings as any)?.sharing?.token) {
       returnToken = (data.settings as any).sharing.token;
-      console.log("Token found in settings.sharing.token:", returnToken);
+      console.log("Token from API settings.sharing.token:", returnToken);
     }
 
     return { success: true, token: returnToken };
@@ -929,7 +929,7 @@ export async function enableProposalSharing(proposalId: string): Promise<{ succe
 
 export async function getPublicProposal(sharingToken: string): Promise<Proposal | null> {
   try {
-    const res = await fetch(`https://propai-api.hirenq.com/api/public/${sharingToken}`);
+    const res = await fetch(`https://propai-api.hirenq.com/api/public/proposal/${sharingToken}`);
 
     if (!res.ok) {
       console.error("Failed to fetch public proposal:", res.statusText);
