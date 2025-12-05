@@ -22,6 +22,7 @@ import {
   createProposal,
   updateProposal,
   persistProposal,
+  getProposalDetails,
 } from "@/services/proposalsService";
 import { type ClientRecord, listClients } from "@/services/clientsService";
 import { GenerateProposalDialog } from "@/components/GenerateProposalDialog";
