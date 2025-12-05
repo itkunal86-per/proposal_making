@@ -89,23 +89,6 @@ export default function SubscriberSettings() {
           </div>
           <Separator />
 
-          {/* Subscription */}
-          <div className="space-y-2">
-            <h2 className="text-lg font-semibold">Subscription</h2>
-            <div className="flex gap-2">
-              {(["free", "pro", "business"] as const).map((p) => (
-                <Button key={p} variant={data.subscription.plan === p ? "default" : "outline"} onClick={() => updatePlan(p)}>
-                  {p}
-                </Button>
-              ))}
-            </div>
-            {data.subscription.updatedAt && (
-              <div className="text-xs text-muted-foreground">Updated: {new Date(data.subscription.updatedAt).toLocaleString()}</div>
-            )}
-          </div>
-
-          <Separator />
-
           <div className="flex justify-end">
             <Button onClick={save}>Save Settings</Button>
           </div>
