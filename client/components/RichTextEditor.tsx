@@ -45,6 +45,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   const captureContent = () => {
     if (!editorRef.current) return;
     const content = editorRef.current.innerHTML;
+    console.log("RichTextEditor: captureContent:", { content, contentLength: content.length, isEmpty: content === "" });
     onChange(content);
   };
 
