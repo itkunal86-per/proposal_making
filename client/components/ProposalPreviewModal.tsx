@@ -365,6 +365,83 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                     ))}
                   </div>
                 )}
+
+                {/* Shapes, Tables, and Texts */}
+                {(section.shapes && section.shapes.length > 0) || (section.tables && section.tables.length > 0) || ((section as any).texts && (section as any).texts.length > 0) ? (
+                  <div className="relative mt-4 bg-gray-50 rounded" style={{ position: "relative", minHeight: "400px", pointerEvents: "none" }}>
+                    {section.shapes && section.shapes.map((shape, sIndex) => (
+                      <div key={`shape-${sIndex}`} style={{ pointerEvents: "auto" }}>
+                        <ShapeEditor
+                          id={`shape-${section.id}-${sIndex}`}
+                          type={shape.type}
+                          width={shape.width}
+                          height={shape.height}
+                          backgroundColor={shape.backgroundColor}
+                          backgroundImage={shape.backgroundImage}
+                          backgroundSize={shape.backgroundSize}
+                          backgroundOpacity={shape.backgroundOpacity}
+                          borderWidth={shape.borderWidth}
+                          borderColor={shape.borderColor}
+                          borderRadius={shape.borderRadius}
+                          top={shape.top}
+                          left={shape.left}
+                          selected={false}
+                          onSelect={() => {}}
+                          onUpdate={() => {}}
+                        />
+                      </div>
+                    ))}
+                    {section.tables && section.tables.map((table, tIndex) => (
+                      <div key={`table-${tIndex}`} style={{ pointerEvents: "auto" }}>
+                        <TableEditor
+                          id={`table-${section.id}-${tIndex}`}
+                          rows={table.rows}
+                          columns={table.columns}
+                          cells={table.cells}
+                          borderWidth={table.borderWidth}
+                          borderColor={table.borderColor}
+                          headerBackground={table.headerBackground}
+                          cellBackground={table.cellBackground}
+                          textColor={table.textColor}
+                          padding={table.padding}
+                          width={table.width}
+                          height={table.height}
+                          top={table.top}
+                          left={table.left}
+                          selected={false}
+                          onSelect={() => {}}
+                          onUpdate={() => {}}
+                        />
+                      </div>
+                    ))}
+                    {(section as any).texts && (section as any).texts.map((text: any, tIndex: number) => (
+                      <div key={`text-${tIndex}`} style={{ pointerEvents: "auto" }}>
+                        <TextEditor
+                          id={`text-${section.id}-${tIndex}`}
+                          content={text.content}
+                          top={text.top}
+                          left={text.left}
+                          width={text.width}
+                          fontSize={text.fontSize}
+                          color={text.color}
+                          fontWeight={text.fontWeight}
+                          backgroundColor={text.backgroundColor}
+                          backgroundOpacity={text.backgroundOpacity}
+                          borderColor={text.borderColor}
+                          borderWidth={text.borderWidth}
+                          borderRadius={text.borderRadius}
+                          paddingTop={text.paddingTop}
+                          paddingRight={text.paddingRight}
+                          paddingBottom={text.paddingBottom}
+                          paddingLeft={text.paddingLeft}
+                          selected={false}
+                          onSelect={() => {}}
+                          onUpdate={() => {}}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
               </div>
             ))}
           </div>
