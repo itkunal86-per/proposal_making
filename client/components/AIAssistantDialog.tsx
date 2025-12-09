@@ -293,6 +293,13 @@ export const AIAssistantDialog: React.FC<AIAssistantDialogProps> = ({
     if (targetElementType === "section-content" && activeSection) {
       return { label: "Section Content", value: activeSection.content };
     }
+    if (targetElementType === "text" && activeSection && elementIndex !== null) {
+      const textElement = (activeSection as any).texts?.[elementIndex];
+      return {
+        label: `Text Block - ${activeSection.title}`,
+        value: textElement?.content || "Empty text block",
+      };
+    }
     if ((targetElementType === "image" || targetElementType === "video") && activeSection) {
       return {
         label: `${targetElementType.toUpperCase()} - ${activeSection.title}`,
