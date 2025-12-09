@@ -264,6 +264,7 @@ interface ProposalPreviewProps {
   selectedElementId: string | null;
   onSelectElement: (id: string, type: string) => void;
   onAIElement?: (elementId: string, elementType: string) => void;
+  onDeleteContent?: (sectionId: string, columnIndex?: number) => void;
   variables?: Array<{ id: string | number; name: string; value: string }>;
   onAddShape?: (sectionId: string, shapeType: "square" | "circle" | "triangle", x: number, y: number) => void;
   onUpdateShape?: (sectionId: string, shapeIndex: number, updates: { width?: number; height?: number; top?: number; left?: number }) => void;
