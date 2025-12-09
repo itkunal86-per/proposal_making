@@ -194,6 +194,7 @@ const sectionSchema = z.object({
   columnStyles: z.union([z.array(z.record(z.any())), z.record(z.any())]).optional(),
   media: z.array(z.object({ type: z.union([z.literal("image"), z.literal("video")]), url: z.string() })).optional(),
   shapes: z.array(shapeElementSchema).optional(),
+  tables: z.array(tableElementSchema).optional(),
   comments: z.array(z.object({ id: z.union([z.string(), z.number()]), author: z.string(), text: z.string(), createdAt: z.number() })).optional(),
   titleStyles: z.union([z.record(z.any()), z.array(z.any())]).optional(),
   contentStyles: z.union([z.record(z.any()), z.array(z.any())]).optional(),
