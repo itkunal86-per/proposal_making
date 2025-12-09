@@ -384,7 +384,6 @@ export const AIAssistantDialog: React.FC<AIAssistantDialogProps> = ({
 
   const elementPreview = getElementPreview();
   const isEnabled = activeSection || targetElementType === "title";
-  const showAddButton = activeSection || targetElementType === "title";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
