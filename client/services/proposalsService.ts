@@ -121,6 +121,19 @@ export interface CreateProposalResult {
 }
 
 const idSchema = z.union([z.string(), z.number()]);
+const shapeElementSchema = z.object({
+  id: z.union([z.string(), z.number()]),
+  type: z.union([z.literal("square"), z.literal("circle"), z.literal("triangle")]),
+  width: z.number(),
+  height: z.number(),
+  backgroundColor: z.string(),
+  borderWidth: z.number().optional(),
+  borderColor: z.string().optional(),
+  borderRadius: z.number().optional(),
+  top: z.number().optional(),
+  left: z.number().optional(),
+}).passthrough();
+
 const sectionSchema = z.object({
   id: idSchema,
   title: z.string(),
@@ -129,6 +142,7 @@ const sectionSchema = z.object({
   columnContents: z.union([z.array(z.string()), z.record(z.any())]).optional(),
   columnStyles: z.union([z.array(z.record(z.any())), z.record(z.any())]).optional(),
   media: z.array(z.object({ type: z.union([z.literal("image"), z.literal("video")]), url: z.string() })).optional(),
+  shapes: z.array(shapeElementSchema).optional(),
   comments: z.array(z.object({ id: z.union([z.string(), z.number()]), author: z.string(), text: z.string(), createdAt: z.number() })).optional(),
   titleStyles: z.union([z.record(z.any()), z.array(z.any())]).optional(),
   contentStyles: z.union([z.record(z.any()), z.array(z.any())]).optional(),
