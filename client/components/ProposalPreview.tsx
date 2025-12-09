@@ -296,7 +296,9 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
   onUpdateText,
 }) => {
   const [dragOverSectionId, setDragOverSectionId] = React.useState<string | null>(null);
+  const [canvasHeights, setCanvasHeights] = React.useState<Record<string, number>>({});
   const sectionRefs = React.useRef<Map<string, HTMLDivElement>>(new Map());
+  const canvasRefs = React.useRef<Map<string, HTMLDivElement>>(new Map());
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     const data = e.dataTransfer.types.includes("application/json");
