@@ -3,6 +3,7 @@ import { Proposal, ProposalSection } from "@/services/proposalsService";
 import { Button } from "@/components/ui/button";
 import { Sparkles } from "lucide-react";
 import { replaceVariables, decodeHtmlEntities } from "@/lib/variableUtils";
+import { ShapeElement } from "@/components/ShapeElement";
 
 interface ElementProps {
   id: string;
