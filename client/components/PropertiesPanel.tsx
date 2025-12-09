@@ -1908,6 +1908,202 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     );
   }
 
+  if (selectedElementType === "shape") {
+    const parts = selectedElementId.split("-");
+    const sectionId = parts[1];
+    const shapeIndex = parseInt(parts[2]);
+    const section = proposal.sections.find((s) => s.id === sectionId);
+
+    if (!section || !section.shapes || !section.shapes[shapeIndex]) {
+      return (
+        <Card className="p-4">
+          <div className="text-center text-muted-foreground">
+            <p className="text-sm">Shape not found</p>
+          </div>
+        </Card>
+      );
+    }
+
+    const shape = section.shapes[shapeIndex];
+
+    const handleUpdateShape = (updates: Partial<typeof shape>) => {
+      const newShapes = [...(section.shapes || [])];
+      newShapes[shapeIndex] = { ...shape, ...updates };
+      const updatedProposal = {
+        ...proposal,
+        sections: proposal.sections.map((s) =>
+          s.id === sectionId ? { ...s, shapes: newShapes } : s
+        ),
+      };
+      onUpdateProposal(updatedProposal);
+    };
+
+    return (
+      <Card className="p-4 space-y-4">
+        <div>
+          <Label className="text-xs font-semibold">Shape Type</Label>
+          <div className="flex gap-2 mt-2">
+            {(["square", "circle", "triangle"] as const).map((type) => (
+              <Button
+                key={type}
+                variant={shape.type === type ? "default" : "outline"}
+                size="sm"
+                onClick={() => handleUpdateShape({ type })}
+                className="capitalize flex-1"
+              >
+                {type}
+              </Button>
+            ))}
+          </div>
+        </div>
+
+        <Separator />
+
+        <div className="space-y-3">
+          <div>
+            <Label className="text-xs font-semibold">Width</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="10"
+                max="500"
+                value={shape.width}
+                onChange={(e) =>
+                  handleUpdateShape({ width: parseInt(e.target.value) || 100 })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">
+                px
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Height</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="10"
+                max="500"
+                value={shape.height}
+                onChange={(e) =>
+                  handleUpdateShape({ height: parseInt(e.target.value) || 100 })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">
+                px
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Background Color</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="color"
+                value={shape.backgroundColor || "#e5e7eb"}
+                onChange={(e) =>
+                  handleUpdateShape({ backgroundColor: e.target.value })
+                }
+                className="w-16 h-10 p-1 cursor-pointer"
+              />
+              <Input
+                value={shape.backgroundColor || "#e5e7eb"}
+                onChange={(e) =>
+                  handleUpdateShape({ backgroundColor: e.target.value })
+                }
+                className="flex-1"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Border Width</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="0"
+                max="10"
+                value={shape.borderWidth || 0}
+                onChange={(e) =>
+                  handleUpdateShape({ borderWidth: parseInt(e.target.value) || 0 })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">
+                px
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Border Color</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="color"
+                value={shape.borderColor || "#000000"}
+                onChange={(e) =>
+                  handleUpdateShape({ borderColor: e.target.value })
+                }
+                className="w-16 h-10 p-1 cursor-pointer"
+              />
+              <Input
+                value={shape.borderColor || "#000000"}
+                onChange={(e) =>
+                  handleUpdateShape({ borderColor: e.target.value })
+                }
+                className="flex-1"
+              />
+            </div>
+          </div>
+
+          {shape.type !== "triangle" && (
+            <div>
+              <Label className="text-xs font-semibold">Border Radius</Label>
+              <div className="flex gap-2 mt-2">
+                <Input
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={shape.borderRadius || 0}
+                  onChange={(e) =>
+                    handleUpdateShape({ borderRadius: parseInt(e.target.value) || 0 })
+                  }
+                  className="flex-1"
+                />
+                <span className="text-sm text-muted-foreground self-center">
+                  px
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <Separator />
+
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={() => {
+            const newShapes = section.shapes!.filter((_, i) => i !== shapeIndex);
+            const updatedProposal = {
+              ...proposal,
+              sections: proposal.sections.map((s) =>
+                s.id === sectionId ? { ...s, shapes: newShapes } : s
+              ),
+            };
+            onUpdateProposal(updatedProposal);
+          }}
+          className="w-full"
+        >
+          Remove Shape
+        </Button>
+      </Card>
+    );
+  }
+
   return (
     <Card className="p-4">
       <div className="text-center text-muted-foreground">
