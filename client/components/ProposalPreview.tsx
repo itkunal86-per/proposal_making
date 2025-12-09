@@ -249,6 +249,8 @@ interface ProposalPreviewProps {
   variables?: Array<{ id: string | number; name: string; value: string }>;
   onAddShape?: (sectionId: string, shapeType: "square" | "circle" | "triangle", x: number, y: number) => void;
   onUpdateShape?: (sectionId: string, shapeIndex: number, updates: { width?: number; height?: number; top?: number; left?: number }) => void;
+  onAddTable?: (sectionId: string, x: number, y: number) => void;
+  onUpdateTable?: (sectionId: string, tableIndex: number, updates: any) => void;
 }
 
 export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
