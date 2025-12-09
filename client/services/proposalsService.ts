@@ -19,6 +19,28 @@ export interface ShapeElement {
   left: number;
 }
 
+export interface TableCell {
+  id: string;
+  content: string;
+}
+
+export interface TableElement {
+  id: string;
+  rows: number;
+  columns: number;
+  cells: TableCell[][];
+  borderWidth: number;
+  borderColor: string;
+  headerBackground?: string;
+  cellBackground?: string;
+  textColor?: string;
+  padding: number;
+  width: number;
+  height: number;
+  top: number;
+  left: number;
+}
+
 export interface ProposalSection {
   id: string;
   title: string;
