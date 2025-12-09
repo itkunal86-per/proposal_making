@@ -37,6 +37,7 @@ export const BuildPanel: React.FC<BuildPanelProps> = ({ onAddContent, onShapeDra
       label: "Table",
       icon: Table,
       description: "Insert a table",
+      draggable: true,
     },
     {
       id: "shape",
