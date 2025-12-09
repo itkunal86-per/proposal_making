@@ -849,11 +849,11 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
               </div>
             )}
 
-            {section.shapes && section.shapes.length > 0 && (
-              <div className={isMultiColumn ? "col-span-full relative mt-4 bg-gray-50 rounded min-h-96" : "relative mt-4 bg-gray-50 rounded min-h-96"} style={{ position: "relative" }}>
-                {section.shapes.map((shape, sIndex) => (
+            {(section.shapes && section.shapes.length > 0) || (section.tables && section.tables.length > 0) ? (
+              <div className={isMultiColumn ? "col-span-full relative mt-4 bg-gray-50 rounded" : "relative mt-4 bg-gray-50 rounded"} style={{ position: "relative", minHeight: "400px" }}>
+                {section.shapes && section.shapes.map((shape, sIndex) => (
                   <ShapeEditor
-                    key={sIndex}
+                    key={`shape-${sIndex}`}
                     id={`shape-${section.id}-${sIndex}`}
                     type={shape.type}
                     width={shape.width}
@@ -876,14 +876,9 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                     }
                   />
                 ))}
-              </div>
-            )}
-
-            {section.tables && section.tables.length > 0 && (
-              <div className={isMultiColumn ? "col-span-full relative mt-4 bg-gray-50 rounded min-h-80" : "relative mt-4 bg-gray-50 rounded min-h-80"} style={{ position: "relative" }}>
-                {section.tables.map((table, tIndex) => (
+                {section.tables && section.tables.map((table, tIndex) => (
                   <TableEditor
-                    key={tIndex}
+                    key={`table-${tIndex}`}
                     id={`table-${section.id}-${tIndex}`}
                     rows={table.rows}
                     columns={table.columns}
@@ -908,7 +903,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                   />
                 ))}
               </div>
-            )}
+            ) : null}
           </div>
         );
         })}
