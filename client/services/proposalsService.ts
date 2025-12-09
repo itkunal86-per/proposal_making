@@ -271,6 +271,9 @@ function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmai
   const createdAtMs = apiProposal.created_at ? new Date(apiProposal.created_at).getTime() : Date.now();
   const updatedAtMs = apiProposal.updated_at ? new Date(apiProposal.updated_at).getTime() : createdAtMs;
 
+  // Ensure we have a valid ID - if API doesn't return one, generate one
+  const proposalId = apiProposal.id && apiProposal.id !== 'undefined' ? String(apiProposal.id) : uuid();
+
   // Handle both old API structure (with created_at) and new API structure (with timestamps)
   const sections = Array.isArray((apiProposal as any).sections) && (apiProposal as any).sections.length > 0
     ? ((apiProposal as any).sections as any[]).map((s) => {
