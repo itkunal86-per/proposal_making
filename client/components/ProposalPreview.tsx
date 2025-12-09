@@ -878,6 +878,37 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                 ))}
               </div>
             )}
+
+            {section.tables && section.tables.length > 0 && (
+              <div className={isMultiColumn ? "col-span-full relative mt-4 bg-gray-50 rounded" : "relative mt-4 bg-gray-50 rounded"} style={{ position: "relative" }}>
+                {section.tables.map((table, tIndex) => (
+                  <TableEditor
+                    key={tIndex}
+                    id={`table-${section.id}-${tIndex}`}
+                    rows={table.rows}
+                    columns={table.columns}
+                    cells={table.cells}
+                    borderWidth={table.borderWidth}
+                    borderColor={table.borderColor}
+                    headerBackground={table.headerBackground}
+                    cellBackground={table.cellBackground}
+                    textColor={table.textColor}
+                    padding={table.padding}
+                    width={table.width}
+                    height={table.height}
+                    top={table.top}
+                    left={table.left}
+                    selected={selectedElementId === `table-${section.id}-${tIndex}`}
+                    onSelect={() =>
+                      onSelectElement(`table-${section.id}-${tIndex}`, "table")
+                    }
+                    onUpdate={(updates) =>
+                      onUpdateTable?.(section.id, tIndex, updates)
+                    }
+                  />
+                ))}
+              </div>
+            )}
           </div>
         );
         })}
