@@ -92,9 +92,9 @@ export default function Dashboard() {
         </div>
 
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Stat title="Total proposals" value={data ? fmt(data.totals.proposals) : "—"} href="/proposals" />
-          <Stat title="Accepted / Declined" value={data ? `${fmt(data.totals.accepted)} / ${fmt(data.totals.declined)} (${ratio}%)` : "—"} href="/proposals" />
-          <Stat title="Active clients" value={data ? fmt(data.totals.activeClients) : "—"} href="/clients" />
+          <Stat title="Total proposals" value={data ? fmt(data.totals.proposals) : "—"} href="/my/proposals" />
+          <Stat title="Accepted / Declined" value={data ? `${fmt(data.totals.accepted)} / ${fmt(data.totals.declined)} (${ratio}%)` : "—"} href="/my/proposals" />
+          <Stat title="Active clients" value={data ? fmt(data.totals.activeClients) : "—"} href="/my/clients" />
           <Stat title="AI usage (tokens)" value={data ? fmt(data.totals.aiTokens) : "—"} />
         </div>
 
@@ -124,8 +124,8 @@ export default function Dashboard() {
         </Card>
 
         <div className="mt-6 flex flex-wrap items-center gap-3">
-          <a href="/proposals"><Button variant="outline">View proposals</Button></a>
-          <a href="/clients"><Button variant="outline">View clients</Button></a>
+          <a href="/my/proposals"><Button variant="outline">View proposals</Button></a>
+          <a href="/my/clients"><Button variant="outline">View clients</Button></a>
         </div>
       </div>
     </AppShell>

@@ -72,7 +72,7 @@ export default function ProposalEditor() {
     (async () => {
       const found = await getProposalDetails(id);
       if (!found) {
-        nav("/proposals");
+        nav("/my/proposals");
         return;
       }
       console.log("Loaded proposal from getProposalDetails:", {
