@@ -21,6 +21,7 @@ export const BuildPanel: React.FC<BuildPanelProps> = ({ onAddContent, onShapeDra
       label: "Text",
       icon: Type,
       description: "Add text content",
+      draggable: true,
     },
     {
       id: "image",
