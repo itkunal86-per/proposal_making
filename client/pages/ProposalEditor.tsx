@@ -501,6 +501,22 @@ export default function ProposalEditor() {
                   setActivePanel("properties");
                 }
               }}
+              onUpdateShape={(sectionId, shapeIndex, updates) => {
+                const updated = {
+                  ...p,
+                  sections: p.sections.map((s) =>
+                    s.id === sectionId
+                      ? {
+                          ...s,
+                          shapes: (s.shapes || []).map((shape, idx) =>
+                            idx === shapeIndex ? { ...shape, ...updates } : shape
+                          ),
+                        }
+                      : s
+                  ),
+                };
+                commit(updated);
+              }}
             />
           </div>
 
