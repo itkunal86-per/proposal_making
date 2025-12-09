@@ -574,6 +574,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                       marginLeft: (section as any).columnStyles?.[0]?.marginLeft ? `${(section as any).columnStyles[0].marginLeft}px` : "0px",
                       position: (section as any).columnStyles?.[0]?.backgroundImage ? "relative" : "static",
                     }}>
+                      {console.log(`Section "${section.title}": column 1 content =`, { content: (section as any).columnContents?.[0], length: (section as any).columnContents?.[0]?.length })}
                       <SelectableElement
                         id={`section-content-${section.id}-col1`}
                         type="section-content"
