@@ -252,6 +252,8 @@ interface ProposalPreviewProps {
   onUpdateShape?: (sectionId: string, shapeIndex: number, updates: { width?: number; height?: number; top?: number; left?: number }) => void;
   onAddTable?: (sectionId: string, x: number, y: number) => void;
   onUpdateTable?: (sectionId: string, tableIndex: number, updates: any) => void;
+  onAddText?: (sectionId: string, x: number, y: number) => void;
+  onUpdateText?: (sectionId: string, textIndex: number, updates: any) => void;
 }
 
 export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
