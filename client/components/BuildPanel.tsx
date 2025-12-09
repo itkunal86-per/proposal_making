@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Type, Image, Video, Table, Square } from "lucide-react";
 
 interface BuildPanelProps {
   onAddContent?: (type: "text" | "image" | "video" | "table" | "shape") => void;
+  onShapeDragStart?: (e: React.DragEvent<HTMLDivElement>) => void;
 }
 
 export const BuildPanel: React.FC<BuildPanelProps> = ({ onAddContent }) => {
