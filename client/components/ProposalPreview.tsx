@@ -136,6 +136,11 @@ const SelectableElement: React.FC<ElementProps> = ({
 
   const isTextElement = type !== "image" && type !== "video";
 
+  // Debug logging for section-content rendering
+  if (type === "section-content") {
+    console.log("SelectableElement: section-content", { id, childrenType: typeof children, childrenValue: children, isEmpty: children === "" });
+  }
+
   if (type === "image" || type === "video") {
     return (
       <div
