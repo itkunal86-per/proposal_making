@@ -475,20 +475,24 @@ export default function ProposalEditor() {
                 console.log("onDeleteContent called:", { sectionId, columnIndex });
                 const updated = {
                   ...p,
-                  sections: p.sections.map((s) =>
-                    s.id === sectionId
-                      ? columnIndex !== undefined
-                        ? {
-                            ...s,
-                            columnContents: ((s as any).columnContents || []).map((content: string, idx: number) =>
-                              idx === columnIndex ? "" : content
-                            ),
-                          }
-                        : { ...s, content: "" }
-                      : s
-                  ),
+                  sections: p.sections.map((s) => {
+                    if (s.id === sectionId) {
+                      if (columnIndex !== undefined) {
+                        const newColumnContents = ((s as any).columnContents || []).map((content: string, idx: number) =>
+                          idx === columnIndex ? "" : content
+                        );
+                        console.log("Clearing column", columnIndex, "newColumnContents:", newColumnContents);
+                        return { ...s, columnContents: newColumnContents };
+                      } else {
+                        console.log("Clearing single column content");
+                        return { ...s, content: "" };
+                      }
+                    }
+                    return s;
+                  }),
                 };
-                console.log("Updated proposal:", updated);
+                const updatedSection = updated.sections.find((s) => s.id === sectionId);
+                console.log("Updated proposal section:", updatedSection);
                 commit(updated);
               }}
               variables={variables}
