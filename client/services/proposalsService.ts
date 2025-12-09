@@ -604,11 +604,13 @@ export async function createProposalApi(input: CreateProposalInput): Promise<Cre
       };
     }
 
-    const data: ApiProposalResponse = await res.json();
-    console.log("API response from createProposalApi:", data);
-    if (!data.id) {
-      console.warn("API response missing 'id' field, will generate one");
-    }
+    const response = await res.json();
+    console.log("API response from createProposalApi:", response);
+
+    // Extract the proposal data from the API response wrapper
+    const data: ApiProposalResponse = response.data || response;
+    console.log("Extracted proposal data with id:", data.id);
+
     const proposal = convertApiProposalToProposal(data);
     console.log("Converted proposal with id:", proposal.id);
     const list = await getAll();
