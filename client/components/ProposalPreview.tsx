@@ -382,14 +382,6 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
 
       <div className="border-t">
         {proposal.sections.map((section, index) => {
-          console.log(`Section "${section.title}":`, {
-            layout: section.layout,
-            columnContents: (section as any).columnContents,
-            columnStyles: (section as any).columnStyles,
-            titleStyles: (section as any).titleStyles,
-            contentStyles: (section as any).contentStyles,
-          });
-
           const isMultiColumn = section.layout === "two-column" || section.layout === "three-column";
           const columnGapValue = typeof (section as any).titleStyles?.columnGap === "number" && (section as any).titleStyles.columnGap !== 24 ? (section as any).titleStyles.columnGap : 0;
           const gapAfterValue = typeof (section as any).contentStyles?.gapAfter === "number" ? (section as any).contentStyles.gapAfter : 10;
@@ -397,10 +389,6 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
             section.layout === "two-column" ? "grid grid-cols-2" :
             section.layout === "three-column" ? "grid grid-cols-3" :
             "space-y-3";
-
-          if (section.layout && section.layout !== "single") {
-            console.log(`Rendering section "${section.title}" with layout: ${section.layout}`, { containerClassName, isMultiColumn });
-          }
 
           return (
           <div
