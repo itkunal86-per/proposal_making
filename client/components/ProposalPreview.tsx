@@ -839,32 +839,34 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
               </div>
             )}
 
-            {(section.shapes && section.shapes.length > 0) ? (
-              <div className={isMultiColumn ? "col-span-full relative mt-4 p-4 bg-gray-50 rounded min-h-96" : "relative mt-4 p-4 bg-gray-50 rounded min-h-96"}>
-                <div className="relative w-full h-full">
-                  {section.shapes.map((shape, sIndex) => (
-                    <div key={sIndex} style={{ position: "relative", display: "inline-block", margin: "8px" }}>
-                      <ShapeElement
-                        id={`shape-${section.id}-${sIndex}`}
-                        type={shape.type}
-                        width={shape.width}
-                        height={shape.height}
-                        backgroundColor={shape.backgroundColor}
-                        borderWidth={shape.borderWidth}
-                        borderColor={shape.borderColor}
-                        borderRadius={shape.borderRadius}
-                        selected={selectedElementId === `shape-${section.id}-${sIndex}`}
-                        onSelect={() =>
-                          onSelectElement(`shape-${section.id}-${sIndex}`, "shape")
-                        }
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <div className={isMultiColumn ? "col-span-full relative mt-4 p-8 bg-gray-50 rounded text-center text-muted-foreground" : "relative mt-4 p-8 bg-gray-50 rounded text-center text-muted-foreground"}>
-                <p className="text-sm">Drag a shape here to add it to this section</p>
+            {section.shapes && section.shapes.length > 0 && (
+              <div className={isMultiColumn ? "col-span-full relative mt-4 bg-gray-50 rounded min-h-96 pointer-events-none" : "relative mt-4 bg-gray-50 rounded min-h-96 pointer-events-none"}>
+                {section.shapes.map((shape, sIndex) => (
+                  <div
+                    key={sIndex}
+                    style={{
+                      position: "absolute",
+                      left: `${shape.left}px`,
+                      top: `${shape.top}px`,
+                      pointerEvents: "auto",
+                    }}
+                  >
+                    <ShapeElement
+                      id={`shape-${section.id}-${sIndex}`}
+                      type={shape.type}
+                      width={shape.width}
+                      height={shape.height}
+                      backgroundColor={shape.backgroundColor}
+                      borderWidth={shape.borderWidth}
+                      borderColor={shape.borderColor}
+                      borderRadius={shape.borderRadius}
+                      selected={selectedElementId === `shape-${section.id}-${sIndex}`}
+                      onSelect={() =>
+                        onSelectElement(`shape-${section.id}-${sIndex}`, "shape")
+                      }
+                    />
+                  </div>
+                ))}
               </div>
             )}
           </div>
