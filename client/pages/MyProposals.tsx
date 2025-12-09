@@ -148,7 +148,9 @@ export default function MyProposals() {
     setIsCreateDialogOpen(false);
 
     if (result.data) {
-      nav(`/proposals/${result.data.id}/edit`);
+      const proposalId = result.data.id;
+      console.log("Navigating to proposal editor with id:", proposalId);
+      nav(`/proposals/${proposalId}/edit`);
     }
 
     await refresh();
