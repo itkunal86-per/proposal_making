@@ -2020,6 +2020,65 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
           </div>
 
           <div>
+            <Label className="text-xs font-semibold">Background Image URL</Label>
+            <Input
+              type="text"
+              placeholder="https://example.com/image.jpg"
+              value={shape.backgroundImage || ""}
+              onChange={(e) =>
+                handleUpdateShape({ backgroundImage: e.target.value })
+              }
+              className="flex-1 mt-2"
+            />
+            <p className="text-xs text-muted-foreground mt-2">
+              Enter the full URL of an image. Leave empty to remove.
+            </p>
+          </div>
+
+          {shape.backgroundImage && (
+            <>
+              <div>
+                <Label className="text-xs font-semibold">Background Size</Label>
+                <div className="flex gap-2 mt-2">
+                  <select
+                    value={shape.backgroundSize || "cover"}
+                    onChange={(e) =>
+                      handleUpdateShape({ backgroundSize: e.target.value })
+                    }
+                    className="flex-1 px-2 py-1 border border-input rounded-md bg-background text-sm"
+                  >
+                    <option value="cover">Cover</option>
+                    <option value="contain">Contain</option>
+                    <option value="100% 100%">Stretch</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-xs font-semibold">Background Opacity</Label>
+                <div className="flex gap-2 mt-2">
+                  <Input
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={parseInt(shape.backgroundOpacity || "0")}
+                    onChange={(e) =>
+                      handleUpdateShape({ backgroundOpacity: e.target.value })
+                    }
+                    className="flex-1"
+                  />
+                  <span className="text-sm text-muted-foreground self-center">
+                    %
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Adjust how much the background color overlays the image (0 = fully transparent, 100 = fully opaque)
+                </p>
+              </div>
+            </>
+          )}
+
+          <div>
             <Label className="text-xs font-semibold">Border Width</Label>
             <div className="flex gap-2 mt-2">
               <Input
