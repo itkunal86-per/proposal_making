@@ -137,10 +137,6 @@ const SelectableElement: React.FC<ElementProps> = ({
 
   const isTextElement = type !== "image" && type !== "video";
 
-  // Debug logging for section-content rendering
-  if (type === "section-content") {
-    console.log("SelectableElement: section-content", { id, childrenType: typeof children, childrenValue: children, isEmpty: children === "" });
-  }
 
   if (type === "image" || type === "video") {
     return (
@@ -177,9 +173,7 @@ const SelectableElement: React.FC<ElementProps> = ({
   };
 
   // If section-content is empty (deleted), don't render anything
-  // But log it for debugging
   if (type === "section-content" && children === "") {
-    console.log("SelectableElement: returning null for empty section-content", { id });
     return null;
   }
 
@@ -509,9 +503,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
             )}
 
             {!isMultiColumn && (
-              <>
-                {console.log(`Section "${section.title}": single-column content =`, { content: section.content, length: section.content?.length })}
-                <SelectableElement
+              <SelectableElement
                   id={`section-content-${section.id}`}
                   type="section-content"
                   selected={selectedElementId === `section-content-${section.id}`}
@@ -550,7 +542,6 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                 >
                   {replaceVariables(section.content || "", variables)}
                 </SelectableElement>
-              </>
             )}
 
             {isMultiColumn && (
@@ -577,7 +568,6 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                       marginLeft: (section as any).columnStyles?.[0]?.marginLeft ? `${(section as any).columnStyles[0].marginLeft}px` : "0px",
                       position: (section as any).columnStyles?.[0]?.backgroundImage ? "relative" : "static",
                     }}>
-                      {console.log(`Section "${section.title}": column 1 content =`, { content: (section as any).columnContents?.[0], length: (section as any).columnContents?.[0]?.length })}
                       <SelectableElement
                         id={`section-content-${section.id}-col1`}
                         type="section-content"
