@@ -2500,6 +2500,365 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     );
   }
 
+  if (selectedElementType === "text") {
+    const parts = selectedElementId.split("-");
+    const sectionId = parts[1];
+    const textIndex = parseInt(parts[2]);
+    const section = proposal.sections.find((s) => s.id === sectionId);
+
+    if (!section || !(section as any).texts || !(section as any).texts[textIndex]) {
+      return (
+        <Card className="p-4">
+          <div className="text-center text-muted-foreground">
+            <p className="text-sm">Text not found</p>
+          </div>
+        </Card>
+      );
+    }
+
+    const text = (section as any).texts[textIndex];
+
+    const handleUpdateText = (updates: Partial<typeof text>) => {
+      const newTexts = [...((section as any).texts || [])];
+      newTexts[textIndex] = { ...text, ...updates };
+      const updatedProposal = {
+        ...proposal,
+        sections: proposal.sections.map((s) =>
+          s.id === sectionId ? { ...s, texts: newTexts } : s
+        ),
+      };
+      onUpdateProposal(updatedProposal);
+    };
+
+    return (
+      <Card className="p-4 space-y-4">
+        <div>
+          <Label className="text-xs font-semibold">Content</Label>
+          <Textarea
+            value={text.content || ""}
+            onChange={(e) =>
+              handleUpdateText({ content: e.target.value })
+            }
+            placeholder="Enter text content..."
+            className="mt-2 min-h-20"
+          />
+        </div>
+
+        <Separator />
+
+        <div className="space-y-3">
+          <h3 className="text-xs font-semibold">Text Styling</h3>
+          <div>
+            <Label className="text-xs font-semibold">Text Color</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="color"
+                value={text.color || "#000000"}
+                onChange={(e) =>
+                  handleUpdateText({ color: e.target.value })
+                }
+                className="w-16 h-10 p-1 cursor-pointer"
+              />
+              <Input
+                value={text.color || "#000000"}
+                onChange={(e) =>
+                  handleUpdateText({ color: e.target.value })
+                }
+                className="flex-1"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Font Size</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="8"
+                max="72"
+                value={parseInt(text.fontSize || "16")}
+                onChange={(e) =>
+                  handleUpdateText({ fontSize: e.target.value })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">
+                px
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Font Weight</Label>
+            <Button
+              variant={text.fontWeight ? "default" : "outline"}
+              size="sm"
+              onClick={() =>
+                handleUpdateText({ fontWeight: !text.fontWeight })
+              }
+              className="w-full"
+            >
+              {text.fontWeight ? "Bold" : "Regular"}
+            </Button>
+          </div>
+        </div>
+
+        <Separator />
+
+        <div className="space-y-3">
+          <h3 className="text-xs font-semibold">Background</h3>
+          <div>
+            <Label className="text-xs font-semibold">Color</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="color"
+                value={text.backgroundColor || "#ffffff"}
+                onChange={(e) =>
+                  handleUpdateText({ backgroundColor: e.target.value })
+                }
+                className="w-16 h-10 p-1 cursor-pointer"
+              />
+              <Input
+                value={text.backgroundColor || "#ffffff"}
+                onChange={(e) =>
+                  handleUpdateText({ backgroundColor: e.target.value })
+                }
+                className="flex-1"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Opacity</Label>
+            <div className="flex gap-2 mt-2 items-center">
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={parseInt(text.backgroundOpacity || "100")}
+                onChange={(e) =>
+                  handleUpdateText({ backgroundOpacity: e.target.value })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm font-medium w-12 text-center">
+                {parseInt(text.backgroundOpacity || "100")}%
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <Separator />
+
+        <div className="space-y-3">
+          <h3 className="text-xs font-semibold">Borders</h3>
+          <div>
+            <Label className="text-xs font-semibold">Color</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="color"
+                value={text.borderColor || "#d1d5db"}
+                onChange={(e) =>
+                  handleUpdateText({ borderColor: e.target.value })
+                }
+                className="w-16 h-10 p-1 cursor-pointer"
+              />
+              <Input
+                value={text.borderColor || "#d1d5db"}
+                onChange={(e) =>
+                  handleUpdateText({ borderColor: e.target.value })
+                }
+                className="flex-1"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Border Width</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="0"
+                max="10"
+                value={parseInt(text.borderWidth || "1")}
+                onChange={(e) =>
+                  handleUpdateText({ borderWidth: e.target.value })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">
+                px
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Border Radius</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="0"
+                max="50"
+                value={parseInt(text.borderRadius || "4")}
+                onChange={(e) =>
+                  handleUpdateText({ borderRadius: e.target.value })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">
+                px
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <Separator />
+
+        <div className="space-y-3">
+          <h3 className="text-xs font-semibold">Spacing</h3>
+          <div>
+            <Label className="text-xs font-semibold">Padding</Label>
+            <div className="grid grid-cols-2 gap-2 mt-2">
+              <div>
+                <Label className="text-xs text-muted-foreground">Top</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={parseInt(text.paddingTop || "8")}
+                  onChange={(e) =>
+                    handleUpdateText({ paddingTop: e.target.value })
+                  }
+                  className="mt-1"
+                  placeholder="0"
+                />
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Right</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={parseInt(text.paddingRight || "8")}
+                  onChange={(e) =>
+                    handleUpdateText({ paddingRight: e.target.value })
+                  }
+                  className="mt-1"
+                  placeholder="0"
+                />
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Bottom</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={parseInt(text.paddingBottom || "8")}
+                  onChange={(e) =>
+                    handleUpdateText({ paddingBottom: e.target.value })
+                  }
+                  className="mt-1"
+                  placeholder="0"
+                />
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Left</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={parseInt(text.paddingLeft || "8")}
+                  onChange={(e) =>
+                    handleUpdateText({ paddingLeft: e.target.value })
+                  }
+                  className="mt-1"
+                  placeholder="0"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <Separator />
+
+        <div className="space-y-3">
+          <h3 className="text-xs font-semibold">Position & Size</h3>
+          <div>
+            <Label className="text-xs font-semibold">Position - X</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="0"
+                value={text.left}
+                onChange={(e) =>
+                  handleUpdateText({ left: parseInt(e.target.value) || 0 })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">
+                px
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Position - Y</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="0"
+                value={text.top}
+                onChange={(e) =>
+                  handleUpdateText({ top: parseInt(e.target.value) || 0 })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">
+                px
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Width</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="50"
+                value={text.width}
+                onChange={(e) =>
+                  handleUpdateText({ width: parseInt(e.target.value) || 200 })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">
+                px
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <Separator />
+
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={() => {
+            const newTexts = (section as any).texts!.filter(
+              (_: any, i: number) => i !== textIndex
+            );
+            const updatedProposal = {
+              ...proposal,
+              sections: proposal.sections.map((s) =>
+                s.id === sectionId ? { ...s, texts: newTexts } : s
+              ),
+            };
+            onUpdateProposal(updatedProposal);
+          }}
+          className="w-full"
+        >
+          Remove Text
+        </Button>
+      </Card>
+    );
+  }
+
   return (
     <Card className="p-4">
       <div className="text-center text-muted-foreground">
