@@ -578,6 +578,49 @@ export default function ProposalEditor() {
                 };
                 commit(updated);
               }}
+              onAddText={(sectionId, x, y) => {
+                const section = p.sections.find((s) => s.id === sectionId);
+                if (section) {
+                  const newText = {
+                    id: Math.random().toString(36).substring(2, 9),
+                    content: "Double-click to edit text",
+                    fontSize: "16",
+                    color: "#000000",
+                    fontWeight: false,
+                    width: 200,
+                    left: Math.round(x),
+                    top: Math.round(y),
+                  };
+                  const updated = {
+                    ...p,
+                    sections: p.sections.map((s) =>
+                      s.id === sectionId
+                        ? { ...s, texts: [...((s as any).texts || []), newText] }
+                        : s
+                    ),
+                  };
+                  commit(updated);
+                  setSelectedElementId(`text-${sectionId}-${((section as any).texts || []).length}`);
+                  setSelectedElementType("text");
+                  setActivePanel("properties");
+                }
+              }}
+              onUpdateText={(sectionId, textIndex, updates) => {
+                const updated = {
+                  ...p,
+                  sections: p.sections.map((s) =>
+                    s.id === sectionId
+                      ? {
+                          ...s,
+                          texts: ((s as any).texts || []).map((text: any, idx: number) =>
+                            idx === textIndex ? { ...text, ...updates } : text
+                          ),
+                        }
+                      : s
+                  ),
+                };
+                commit(updated);
+              }}
             />
           </div>
 
