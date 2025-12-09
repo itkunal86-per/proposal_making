@@ -146,11 +146,14 @@ export default function MyProposals() {
     toast({ title: "Proposal created successfully" });
     setFormData({ title: "", client_id: "", status: "draft", due_date: "" });
     setIsCreateDialogOpen(false);
-    await refresh();
 
     if (result.data) {
-      nav(`/my/proposals/${result.data.id}/edit`);
+      const proposalId = result.data.id;
+      console.log("Navigating to proposal editor with id:", proposalId);
+      nav(`/proposals/${proposalId}/edit`);
     }
+
+    await refresh();
   }
 
   function onDeleteClick(id: string) {

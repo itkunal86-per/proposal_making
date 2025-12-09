@@ -70,9 +70,12 @@ export default function ProposalEditor() {
 
   useEffect(() => {
     (async () => {
+      console.log("ProposalEditor: Loading proposal with id:", id);
       const found = await getProposalDetails(id);
+      console.log("ProposalEditor: getProposalDetails returned:", found);
       if (!found) {
-        nav("/proposals");
+        console.warn("ProposalEditor: Proposal not found, redirecting to /my/proposals");
+        nav("/my/proposals");
         return;
       }
       console.log("Loaded proposal from getProposalDetails:", {

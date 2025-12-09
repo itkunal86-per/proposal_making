@@ -271,6 +271,10 @@ function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmai
   const createdAtMs = apiProposal.created_at ? new Date(apiProposal.created_at).getTime() : Date.now();
   const updatedAtMs = apiProposal.updated_at ? new Date(apiProposal.updated_at).getTime() : createdAtMs;
 
+  // Ensure we have a valid ID - handle both numeric and string IDs from API
+  const proposalId = apiProposal.id ? String(apiProposal.id) : uuid();
+  console.log("convertApiProposalToProposal - original id:", apiProposal.id, "converted to:", proposalId);
+
   // Handle both old API structure (with created_at) and new API structure (with timestamps)
   const sections = Array.isArray((apiProposal as any).sections) && (apiProposal as any).sections.length > 0
     ? ((apiProposal as any).sections as any[]).map((s) => {
@@ -343,7 +347,7 @@ function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmai
   const clientId = typeof apiProposal.client_id === "string" ? apiProposal.client_id : (apiProposal.client_id ? String(apiProposal.client_id) : undefined);
 
   return {
-    id: String(apiProposal.id),
+    id: proposalId,
     title: apiProposal.title,
     client: clientName,
     client_id: clientId,
@@ -430,12 +434,23 @@ export async function listProposals(): Promise<Proposal[]> {
 }
 
 export async function getProposal(id: string): Promise<Proposal | undefined> {
+  console.log("getProposal called with id:", id);
+  // Check local storage first (for recently created proposals that may not be on the API yet)
+  const stored = readStored();
+  console.log("Stored proposals:", stored?.map(p => ({ id: p.id, title: p.title })));
+  const found = stored?.find((p) => p.id === id);
+  console.log("Found in storage:", found?.id);
+  if (found) return found;
+
+  // Fall back to API list
+  console.log("Proposal not in storage, fetching from API...");
   const list = await getAll();
-  const found = list.find((p) => p.id === id);
-  return found;
+  console.log("API proposals:", list.map(p => ({ id: p.id, title: p.title })));
+  return list.find((p) => p.id === id);
 }
 
 export async function getProposalDetails(id: string): Promise<Proposal | undefined> {
+  console.log("getProposalDetails called with id:", id, "type:", typeof id);
   const token = getStoredToken();
   if (!token) {
     console.warn("No authentication token available, falling back to local storage");
@@ -589,8 +604,15 @@ export async function createProposalApi(input: CreateProposalInput): Promise<Cre
       };
     }
 
-    const data: ApiProposalResponse = await res.json();
+    const response = await res.json();
+    console.log("API response from createProposalApi:", response);
+
+    // Extract the proposal data from the API response wrapper
+    const data: ApiProposalResponse = response.data || response;
+    console.log("Extracted proposal data with id:", data.id);
+
     const proposal = convertApiProposalToProposal(data);
+    console.log("Converted proposal with id:", proposal.id);
     const list = await getAll();
     persist([proposal, ...list]);
 
