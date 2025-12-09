@@ -32,10 +32,19 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   // Initialize editor content and update when value prop changes
   useEffect(() => {
     if (editorRef.current) {
-      // Only set innerHTML if the content has actually changed
-      if (editorRef.current.innerHTML !== (value || "")) {
-        editorRef.current.innerHTML = value || "";
+      const isEditorFocused = document.activeElement === editorRef.current;
+      const currentInnerHTML = editorRef.current.innerHTML;
+      const newValue = value || "";
+
+      // Only update innerHTML if:
+      // 1. Editor is not currently focused (user is not typing), OR
+      // 2. It's the initial load (isInitializedRef is false)
+      if (!isInitializedRef.current || !isEditorFocused) {
+        if (currentInnerHTML !== newValue) {
+          editorRef.current.innerHTML = newValue;
+        }
       }
+
       if (!isInitializedRef.current) {
         isInitializedRef.current = true;
       }

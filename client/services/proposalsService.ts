@@ -41,6 +41,27 @@ export interface TableElement {
   left: number;
 }
 
+export interface TextElement {
+  id: string;
+  content: string;
+  fontSize?: string;
+  color?: string;
+  fontWeight?: boolean;
+  backgroundColor?: string;
+  backgroundOpacity?: string;
+  borderColor?: string;
+  borderWidth?: string;
+  borderRadius?: string;
+  paddingTop?: string;
+  paddingRight?: string;
+  paddingBottom?: string;
+  paddingLeft?: string;
+  width?: number;
+  height?: number;
+  top: number;
+  left: number;
+}
+
 export interface ProposalSection {
   id: string;
   title: string;
@@ -51,6 +72,7 @@ export interface ProposalSection {
   media?: { type: "image" | "video"; url: string }[];
   shapes?: ShapeElement[];
   tables?: TableElement[];
+  texts?: TextElement[];
   comments?: { id: string; author: string; text: string; createdAt: number }[];
   titleStyles?: Record<string, any>;
   contentStyles?: Record<string, any>;
@@ -185,6 +207,27 @@ const tableElementSchema = z.object({
   left: z.number(),
 }).passthrough();
 
+const textElementSchema = z.object({
+  id: z.union([z.string(), z.number()]),
+  content: z.string(),
+  fontSize: z.string().optional(),
+  color: z.string().optional(),
+  fontWeight: z.boolean().optional(),
+  backgroundColor: z.string().optional(),
+  backgroundOpacity: z.string().optional(),
+  borderColor: z.string().optional(),
+  borderWidth: z.string().optional(),
+  borderRadius: z.string().optional(),
+  paddingTop: z.string().optional(),
+  paddingRight: z.string().optional(),
+  paddingBottom: z.string().optional(),
+  paddingLeft: z.string().optional(),
+  width: z.number().optional(),
+  height: z.number().optional(),
+  top: z.number(),
+  left: z.number(),
+}).passthrough();
+
 const sectionSchema = z.object({
   id: idSchema,
   title: z.string(),
@@ -195,6 +238,7 @@ const sectionSchema = z.object({
   media: z.array(z.object({ type: z.union([z.literal("image"), z.literal("video")]), url: z.string() })).optional(),
   shapes: z.array(shapeElementSchema).optional(),
   tables: z.array(tableElementSchema).optional(),
+  texts: z.array(textElementSchema).optional(),
   comments: z.array(z.object({ id: z.union([z.string(), z.number()]), author: z.string(), text: z.string(), createdAt: z.number() })).optional(),
   titleStyles: z.union([z.record(z.any()), z.array(z.any())]).optional(),
   contentStyles: z.union([z.record(z.any()), z.array(z.any())]).optional(),
@@ -314,6 +358,26 @@ function normalizeProposal(raw: z.infer<typeof proposalSchema>): Proposal {
           height: table.height!,
           top: typeof table.top === "number" ? table.top : 0,
           left: typeof table.left === "number" ? table.left : 0,
+        })),
+        texts: (s.texts ?? []).map((text) => ({
+          id: String(text.id!),
+          content: text.content!,
+          fontSize: text.fontSize,
+          color: text.color,
+          fontWeight: text.fontWeight,
+          backgroundColor: text.backgroundColor,
+          backgroundOpacity: text.backgroundOpacity,
+          borderColor: text.borderColor,
+          borderWidth: text.borderWidth,
+          borderRadius: text.borderRadius,
+          paddingTop: text.paddingTop,
+          paddingRight: text.paddingRight,
+          paddingBottom: text.paddingBottom,
+          paddingLeft: text.paddingLeft,
+          width: text.width,
+          height: text.height,
+          top: typeof text.top === "number" ? text.top : 0,
+          left: typeof text.left === "number" ? text.left : 0,
         })),
         comments: (s.comments ?? []).map((c) => ({
           id: String(c.id!),
@@ -484,15 +548,35 @@ function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmai
             top: typeof table.top === "number" ? table.top : 0,
             left: typeof table.left === "number" ? table.left : 0,
           })) : [],
+          texts: Array.isArray(s.texts) ? s.texts.map((text) => ({
+            id: String(text.id),
+            content: text.content,
+            fontSize: text.fontSize,
+            color: text.color,
+            fontWeight: text.fontWeight,
+            backgroundColor: text.backgroundColor,
+            backgroundOpacity: text.backgroundOpacity,
+            borderColor: text.borderColor,
+            borderWidth: text.borderWidth,
+            borderRadius: text.borderRadius,
+            paddingTop: text.paddingTop,
+            paddingRight: text.paddingRight,
+            paddingBottom: text.paddingBottom,
+            paddingLeft: text.paddingLeft,
+            width: text.width,
+            height: text.height,
+            top: typeof text.top === "number" ? text.top : 0,
+            left: typeof text.left === "number" ? text.left : 0,
+          })) : [],
           comments: Array.isArray(s.comments) ? s.comments : [],
           titleStyles: normalizeStyles(s.titleStyles),
           contentStyles: normalizeStyles(s.contentStyles),
         };
       })
     : [
-      { id: uuid(), title: "Overview", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], shapes: [], tables: [], comments: [] },
-      { id: uuid(), title: "Scope", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], shapes: [], tables: [], comments: [] },
-      { id: uuid(), title: "Timeline", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], shapes: [], tables: [], comments: [] },
+      { id: uuid(), title: "Overview", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], shapes: [], tables: [], texts: [], comments: [] },
+      { id: uuid(), title: "Scope", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], shapes: [], tables: [], texts: [], comments: [] },
+      { id: uuid(), title: "Timeline", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], shapes: [], tables: [], texts: [], comments: [] },
     ] as ProposalSection[];
 
   const clientName = typeof apiProposal.client === "string" ? apiProposal.client : (apiProposal.client?.name || "");

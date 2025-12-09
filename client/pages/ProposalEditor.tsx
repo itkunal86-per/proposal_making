@@ -455,7 +455,7 @@ export default function ProposalEditor() {
         />
 
         {/* Main content area */}
-        <div className="flex-1 overflow-hidden flex gap-4">
+        <div className="flex-1 flex gap-4 min-h-0">
           {/* Editor Preview */}
           <div ref={previewContainerRef} className="flex-1 overflow-y-auto p-6">
             <ProposalPreview
@@ -470,6 +470,24 @@ export default function ProposalEditor() {
                 setAIElementId(id);
                 setAIElementType(type);
                 setAIDialogOpen(true);
+              }}
+              onDeleteContent={(sectionId, columnIndex) => {
+                const updated = {
+                  ...p,
+                  sections: p.sections.map((s) =>
+                    s.id === sectionId
+                      ? columnIndex !== undefined
+                        ? {
+                            ...s,
+                            columnContents: ((s as any).columnContents || []).map((content: string, idx: number) =>
+                              idx === columnIndex ? "" : content
+                            ),
+                          }
+                        : { ...s, content: "" }
+                      : s
+                  ),
+                };
+                commit(updated);
               }}
               variables={variables}
               onAddShape={(sectionId, shapeType, x, y) => {

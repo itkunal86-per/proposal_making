@@ -29,6 +29,53 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
 }) => {
   const contentRef = useRef<HTMLDivElement>(null);
   const [showShareDialog, setShowShareDialog] = useState(false);
+  const [canvasHeights, setCanvasHeights] = useState<Record<string, number>>({});
+
+  React.useEffect(() => {
+    const newHeights: Record<string, number> = {};
+
+    proposal.sections.forEach((section) => {
+      if ((section.shapes && section.shapes.length > 0) ||
+          (section.tables && section.tables.length > 0) ||
+          ((section as any).texts && (section as any).texts.length > 0)) {
+        let maxHeight = 400; // minimum height
+
+        // Calculate max height needed for shapes
+        if (section.shapes) {
+          section.shapes.forEach((shape) => {
+            const bottomPos = shape.top + shape.height + 20; // 20px padding
+            if (bottomPos > maxHeight) {
+              maxHeight = bottomPos;
+            }
+          });
+        }
+
+        // Calculate max height needed for tables
+        if (section.tables) {
+          section.tables.forEach((table) => {
+            const bottomPos = table.top + table.height + 20; // 20px padding
+            if (bottomPos > maxHeight) {
+              maxHeight = bottomPos;
+            }
+          });
+        }
+
+        // Calculate max height needed for text elements
+        if ((section as any).texts) {
+          (section as any).texts.forEach((text: any) => {
+            const bottomPos = text.top + (text.height || 100) + 20; // 20px padding, assume 100px if no height
+            if (bottomPos > maxHeight) {
+              maxHeight = bottomPos;
+            }
+          });
+        }
+
+        newHeights[section.id] = maxHeight;
+      }
+    });
+
+    setCanvasHeights(newHeights);
+  }, [proposal.sections]);
 
   const handleExportPDF = async () => {
     try {
@@ -368,7 +415,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
 
                 {/* Shapes, Tables, and Texts */}
                 {(section.shapes && section.shapes.length > 0) || (section.tables && section.tables.length > 0) || ((section as any).texts && (section as any).texts.length > 0) ? (
-                  <div className="relative mt-4 bg-gray-50 rounded" style={{ position: "relative", minHeight: "400px", pointerEvents: "none" }}>
+                  <div className="relative mt-4 bg-gray-50 rounded" style={{ position: "relative", minHeight: `${canvasHeights[section.id] || 400}px`, pointerEvents: "none" }}>
                     {section.shapes && section.shapes.map((shape, sIndex) => (
                       <div key={`shape-${sIndex}`} style={{ pointerEvents: "auto" }}>
                         <ShapeEditor
