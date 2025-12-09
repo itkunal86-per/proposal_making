@@ -130,8 +130,8 @@ const shapeElementSchema = z.object({
   borderWidth: z.number().optional(),
   borderColor: z.string().optional(),
   borderRadius: z.number().optional(),
-  top: z.number().optional(),
-  left: z.number().optional(),
+  top: z.number(),
+  left: z.number(),
 }).passthrough();
 
 const sectionSchema = z.object({
