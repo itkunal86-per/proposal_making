@@ -338,6 +338,12 @@ export const AIAssistantDialog: React.FC<AIAssistantDialogProps> = ({
     }
   };
 
+  const stripHtmlTags = (html: string): string => {
+    const div = document.createElement("div");
+    div.innerHTML = html;
+    return div.innerText || "";
+  };
+
   const handleAddToProposal = () => {
     if (!editableContent.trim()) {
       toast({ title: "Content is empty" });
@@ -350,16 +356,18 @@ export const AIAssistantDialog: React.FC<AIAssistantDialogProps> = ({
     }
 
     const updatedProposal = { ...proposal };
+    // Strip HTML tags for text elements
+    const contentToAdd = targetElementType === "text" ? stripHtmlTags(editableContent) : editableContent;
 
     if (targetElementType === "title") {
-      updatedProposal.title = editableContent;
+      updatedProposal.title = contentToAdd;
     } else if (targetElementType === "section-title" && activeSection) {
       updatedProposal.sections = proposal.sections.map((s) =>
-        s.id === activeSection!.id ? { ...s, title: editableContent } : s
+        s.id === activeSection!.id ? { ...s, title: contentToAdd } : s
       );
     } else if (targetElementType === "section-content" && activeSection) {
       updatedProposal.sections = proposal.sections.map((s) =>
-        s.id === activeSection!.id ? { ...s, content: editableContent } : s
+        s.id === activeSection!.id ? { ...s, content: contentToAdd } : s
       );
     } else if (targetElementType === "text" && activeSection && elementIndex !== null) {
       updatedProposal.sections = proposal.sections.map((s) =>
@@ -367,7 +375,7 @@ export const AIAssistantDialog: React.FC<AIAssistantDialogProps> = ({
           ? {
               ...s,
               texts: ((s as any).texts || []).map((text: any, idx: number) =>
-                idx === elementIndex ? { ...text, content: editableContent } : text
+                idx === elementIndex ? { ...text, content: contentToAdd } : text
               ),
             }
           : s
