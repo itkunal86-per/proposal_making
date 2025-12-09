@@ -49,6 +49,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   onUpdateProposal,
   onRemoveMedia,
   variables,
+  onOpenAI,
 }) => {
   if (!selectedElementId || !selectedElementType) {
     return (
