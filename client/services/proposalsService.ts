@@ -163,6 +163,28 @@ const shapeElementSchema = z.object({
   left: z.number(),
 }).passthrough();
 
+const tableCellSchema = z.object({
+  id: z.union([z.string(), z.number()]),
+  content: z.string(),
+}).passthrough();
+
+const tableElementSchema = z.object({
+  id: z.union([z.string(), z.number()]),
+  rows: z.number(),
+  columns: z.number(),
+  cells: z.array(z.array(tableCellSchema)),
+  borderWidth: z.number(),
+  borderColor: z.string(),
+  headerBackground: z.string().optional(),
+  cellBackground: z.string().optional(),
+  textColor: z.string().optional(),
+  padding: z.number(),
+  width: z.number(),
+  height: z.number(),
+  top: z.number(),
+  left: z.number(),
+}).passthrough();
+
 const sectionSchema = z.object({
   id: idSchema,
   title: z.string(),
