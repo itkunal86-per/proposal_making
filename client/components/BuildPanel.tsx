@@ -9,8 +9,9 @@ interface BuildPanelProps {
   onTableDragStart?: (e: React.DragEvent<HTMLDivElement>) => void;
 }
 
-export const BuildPanel: React.FC<BuildPanelProps> = ({ onAddContent, onShapeDragStart }) => {
+export const BuildPanel: React.FC<BuildPanelProps> = ({ onAddContent, onShapeDragStart, onTableDragStart }) => {
   const [isDraggingShape, setIsDraggingShape] = useState(false);
+  const [isDraggingTable, setIsDraggingTable] = useState(false);
 
   const contentTypes = [
     {
