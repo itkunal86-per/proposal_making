@@ -236,8 +236,8 @@ function normalizeProposal(raw: z.infer<typeof proposalSchema>): Proposal {
           borderWidth: shape.borderWidth,
           borderColor: shape.borderColor,
           borderRadius: shape.borderRadius,
-          top: shape.top,
-          left: shape.left,
+          top: typeof shape.top === "number" ? shape.top : 0,
+          left: typeof shape.left === "number" ? shape.left : 0,
         })),
         comments: (s.comments ?? []).map((c) => ({
           id: String(c.id!),
