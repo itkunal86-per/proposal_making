@@ -246,7 +246,7 @@ interface ProposalPreviewProps {
   onSelectElement: (id: string, type: string) => void;
   onAIElement?: (elementId: string, elementType: string) => void;
   variables?: Array<{ id: string | number; name: string; value: string }>;
-  onAddShape?: (sectionId: string, shapeType: "square" | "circle" | "triangle") => void;
+  onAddShape?: (sectionId: string, shapeType: "square" | "circle" | "triangle", x: number, y: number) => void;
 }
 
 export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
