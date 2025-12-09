@@ -594,8 +594,11 @@ export async function createProposalApi(input: CreateProposalInput): Promise<Cre
 
     const data: ApiProposalResponse = await res.json();
     console.log("API response from createProposalApi:", data);
+    if (!data.id) {
+      console.warn("API response missing 'id' field, will generate one");
+    }
     const proposal = convertApiProposalToProposal(data);
-    console.log("Converted proposal:", proposal);
+    console.log("Converted proposal with id:", proposal.id);
     const list = await getAll();
     persist([proposal, ...list]);
 
