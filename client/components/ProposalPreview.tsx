@@ -880,7 +880,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
             )}
 
             {section.tables && section.tables.length > 0 && (
-              <div className={isMultiColumn ? "col-span-full relative mt-4 bg-gray-50 rounded" : "relative mt-4 bg-gray-50 rounded"} style={{ position: "relative" }}>
+              <div className={isMultiColumn ? "col-span-full relative mt-4 bg-gray-50 rounded min-h-80" : "relative mt-4 bg-gray-50 rounded min-h-80"} style={{ position: "relative" }}>
                 {section.tables.map((table, tIndex) => (
                   <TableEditor
                     key={tIndex}
