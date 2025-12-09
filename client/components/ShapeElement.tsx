@@ -6,6 +6,9 @@ interface ShapeElementProps {
   width: number;
   height: number;
   backgroundColor: string;
+  backgroundImage?: string;
+  backgroundSize?: string;
+  backgroundOpacity?: string;
   borderWidth?: number;
   borderColor?: string;
   borderRadius?: number;
