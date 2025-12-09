@@ -2536,14 +2536,25 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
       <Card className="p-4 space-y-4">
         <div>
           <Label className="text-xs font-semibold">Content</Label>
-          <Textarea
-            value={text.content || ""}
-            onChange={(e) =>
-              handleUpdateText({ content: e.target.value })
-            }
-            placeholder="Enter text content..."
-            className="mt-2 min-h-20"
-          />
+          <div className="flex gap-2 mt-2">
+            <Textarea
+              value={text.content || ""}
+              onChange={(e) =>
+                handleUpdateText({ content: e.target.value })
+              }
+              placeholder="Enter text content..."
+              className="min-h-20 flex-1"
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onOpenAI?.()}
+              className="h-auto"
+              title="Generate with AI"
+            >
+              <Sparkles className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
 
         <Separator />
