@@ -9,6 +9,15 @@ interface TextEditorProps {
   fontSize?: string;
   color?: string;
   fontWeight?: boolean;
+  backgroundColor?: string;
+  backgroundOpacity?: string;
+  borderColor?: string;
+  borderWidth?: string;
+  borderRadius?: string;
+  paddingTop?: string;
+  paddingRight?: string;
+  paddingBottom?: string;
+  paddingLeft?: string;
   selected: boolean;
   onSelect: () => void;
   onUpdate: (updates: {
@@ -19,6 +28,15 @@ interface TextEditorProps {
     fontSize?: string;
     color?: string;
     fontWeight?: boolean;
+    backgroundColor?: string;
+    backgroundOpacity?: string;
+    borderColor?: string;
+    borderWidth?: string;
+    borderRadius?: string;
+    paddingTop?: string;
+    paddingRight?: string;
+    paddingBottom?: string;
+    paddingLeft?: string;
   }) => void;
 }
 
