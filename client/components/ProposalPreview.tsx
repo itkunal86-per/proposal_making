@@ -361,6 +361,9 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
               gap: isMultiColumn ? `${columnGapValue}px` : undefined,
               marginBottom: `${gapAfterValue}px`
             }}
+            onDragOver={handleDragOver}
+            onDragLeave={() => setDragOverSectionId(null)}
+            onDrop={(e) => handleDrop(e, section.id)}
           >
             {isMultiColumn && (
               <div className="col-span-full">
