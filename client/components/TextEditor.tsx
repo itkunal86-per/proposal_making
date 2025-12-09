@@ -205,10 +205,11 @@ export const TextEditor: React.FC<TextEditorProps> = ({
     >
       <div
         style={{
-          padding: "8px",
-          border: selected ? "2px solid #3b82f6" : "1px solid #e5e7eb",
-          borderRadius: "4px",
-          backgroundColor: "white",
+          padding: `${paddingTop}px ${paddingRight}px ${paddingBottom}px ${paddingLeft}px`,
+          border: `${borderWidth}px solid ${borderColor}`,
+          borderRadius: `${borderRadius}px`,
+          backgroundColor: backgroundColor,
+          opacity: parseInt(backgroundOpacity || "100") / 100,
           cursor: isEditing ? "text" : "grab",
           minHeight: "40px",
           wordWrap: "break-word",
