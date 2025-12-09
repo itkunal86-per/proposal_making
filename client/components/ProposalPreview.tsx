@@ -171,6 +171,11 @@ const SelectableElement: React.FC<ElementProps> = ({
   };
 
   const renderContent = () => {
+    // For section-content type: if children is empty string, return null to hide the element
+    if (type === "section-content" && (children === "" || children === undefined || children === null)) {
+      return null;
+    }
+
     const content = children === undefined || children === null ? (type === "section-content" ? "Click to add content..." : "") : children;
 
     // Check for both literal HTML tags and encoded HTML entities
