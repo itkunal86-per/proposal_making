@@ -520,6 +520,64 @@ export default function ProposalEditor() {
                 };
                 commit(updated);
               }}
+              onAddTable={(sectionId, x, y) => {
+                const section = p.sections.find((s) => s.id === sectionId);
+                if (section) {
+                  const createTableCells = (rows: number, cols: number) => {
+                    return Array.from({ length: rows }, (_, rIdx) =>
+                      Array.from({ length: cols }, (_, cIdx) => ({
+                        id: Math.random().toString(36).substring(2, 9),
+                        content: rIdx === 0 ? `Header ${cIdx + 1}` : "",
+                      }))
+                    );
+                  };
+
+                  const newTable = {
+                    id: Math.random().toString(36).substring(2, 9),
+                    rows: 3,
+                    columns: 3,
+                    cells: createTableCells(3, 3),
+                    borderWidth: 1,
+                    borderColor: "#d1d5db",
+                    headerBackground: "#f3f4f6",
+                    cellBackground: "#ffffff",
+                    textColor: "#000000",
+                    padding: 8,
+                    width: 500,
+                    height: 300,
+                    left: Math.round(x),
+                    top: Math.round(y),
+                  };
+                  const updated = {
+                    ...p,
+                    sections: p.sections.map((s) =>
+                      s.id === sectionId
+                        ? { ...s, tables: [...(s.tables || []), newTable] }
+                        : s
+                    ),
+                  };
+                  commit(updated);
+                  setSelectedElementId(`table-${sectionId}-${(section.tables || []).length}`);
+                  setSelectedElementType("table");
+                  setActivePanel("properties");
+                }
+              }}
+              onUpdateTable={(sectionId, tableIndex, updates) => {
+                const updated = {
+                  ...p,
+                  sections: p.sections.map((s) =>
+                    s.id === sectionId
+                      ? {
+                          ...s,
+                          tables: (s.tables || []).map((table, idx) =>
+                            idx === tableIndex ? { ...table, ...updates } : table
+                          ),
+                        }
+                      : s
+                  ),
+                };
+                commit(updated);
+              }}
             />
           </div>
 
