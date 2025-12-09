@@ -646,6 +646,13 @@ export default function ProposalEditor() {
                   setSelectedElementType(null);
                 }}
                 variables={variables}
+                onOpenAI={() => {
+                  if (selectedElementId && selectedElementType) {
+                    setAIElementId(selectedElementId);
+                    setAIElementType(selectedElementType);
+                    setAIDialogOpen(true);
+                  }
+                }}
               />
             ) : activePanel === "document" ? (
               <DocumentPanel
