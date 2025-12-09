@@ -471,6 +471,28 @@ export default function ProposalEditor() {
                 setAIElementType(type);
                 setAIDialogOpen(true);
               }}
+              onDeleteContent={(sectionId, columnIndex) => {
+                const section = p.sections.find((s) => s.id === sectionId);
+                if (section) {
+                  const updated = {
+                    ...p,
+                    sections: p.sections.map((s) =>
+                      s.id === sectionId
+                        ? {
+                            ...s,
+                            content: columnIndex === undefined ? "" : s.content,
+                            columnContents: columnIndex !== undefined
+                              ? ((s as any).columnContents || []).map((content: string, idx: number) =>
+                                  idx === columnIndex ? "" : content
+                                )
+                              : undefined,
+                          }
+                        : s
+                    ),
+                  };
+                  commit(updated);
+                }
+              }}
               variables={variables}
               onAddShape={(sectionId, shapeType, x, y) => {
                 const section = p.sections.find((s) => s.id === sectionId);
