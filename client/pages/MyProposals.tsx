@@ -146,11 +146,12 @@ export default function MyProposals() {
     toast({ title: "Proposal created successfully" });
     setFormData({ title: "", client_id: "", status: "draft", due_date: "" });
     setIsCreateDialogOpen(false);
-    await refresh();
 
     if (result.data) {
       nav(`/proposals/${result.data.id}/edit`);
     }
+
+    await refresh();
   }
 
   function onDeleteClick(id: string) {
