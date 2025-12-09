@@ -1,7 +1,7 @@
 import React from "react";
 import { Proposal, ProposalSection } from "@/services/proposalsService";
 import { Button } from "@/components/ui/button";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Trash2 } from "lucide-react";
 import { replaceVariables, decodeHtmlEntities } from "@/lib/variableUtils";
 import { ShapeEditor } from "@/components/ShapeEditor";
 import { TableEditor } from "@/components/TableEditor";
@@ -13,6 +13,7 @@ interface ElementProps {
   selected: boolean;
   onSelect: () => void;
   onAI?: () => void;
+  onDelete?: () => void;
   children?: React.ReactNode;
   value?: string;
   color?: string;
@@ -47,6 +48,7 @@ const SelectableElement: React.FC<ElementProps> = ({
   selected,
   onSelect,
   onAI,
+  onDelete,
   children,
   type,
   color,
@@ -236,6 +238,21 @@ const SelectableElement: React.FC<ElementProps> = ({
           style={{ zIndex: 2 }}
         >
           <Sparkles className="w-4 h-4" />
+        </Button>
+      )}
+      {onDelete && type === "section-content" && (
+        <Button
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
+          variant="ghost"
+          size="sm"
+          className="absolute top-2 left-2 bg-white/80 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0 text-red-600 hover:text-red-700"
+          style={{ zIndex: 2 }}
+          title="Delete content"
+        >
+          <Trash2 className="w-4 h-4" />
         </Button>
       )}
     </div>
