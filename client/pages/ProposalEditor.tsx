@@ -472,7 +472,7 @@ export default function ProposalEditor() {
                 setAIDialogOpen(true);
               }}
               variables={variables}
-              onAddShape={(sectionId, shapeType) => {
+              onAddShape={(sectionId, shapeType, x, y) => {
                 const section = p.sections.find((s) => s.id === sectionId);
                 if (section) {
                   const newShape = {
@@ -484,6 +484,8 @@ export default function ProposalEditor() {
                     borderWidth: 2,
                     borderColor: "#6b7280",
                     borderRadius: 0,
+                    left: Math.round(x),
+                    top: Math.round(y),
                   };
                   const updated = {
                     ...p,
