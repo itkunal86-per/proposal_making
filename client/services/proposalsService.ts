@@ -434,13 +434,18 @@ export async function listProposals(): Promise<Proposal[]> {
 }
 
 export async function getProposal(id: string): Promise<Proposal | undefined> {
+  console.log("getProposal called with id:", id);
   // Check local storage first (for recently created proposals that may not be on the API yet)
   const stored = readStored();
+  console.log("Stored proposals:", stored?.map(p => ({ id: p.id, title: p.title })));
   const found = stored?.find((p) => p.id === id);
+  console.log("Found in storage:", found?.id);
   if (found) return found;
 
   // Fall back to API list
+  console.log("Proposal not in storage, fetching from API...");
   const list = await getAll();
+  console.log("API proposals:", list.map(p => ({ id: p.id, title: p.title })));
   return list.find((p) => p.id === id);
 }
 
