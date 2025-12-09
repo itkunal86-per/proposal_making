@@ -300,6 +300,59 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
   const sectionRefs = React.useRef<Map<string, HTMLDivElement>>(new Map());
   const canvasRefs = React.useRef<Map<string, HTMLDivElement>>(new Map());
 
+  React.useEffect(() => {
+    const calculateCanvasHeights = () => {
+      const newHeights: Record<string, number> = {};
+
+      proposal.sections.forEach((section) => {
+        if ((section.shapes && section.shapes.length > 0) ||
+            (section.tables && section.tables.length > 0) ||
+            ((section as any).texts && (section as any).texts.length > 0)) {
+          const canvasElement = canvasRefs.current.get(section.id);
+          if (canvasElement) {
+            let maxHeight = 400; // minimum height
+
+            // Calculate max height needed for shapes
+            if (section.shapes) {
+              section.shapes.forEach((shape) => {
+                const bottomPos = shape.top + shape.height + 20; // 20px padding
+                if (bottomPos > maxHeight) {
+                  maxHeight = bottomPos;
+                }
+              });
+            }
+
+            // Calculate max height needed for tables
+            if (section.tables) {
+              section.tables.forEach((table) => {
+                const bottomPos = table.top + table.height + 20; // 20px padding
+                if (bottomPos > maxHeight) {
+                  maxHeight = bottomPos;
+                }
+              });
+            }
+
+            // Calculate max height needed for text elements
+            if ((section as any).texts) {
+              (section as any).texts.forEach((text: any) => {
+                const bottomPos = text.top + (text.height || 100) + 20; // 20px padding, assume 100px if no height
+                if (bottomPos > maxHeight) {
+                  maxHeight = bottomPos;
+                }
+              });
+            }
+
+            newHeights[section.id] = maxHeight;
+          }
+        }
+      });
+
+      setCanvasHeights(newHeights);
+    };
+
+    calculateCanvasHeights();
+  }, [proposal.sections]);
+
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     const data = e.dataTransfer.types.includes("application/json");
     if (data) {
