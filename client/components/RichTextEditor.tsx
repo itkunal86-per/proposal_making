@@ -50,6 +50,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   };
 
   const handleInput = () => {
+    console.log("RichTextEditor: handleInput fired, editorRef.current.innerHTML =", editorRef.current?.innerHTML);
     captureContent();
 
     // Check for variable insertion trigger
