@@ -298,7 +298,6 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
   const [dragOverSectionId, setDragOverSectionId] = React.useState<string | null>(null);
   const [canvasHeights, setCanvasHeights] = React.useState<Record<string, number>>({});
   const sectionRefs = React.useRef<Map<string, HTMLDivElement>>(new Map());
-  const canvasRefs = React.useRef<Map<string, HTMLDivElement>>(new Map());
 
   React.useEffect(() => {
     const newHeights: Record<string, number> = {};
