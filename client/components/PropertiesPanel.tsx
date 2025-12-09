@@ -1828,6 +1828,35 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             </p>
           </div>
         </div>
+
+        <Separator />
+
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={() => {
+            const updatedProposal = {
+              ...proposal,
+              sections: proposal.sections.map((s) =>
+                s.id === sectionId
+                  ? {
+                      ...s,
+                      content: "",
+                      columnContents: columnIndex >= 0
+                        ? ((s as any).columnContents || []).map((content: string, idx: number) =>
+                            idx === columnIndex ? "" : content
+                          )
+                        : undefined,
+                    }
+                  : s
+              ),
+            };
+            onUpdateProposal(updatedProposal);
+          }}
+          className="w-full"
+        >
+          Delete Content
+        </Button>
       </Card>
     );
   }
