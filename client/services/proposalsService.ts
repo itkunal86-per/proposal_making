@@ -207,6 +207,27 @@ const tableElementSchema = z.object({
   left: z.number(),
 }).passthrough();
 
+const textElementSchema = z.object({
+  id: z.union([z.string(), z.number()]),
+  content: z.string(),
+  fontSize: z.string().optional(),
+  color: z.string().optional(),
+  fontWeight: z.boolean().optional(),
+  backgroundColor: z.string().optional(),
+  backgroundOpacity: z.string().optional(),
+  borderColor: z.string().optional(),
+  borderWidth: z.string().optional(),
+  borderRadius: z.string().optional(),
+  paddingTop: z.string().optional(),
+  paddingRight: z.string().optional(),
+  paddingBottom: z.string().optional(),
+  paddingLeft: z.string().optional(),
+  width: z.number().optional(),
+  height: z.number().optional(),
+  top: z.number(),
+  left: z.number(),
+}).passthrough();
+
 const sectionSchema = z.object({
   id: idSchema,
   title: z.string(),
@@ -217,6 +238,7 @@ const sectionSchema = z.object({
   media: z.array(z.object({ type: z.union([z.literal("image"), z.literal("video")]), url: z.string() })).optional(),
   shapes: z.array(shapeElementSchema).optional(),
   tables: z.array(tableElementSchema).optional(),
+  texts: z.array(textElementSchema).optional(),
   comments: z.array(z.object({ id: z.union([z.string(), z.number()]), author: z.string(), text: z.string(), createdAt: z.number() })).optional(),
   titleStyles: z.union([z.record(z.any()), z.array(z.any())]).optional(),
   contentStyles: z.union([z.record(z.any()), z.array(z.any())]).optional(),
