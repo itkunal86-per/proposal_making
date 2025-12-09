@@ -842,32 +842,28 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
             )}
 
             {section.shapes && section.shapes.length > 0 && (
-              <div className={isMultiColumn ? "col-span-full relative mt-4 bg-gray-50 rounded min-h-96 pointer-events-none" : "relative mt-4 bg-gray-50 rounded min-h-96 pointer-events-none"}>
+              <div className={isMultiColumn ? "col-span-full relative mt-4 bg-gray-50 rounded min-h-96" : "relative mt-4 bg-gray-50 rounded min-h-96"} style={{ position: "relative" }}>
                 {section.shapes.map((shape, sIndex) => (
-                  <div
+                  <ShapeEditor
                     key={sIndex}
-                    style={{
-                      position: "absolute",
-                      left: `${shape.left}px`,
-                      top: `${shape.top}px`,
-                      pointerEvents: "auto",
-                    }}
-                  >
-                    <ShapeElement
-                      id={`shape-${section.id}-${sIndex}`}
-                      type={shape.type}
-                      width={shape.width}
-                      height={shape.height}
-                      backgroundColor={shape.backgroundColor}
-                      borderWidth={shape.borderWidth}
-                      borderColor={shape.borderColor}
-                      borderRadius={shape.borderRadius}
-                      selected={selectedElementId === `shape-${section.id}-${sIndex}`}
-                      onSelect={() =>
-                        onSelectElement(`shape-${section.id}-${sIndex}`, "shape")
-                      }
-                    />
-                  </div>
+                    id={`shape-${section.id}-${sIndex}`}
+                    type={shape.type}
+                    width={shape.width}
+                    height={shape.height}
+                    backgroundColor={shape.backgroundColor}
+                    borderWidth={shape.borderWidth}
+                    borderColor={shape.borderColor}
+                    borderRadius={shape.borderRadius}
+                    top={shape.top}
+                    left={shape.left}
+                    selected={selectedElementId === `shape-${section.id}-${sIndex}`}
+                    onSelect={() =>
+                      onSelectElement(`shape-${section.id}-${sIndex}`, "shape")
+                    }
+                    onUpdate={(updates) =>
+                      onUpdateShape?.(section.id, sIndex, updates)
+                    }
+                  />
                 ))}
               </div>
             )}
