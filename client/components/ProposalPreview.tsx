@@ -171,7 +171,7 @@ const SelectableElement: React.FC<ElementProps> = ({
   };
 
   const renderContent = () => {
-    const content = children || (type === "section-content" ? "Click to add content..." : "");
+    const content = children === undefined || children === null ? (type === "section-content" ? "Click to add content..." : "") : children;
 
     // Check for both literal HTML tags and encoded HTML entities
     const isHtml = typeof content === "string" && (content.includes("<") || content.includes("&lt;") || content.includes("&amp;"));
