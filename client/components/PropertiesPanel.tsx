@@ -884,6 +884,13 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     if (!section) return null;
 
     const handleUpdateSection = (updates: Partial<ProposalSection>) => {
+      const updateKey = Object.keys(updates)[0];
+      const updateValue = (updates as any)[updateKey];
+      console.log("PropertiesPanel section-content: handleUpdateSection called", {
+        sectionId,
+        updateKey,
+        updateValue: typeof updateValue === "string" ? updateValue.substring(0, 50) : updateValue,
+      });
       const updatedProposal = {
         ...proposal,
         sections: proposal.sections.map((s) =>
