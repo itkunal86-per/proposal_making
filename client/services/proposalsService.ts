@@ -346,7 +346,7 @@ function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmai
   const clientId = typeof apiProposal.client_id === "string" ? apiProposal.client_id : (apiProposal.client_id ? String(apiProposal.client_id) : undefined);
 
   return {
-    id: String(apiProposal.id),
+    id: proposalId,
     title: apiProposal.title,
     client: clientName,
     client_id: clientId,
