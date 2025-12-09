@@ -361,6 +361,17 @@ export const AIAssistantDialog: React.FC<AIAssistantDialogProps> = ({
       updatedProposal.sections = proposal.sections.map((s) =>
         s.id === activeSection!.id ? { ...s, content: editableContent } : s
       );
+    } else if (targetElementType === "text" && activeSection && elementIndex !== null) {
+      updatedProposal.sections = proposal.sections.map((s) =>
+        s.id === activeSection!.id
+          ? {
+              ...s,
+              texts: ((s as any).texts || []).map((text: any, idx: number) =>
+                idx === elementIndex ? { ...text, content: editableContent } : text
+              ),
+            }
+          : s
+      );
     }
 
     onUpdateProposal(updatedProposal);
