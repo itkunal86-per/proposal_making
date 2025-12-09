@@ -266,6 +266,8 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
   onUpdateShape,
   onAddTable,
   onUpdateTable,
+  onAddText,
+  onUpdateText,
 }) => {
   const [dragOverSectionId, setDragOverSectionId] = React.useState<string | null>(null);
   const sectionRefs = React.useRef<Map<string, HTMLDivElement>>(new Map());
