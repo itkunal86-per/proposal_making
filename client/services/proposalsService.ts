@@ -445,6 +445,7 @@ export async function getProposal(id: string): Promise<Proposal | undefined> {
 }
 
 export async function getProposalDetails(id: string): Promise<Proposal | undefined> {
+  console.log("getProposalDetails called with id:", id, "type:", typeof id);
   const token = getStoredToken();
   if (!token) {
     console.warn("No authentication token available, falling back to local storage");
