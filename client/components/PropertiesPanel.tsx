@@ -884,13 +884,6 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     if (!section) return null;
 
     const handleUpdateSection = (updates: Partial<ProposalSection>) => {
-      const updateKey = Object.keys(updates)[0];
-      const updateValue = (updates as any)[updateKey];
-      console.log("PropertiesPanel section-content: handleUpdateSection called", {
-        sectionId,
-        updateKey,
-        updateValue: typeof updateValue === "string" ? updateValue.substring(0, 50) : updateValue,
-      });
       const updatedProposal = {
         ...proposal,
         sections: proposal.sections.map((s) =>
@@ -921,14 +914,11 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
       : section.content;
 
     const handleContentChange = (value: string) => {
-      console.log("PropertiesPanel: handleContentChange:", { sectionId, columnIndex, value, valueLength: value.length });
       if (columnIndex >= 0) {
         const newColumnContents = [...((section as any).columnContents || [])];
         newColumnContents[columnIndex] = value;
-        console.log("PropertiesPanel: updating column content", { columnIndex, newColumnContents });
         handleUpdateSection({ columnContents: newColumnContents });
       } else {
-        console.log("PropertiesPanel: updating single column content", { sectionId, value });
         handleUpdateSection({ content: value });
       }
     };
