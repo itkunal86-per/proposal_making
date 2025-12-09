@@ -892,7 +892,7 @@ export async function addSection(p: Proposal, title = "New Section", layout: "si
   const titleStyles = columnCount > 0 ? { columnGap: 0 } : {};
   const contentStyles = { gapAfter: 10 };
 
-  const newSection = { id: uuid(), title, content: "", layout, columnContents, columnStyles, titleStyles, contentStyles, media: [], comments: [] };
+  const newSection = { id: uuid(), title, content: "", layout, columnContents, columnStyles, titleStyles, contentStyles, media: [], shapes: [], comments: [] };
   const updated = {
     ...p,
     sections: [...p.sections, newSection],
