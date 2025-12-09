@@ -504,6 +504,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                   onSelectElement(`section-content-${section.id}`, "section-content")
                 }
                 onAI={() => onAIElement?.(`section-content-${section.id}`, "section-content")}
+                onDelete={() => onDeleteContent?.(section.id)}
                 value={section.content}
                 color={(section as any).contentStyles?.color}
                 fontSize={(section as any).contentStyles?.fontSize}
