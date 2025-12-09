@@ -258,6 +258,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
   onAddShape,
 }) => {
   const [dragOverSectionId, setDragOverSectionId] = React.useState<string | null>(null);
+  const sectionRefs = React.useRef<Map<string, HTMLDivElement>>(new Map());
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     const data = e.dataTransfer.types.includes("application/json");
@@ -276,7 +277,13 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
       if (data) {
         const draggedItem = JSON.parse(data);
         if (draggedItem.type === "shape") {
-          onAddShape?.(sectionId, draggedItem.shapeType || "square");
+          const sectionElement = sectionRefs.current.get(sectionId);
+          if (sectionElement) {
+            const rect = sectionElement.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            onAddShape?.(sectionId, draggedItem.shapeType || "square", Math.max(0, x), Math.max(0, y));
+          }
         }
       }
     } catch (err) {
