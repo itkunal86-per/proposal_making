@@ -363,10 +363,14 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
           <div
             key={section.id}
             data-section-id={section.id}
+            ref={(el) => {
+              if (el) sectionRefs.current.set(section.id, el);
+            }}
             className={containerClassName}
             style={{
               gap: isMultiColumn ? `${columnGapValue}px` : undefined,
-              marginBottom: `${gapAfterValue}px`
+              marginBottom: `${gapAfterValue}px`,
+              position: "relative"
             }}
             onDragOver={handleDragOver}
             onDragLeave={() => setDragOverSectionId(null)}
