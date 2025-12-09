@@ -55,8 +55,16 @@ export const BuildPanel: React.FC<BuildPanelProps> = ({ onAddContent, onShapeDra
     onShapeDragStart?.(e);
   };
 
+  const handleTableDragStart = (e: React.DragEvent<HTMLDivElement>) => {
+    e.dataTransfer.effectAllowed = "copy";
+    e.dataTransfer.setData("application/json", JSON.stringify({ type: "table" }));
+    setIsDraggingTable(true);
+    onTableDragStart?.(e);
+  };
+
   const handleDragEnd = () => {
     setIsDraggingShape(false);
+    setIsDraggingTable(false);
   };
 
   return (
