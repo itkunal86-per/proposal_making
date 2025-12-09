@@ -12,6 +12,9 @@ import { toast } from "@/hooks/use-toast";
 import { Proposal } from "@/services/proposalsService";
 import { replaceVariables, decodeHtmlEntities } from "@/lib/variableUtils";
 import { ShareLinkDialog } from "@/components/ShareLinkDialog";
+import { ShapeEditor } from "@/components/ShapeEditor";
+import { TableEditor } from "@/components/TableEditor";
+import { TextEditor } from "@/components/TextEditor";
 
 interface ProposalPreviewModalProps {
   proposal: Proposal;
