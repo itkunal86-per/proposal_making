@@ -850,7 +850,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
             )}
 
             {section.shapes && section.shapes.length > 0 && (
-              <div className={isMultiColumn ? "col-span-full relative mt-4 bg-gray-50 rounded min-h-96" : "relative mt-4 bg-gray-50 rounded min-h-96"} style={{ position: "relative" }}>
+              <div className={isMultiColumn ? "col-span-full relative mt-4 bg-gray-50 rounded min-h-96" : "relative mt-4 bg-gray-50 rounded min-h-96"} style={{ position: "relative", overflow: "hidden" }}>
                 {section.shapes.map((shape, sIndex) => (
                   <ShapeEditor
                     key={sIndex}
