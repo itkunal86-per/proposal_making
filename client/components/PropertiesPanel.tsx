@@ -2079,6 +2079,42 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               </div>
             </div>
           )}
+
+          <div>
+            <Label className="text-xs font-semibold">Position - X</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="0"
+                value={shape.left}
+                onChange={(e) =>
+                  handleUpdateShape({ left: parseInt(e.target.value) || 0 })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">
+                px
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Position - Y</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="0"
+                value={shape.top}
+                onChange={(e) =>
+                  handleUpdateShape({ top: parseInt(e.target.value) || 0 })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">
+                px
+              </span>
+            </div>
+          </div>
         </div>
 
         <Separator />
