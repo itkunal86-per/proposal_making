@@ -7,7 +7,7 @@ import { ShapeElement } from "@/components/ShapeElement";
 
 interface ElementProps {
   id: string;
-  type: "title" | "section-title" | "section-content" | "image" | "video";
+  type: "title" | "section-title" | "section-content" | "image" | "video" | "shape";
   selected: boolean;
   onSelect: () => void;
   onAI?: () => void;
