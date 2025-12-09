@@ -26,19 +26,20 @@ export const ShapeElement: React.FC<ShapeElementProps> = ({
   onSelect,
 }) => {
   const baseClasses =
-    "cursor-pointer transition-all duration-200 outline-2 outline-offset-2 absolute";
+    "cursor-pointer transition-all duration-200 outline-2 outline-offset-2";
   const selectedClasses = selected
-    ? "outline outline-blue-500 bg-blue-50/50"
+    ? "outline outline-blue-500"
     : "hover:outline hover:outline-gray-300 hover:outline-offset-2";
 
   const renderShape = () => {
-    const commonStyle: React.CSSProperties = {
-      width: `${width}px`,
-      height: `${height}px`,
-      backgroundColor,
-      borderWidth: borderWidth ? `${borderWidth}px` : "0px",
-      borderColor,
-      borderStyle: borderWidth ? "solid" : "none",
+    const baseStyle: React.CSSProperties = {
+      cursor: "pointer",
+      display: "inline-block",
+    };
+
+    const outlineStyle: React.CSSProperties = {
+      outline: selected ? "2px solid #3b82f6" : "none",
+      outlineOffset: "2px",
     };
 
     switch (type) {
@@ -46,10 +47,17 @@ export const ShapeElement: React.FC<ShapeElementProps> = ({
         return (
           <div
             onClick={onSelect}
-            className={`${baseClasses} ${selectedClasses}`}
+            className={baseClasses}
             style={{
-              ...commonStyle,
+              ...baseStyle,
+              ...outlineStyle,
+              width: `${width}px`,
+              height: `${height}px`,
+              backgroundColor,
               borderRadius: "50%",
+              borderWidth: borderWidth ? `${borderWidth}px` : "0px",
+              borderColor,
+              borderStyle: borderWidth ? "solid" : "none",
             }}
           />
         );
@@ -57,27 +65,16 @@ export const ShapeElement: React.FC<ShapeElementProps> = ({
         return (
           <div
             onClick={onSelect}
-            className={`${baseClasses} ${selectedClasses}`}
+            className={baseClasses}
             style={{
+              ...baseStyle,
+              ...outlineStyle,
               width: 0,
               height: 0,
               borderLeft: `${width / 2}px solid transparent`,
               borderRight: `${width / 2}px solid transparent`,
               borderBottom: `${height}px solid ${backgroundColor}`,
-              position: "absolute",
-              borderTopWidth: 0,
-              borderBottomWidth: `${height}px`,
-              borderLeftWidth: `${width / 2}px`,
-              borderRightWidth: `${width / 2}px`,
-              borderTopStyle: "solid",
-              borderBottomStyle: "solid",
-              borderLeftStyle: "solid",
-              borderRightStyle: "solid",
-              borderTopColor: "transparent",
-              borderBottomColor: backgroundColor,
-              borderLeftColor: "transparent",
-              borderRightColor: "transparent",
-            } as React.CSSProperties}
+            }}
           />
         );
       case "square":
@@ -85,10 +82,17 @@ export const ShapeElement: React.FC<ShapeElementProps> = ({
         return (
           <div
             onClick={onSelect}
-            className={`${baseClasses} ${selectedClasses}`}
+            className={baseClasses}
             style={{
-              ...commonStyle,
+              ...baseStyle,
+              ...outlineStyle,
+              width: `${width}px`,
+              height: `${height}px`,
+              backgroundColor,
               borderRadius: `${borderRadius}px`,
+              borderWidth: borderWidth ? `${borderWidth}px` : "0px",
+              borderColor,
+              borderStyle: borderWidth ? "solid" : "none",
             }}
           />
         );
