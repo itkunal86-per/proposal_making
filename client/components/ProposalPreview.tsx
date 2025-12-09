@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Sparkles } from "lucide-react";
 import { replaceVariables, decodeHtmlEntities } from "@/lib/variableUtils";
 import { ShapeEditor } from "@/components/ShapeEditor";
+import { TableEditor } from "@/components/TableEditor";
 
 interface ElementProps {
   id: string;
