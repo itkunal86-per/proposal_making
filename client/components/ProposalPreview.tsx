@@ -45,6 +45,7 @@ interface ElementProps {
 }
 
 const SelectableElement: React.FC<ElementProps> = ({
+  id,
   selected,
   onSelect,
   onAI,
