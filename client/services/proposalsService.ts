@@ -590,7 +590,9 @@ export async function createProposalApi(input: CreateProposalInput): Promise<Cre
     }
 
     const data: ApiProposalResponse = await res.json();
+    console.log("API response from createProposalApi:", data);
     const proposal = convertApiProposalToProposal(data);
+    console.log("Converted proposal:", proposal);
     const list = await getAll();
     persist([proposal, ...list]);
 
