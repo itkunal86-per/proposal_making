@@ -463,6 +463,27 @@ function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmai
             top: typeof shape.top === "number" ? shape.top : 0,
             left: typeof shape.left === "number" ? shape.left : 0,
           })) : [],
+          tables: Array.isArray(s.tables) ? s.tables.map((table) => ({
+            id: String(table.id),
+            rows: table.rows,
+            columns: table.columns,
+            cells: (table.cells ?? []).map((row) =>
+              (row ?? []).map((cell) => ({
+                id: String(cell.id),
+                content: cell.content,
+              }))
+            ),
+            borderWidth: table.borderWidth,
+            borderColor: table.borderColor,
+            headerBackground: table.headerBackground,
+            cellBackground: table.cellBackground,
+            textColor: table.textColor,
+            padding: table.padding,
+            width: table.width,
+            height: table.height,
+            top: typeof table.top === "number" ? table.top : 0,
+            left: typeof table.left === "number" ? table.left : 0,
+          })) : [],
           comments: Array.isArray(s.comments) ? s.comments : [],
           titleStyles: normalizeStyles(s.titleStyles),
           contentStyles: normalizeStyles(s.contentStyles),
