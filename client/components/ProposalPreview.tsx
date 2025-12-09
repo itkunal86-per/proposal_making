@@ -175,11 +175,6 @@ const SelectableElement: React.FC<ElementProps> = ({
     "section-content": "",
   };
 
-  // If section-content is empty (deleted), don't render anything
-  if (type === "section-content" && children === "") {
-    return null;
-  }
-
   const renderContent = () => {
     const content = children === undefined || children === null ? (type === "section-content" ? "Click to add content..." : "") : children;
 
