@@ -433,9 +433,14 @@ export async function listProposals(): Promise<Proposal[]> {
 }
 
 export async function getProposal(id: string): Promise<Proposal | undefined> {
+  // Check local storage first (for recently created proposals that may not be on the API yet)
+  const stored = readStored();
+  const found = stored?.find((p) => p.id === id);
+  if (found) return found;
+
+  // Fall back to API list
   const list = await getAll();
-  const found = list.find((p) => p.id === id);
-  return found;
+  return list.find((p) => p.id === id);
 }
 
 export async function getProposalDetails(id: string): Promise<Proposal | undefined> {
