@@ -472,6 +472,33 @@ export default function ProposalEditor() {
                 setAIDialogOpen(true);
               }}
               variables={variables}
+              onAddShape={(sectionId, shapeType) => {
+                const section = p.sections.find((s) => s.id === sectionId);
+                if (section) {
+                  const newShape = {
+                    id: Math.random().toString(36).substring(2, 9),
+                    type: shapeType as "square" | "circle" | "triangle",
+                    width: 100,
+                    height: 100,
+                    backgroundColor: "#e5e7eb",
+                    borderWidth: 2,
+                    borderColor: "#6b7280",
+                    borderRadius: 0,
+                  };
+                  const updated = {
+                    ...p,
+                    sections: p.sections.map((s) =>
+                      s.id === sectionId
+                        ? { ...s, shapes: [...(s.shapes || []), newShape] }
+                        : s
+                    ),
+                  };
+                  commit(updated);
+                  setSelectedElementId(`shape-${sectionId}-${(section.shapes || []).length}`);
+                  setSelectedElementType("shape");
+                  setActivePanel("properties");
+                }
+              }}
             />
           </div>
 
