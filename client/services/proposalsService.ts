@@ -12,8 +12,8 @@ export interface ShapeElement {
   borderWidth?: number;
   borderColor?: string;
   borderRadius?: number;
-  top?: number;
-  left?: number;
+  top: number;
+  left: number;
 }
 
 export interface ProposalSection {
