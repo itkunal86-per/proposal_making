@@ -279,6 +279,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
   selectedElementId,
   onSelectElement,
   onAIElement,
+  onDeleteContent,
   variables = [],
   onAddShape,
   onUpdateShape,
