@@ -795,6 +795,28 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                 ))}
               </div>
             )}
+
+            {section.shapes && section.shapes.length > 0 && (
+              <div className={isMultiColumn ? "col-span-full relative mt-4 h-96" : "relative mt-4 h-96"}>
+                {section.shapes.map((shape, sIndex) => (
+                  <ShapeElement
+                    key={sIndex}
+                    id={`shape-${section.id}-${sIndex}`}
+                    type={shape.type}
+                    width={shape.width}
+                    height={shape.height}
+                    backgroundColor={shape.backgroundColor}
+                    borderWidth={shape.borderWidth}
+                    borderColor={shape.borderColor}
+                    borderRadius={shape.borderRadius}
+                    selected={selectedElementId === `shape-${section.id}-${sIndex}`}
+                    onSelect={() =>
+                      onSelectElement(`shape-${section.id}-${sIndex}`, "shape")
+                    }
+                  />
+                ))}
+              </div>
+            )}
           </div>
         );
         })}
