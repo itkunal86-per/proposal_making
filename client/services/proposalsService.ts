@@ -3,6 +3,19 @@ import { getStoredToken, getStoredAuth } from "@/lib/auth";
 
 export type ProposalStatus = "draft" | "sent" | "accepted" | "declined";
 
+export interface ShapeElement {
+  id: string;
+  type: "square" | "circle" | "triangle";
+  width: number;
+  height: number;
+  backgroundColor: string;
+  borderWidth?: number;
+  borderColor?: string;
+  borderRadius?: number;
+  top?: number;
+  left?: number;
+}
+
 export interface ProposalSection {
   id: string;
   title: string;
@@ -11,6 +24,7 @@ export interface ProposalSection {
   columnContents?: string[];
   columnStyles?: Record<string, any>[];
   media?: { type: "image" | "video"; url: string }[];
+  shapes?: ShapeElement[];
   comments?: { id: string; author: string; text: string; createdAt: number }[];
   titleStyles?: Record<string, any>;
   contentStyles?: Record<string, any>;
