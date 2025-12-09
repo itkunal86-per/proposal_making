@@ -255,7 +255,35 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
   onSelectElement,
   onAIElement,
   variables = [],
+  onAddShape,
 }) => {
+  const [dragOverSectionId, setDragOverSectionId] = React.useState<string | null>(null);
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    const data = e.dataTransfer.types.includes("application/json");
+    if (data) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "copy";
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>, sectionId: string) => {
+    e.preventDefault();
+    setDragOverSectionId(null);
+
+    try {
+      const data = e.dataTransfer.getData("application/json");
+      if (data) {
+        const draggedItem = JSON.parse(data);
+        if (draggedItem.type === "shape") {
+          onAddShape?.(sectionId, draggedItem.shapeType || "square");
+        }
+      }
+    } catch (err) {
+      console.error("Error handling drop:", err);
+    }
+  };
+
   return (
     <div className="bg-white rounded-lg border p-6 space-y-6 shadow-sm">
       <SelectableElement
