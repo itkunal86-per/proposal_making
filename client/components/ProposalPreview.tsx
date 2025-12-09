@@ -333,7 +333,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-lg border p-6 space-y-6 shadow-sm">
+    <div className="bg-white rounded-lg border p-6 space-y-6 shadow-sm w-full">
       <SelectableElement
         id="proposal-title"
         type="title"
