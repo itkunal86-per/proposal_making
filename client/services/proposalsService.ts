@@ -227,6 +227,18 @@ function normalizeProposal(raw: z.infer<typeof proposalSchema>): Proposal {
           type: m.type!,
           url: m.url!,
         })),
+        shapes: (s.shapes ?? []).map((shape) => ({
+          id: String(shape.id!),
+          type: shape.type! as "square" | "circle" | "triangle",
+          width: shape.width!,
+          height: shape.height!,
+          backgroundColor: shape.backgroundColor!,
+          borderWidth: shape.borderWidth,
+          borderColor: shape.borderColor,
+          borderRadius: shape.borderRadius,
+          top: shape.top,
+          left: shape.left,
+        })),
         comments: (s.comments ?? []).map((c) => ({
           id: String(c.id!),
           author: c.author!,
