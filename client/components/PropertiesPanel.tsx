@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Proposal, ProposalSection } from "@/services/proposalsService";
-import { X, Plus } from "lucide-react";
+import { X, Plus, Sparkles } from "lucide-react";
 import { RichTextEditor } from "@/components/RichTextEditor";
 
 interface ElementStyle {
