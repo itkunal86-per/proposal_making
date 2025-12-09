@@ -920,6 +920,15 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                     fontSize={text.fontSize}
                     color={text.color}
                     fontWeight={text.fontWeight}
+                    backgroundColor={text.backgroundColor}
+                    backgroundOpacity={text.backgroundOpacity}
+                    borderColor={text.borderColor}
+                    borderWidth={text.borderWidth}
+                    borderRadius={text.borderRadius}
+                    paddingTop={text.paddingTop}
+                    paddingRight={text.paddingRight}
+                    paddingBottom={text.paddingBottom}
+                    paddingLeft={text.paddingLeft}
                     selected={selectedElementId === `text-${section.id}-${tIndex}`}
                     onSelect={() =>
                       onSelectElement(`text-${section.id}-${tIndex}`, "text")
