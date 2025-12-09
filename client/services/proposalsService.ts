@@ -548,15 +548,35 @@ function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmai
             top: typeof table.top === "number" ? table.top : 0,
             left: typeof table.left === "number" ? table.left : 0,
           })) : [],
+          texts: Array.isArray(s.texts) ? s.texts.map((text) => ({
+            id: String(text.id),
+            content: text.content,
+            fontSize: text.fontSize,
+            color: text.color,
+            fontWeight: text.fontWeight,
+            backgroundColor: text.backgroundColor,
+            backgroundOpacity: text.backgroundOpacity,
+            borderColor: text.borderColor,
+            borderWidth: text.borderWidth,
+            borderRadius: text.borderRadius,
+            paddingTop: text.paddingTop,
+            paddingRight: text.paddingRight,
+            paddingBottom: text.paddingBottom,
+            paddingLeft: text.paddingLeft,
+            width: text.width,
+            height: text.height,
+            top: typeof text.top === "number" ? text.top : 0,
+            left: typeof text.left === "number" ? text.left : 0,
+          })) : [],
           comments: Array.isArray(s.comments) ? s.comments : [],
           titleStyles: normalizeStyles(s.titleStyles),
           contentStyles: normalizeStyles(s.contentStyles),
         };
       })
     : [
-      { id: uuid(), title: "Overview", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], shapes: [], tables: [], comments: [] },
-      { id: uuid(), title: "Scope", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], shapes: [], tables: [], comments: [] },
-      { id: uuid(), title: "Timeline", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], shapes: [], tables: [], comments: [] },
+      { id: uuid(), title: "Overview", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], shapes: [], tables: [], texts: [], comments: [] },
+      { id: uuid(), title: "Scope", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], shapes: [], tables: [], texts: [], comments: [] },
+      { id: uuid(), title: "Timeline", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], shapes: [], tables: [], texts: [], comments: [] },
     ] as ProposalSection[];
 
   const clientName = typeof apiProposal.client === "string" ? apiProposal.client : (apiProposal.client?.name || "");
