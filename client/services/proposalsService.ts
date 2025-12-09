@@ -41,6 +41,27 @@ export interface TableElement {
   left: number;
 }
 
+export interface TextElement {
+  id: string;
+  content: string;
+  fontSize?: string;
+  color?: string;
+  fontWeight?: boolean;
+  backgroundColor?: string;
+  backgroundOpacity?: string;
+  borderColor?: string;
+  borderWidth?: string;
+  borderRadius?: string;
+  paddingTop?: string;
+  paddingRight?: string;
+  paddingBottom?: string;
+  paddingLeft?: string;
+  width?: number;
+  height?: number;
+  top: number;
+  left: number;
+}
+
 export interface ProposalSection {
   id: string;
   title: string;
@@ -51,6 +72,7 @@ export interface ProposalSection {
   media?: { type: "image" | "video"; url: string }[];
   shapes?: ShapeElement[];
   tables?: TableElement[];
+  texts?: TextElement[];
   comments?: { id: string; author: string; text: string; createdAt: number }[];
   titleStyles?: Record<string, any>;
   contentStyles?: Record<string, any>;
