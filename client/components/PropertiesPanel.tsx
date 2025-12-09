@@ -914,11 +914,14 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
       : section.content;
 
     const handleContentChange = (value: string) => {
+      console.log("PropertiesPanel: handleContentChange:", { sectionId, columnIndex, value, valueLength: value.length });
       if (columnIndex >= 0) {
         const newColumnContents = [...((section as any).columnContents || [])];
         newColumnContents[columnIndex] = value;
+        console.log("PropertiesPanel: updating column content", { columnIndex, newColumnContents });
         handleUpdateSection({ columnContents: newColumnContents });
       } else {
+        console.log("PropertiesPanel: updating single column content", { sectionId, value });
         handleUpdateSection({ content: value });
       }
     };
