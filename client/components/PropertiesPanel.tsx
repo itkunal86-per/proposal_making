@@ -2199,6 +2199,307 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     );
   }
 
+  if (selectedElementType === "table") {
+    const parts = selectedElementId.split("-");
+    const sectionId = parts[1];
+    const tableIndex = parseInt(parts[2]);
+    const section = proposal.sections.find((s) => s.id === sectionId);
+
+    if (!section || !section.tables || !section.tables[tableIndex]) {
+      return (
+        <Card className="p-4">
+          <div className="text-center text-muted-foreground">
+            <p className="text-sm">Table not found</p>
+          </div>
+        </Card>
+      );
+    }
+
+    const table = section.tables[tableIndex];
+
+    const handleUpdateTable = (updates: Partial<typeof table>) => {
+      const newTables = [...(section.tables || [])];
+      newTables[tableIndex] = { ...table, ...updates };
+      const updatedProposal = {
+        ...proposal,
+        sections: proposal.sections.map((s) =>
+          s.id === sectionId ? { ...s, tables: newTables } : s
+        ),
+      };
+      onUpdateProposal(updatedProposal);
+    };
+
+    return (
+      <Card className="p-4 space-y-4">
+        <div>
+          <Label className="text-xs font-semibold">Table Dimensions</Label>
+          <div className="flex gap-2 mt-2">
+            <div className="flex-1">
+              <Label className="text-xs">Rows</Label>
+              <Input
+                type="number"
+                min="1"
+                max="20"
+                value={table.rows}
+                onChange={(e) => {
+                  const newRows = parseInt(e.target.value) || 1;
+                  if (newRows !== table.rows) {
+                    const newCells = Array.from({ length: newRows }, (_, rIdx) => {
+                      if (rIdx < table.cells.length) {
+                        return table.cells[rIdx];
+                      }
+                      return Array.from({ length: table.columns }, (_, cIdx) => ({
+                        id: Math.random().toString(36).substring(2, 9),
+                        content: "",
+                      }));
+                    });
+                    handleUpdateTable({ rows: newRows, cells: newCells });
+                  }
+                }}
+                className="mt-1"
+              />
+            </div>
+            <div className="flex-1">
+              <Label className="text-xs">Columns</Label>
+              <Input
+                type="number"
+                min="1"
+                max="20"
+                value={table.columns}
+                onChange={(e) => {
+                  const newCols = parseInt(e.target.value) || 1;
+                  if (newCols !== table.columns) {
+                    const newCells = table.cells.map((row) => {
+                      if (newCols > row.length) {
+                        return [
+                          ...row,
+                          ...Array.from({ length: newCols - row.length }, () => ({
+                            id: Math.random().toString(36).substring(2, 9),
+                            content: "",
+                          })),
+                        ];
+                      } else {
+                        return row.slice(0, newCols);
+                      }
+                    });
+                    handleUpdateTable({ columns: newCols, cells: newCells });
+                  }
+                }}
+                className="mt-1"
+              />
+            </div>
+          </div>
+        </div>
+
+        <Separator />
+
+        <div className="space-y-3">
+          <div>
+            <Label className="text-xs font-semibold">Border Width</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="0"
+                max="5"
+                value={table.borderWidth}
+                onChange={(e) =>
+                  handleUpdateTable({ borderWidth: parseInt(e.target.value) || 0 })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">px</span>
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Border Color</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="color"
+                value={table.borderColor || "#000000"}
+                onChange={(e) =>
+                  handleUpdateTable({ borderColor: e.target.value })
+                }
+                className="w-16 h-10 p-1 cursor-pointer"
+              />
+              <Input
+                value={table.borderColor || "#000000"}
+                onChange={(e) =>
+                  handleUpdateTable({ borderColor: e.target.value })
+                }
+                className="flex-1"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Header Background</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="color"
+                value={table.headerBackground || "#f3f4f6"}
+                onChange={(e) =>
+                  handleUpdateTable({ headerBackground: e.target.value })
+                }
+                className="w-16 h-10 p-1 cursor-pointer"
+              />
+              <Input
+                value={table.headerBackground || "#f3f4f6"}
+                onChange={(e) =>
+                  handleUpdateTable({ headerBackground: e.target.value })
+                }
+                className="flex-1"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Cell Background</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="color"
+                value={table.cellBackground || "#ffffff"}
+                onChange={(e) =>
+                  handleUpdateTable({ cellBackground: e.target.value })
+                }
+                className="w-16 h-10 p-1 cursor-pointer"
+              />
+              <Input
+                value={table.cellBackground || "#ffffff"}
+                onChange={(e) =>
+                  handleUpdateTable({ cellBackground: e.target.value })
+                }
+                className="flex-1"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Text Color</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="color"
+                value={table.textColor || "#000000"}
+                onChange={(e) =>
+                  handleUpdateTable({ textColor: e.target.value })
+                }
+                className="w-16 h-10 p-1 cursor-pointer"
+              />
+              <Input
+                value={table.textColor || "#000000"}
+                onChange={(e) =>
+                  handleUpdateTable({ textColor: e.target.value })
+                }
+                className="flex-1"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Cell Padding</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="0"
+                max="20"
+                value={table.padding}
+                onChange={(e) =>
+                  handleUpdateTable({ padding: parseInt(e.target.value) || 0 })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">px</span>
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Position - X</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="0"
+                value={table.left}
+                onChange={(e) =>
+                  handleUpdateTable({ left: parseInt(e.target.value) || 0 })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">px</span>
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Position - Y</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="0"
+                value={table.top}
+                onChange={(e) =>
+                  handleUpdateTable({ top: parseInt(e.target.value) || 0 })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">px</span>
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Width</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="300"
+                value={table.width}
+                onChange={(e) =>
+                  handleUpdateTable({ width: parseInt(e.target.value) || 300 })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">px</span>
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Height</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="200"
+                value={table.height}
+                onChange={(e) =>
+                  handleUpdateTable({ height: parseInt(e.target.value) || 200 })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">px</span>
+            </div>
+          </div>
+        </div>
+
+        <Separator />
+
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={() => {
+            const newTables = section.tables!.filter((_, i) => i !== tableIndex);
+            const updatedProposal = {
+              ...proposal,
+              sections: proposal.sections.map((s) =>
+                s.id === sectionId ? { ...s, tables: newTables } : s
+              ),
+            };
+            onUpdateProposal(updatedProposal);
+          }}
+          className="w-full"
+        >
+          Remove Table
+        </Button>
+      </Card>
+    );
+  }
+
   return (
     <Card className="p-4">
       <div className="text-center text-muted-foreground">
