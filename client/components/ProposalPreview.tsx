@@ -856,7 +856,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
               </div>
             )}
 
-            {(section.shapes && section.shapes.length > 0) || (section.tables && section.tables.length > 0) ? (
+            {(section.shapes && section.shapes.length > 0) || (section.tables && section.tables.length > 0) || ((section as any).texts && (section as any).texts.length > 0) ? (
               <div className={isMultiColumn ? "col-span-full relative mt-4 bg-gray-50 rounded" : "relative mt-4 bg-gray-50 rounded"} style={{ position: "relative", minHeight: "400px" }}>
                 {section.shapes && section.shapes.map((shape, sIndex) => (
                   <ShapeEditor
@@ -906,6 +906,26 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                     }
                     onUpdate={(updates) =>
                       onUpdateTable?.(section.id, tIndex, updates)
+                    }
+                  />
+                ))}
+                {(section as any).texts && (section as any).texts.map((text: any, tIndex: number) => (
+                  <TextEditor
+                    key={`text-${tIndex}`}
+                    id={`text-${section.id}-${tIndex}`}
+                    content={text.content}
+                    top={text.top}
+                    left={text.left}
+                    width={text.width}
+                    fontSize={text.fontSize}
+                    color={text.color}
+                    fontWeight={text.fontWeight}
+                    selected={selectedElementId === `text-${section.id}-${tIndex}`}
+                    onSelect={() =>
+                      onSelectElement(`text-${section.id}-${tIndex}`, "text")
+                    }
+                    onUpdate={(updates) =>
+                      onUpdateText?.(section.id, tIndex, updates)
                     }
                   />
                 ))}
