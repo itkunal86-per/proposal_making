@@ -8,7 +8,9 @@ interface BuildPanelProps {
   onShapeDragStart?: (e: React.DragEvent<HTMLDivElement>) => void;
 }
 
-export const BuildPanel: React.FC<BuildPanelProps> = ({ onAddContent }) => {
+export const BuildPanel: React.FC<BuildPanelProps> = ({ onAddContent, onShapeDragStart }) => {
+  const [isDraggingShape, setIsDraggingShape] = useState(false);
+
   const contentTypes = [
     {
       id: "text",
@@ -39,8 +41,20 @@ export const BuildPanel: React.FC<BuildPanelProps> = ({ onAddContent }) => {
       label: "Shape",
       icon: Square,
       description: "Add a shape",
+      draggable: true,
     },
   ];
+
+  const handleShapeDragStart = (e: React.DragEvent<HTMLDivElement>) => {
+    e.dataTransfer.effectAllowed = "copy";
+    e.dataTransfer.setData("application/json", JSON.stringify({ type: "shape", shapeType: "square" }));
+    setIsDraggingShape(true);
+    onShapeDragStart?.(e);
+  };
+
+  const handleDragEnd = () => {
+    setIsDraggingShape(false);
+  };
 
   return (
     <Card className="p-4 space-y-4">
@@ -49,7 +63,21 @@ export const BuildPanel: React.FC<BuildPanelProps> = ({ onAddContent }) => {
       <div className="grid grid-cols-2 gap-3">
         {contentTypes.map((type) => {
           const IconComponent = type.icon;
-          return (
+          const isShape = type.id === "shape";
+
+          return isShape ? (
+            <div
+              key={type.id}
+              draggable
+              onDragStart={handleShapeDragStart}
+              onDragEnd={handleDragEnd}
+              className={`flex flex-col items-center gap-2 p-4 h-auto border border-slate-200 rounded-md cursor-move hover:bg-slate-50 transition-colors ${isDraggingShape ? "opacity-50" : ""}`}
+              title="Drag to add a shape"
+            >
+              <IconComponent className="w-6 h-6" />
+              <span className="text-sm font-medium">{type.label}</span>
+            </div>
+          ) : (
             <Button
               key={type.id}
               variant="outline"
