@@ -3,10 +3,13 @@ import { Proposal, ProposalSection } from "@/services/proposalsService";
 import { Button } from "@/components/ui/button";
 import { Sparkles } from "lucide-react";
 import { replaceVariables, decodeHtmlEntities } from "@/lib/variableUtils";
+import { ShapeEditor } from "@/components/ShapeEditor";
+import { TableEditor } from "@/components/TableEditor";
+import { TextEditor } from "@/components/TextEditor";
 
 interface ElementProps {
   id: string;
-  type: "title" | "section-title" | "section-content" | "image" | "video";
+  type: "title" | "section-title" | "section-content" | "image" | "video" | "shape";
   selected: boolean;
   onSelect: () => void;
   onAI?: () => void;
@@ -245,6 +248,12 @@ interface ProposalPreviewProps {
   onSelectElement: (id: string, type: string) => void;
   onAIElement?: (elementId: string, elementType: string) => void;
   variables?: Array<{ id: string | number; name: string; value: string }>;
+  onAddShape?: (sectionId: string, shapeType: "square" | "circle" | "triangle", x: number, y: number) => void;
+  onUpdateShape?: (sectionId: string, shapeIndex: number, updates: { width?: number; height?: number; top?: number; left?: number }) => void;
+  onAddTable?: (sectionId: string, x: number, y: number) => void;
+  onUpdateTable?: (sectionId: string, tableIndex: number, updates: any) => void;
+  onAddText?: (sectionId: string, x: number, y: number) => void;
+  onUpdateText?: (sectionId: string, textIndex: number, updates: any) => void;
 }
 
 export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
@@ -253,7 +262,52 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
   onSelectElement,
   onAIElement,
   variables = [],
+  onAddShape,
+  onUpdateShape,
+  onAddTable,
+  onUpdateTable,
+  onAddText,
+  onUpdateText,
 }) => {
+  const [dragOverSectionId, setDragOverSectionId] = React.useState<string | null>(null);
+  const sectionRefs = React.useRef<Map<string, HTMLDivElement>>(new Map());
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    const data = e.dataTransfer.types.includes("application/json");
+    if (data) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "copy";
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>, sectionId: string) => {
+    e.preventDefault();
+    setDragOverSectionId(null);
+
+    try {
+      const data = e.dataTransfer.getData("application/json");
+      if (data) {
+        const draggedItem = JSON.parse(data);
+        const sectionElement = sectionRefs.current.get(sectionId);
+        if (sectionElement) {
+          const rect = sectionElement.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+
+          if (draggedItem.type === "shape") {
+            onAddShape?.(sectionId, draggedItem.shapeType || "square", Math.max(0, x), Math.max(0, y));
+          } else if (draggedItem.type === "table") {
+            onAddTable?.(sectionId, Math.max(0, x), Math.max(0, y));
+          } else if (draggedItem.type === "text") {
+            onAddText?.(sectionId, Math.max(0, x), Math.max(0, y));
+          }
+        }
+      }
+    } catch (err) {
+      console.error("Error handling drop:", err);
+    }
+  };
+
   return (
     <div className="bg-white rounded-lg border p-6 space-y-6 shadow-sm">
       <SelectableElement
@@ -326,11 +380,18 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
           <div
             key={section.id}
             data-section-id={section.id}
+            ref={(el) => {
+              if (el) sectionRefs.current.set(section.id, el);
+            }}
             className={containerClassName}
             style={{
               gap: isMultiColumn ? `${columnGapValue}px` : undefined,
-              marginBottom: `${gapAfterValue}px`
+              marginBottom: `${gapAfterValue}px`,
+              position: "relative"
             }}
+            onDragOver={handleDragOver}
+            onDragLeave={() => setDragOverSectionId(null)}
+            onDrop={(e) => handleDrop(e, section.id)}
           >
             {isMultiColumn && (
               <div className="col-span-full">
@@ -794,6 +855,91 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                 ))}
               </div>
             )}
+
+            {(section.shapes && section.shapes.length > 0) || (section.tables && section.tables.length > 0) || ((section as any).texts && (section as any).texts.length > 0) ? (
+              <div className={isMultiColumn ? "col-span-full relative mt-4 bg-gray-50 rounded" : "relative mt-4 bg-gray-50 rounded"} style={{ position: "relative", minHeight: "400px" }}>
+                {section.shapes && section.shapes.map((shape, sIndex) => (
+                  <ShapeEditor
+                    key={`shape-${sIndex}`}
+                    id={`shape-${section.id}-${sIndex}`}
+                    type={shape.type}
+                    width={shape.width}
+                    height={shape.height}
+                    backgroundColor={shape.backgroundColor}
+                    backgroundImage={shape.backgroundImage}
+                    backgroundSize={shape.backgroundSize}
+                    backgroundOpacity={shape.backgroundOpacity}
+                    borderWidth={shape.borderWidth}
+                    borderColor={shape.borderColor}
+                    borderRadius={shape.borderRadius}
+                    top={shape.top}
+                    left={shape.left}
+                    selected={selectedElementId === `shape-${section.id}-${sIndex}`}
+                    onSelect={() =>
+                      onSelectElement(`shape-${section.id}-${sIndex}`, "shape")
+                    }
+                    onUpdate={(updates) =>
+                      onUpdateShape?.(section.id, sIndex, updates)
+                    }
+                  />
+                ))}
+                {section.tables && section.tables.map((table, tIndex) => (
+                  <TableEditor
+                    key={`table-${tIndex}`}
+                    id={`table-${section.id}-${tIndex}`}
+                    rows={table.rows}
+                    columns={table.columns}
+                    cells={table.cells}
+                    borderWidth={table.borderWidth}
+                    borderColor={table.borderColor}
+                    headerBackground={table.headerBackground}
+                    cellBackground={table.cellBackground}
+                    textColor={table.textColor}
+                    padding={table.padding}
+                    width={table.width}
+                    height={table.height}
+                    top={table.top}
+                    left={table.left}
+                    selected={selectedElementId === `table-${section.id}-${tIndex}`}
+                    onSelect={() =>
+                      onSelectElement(`table-${section.id}-${tIndex}`, "table")
+                    }
+                    onUpdate={(updates) =>
+                      onUpdateTable?.(section.id, tIndex, updates)
+                    }
+                  />
+                ))}
+                {(section as any).texts && (section as any).texts.map((text: any, tIndex: number) => (
+                  <TextEditor
+                    key={`text-${tIndex}`}
+                    id={`text-${section.id}-${tIndex}`}
+                    content={text.content}
+                    top={text.top}
+                    left={text.left}
+                    width={text.width}
+                    fontSize={text.fontSize}
+                    color={text.color}
+                    fontWeight={text.fontWeight}
+                    backgroundColor={text.backgroundColor}
+                    backgroundOpacity={text.backgroundOpacity}
+                    borderColor={text.borderColor}
+                    borderWidth={text.borderWidth}
+                    borderRadius={text.borderRadius}
+                    paddingTop={text.paddingTop}
+                    paddingRight={text.paddingRight}
+                    paddingBottom={text.paddingBottom}
+                    paddingLeft={text.paddingLeft}
+                    selected={selectedElementId === `text-${section.id}-${tIndex}`}
+                    onSelect={() =>
+                      onSelectElement(`text-${section.id}-${tIndex}`, "text")
+                    }
+                    onUpdate={(updates) =>
+                      onUpdateText?.(section.id, tIndex, updates)
+                    }
+                  />
+                ))}
+              </div>
+            ) : null}
           </div>
         );
         })}

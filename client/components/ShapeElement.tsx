@@ -1,0 +1,145 @@
+import React from "react";
+
+interface ShapeElementProps {
+  id: string;
+  type: "square" | "circle" | "triangle";
+  width: number;
+  height: number;
+  backgroundColor: string;
+  backgroundImage?: string;
+  backgroundSize?: string;
+  backgroundOpacity?: string;
+  borderWidth?: number;
+  borderColor?: string;
+  borderRadius?: number;
+  selected: boolean;
+  onSelect: () => void;
+}
+
+export const ShapeElement: React.FC<ShapeElementProps> = ({
+  id,
+  type,
+  width,
+  height,
+  backgroundColor,
+  backgroundImage,
+  backgroundSize = "cover",
+  backgroundOpacity = "0",
+  borderWidth = 0,
+  borderColor = "#000000",
+  borderRadius = 0,
+  selected,
+  onSelect,
+}) => {
+  const baseClasses =
+    "cursor-pointer transition-all duration-200 outline-2 outline-offset-2 relative";
+  const selectedClasses = selected
+    ? "outline outline-blue-500"
+    : "hover:outline hover:outline-gray-300 hover:outline-offset-2";
+
+  const backgroundOverlayOpacity = backgroundImage && backgroundOpacity ? (100 - parseInt(backgroundOpacity)) / 100 : 0;
+
+  const renderShape = () => {
+    const baseStyle: React.CSSProperties = {
+      cursor: "pointer",
+      display: "inline-block",
+      position: "relative",
+    };
+
+    const outlineStyle: React.CSSProperties = {
+      outline: selected ? "2px solid #3b82f6" : "none",
+      outlineOffset: "2px",
+    };
+
+    const commonShapeStyle = (shapeType: string): React.CSSProperties => ({
+      ...baseStyle,
+      ...outlineStyle,
+      width: `${width}px`,
+      height: `${height}px`,
+      backgroundColor,
+      backgroundImage: backgroundImage ? `url(${backgroundImage})` : undefined,
+      backgroundSize: backgroundImage ? backgroundSize : undefined,
+      backgroundPosition: "center",
+      backgroundRepeat: "no-repeat",
+      borderWidth: borderWidth ? `${borderWidth}px` : "0px",
+      borderColor,
+      borderStyle: borderWidth ? "solid" : "none",
+    });
+
+    switch (type) {
+      case "circle":
+        return (
+          <>
+            <div
+              onClick={onSelect}
+              className={baseClasses}
+              style={{
+                ...commonShapeStyle("circle"),
+                borderRadius: "50%",
+              }}
+            />
+            {backgroundImage && backgroundOverlayOpacity > 0 && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundColor: "rgba(255, 255, 255, " + backgroundOverlayOpacity + ")",
+                  borderRadius: "50%",
+                  pointerEvents: "none",
+                }}
+              />
+            )}
+          </>
+        );
+      case "triangle":
+        return (
+          <div
+            onClick={onSelect}
+            className={baseClasses}
+            style={{
+              ...baseStyle,
+              ...outlineStyle,
+              width: 0,
+              height: 0,
+              borderLeft: `${width / 2}px solid transparent`,
+              borderRight: `${width / 2}px solid transparent`,
+              borderBottom: `${height}px solid ${backgroundColor}`,
+            }}
+          />
+        );
+      case "square":
+      default:
+        return (
+          <>
+            <div
+              onClick={onSelect}
+              className={baseClasses}
+              style={{
+                ...commonShapeStyle("square"),
+                borderRadius: `${borderRadius}px`,
+              }}
+            />
+            {backgroundImage && backgroundOverlayOpacity > 0 && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundColor: "rgba(255, 255, 255, " + backgroundOverlayOpacity + ")",
+                  borderRadius: `${borderRadius}px`,
+                  pointerEvents: "none",
+                }}
+              />
+            )}
+          </>
+        );
+    }
+  };
+
+  return renderShape();
+};

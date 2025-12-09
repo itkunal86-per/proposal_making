@@ -472,6 +472,164 @@ export default function ProposalEditor() {
                 setAIDialogOpen(true);
               }}
               variables={variables}
+              onAddShape={(sectionId, shapeType, x, y) => {
+                const section = p.sections.find((s) => s.id === sectionId);
+                if (section) {
+                  const newShape = {
+                    id: Math.random().toString(36).substring(2, 9),
+                    type: shapeType as "square" | "circle" | "triangle",
+                    width: 100,
+                    height: 100,
+                    backgroundColor: "#e5e7eb",
+                    backgroundImage: undefined,
+                    backgroundSize: "cover",
+                    backgroundOpacity: "0",
+                    borderWidth: 2,
+                    borderColor: "#6b7280",
+                    borderRadius: 0,
+                    left: Math.round(x),
+                    top: Math.round(y),
+                  };
+                  const updated = {
+                    ...p,
+                    sections: p.sections.map((s) =>
+                      s.id === sectionId
+                        ? { ...s, shapes: [...(s.shapes || []), newShape] }
+                        : s
+                    ),
+                  };
+                  commit(updated);
+                  setSelectedElementId(`shape-${sectionId}-${(section.shapes || []).length}`);
+                  setSelectedElementType("shape");
+                  setActivePanel("properties");
+                }
+              }}
+              onUpdateShape={(sectionId, shapeIndex, updates) => {
+                const updated = {
+                  ...p,
+                  sections: p.sections.map((s) =>
+                    s.id === sectionId
+                      ? {
+                          ...s,
+                          shapes: (s.shapes || []).map((shape, idx) =>
+                            idx === shapeIndex ? { ...shape, ...updates } : shape
+                          ),
+                        }
+                      : s
+                  ),
+                };
+                commit(updated);
+              }}
+              onAddTable={(sectionId, x, y) => {
+                const section = p.sections.find((s) => s.id === sectionId);
+                if (section) {
+                  const createTableCells = (rows: number, cols: number) => {
+                    return Array.from({ length: rows }, (_, rIdx) =>
+                      Array.from({ length: cols }, (_, cIdx) => ({
+                        id: Math.random().toString(36).substring(2, 9),
+                        content: rIdx === 0 ? `Header ${cIdx + 1}` : "",
+                      }))
+                    );
+                  };
+
+                  const newTable = {
+                    id: Math.random().toString(36).substring(2, 9),
+                    rows: 3,
+                    columns: 3,
+                    cells: createTableCells(3, 3),
+                    borderWidth: 1,
+                    borderColor: "#d1d5db",
+                    headerBackground: "#f3f4f6",
+                    cellBackground: "#ffffff",
+                    textColor: "#000000",
+                    padding: 8,
+                    width: 500,
+                    height: 300,
+                    left: Math.round(x),
+                    top: Math.round(y),
+                  };
+                  const updated = {
+                    ...p,
+                    sections: p.sections.map((s) =>
+                      s.id === sectionId
+                        ? { ...s, tables: [...(s.tables || []), newTable] }
+                        : s
+                    ),
+                  };
+                  commit(updated);
+                  setSelectedElementId(`table-${sectionId}-${(section.tables || []).length}`);
+                  setSelectedElementType("table");
+                  setActivePanel("properties");
+                }
+              }}
+              onUpdateTable={(sectionId, tableIndex, updates) => {
+                const updated = {
+                  ...p,
+                  sections: p.sections.map((s) =>
+                    s.id === sectionId
+                      ? {
+                          ...s,
+                          tables: (s.tables || []).map((table, idx) =>
+                            idx === tableIndex ? { ...table, ...updates } : table
+                          ),
+                        }
+                      : s
+                  ),
+                };
+                commit(updated);
+              }}
+              onAddText={(sectionId, x, y) => {
+                const section = p.sections.find((s) => s.id === sectionId);
+                if (section) {
+                  const newText = {
+                    id: Math.random().toString(36).substring(2, 9),
+                    content: "Double-click to edit text",
+                    fontSize: "16",
+                    color: "#000000",
+                    fontWeight: false,
+                    backgroundColor: "#ffffff",
+                    backgroundOpacity: "100",
+                    borderColor: "#d1d5db",
+                    borderWidth: "1",
+                    borderRadius: "4",
+                    paddingTop: "8",
+                    paddingRight: "8",
+                    paddingBottom: "8",
+                    paddingLeft: "8",
+                    width: 200,
+                    left: Math.round(x),
+                    top: Math.round(y),
+                  };
+                  const updated = {
+                    ...p,
+                    sections: p.sections.map((s) =>
+                      s.id === sectionId
+                        ? { ...s, texts: [...((s as any).texts || []), newText] }
+                        : s
+                    ),
+                  };
+                  commit(updated);
+                  setSelectedElementId(`text-${sectionId}-${((section as any).texts || []).length}`);
+                  setSelectedElementType("text");
+                  setActivePanel("properties");
+                }
+              }}
+              onUpdateText={(sectionId, textIndex, updates) => {
+                const updated = {
+                  ...p,
+                  sections: p.sections.map((s) =>
+                    s.id === sectionId
+                      ? {
+                          ...s,
+                          texts: ((s as any).texts || []).map((text: any, idx: number) =>
+                            idx === textIndex ? { ...text, ...updates } : text
+                          ),
+                        }
+                      : s
+                  ),
+                };
+                commit(updated);
+              }}
             />
           </div>
 
@@ -488,6 +646,13 @@ export default function ProposalEditor() {
                   setSelectedElementType(null);
                 }}
                 variables={variables}
+                onOpenAI={() => {
+                  if (selectedElementId && selectedElementType) {
+                    setAIElementId(selectedElementId);
+                    setAIElementType(selectedElementType);
+                    setAIDialogOpen(true);
+                  }
+                }}
               />
             ) : activePanel === "document" ? (
               <DocumentPanel

@@ -255,15 +255,24 @@ export const AIAssistantDialog: React.FC<AIAssistantDialogProps> = ({
   let activeSection: typeof proposal.sections[0] | null = null;
   let targetElementId = elementId;
   let targetElementType = elementType;
+  let elementIndex: number | null = null;
 
-  if (elementId && (elementId.includes("section-") || elementId.includes("media-"))) {
-    // Extract section ID from element ID (e.g., "section-content-abc123" -> "abc123")
+  if (elementId && (elementId.includes("section-") || elementId.includes("media-") || elementId.includes("shape-") || elementId.includes("table-") || elementId.includes("text-"))) {
+    // Extract section ID from element ID
     if (elementId.startsWith("section-")) {
       const sid = elementId.replace(/^section-(title|content)-/, "");
       activeSection = proposal.sections.find((s) => s.id === sid) || null;
     } else if (elementId.startsWith("media-")) {
       const sid = elementId.split("-")[1];
       activeSection = proposal.sections.find((s) => s.id === sid) || null;
+    } else if (elementId.startsWith("shape-") || elementId.startsWith("table-") || elementId.startsWith("text-")) {
+      // Format: "shape-sectionId-index", "table-sectionId-index", or "text-sectionId-index"
+      const parts = elementId.split("-");
+      if (parts.length >= 3) {
+        const sid = parts[1];
+        elementIndex = parseInt(parts[2]);
+        activeSection = proposal.sections.find((s) => s.id === sid) || null;
+      }
     }
   }
 
@@ -283,6 +292,13 @@ export const AIAssistantDialog: React.FC<AIAssistantDialogProps> = ({
     }
     if (targetElementType === "section-content" && activeSection) {
       return { label: "Section Content", value: activeSection.content };
+    }
+    if (targetElementType === "text" && activeSection && elementIndex !== null) {
+      const textElement = (activeSection as any).texts?.[elementIndex];
+      return {
+        label: `Text Block - ${activeSection.title}`,
+        value: textElement?.content || "Empty text block",
+      };
     }
     if ((targetElementType === "image" || targetElementType === "video") && activeSection) {
       return {
@@ -322,6 +338,12 @@ export const AIAssistantDialog: React.FC<AIAssistantDialogProps> = ({
     }
   };
 
+  const stripHtmlTags = (html: string): string => {
+    const div = document.createElement("div");
+    div.innerHTML = html;
+    return div.innerText || "";
+  };
+
   const handleAddToProposal = () => {
     if (!editableContent.trim()) {
       toast({ title: "Content is empty" });
@@ -334,16 +356,29 @@ export const AIAssistantDialog: React.FC<AIAssistantDialogProps> = ({
     }
 
     const updatedProposal = { ...proposal };
+    // Strip HTML tags for text elements
+    const contentToAdd = targetElementType === "text" ? stripHtmlTags(editableContent) : editableContent;
 
     if (targetElementType === "title") {
-      updatedProposal.title = editableContent;
+      updatedProposal.title = contentToAdd;
     } else if (targetElementType === "section-title" && activeSection) {
       updatedProposal.sections = proposal.sections.map((s) =>
-        s.id === activeSection!.id ? { ...s, title: editableContent } : s
+        s.id === activeSection!.id ? { ...s, title: contentToAdd } : s
       );
     } else if (targetElementType === "section-content" && activeSection) {
       updatedProposal.sections = proposal.sections.map((s) =>
-        s.id === activeSection!.id ? { ...s, content: editableContent } : s
+        s.id === activeSection!.id ? { ...s, content: contentToAdd } : s
+      );
+    } else if (targetElementType === "text" && activeSection && elementIndex !== null) {
+      updatedProposal.sections = proposal.sections.map((s) =>
+        s.id === activeSection!.id
+          ? {
+              ...s,
+              texts: ((s as any).texts || []).map((text: any, idx: number) =>
+                idx === elementIndex ? { ...text, content: contentToAdd } : text
+              ),
+            }
+          : s
       );
     }
 

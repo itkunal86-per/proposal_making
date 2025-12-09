@@ -3,6 +3,44 @@ import { getStoredToken, getStoredAuth } from "@/lib/auth";
 
 export type ProposalStatus = "draft" | "sent" | "accepted" | "declined";
 
+export interface ShapeElement {
+  id: string;
+  type: "square" | "circle" | "triangle";
+  width: number;
+  height: number;
+  backgroundColor: string;
+  backgroundImage?: string;
+  backgroundSize?: string;
+  backgroundOpacity?: string;
+  borderWidth?: number;
+  borderColor?: string;
+  borderRadius?: number;
+  top: number;
+  left: number;
+}
+
+export interface TableCell {
+  id: string;
+  content: string;
+}
+
+export interface TableElement {
+  id: string;
+  rows: number;
+  columns: number;
+  cells: TableCell[][];
+  borderWidth: number;
+  borderColor: string;
+  headerBackground?: string;
+  cellBackground?: string;
+  textColor?: string;
+  padding: number;
+  width: number;
+  height: number;
+  top: number;
+  left: number;
+}
+
 export interface ProposalSection {
   id: string;
   title: string;
@@ -11,6 +49,8 @@ export interface ProposalSection {
   columnContents?: string[];
   columnStyles?: Record<string, any>[];
   media?: { type: "image" | "video"; url: string }[];
+  shapes?: ShapeElement[];
+  tables?: TableElement[];
   comments?: { id: string; author: string; text: string; createdAt: number }[];
   titleStyles?: Record<string, any>;
   contentStyles?: Record<string, any>;
@@ -107,6 +147,44 @@ export interface CreateProposalResult {
 }
 
 const idSchema = z.union([z.string(), z.number()]);
+const shapeElementSchema = z.object({
+  id: z.union([z.string(), z.number()]),
+  type: z.union([z.literal("square"), z.literal("circle"), z.literal("triangle")]),
+  width: z.number(),
+  height: z.number(),
+  backgroundColor: z.string(),
+  backgroundImage: z.string().optional(),
+  backgroundSize: z.string().optional(),
+  backgroundOpacity: z.string().optional(),
+  borderWidth: z.number().optional(),
+  borderColor: z.string().optional(),
+  borderRadius: z.number().optional(),
+  top: z.number(),
+  left: z.number(),
+}).passthrough();
+
+const tableCellSchema = z.object({
+  id: z.union([z.string(), z.number()]),
+  content: z.string(),
+}).passthrough();
+
+const tableElementSchema = z.object({
+  id: z.union([z.string(), z.number()]),
+  rows: z.number(),
+  columns: z.number(),
+  cells: z.array(z.array(tableCellSchema)),
+  borderWidth: z.number(),
+  borderColor: z.string(),
+  headerBackground: z.string().optional(),
+  cellBackground: z.string().optional(),
+  textColor: z.string().optional(),
+  padding: z.number(),
+  width: z.number(),
+  height: z.number(),
+  top: z.number(),
+  left: z.number(),
+}).passthrough();
+
 const sectionSchema = z.object({
   id: idSchema,
   title: z.string(),
@@ -115,6 +193,8 @@ const sectionSchema = z.object({
   columnContents: z.union([z.array(z.string()), z.record(z.any())]).optional(),
   columnStyles: z.union([z.array(z.record(z.any())), z.record(z.any())]).optional(),
   media: z.array(z.object({ type: z.union([z.literal("image"), z.literal("video")]), url: z.string() })).optional(),
+  shapes: z.array(shapeElementSchema).optional(),
+  tables: z.array(tableElementSchema).optional(),
   comments: z.array(z.object({ id: z.union([z.string(), z.number()]), author: z.string(), text: z.string(), createdAt: z.number() })).optional(),
   titleStyles: z.union([z.record(z.any()), z.array(z.any())]).optional(),
   contentStyles: z.union([z.record(z.any()), z.array(z.any())]).optional(),
@@ -198,6 +278,42 @@ function normalizeProposal(raw: z.infer<typeof proposalSchema>): Proposal {
         media: (s.media ?? []).map((m) => ({
           type: m.type!,
           url: m.url!,
+        })),
+        shapes: (s.shapes ?? []).map((shape) => ({
+          id: String(shape.id!),
+          type: shape.type! as "square" | "circle" | "triangle",
+          width: shape.width!,
+          height: shape.height!,
+          backgroundColor: shape.backgroundColor!,
+          backgroundImage: shape.backgroundImage,
+          backgroundSize: shape.backgroundSize,
+          backgroundOpacity: shape.backgroundOpacity,
+          borderWidth: shape.borderWidth,
+          borderColor: shape.borderColor,
+          borderRadius: shape.borderRadius,
+          top: typeof shape.top === "number" ? shape.top : 0,
+          left: typeof shape.left === "number" ? shape.left : 0,
+        })),
+        tables: (s.tables ?? []).map((table) => ({
+          id: String(table.id!),
+          rows: table.rows!,
+          columns: table.columns!,
+          cells: (table.cells ?? []).map((row) =>
+            (row ?? []).map((cell) => ({
+              id: String(cell.id!),
+              content: cell.content!,
+            }))
+          ),
+          borderWidth: table.borderWidth!,
+          borderColor: table.borderColor!,
+          headerBackground: table.headerBackground,
+          cellBackground: table.cellBackground,
+          textColor: table.textColor,
+          padding: table.padding!,
+          width: table.width!,
+          height: table.height!,
+          top: typeof table.top === "number" ? table.top : 0,
+          left: typeof table.left === "number" ? table.left : 0,
         })),
         comments: (s.comments ?? []).map((c) => ({
           id: String(c.id!),
@@ -332,15 +448,51 @@ function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmai
           columnContents: normalizedColumnContents,
           columnStyles: normalizedColumnStyles,
           media: Array.isArray(s.media) ? s.media : [],
+          shapes: Array.isArray(s.shapes) ? s.shapes.map((shape) => ({
+            id: String(shape.id),
+            type: shape.type as "square" | "circle" | "triangle",
+            width: shape.width,
+            height: shape.height,
+            backgroundColor: shape.backgroundColor,
+            backgroundImage: shape.backgroundImage,
+            backgroundSize: shape.backgroundSize,
+            backgroundOpacity: shape.backgroundOpacity,
+            borderWidth: shape.borderWidth,
+            borderColor: shape.borderColor,
+            borderRadius: shape.borderRadius,
+            top: typeof shape.top === "number" ? shape.top : 0,
+            left: typeof shape.left === "number" ? shape.left : 0,
+          })) : [],
+          tables: Array.isArray(s.tables) ? s.tables.map((table) => ({
+            id: String(table.id),
+            rows: table.rows,
+            columns: table.columns,
+            cells: (table.cells ?? []).map((row) =>
+              (row ?? []).map((cell) => ({
+                id: String(cell.id),
+                content: cell.content,
+              }))
+            ),
+            borderWidth: table.borderWidth,
+            borderColor: table.borderColor,
+            headerBackground: table.headerBackground,
+            cellBackground: table.cellBackground,
+            textColor: table.textColor,
+            padding: table.padding,
+            width: table.width,
+            height: table.height,
+            top: typeof table.top === "number" ? table.top : 0,
+            left: typeof table.left === "number" ? table.left : 0,
+          })) : [],
           comments: Array.isArray(s.comments) ? s.comments : [],
           titleStyles: normalizeStyles(s.titleStyles),
           contentStyles: normalizeStyles(s.contentStyles),
         };
       })
     : [
-      { id: uuid(), title: "Overview", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], comments: [] },
-      { id: uuid(), title: "Scope", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], comments: [] },
-      { id: uuid(), title: "Timeline", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], comments: [] },
+      { id: uuid(), title: "Overview", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], shapes: [], tables: [], comments: [] },
+      { id: uuid(), title: "Scope", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], shapes: [], tables: [], comments: [] },
+      { id: uuid(), title: "Timeline", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], shapes: [], tables: [], comments: [] },
     ] as ProposalSection[];
 
   const clientName = typeof apiProposal.client === "string" ? apiProposal.client : (apiProposal.client?.name || "");
@@ -640,9 +792,9 @@ export async function createProposal(partial?: Partial<Proposal>): Promise<Propo
     createdAt: now,
     updatedAt: now,
     sections: partial?.sections ?? [
-      { id: uuid(), title: "Overview", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], comments: [] },
-      { id: uuid(), title: "Scope", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], comments: [] },
-      { id: uuid(), title: "Timeline", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], comments: [] },
+      { id: uuid(), title: "Overview", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], shapes: [], tables: [], comments: [] },
+      { id: uuid(), title: "Scope", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], shapes: [], tables: [], comments: [] },
+      { id: uuid(), title: "Timeline", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], shapes: [], tables: [], comments: [] },
     ] as ProposalSection[],
     pricing: partial?.pricing ?? {
       currency: "USD",
@@ -840,7 +992,7 @@ export async function addSection(p: Proposal, title = "New Section", layout: "si
   const titleStyles = columnCount > 0 ? { columnGap: 0 } : {};
   const contentStyles = { gapAfter: 10 };
 
-  const newSection = { id: uuid(), title, content: "", layout, columnContents, columnStyles, titleStyles, contentStyles, media: [], comments: [] };
+  const newSection = { id: uuid(), title, content: "", layout, columnContents, columnStyles, titleStyles, contentStyles, media: [], shapes: [], tables: [], comments: [] };
   const updated = {
     ...p,
     sections: [...p.sections, newSection],

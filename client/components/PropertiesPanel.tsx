@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Proposal, ProposalSection } from "@/services/proposalsService";
-import { X, Plus } from "lucide-react";
+import { X, Plus, Sparkles } from "lucide-react";
 import { RichTextEditor } from "@/components/RichTextEditor";
 
 interface ElementStyle {
@@ -39,6 +39,7 @@ interface PropertiesPanelProps {
   onUpdateProposal: (proposal: Proposal) => void;
   onRemoveMedia?: (sectionId: string, mediaIndex: number) => void;
   variables?: Array<{ id: string | number; name: string; value: string }>;
+  onOpenAI?: () => void;
 }
 
 export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
@@ -48,6 +49,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   onUpdateProposal,
   onRemoveMedia,
   variables,
+  onOpenAI,
 }) => {
   if (!selectedElementId || !selectedElementType) {
     return (
@@ -1903,6 +1905,968 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
           className="w-full"
         >
           Remove Media
+        </Button>
+      </Card>
+    );
+  }
+
+  if (selectedElementType === "shape") {
+    const parts = selectedElementId.split("-");
+    const sectionId = parts[1];
+    const shapeIndex = parseInt(parts[2]);
+    const section = proposal.sections.find((s) => s.id === sectionId);
+
+    if (!section || !section.shapes || !section.shapes[shapeIndex]) {
+      return (
+        <Card className="p-4">
+          <div className="text-center text-muted-foreground">
+            <p className="text-sm">Shape not found</p>
+          </div>
+        </Card>
+      );
+    }
+
+    const shape = section.shapes[shapeIndex];
+
+    const handleUpdateShape = (updates: Partial<typeof shape>) => {
+      const newShapes = [...(section.shapes || [])];
+      newShapes[shapeIndex] = { ...shape, ...updates };
+      const updatedProposal = {
+        ...proposal,
+        sections: proposal.sections.map((s) =>
+          s.id === sectionId ? { ...s, shapes: newShapes } : s
+        ),
+      };
+      onUpdateProposal(updatedProposal);
+    };
+
+    return (
+      <Card className="p-4 space-y-4">
+        <div>
+          <Label className="text-xs font-semibold">Shape Type</Label>
+          <div className="flex gap-2 mt-2">
+            {(["square", "circle", "triangle"] as const).map((type) => (
+              <Button
+                key={type}
+                variant={shape.type === type ? "default" : "outline"}
+                size="sm"
+                onClick={() => handleUpdateShape({ type })}
+                className="capitalize flex-1"
+              >
+                {type}
+              </Button>
+            ))}
+          </div>
+        </div>
+
+        <Separator />
+
+        <div className="space-y-3">
+          <div>
+            <Label className="text-xs font-semibold">Width</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="10"
+                max="500"
+                value={shape.width}
+                onChange={(e) =>
+                  handleUpdateShape({ width: parseInt(e.target.value) || 100 })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">
+                px
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Height</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="10"
+                max="500"
+                value={shape.height}
+                onChange={(e) =>
+                  handleUpdateShape({ height: parseInt(e.target.value) || 100 })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">
+                px
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Background Color</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="color"
+                value={shape.backgroundColor || "#e5e7eb"}
+                onChange={(e) =>
+                  handleUpdateShape({ backgroundColor: e.target.value })
+                }
+                className="w-16 h-10 p-1 cursor-pointer"
+              />
+              <Input
+                value={shape.backgroundColor || "#e5e7eb"}
+                onChange={(e) =>
+                  handleUpdateShape({ backgroundColor: e.target.value })
+                }
+                className="flex-1"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Background Image URL</Label>
+            <Input
+              type="text"
+              placeholder="https://example.com/image.jpg"
+              value={shape.backgroundImage || ""}
+              onChange={(e) =>
+                handleUpdateShape({ backgroundImage: e.target.value })
+              }
+              className="flex-1 mt-2"
+            />
+            <p className="text-xs text-muted-foreground mt-2">
+              Enter the full URL of an image. Leave empty to remove.
+            </p>
+          </div>
+
+          {shape.backgroundImage && (
+            <>
+              <div>
+                <Label className="text-xs font-semibold">Background Size</Label>
+                <div className="flex gap-2 mt-2">
+                  <select
+                    value={shape.backgroundSize || "cover"}
+                    onChange={(e) =>
+                      handleUpdateShape({ backgroundSize: e.target.value })
+                    }
+                    className="flex-1 px-2 py-1 border border-input rounded-md bg-background text-sm"
+                  >
+                    <option value="cover">Cover</option>
+                    <option value="contain">Contain</option>
+                    <option value="100% 100%">Stretch</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-xs font-semibold">Background Opacity</Label>
+                <div className="flex gap-2 mt-2">
+                  <Input
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={parseInt(shape.backgroundOpacity || "0")}
+                    onChange={(e) =>
+                      handleUpdateShape({ backgroundOpacity: e.target.value })
+                    }
+                    className="flex-1"
+                  />
+                  <span className="text-sm text-muted-foreground self-center">
+                    %
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Adjust how much the background color overlays the image (0 = fully transparent, 100 = fully opaque)
+                </p>
+              </div>
+            </>
+          )}
+
+          <div>
+            <Label className="text-xs font-semibold">Border Width</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="0"
+                max="10"
+                value={shape.borderWidth || 0}
+                onChange={(e) =>
+                  handleUpdateShape({ borderWidth: parseInt(e.target.value) || 0 })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">
+                px
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Border Color</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="color"
+                value={shape.borderColor || "#000000"}
+                onChange={(e) =>
+                  handleUpdateShape({ borderColor: e.target.value })
+                }
+                className="w-16 h-10 p-1 cursor-pointer"
+              />
+              <Input
+                value={shape.borderColor || "#000000"}
+                onChange={(e) =>
+                  handleUpdateShape({ borderColor: e.target.value })
+                }
+                className="flex-1"
+              />
+            </div>
+          </div>
+
+          {shape.type !== "triangle" && (
+            <div>
+              <Label className="text-xs font-semibold">Border Radius</Label>
+              <div className="flex gap-2 mt-2">
+                <Input
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={shape.borderRadius || 0}
+                  onChange={(e) =>
+                    handleUpdateShape({ borderRadius: parseInt(e.target.value) || 0 })
+                  }
+                  className="flex-1"
+                />
+                <span className="text-sm text-muted-foreground self-center">
+                  px
+                </span>
+              </div>
+            </div>
+          )}
+
+          <div>
+            <Label className="text-xs font-semibold">Position - X</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="0"
+                value={shape.left}
+                onChange={(e) =>
+                  handleUpdateShape({ left: parseInt(e.target.value) || 0 })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">
+                px
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Position - Y</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="0"
+                value={shape.top}
+                onChange={(e) =>
+                  handleUpdateShape({ top: parseInt(e.target.value) || 0 })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">
+                px
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <Separator />
+
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={() => {
+            const newShapes = section.shapes!.filter((_, i) => i !== shapeIndex);
+            const updatedProposal = {
+              ...proposal,
+              sections: proposal.sections.map((s) =>
+                s.id === sectionId ? { ...s, shapes: newShapes } : s
+              ),
+            };
+            onUpdateProposal(updatedProposal);
+          }}
+          className="w-full"
+        >
+          Remove Shape
+        </Button>
+      </Card>
+    );
+  }
+
+  if (selectedElementType === "table") {
+    const parts = selectedElementId.split("-");
+    const sectionId = parts[1];
+    const tableIndex = parseInt(parts[2]);
+    const section = proposal.sections.find((s) => s.id === sectionId);
+
+    if (!section || !section.tables || !section.tables[tableIndex]) {
+      return (
+        <Card className="p-4">
+          <div className="text-center text-muted-foreground">
+            <p className="text-sm">Table not found</p>
+          </div>
+        </Card>
+      );
+    }
+
+    const table = section.tables[tableIndex];
+
+    const handleUpdateTable = (updates: Partial<typeof table>) => {
+      const newTables = [...(section.tables || [])];
+      newTables[tableIndex] = { ...table, ...updates };
+      const updatedProposal = {
+        ...proposal,
+        sections: proposal.sections.map((s) =>
+          s.id === sectionId ? { ...s, tables: newTables } : s
+        ),
+      };
+      onUpdateProposal(updatedProposal);
+    };
+
+    return (
+      <Card className="p-4 space-y-4">
+        <div>
+          <Label className="text-xs font-semibold">Table Dimensions</Label>
+          <div className="flex gap-2 mt-2">
+            <div className="flex-1">
+              <Label className="text-xs">Rows</Label>
+              <Input
+                type="number"
+                min="1"
+                max="20"
+                value={table.rows}
+                onChange={(e) => {
+                  const newRows = parseInt(e.target.value) || 1;
+                  if (newRows !== table.rows) {
+                    const newCells = Array.from({ length: newRows }, (_, rIdx) => {
+                      if (rIdx < table.cells.length) {
+                        return table.cells[rIdx];
+                      }
+                      return Array.from({ length: table.columns }, (_, cIdx) => ({
+                        id: Math.random().toString(36).substring(2, 9),
+                        content: "",
+                      }));
+                    });
+                    handleUpdateTable({ rows: newRows, cells: newCells });
+                  }
+                }}
+                className="mt-1"
+              />
+            </div>
+            <div className="flex-1">
+              <Label className="text-xs">Columns</Label>
+              <Input
+                type="number"
+                min="1"
+                max="20"
+                value={table.columns}
+                onChange={(e) => {
+                  const newCols = parseInt(e.target.value) || 1;
+                  if (newCols !== table.columns) {
+                    const newCells = table.cells.map((row) => {
+                      if (newCols > row.length) {
+                        return [
+                          ...row,
+                          ...Array.from({ length: newCols - row.length }, () => ({
+                            id: Math.random().toString(36).substring(2, 9),
+                            content: "",
+                          })),
+                        ];
+                      } else {
+                        return row.slice(0, newCols);
+                      }
+                    });
+                    handleUpdateTable({ columns: newCols, cells: newCells });
+                  }
+                }}
+                className="mt-1"
+              />
+            </div>
+          </div>
+        </div>
+
+        <Separator />
+
+        <div className="space-y-3">
+          <div>
+            <Label className="text-xs font-semibold">Border Width</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="0"
+                max="5"
+                value={table.borderWidth}
+                onChange={(e) =>
+                  handleUpdateTable({ borderWidth: parseInt(e.target.value) || 0 })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">px</span>
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Border Color</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="color"
+                value={table.borderColor || "#000000"}
+                onChange={(e) =>
+                  handleUpdateTable({ borderColor: e.target.value })
+                }
+                className="w-16 h-10 p-1 cursor-pointer"
+              />
+              <Input
+                value={table.borderColor || "#000000"}
+                onChange={(e) =>
+                  handleUpdateTable({ borderColor: e.target.value })
+                }
+                className="flex-1"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Header Background</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="color"
+                value={table.headerBackground || "#f3f4f6"}
+                onChange={(e) =>
+                  handleUpdateTable({ headerBackground: e.target.value })
+                }
+                className="w-16 h-10 p-1 cursor-pointer"
+              />
+              <Input
+                value={table.headerBackground || "#f3f4f6"}
+                onChange={(e) =>
+                  handleUpdateTable({ headerBackground: e.target.value })
+                }
+                className="flex-1"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Cell Background</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="color"
+                value={table.cellBackground || "#ffffff"}
+                onChange={(e) =>
+                  handleUpdateTable({ cellBackground: e.target.value })
+                }
+                className="w-16 h-10 p-1 cursor-pointer"
+              />
+              <Input
+                value={table.cellBackground || "#ffffff"}
+                onChange={(e) =>
+                  handleUpdateTable({ cellBackground: e.target.value })
+                }
+                className="flex-1"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Text Color</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="color"
+                value={table.textColor || "#000000"}
+                onChange={(e) =>
+                  handleUpdateTable({ textColor: e.target.value })
+                }
+                className="w-16 h-10 p-1 cursor-pointer"
+              />
+              <Input
+                value={table.textColor || "#000000"}
+                onChange={(e) =>
+                  handleUpdateTable({ textColor: e.target.value })
+                }
+                className="flex-1"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Cell Padding</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="0"
+                max="20"
+                value={table.padding}
+                onChange={(e) =>
+                  handleUpdateTable({ padding: parseInt(e.target.value) || 0 })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">px</span>
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Position - X</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="0"
+                value={table.left}
+                onChange={(e) =>
+                  handleUpdateTable({ left: parseInt(e.target.value) || 0 })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">px</span>
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Position - Y</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="0"
+                value={table.top}
+                onChange={(e) =>
+                  handleUpdateTable({ top: parseInt(e.target.value) || 0 })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">px</span>
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Width</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="300"
+                value={table.width}
+                onChange={(e) =>
+                  handleUpdateTable({ width: parseInt(e.target.value) || 300 })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">px</span>
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Height</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="200"
+                value={table.height}
+                onChange={(e) =>
+                  handleUpdateTable({ height: parseInt(e.target.value) || 200 })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">px</span>
+            </div>
+          </div>
+        </div>
+
+        <Separator />
+
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={() => {
+            const newTables = section.tables!.filter((_, i) => i !== tableIndex);
+            const updatedProposal = {
+              ...proposal,
+              sections: proposal.sections.map((s) =>
+                s.id === sectionId ? { ...s, tables: newTables } : s
+              ),
+            };
+            onUpdateProposal(updatedProposal);
+          }}
+          className="w-full"
+        >
+          Remove Table
+        </Button>
+      </Card>
+    );
+  }
+
+  if (selectedElementType === "text") {
+    const parts = selectedElementId.split("-");
+    const sectionId = parts[1];
+    const textIndex = parseInt(parts[2]);
+    const section = proposal.sections.find((s) => s.id === sectionId);
+
+    if (!section || !(section as any).texts || !(section as any).texts[textIndex]) {
+      return (
+        <Card className="p-4">
+          <div className="text-center text-muted-foreground">
+            <p className="text-sm">Text not found</p>
+          </div>
+        </Card>
+      );
+    }
+
+    const text = (section as any).texts[textIndex];
+
+    const handleUpdateText = (updates: Partial<typeof text>) => {
+      const newTexts = [...((section as any).texts || [])];
+      newTexts[textIndex] = { ...text, ...updates };
+      const updatedProposal = {
+        ...proposal,
+        sections: proposal.sections.map((s) =>
+          s.id === sectionId ? { ...s, texts: newTexts } : s
+        ),
+      };
+      onUpdateProposal(updatedProposal);
+    };
+
+    return (
+      <Card className="p-4 space-y-4">
+        <div>
+          <Label className="text-xs font-semibold">Content</Label>
+          <div className="flex gap-2 mt-2">
+            <Textarea
+              value={text.content || ""}
+              onChange={(e) =>
+                handleUpdateText({ content: e.target.value })
+              }
+              placeholder="Enter text content..."
+              className="min-h-20 flex-1"
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onOpenAI?.()}
+              className="h-auto"
+              title="Generate with AI"
+            >
+              <Sparkles className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+
+        <Separator />
+
+        <div className="space-y-3">
+          <h3 className="text-xs font-semibold">Text Styling</h3>
+          <div>
+            <Label className="text-xs font-semibold">Text Color</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="color"
+                value={text.color || "#000000"}
+                onChange={(e) =>
+                  handleUpdateText({ color: e.target.value })
+                }
+                className="w-16 h-10 p-1 cursor-pointer"
+              />
+              <Input
+                value={text.color || "#000000"}
+                onChange={(e) =>
+                  handleUpdateText({ color: e.target.value })
+                }
+                className="flex-1"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Font Size</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="8"
+                max="72"
+                value={parseInt(text.fontSize || "16")}
+                onChange={(e) =>
+                  handleUpdateText({ fontSize: e.target.value })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">
+                px
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Font Weight</Label>
+            <Button
+              variant={text.fontWeight ? "default" : "outline"}
+              size="sm"
+              onClick={() =>
+                handleUpdateText({ fontWeight: !text.fontWeight })
+              }
+              className="w-full"
+            >
+              {text.fontWeight ? "Bold" : "Regular"}
+            </Button>
+          </div>
+        </div>
+
+        <Separator />
+
+        <div className="space-y-3">
+          <h3 className="text-xs font-semibold">Background</h3>
+          <div>
+            <Label className="text-xs font-semibold">Color</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="color"
+                value={text.backgroundColor || "#ffffff"}
+                onChange={(e) =>
+                  handleUpdateText({ backgroundColor: e.target.value })
+                }
+                className="w-16 h-10 p-1 cursor-pointer"
+              />
+              <Input
+                value={text.backgroundColor || "#ffffff"}
+                onChange={(e) =>
+                  handleUpdateText({ backgroundColor: e.target.value })
+                }
+                className="flex-1"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Opacity</Label>
+            <div className="flex gap-2 mt-2 items-center">
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={parseInt(text.backgroundOpacity || "100")}
+                onChange={(e) =>
+                  handleUpdateText({ backgroundOpacity: e.target.value })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm font-medium w-12 text-center">
+                {parseInt(text.backgroundOpacity || "100")}%
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <Separator />
+
+        <div className="space-y-3">
+          <h3 className="text-xs font-semibold">Borders</h3>
+          <div>
+            <Label className="text-xs font-semibold">Color</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="color"
+                value={text.borderColor || "#d1d5db"}
+                onChange={(e) =>
+                  handleUpdateText({ borderColor: e.target.value })
+                }
+                className="w-16 h-10 p-1 cursor-pointer"
+              />
+              <Input
+                value={text.borderColor || "#d1d5db"}
+                onChange={(e) =>
+                  handleUpdateText({ borderColor: e.target.value })
+                }
+                className="flex-1"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Border Width</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="0"
+                max="10"
+                value={parseInt(text.borderWidth || "1")}
+                onChange={(e) =>
+                  handleUpdateText({ borderWidth: e.target.value })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">
+                px
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Border Radius</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="0"
+                max="50"
+                value={parseInt(text.borderRadius || "4")}
+                onChange={(e) =>
+                  handleUpdateText({ borderRadius: e.target.value })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">
+                px
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <Separator />
+
+        <div className="space-y-3">
+          <h3 className="text-xs font-semibold">Spacing</h3>
+          <div>
+            <Label className="text-xs font-semibold">Padding</Label>
+            <div className="grid grid-cols-2 gap-2 mt-2">
+              <div>
+                <Label className="text-xs text-muted-foreground">Top</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={parseInt(text.paddingTop || "8")}
+                  onChange={(e) =>
+                    handleUpdateText({ paddingTop: e.target.value })
+                  }
+                  className="mt-1"
+                  placeholder="0"
+                />
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Right</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={parseInt(text.paddingRight || "8")}
+                  onChange={(e) =>
+                    handleUpdateText({ paddingRight: e.target.value })
+                  }
+                  className="mt-1"
+                  placeholder="0"
+                />
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Bottom</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={parseInt(text.paddingBottom || "8")}
+                  onChange={(e) =>
+                    handleUpdateText({ paddingBottom: e.target.value })
+                  }
+                  className="mt-1"
+                  placeholder="0"
+                />
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Left</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={parseInt(text.paddingLeft || "8")}
+                  onChange={(e) =>
+                    handleUpdateText({ paddingLeft: e.target.value })
+                  }
+                  className="mt-1"
+                  placeholder="0"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <Separator />
+
+        <div className="space-y-3">
+          <h3 className="text-xs font-semibold">Position & Size</h3>
+          <div>
+            <Label className="text-xs font-semibold">Position - X</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="0"
+                value={text.left}
+                onChange={(e) =>
+                  handleUpdateText({ left: parseInt(e.target.value) || 0 })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">
+                px
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Position - Y</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="0"
+                value={text.top}
+                onChange={(e) =>
+                  handleUpdateText({ top: parseInt(e.target.value) || 0 })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">
+                px
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Width</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="50"
+                value={text.width}
+                onChange={(e) =>
+                  handleUpdateText({ width: parseInt(e.target.value) || 200 })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">
+                px
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <Separator />
+
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={() => {
+            const newTexts = (section as any).texts!.filter(
+              (_: any, i: number) => i !== textIndex
+            );
+            const updatedProposal = {
+              ...proposal,
+              sections: proposal.sections.map((s) =>
+                s.id === sectionId ? { ...s, texts: newTexts } : s
+              ),
+            };
+            onUpdateProposal(updatedProposal);
+          }}
+          className="w-full"
+        >
+          Remove Text
         </Button>
       </Card>
     );
