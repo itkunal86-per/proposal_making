@@ -298,6 +298,8 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
             onAddShape?.(sectionId, draggedItem.shapeType || "square", Math.max(0, x), Math.max(0, y));
           } else if (draggedItem.type === "table") {
             onAddTable?.(sectionId, Math.max(0, x), Math.max(0, y));
+          } else if (draggedItem.type === "text") {
+            onAddText?.(sectionId, Math.max(0, x), Math.max(0, y));
           }
         }
       }
