@@ -50,6 +50,7 @@ export interface ProposalSection {
   columnStyles?: Record<string, any>[];
   media?: { type: "image" | "video"; url: string }[];
   shapes?: ShapeElement[];
+  tables?: TableElement[];
   comments?: { id: string; author: string; text: string; createdAt: number }[];
   titleStyles?: Record<string, any>;
   contentStyles?: Record<string, any>;
