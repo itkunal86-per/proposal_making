@@ -415,7 +415,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
 
                 {/* Shapes, Tables, and Texts */}
                 {(section.shapes && section.shapes.length > 0) || (section.tables && section.tables.length > 0) || ((section as any).texts && (section as any).texts.length > 0) ? (
-                  <div className="relative mt-4 bg-gray-50 rounded" style={{ position: "relative", minHeight: "400px", pointerEvents: "none" }}>
+                  <div className="relative mt-4 bg-gray-50 rounded" style={{ position: "relative", minHeight: `${canvasHeights[section.id] || 400}px`, pointerEvents: "none" }}>
                     {section.shapes && section.shapes.map((shape, sIndex) => (
                       <div key={`shape-${sIndex}`} style={{ pointerEvents: "auto" }}>
                         <ShapeEditor
