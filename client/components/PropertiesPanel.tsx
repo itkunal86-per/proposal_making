@@ -2532,84 +2532,46 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
       onUpdateProposal(updatedProposal);
     };
 
-    const textareaRef = useRef<HTMLTextAreaElement>(null);
+    const editorRef = useRef<HTMLDivElement>(null);
 
     const applyFormatting = (format: "bold" | "italic" | "underline" | "bullet" | "number") => {
-      if (!textareaRef.current) return;
+      if (!editorRef.current) return;
 
-      const textarea = textareaRef.current;
-      const start = textarea.selectionStart;
-      const end = textarea.selectionEnd;
-      const selectedText = textarea.value.substring(start, end);
-      const beforeText = textarea.value.substring(0, start);
-      const afterText = textarea.value.substring(end);
+      const editor = editorRef.current;
+      const selection = window.getSelection();
 
-      if (!selectedText) {
+      if (!selection || selection.toString().length === 0) {
         return;
       }
 
-      let newText = "";
-      let tagName = "";
-      let openTag = "";
-      let closeTag = "";
+      editor.focus();
 
+      let command = "";
       switch (format) {
         case "bold":
-          tagName = "b";
-          openTag = "<b>";
-          closeTag = "</b>";
+          command = "bold";
           break;
         case "italic":
-          tagName = "i";
-          openTag = "<i>";
-          closeTag = "</i>";
+          command = "italic";
           break;
         case "underline":
-          tagName = "u";
-          openTag = "<u>";
-          closeTag = "</u>";
+          command = "underline";
           break;
         case "bullet":
-          newText = `${beforeText}• ${selectedText}${afterText}`;
-          handleUpdateText({ content: newText });
-          setTimeout(() => {
-            textarea.focus();
-            textarea.setSelectionRange(start + 2, start + 2 + selectedText.length);
-          }, 0);
-          return;
+          command = "insertUnorderedList";
+          break;
         case "number":
-          newText = `${beforeText}1. ${selectedText}${afterText}`;
-          handleUpdateText({ content: newText });
-          setTimeout(() => {
-            textarea.focus();
-            textarea.setSelectionRange(start + 3, start + 3 + selectedText.length);
-          }, 0);
-          return;
+          command = "insertOrderedList";
+          break;
       }
 
-      // Check if text is already wrapped in the tag - if so, remove it (toggle)
-      const openTagIndex = beforeText.lastIndexOf(openTag);
-      const closeTagIndex = afterText.indexOf(closeTag);
+      if (command) {
+        document.execCommand(command, false);
+        handleUpdateText({ content: editor.innerHTML });
 
-      if (openTagIndex !== -1 && closeTagIndex === 0) {
-        // Text is already wrapped - remove the tags
-        const textBeforeTag = beforeText.substring(0, openTagIndex);
-        const textAfterTag = afterText.substring(closeTag.length);
-        newText = textBeforeTag + selectedText + textAfterTag;
-        handleUpdateText({ content: newText });
+        // Keep selection and focus
         setTimeout(() => {
-          textarea.focus();
-          textarea.setSelectionRange(openTagIndex, openTagIndex + selectedText.length);
-        }, 0);
-      } else {
-        // Add the tag
-        newText = `${beforeText}${openTag}${selectedText}${closeTag}${afterText}`;
-        handleUpdateText({ content: newText });
-        setTimeout(() => {
-          textarea.focus();
-          const newStart = start + openTag.length;
-          const newEnd = newStart + selectedText.length;
-          textarea.setSelectionRange(newStart, newEnd);
+          editor.focus();
         }, 0);
       }
     };
