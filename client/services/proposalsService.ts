@@ -1186,6 +1186,8 @@ export async function enableProposalSharing(proposalId: string): Promise<{ succe
 }
 
 export async function getPublicProposal(sharingToken: string): Promise<Proposal | null> {
+  console.log("getPublicProposal called with token:", sharingToken);
+
   // Try the external API first
   try {
     const res = await fetch(`https://propai-api.hirenq.com/api/public/proposal/${sharingToken}`);
@@ -1196,6 +1198,7 @@ export async function getPublicProposal(sharingToken: string): Promise<Proposal 
 
       // Verify we have sections
       if (proposal.sections && proposal.sections.length > 0) {
+        console.log("Successfully fetched proposal from external API");
         return proposal;
       }
     }
@@ -1213,6 +1216,7 @@ export async function getPublicProposal(sharingToken: string): Promise<Proposal 
 
       // Verify we have sections
       if (proposal.sections && proposal.sections.length > 0) {
+        console.log("Successfully fetched proposal from local API");
         return proposal;
       }
     }
@@ -1232,6 +1236,23 @@ export async function getPublicProposal(sharingToken: string): Promise<Proposal 
     }
   } catch (err) {
     console.warn("Local storage lookup failed:", err);
+  }
+
+  // Fallback 3: Load seed data and check for matching sharing token
+  try {
+    const res = await fetch("/data/proposals.json");
+    if (res.ok) {
+      const seedData = await res.json();
+      const seedProposals = proposalListSchema.parse(seedData).map(normalizeProposal);
+      const foundProposal = seedProposals.find((p) => p.settings.sharing.token === sharingToken);
+
+      if (foundProposal && foundProposal.sections && foundProposal.sections.length > 0) {
+        console.log("Found proposal in seed data by sharing token");
+        return foundProposal;
+      }
+    }
+  } catch (err) {
+    console.warn("Seed data lookup failed:", err);
   }
 
   console.error("Failed to fetch public proposal from all sources:", { sharingToken });
