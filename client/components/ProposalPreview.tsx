@@ -1015,6 +1015,25 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                     }
                   />
                 ))}
+                {(section as any).images && (section as any).images.map((image: any, iIndex: number) => (
+                  <ImageElement
+                    key={`image-${iIndex}`}
+                    id={`image-${section.id}-${iIndex}`}
+                    url={image.url}
+                    width={image.width}
+                    height={image.height}
+                    opacity={image.opacity}
+                    borderWidth={image.borderWidth}
+                    borderColor={image.borderColor}
+                    borderRadius={image.borderRadius}
+                    top={image.top}
+                    left={image.left}
+                    selected={selectedElementId === `image-${section.id}-${iIndex}`}
+                    onSelect={() =>
+                      onSelectElement(`image-${section.id}-${iIndex}`, "image")
+                    }
+                  />
+                ))}
               </div>
             ) : null}
           </div>
