@@ -53,9 +53,6 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   variables,
   onOpenAI,
 }) => {
-  const [uploading, setUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
   if (!selectedElementId || !selectedElementType) {
     return (
       <Card className="p-4">
@@ -65,6 +62,11 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
       </Card>
     );
   }
+
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [mediaUrl, setMediaUrl] = useState("");
+  const [mediaType, setMediaType] = useState<"image" | "video">("image");
 
   if (selectedElementType === "image") {
     // Parse ID format: "image-{sectionId}-{imageIndex}"
@@ -486,17 +488,18 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             <div className="flex gap-2 mt-2">
               <Input
                 type="color"
-                value={titleStyles.backgroundColor || "#ffffff"}
+                value={titleStyles.backgroundColor || "#f0f0f0"}
                 onChange={(e) =>
                   updateTitleStyles({ backgroundColor: e.target.value })
                 }
                 className="w-16 h-10 p-1 cursor-pointer"
               />
               <Input
-                value={titleStyles.backgroundColor || "#ffffff"}
+                value={titleStyles.backgroundColor || ""}
                 onChange={(e) =>
                   updateTitleStyles({ backgroundColor: e.target.value })
                 }
+                placeholder="transparent"
                 className="flex-1"
               />
             </div>
@@ -867,7 +870,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             <div className="flex gap-2 mt-2">
               <Input
                 type="color"
-                value={sectionTitleStyles.backgroundColor || "#ffffff"}
+                value={sectionTitleStyles.backgroundColor || "#f0f0f0"}
                 onChange={(e) =>
                   handleUpdateSection({
                     titleStyles: { ...sectionTitleStyles, backgroundColor: e.target.value }
@@ -876,12 +879,13 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                 className="w-16 h-10 p-1 cursor-pointer"
               />
               <Input
-                value={sectionTitleStyles.backgroundColor || "#ffffff"}
+                value={sectionTitleStyles.backgroundColor || ""}
                 onChange={(e) =>
                   handleUpdateSection({
                     titleStyles: { ...sectionTitleStyles, backgroundColor: e.target.value }
                   })
                 }
+                placeholder="transparent"
                 className="flex-1"
               />
             </div>
@@ -1222,8 +1226,6 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     };
 
     const sectionContentStyles = (section as any).contentStyles || {};
-    const [mediaUrl, setMediaUrl] = useState("");
-    const [mediaType, setMediaType] = useState<"image" | "video">("image");
 
     const handleAddMedia = () => {
       if (!mediaUrl.trim()) return;
@@ -1261,6 +1263,13 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               onChange={handleContentChange}
               variables={variables || []}
               placeholder="Enter your section content with rich text formatting..."
+              color={sectionContentStyles.color}
+              fontSize={sectionContentStyles.fontSize}
+              backgroundColor={sectionContentStyles.backgroundColor}
+              textAlign={sectionContentStyles.textAlign as "left" | "center" | "right"}
+              bold={sectionContentStyles.bold}
+              italic={sectionContentStyles.italic}
+              underline={sectionContentStyles.underline}
             />
           </div>
         </div>
@@ -1276,7 +1285,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                   <label className="text-xs font-medium">Background Color</label>
                   <Input
                     type="color"
-                    value={(section as any).columnStyles?.[columnIndex]?.backgroundColor || "#ffffff"}
+                    value={(section as any).columnStyles?.[columnIndex]?.backgroundColor || "#f0f0f0"}
                     onChange={(e) => {
                       const newColumnStyles = [...((section as any).columnStyles || [])];
                       newColumnStyles[columnIndex] = { ...newColumnStyles[columnIndex], backgroundColor: e.target.value };
@@ -1821,7 +1830,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             <div className="flex gap-2 mt-2">
               <Input
                 type="color"
-                value={sectionContentStyles.backgroundColor || "#ffffff"}
+                value={sectionContentStyles.backgroundColor || "#f0f0f0"}
                 onChange={(e) =>
                   handleUpdateSection({
                     contentStyles: { ...sectionContentStyles, backgroundColor: e.target.value }
@@ -1830,12 +1839,13 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                 className="w-16 h-10 p-1 cursor-pointer"
               />
               <Input
-                value={sectionContentStyles.backgroundColor || "#ffffff"}
+                value={sectionContentStyles.backgroundColor || ""}
                 onChange={(e) =>
                   handleUpdateSection({
                     contentStyles: { ...sectionContentStyles, backgroundColor: e.target.value }
                   })
                 }
+                placeholder="transparent"
                 className="flex-1"
               />
             </div>
@@ -2342,10 +2352,11 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                 className="w-16 h-10 p-1 cursor-pointer"
               />
               <Input
-                value={shape.backgroundColor || "#e5e7eb"}
+                value={shape.backgroundColor || ""}
                 onChange={(e) =>
                   handleUpdateShape({ backgroundColor: e.target.value })
                 }
+                placeholder="transparent"
                 className="flex-1"
               />
             </div>
@@ -3064,17 +3075,18 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             <div className="flex gap-2 mt-2">
               <Input
                 type="color"
-                value={text.backgroundColor || "#ffffff"}
+                value={text.backgroundColor || "#f0f0f0"}
                 onChange={(e) =>
                   handleUpdateText({ backgroundColor: e.target.value })
                 }
                 className="w-16 h-10 p-1 cursor-pointer"
               />
               <Input
-                value={text.backgroundColor || "#ffffff"}
+                value={text.backgroundColor || ""}
                 onChange={(e) =>
                   handleUpdateText({ backgroundColor: e.target.value })
                 }
+                placeholder="transparent"
                 className="flex-1"
               />
             </div>

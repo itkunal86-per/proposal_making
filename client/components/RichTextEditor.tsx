@@ -7,6 +7,13 @@ interface RichTextEditorProps {
   variables?: Array<{ id: string | number; name: string; value: string }>;
   className?: string;
   placeholder?: string;
+  color?: string;
+  fontSize?: string;
+  backgroundColor?: string;
+  textAlign?: "left" | "center" | "right";
+  bold?: boolean;
+  italic?: boolean;
+  underline?: boolean;
 }
 
 interface VariableDropdown {
@@ -20,6 +27,13 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   variables = [],
   className = "",
   placeholder = "Enter text...",
+  color = "inherit",
+  fontSize = "16",
+  backgroundColor = "transparent",
+  textAlign = "left",
+  bold = false,
+  italic = false,
+  underline = false,
 }) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -182,13 +196,22 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           suppressContentEditableWarning
           onInput={handleInput}
           onBlur={() => captureContent()}
+          dir="ltr"
           className={cn(
             "p-4 min-h-[200px] focus:outline-none prose prose-sm max-w-none",
-            "text-foreground bg-white"
+            "text-foreground"
           )}
           style={{
             wordWrap: "break-word",
             overflowWrap: "break-word",
+            color: color || "inherit",
+            fontSize: fontSize ? `${fontSize}px` : "16px",
+            backgroundColor: backgroundColor || "transparent",
+            textAlign: (textAlign as any) || "left",
+            fontWeight: bold ? "bold" : "normal",
+            fontStyle: italic ? "italic" : "normal",
+            textDecoration: underline ? "underline" : "none",
+            direction: "ltr",
           }}
           data-placeholder={placeholder}
           data-testid="rich-text-editor"
