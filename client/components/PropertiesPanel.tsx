@@ -55,6 +55,8 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
 }) => {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [mediaUrl, setMediaUrl] = useState("");
+  const [mediaType, setMediaType] = useState<"image" | "video">("image");
 
   if (!selectedElementId || !selectedElementType) {
     return (
