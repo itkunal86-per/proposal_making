@@ -68,6 +68,14 @@ export default function ProposalEditor() {
   const previewContainerRef = useRef<HTMLDivElement>(null);
   const saveTimer = useRef<number | null>(null);
 
+  const handleSelectElement = useCallback((id: string, type: string) => {
+    console.log("handleSelectElement called", { id, type, currentActivePanel: activePanel });
+    setSelectedElementId(id);
+    setSelectedElementType(type);
+    setActivePanel("properties");
+    console.log("handleSelectElement - state setters called", { id, type });
+  }, [activePanel]);
+
   useEffect(() => {
     console.log("State update - selectedElementId/activePanel changed", { selectedElementId, selectedElementType, activePanel });
   }, [selectedElementId, selectedElementType, activePanel]);
