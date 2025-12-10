@@ -316,7 +316,6 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   };
 
   if (selectedElementType === "title") {
-    console.log("PropertiesPanel: Entering TITLE type block");
     const titleStyles = (proposal as any).titleStyles || {};
     return (
       <Card className="p-4 space-y-4">
