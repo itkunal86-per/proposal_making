@@ -69,12 +69,12 @@ export default function ProposalEditor() {
   const saveTimer = useRef<number | null>(null);
 
   const handleSelectElement = useCallback((id: string, type: string) => {
-    console.log("handleSelectElement called", { id, type, currentActivePanel: activePanel });
+    console.log("handleSelectElement called", { id, type });
     setSelectedElementId(id);
     setSelectedElementType(type);
     setActivePanel("properties");
     console.log("handleSelectElement - state setters called", { id, type });
-  }, [activePanel]);
+  }, []);
 
   useEffect(() => {
     console.log("State update - selectedElementId/activePanel changed", { selectedElementId, selectedElementType, activePanel });
