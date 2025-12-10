@@ -2544,31 +2544,74 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
       const beforeText = textarea.value.substring(0, start);
       const afterText = textarea.value.substring(end);
 
+      if (!selectedText) {
+        return;
+      }
+
       let newText = "";
+      let tagName = "";
+      let openTag = "";
+      let closeTag = "";
+
       switch (format) {
         case "bold":
-          newText = `${beforeText}**${selectedText}**${afterText}`;
+          tagName = "b";
+          openTag = "<b>";
+          closeTag = "</b>";
           break;
         case "italic":
-          newText = `${beforeText}_${selectedText}_${afterText}`;
+          tagName = "i";
+          openTag = "<i>";
+          closeTag = "</i>";
           break;
         case "underline":
-          newText = `${beforeText}<u>${selectedText}</u>${afterText}`;
+          tagName = "u";
+          openTag = "<u>";
+          closeTag = "</u>";
           break;
         case "bullet":
           newText = `${beforeText}• ${selectedText}${afterText}`;
-          break;
+          handleUpdateText({ content: newText });
+          setTimeout(() => {
+            textarea.focus();
+            textarea.setSelectionRange(start + 2, start + 2 + selectedText.length);
+          }, 0);
+          return;
         case "number":
           newText = `${beforeText}1. ${selectedText}${afterText}`;
-          break;
+          handleUpdateText({ content: newText });
+          setTimeout(() => {
+            textarea.focus();
+            textarea.setSelectionRange(start + 3, start + 3 + selectedText.length);
+          }, 0);
+          return;
       }
 
-      handleUpdateText({ content: newText });
+      // Check if text is already wrapped in the tag - if so, remove it (toggle)
+      const openTagIndex = beforeText.lastIndexOf(openTag);
+      const closeTagIndex = afterText.indexOf(closeTag);
 
-      setTimeout(() => {
-        textarea.focus();
-        textarea.setSelectionRange(start + 2, start + 2 + selectedText.length);
-      }, 0);
+      if (openTagIndex !== -1 && closeTagIndex === 0) {
+        // Text is already wrapped - remove the tags
+        const textBeforeTag = beforeText.substring(0, openTagIndex);
+        const textAfterTag = afterText.substring(closeTag.length);
+        newText = textBeforeTag + selectedText + textAfterTag;
+        handleUpdateText({ content: newText });
+        setTimeout(() => {
+          textarea.focus();
+          textarea.setSelectionRange(openTagIndex, openTagIndex + selectedText.length);
+        }, 0);
+      } else {
+        // Add the tag
+        newText = `${beforeText}${openTag}${selectedText}${closeTag}${afterText}`;
+        handleUpdateText({ content: newText });
+        setTimeout(() => {
+          textarea.focus();
+          const newStart = start + openTag.length;
+          const newEnd = newStart + selectedText.length;
+          textarea.setSelectionRange(newStart, newEnd);
+        }, 0);
+      }
     };
 
     return (
