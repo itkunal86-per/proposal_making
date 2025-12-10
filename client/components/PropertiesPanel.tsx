@@ -3232,18 +3232,10 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   console.log("🔵 About to check if selectedElementType === 'image'", { selectedElementType, isImage: selectedElementType === "image" });
 
   if (selectedElementType === "image") {
-    console.log("🟢 PropertiesPanel: IMAGE type matched!");
     // Parse ID format: "image-{sectionId}-{imageIndex}"
     const lastHyphenIndex = selectedElementId.lastIndexOf("-");
     const imageIndex = selectedElementId.substring(lastHyphenIndex + 1);
     const sectionId = selectedElementId.substring(6, lastHyphenIndex); // Skip "image-"
-
-    console.log("Image properties panel - parsing:", {
-      selectedElementId,
-      sectionId,
-      imageIndex,
-      sections: proposal.sections.map(s => s.id),
-    });
 
     const section = proposal.sections.find((s) => s.id === sectionId);
     if (!section) {
