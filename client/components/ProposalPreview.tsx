@@ -1040,9 +1040,15 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                     top={image.top}
                     left={image.left}
                     selected={selectedElementId === `image-${section.id}-${iIndex}`}
-                    onSelect={() =>
-                      onSelectElement(`image-${section.id}-${iIndex}`, "image")
-                    }
+                    onSelect={() => {
+                      console.log("ImageEditor.onSelect callback - calling onSelectElement", {
+                        id: `image-${section.id}-${iIndex}`,
+                        type: "image",
+                        sectionId: section.id,
+                        imageIndex: iIndex,
+                      });
+                      onSelectElement(`image-${section.id}-${iIndex}`, "image");
+                    }}
                     onUpdate={(updates) =>
                       onUpdateImage?.(section.id, iIndex, updates)
                     }
