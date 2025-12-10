@@ -718,6 +718,9 @@ export async function getProposalDetails(id: string): Promise<Proposal | undefin
   }
 
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
     const res = await fetch(`${PROPOSALS_DETAILS_ENDPOINT}/${id}`, {
       method: "GET",
       headers: {
@@ -725,7 +728,10 @@ export async function getProposalDetails(id: string): Promise<Proposal | undefin
         "Authorization": `Bearer ${token}`,
       },
       cache: "no-store",
+      signal: controller.signal,
     });
+
+    clearTimeout(timeoutId);
 
     if (!res.ok) {
       console.warn(`Failed to fetch proposal details: ${res.statusText}, falling back to local storage`);
