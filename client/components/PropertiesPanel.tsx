@@ -2159,7 +2159,6 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   console.log("🔵 Checking shape type", { selectedElementType, isShape: selectedElementType === "shape" });
 
   if (selectedElementType === "shape") {
-    console.log("🟢 SHAPE type matched!");
     const parts = selectedElementId.split("-");
     const sectionId = parts[1];
     const shapeIndex = parseInt(parts[2]);
