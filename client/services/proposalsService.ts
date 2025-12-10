@@ -242,6 +242,19 @@ const textElementSchema = z.object({
   left: z.number(),
 }).passthrough();
 
+const imageElementSchema = z.object({
+  id: z.union([z.string(), z.number()]),
+  url: z.string(),
+  width: z.number(),
+  height: z.number(),
+  opacity: z.string().optional(),
+  borderWidth: z.string().optional(),
+  borderColor: z.string().optional(),
+  borderRadius: z.string().optional(),
+  top: z.number().optional(),
+  left: z.number().optional(),
+}).passthrough();
+
 const sectionSchema = z.object({
   id: idSchema,
   title: z.string(),
@@ -253,6 +266,7 @@ const sectionSchema = z.object({
   shapes: z.array(shapeElementSchema).optional(),
   tables: z.array(tableElementSchema).optional(),
   texts: z.array(textElementSchema).optional(),
+  images: z.array(imageElementSchema).optional(),
   comments: z.array(z.object({ id: z.union([z.string(), z.number()]), author: z.string(), text: z.string(), createdAt: z.number() })).optional(),
   titleStyles: z.union([z.record(z.any()), z.array(z.any())]).optional(),
   contentStyles: z.union([z.record(z.any()), z.array(z.any())]).optional(),
