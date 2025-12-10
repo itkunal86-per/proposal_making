@@ -82,7 +82,8 @@ export const TextEditor: React.FC<TextEditorProps> = ({
   const isInitializedRef = useRef(false);
 
   const handleMouseDown = (e: React.MouseEvent, handle: ResizeHandle = null) => {
-    if ((e.target as HTMLElement).tagName === "TEXTAREA") {
+    const target = e.target as HTMLElement;
+    if (isEditing && editorRef.current?.contains(target)) {
       return;
     }
 
@@ -104,56 +105,91 @@ export const TextEditor: React.FC<TextEditorProps> = ({
     setIsEditing(true);
     setShowToolbar(true);
     setTimeout(() => {
-      if (textInputRef.current) {
-        textInputRef.current.focus();
+      if (editorRef.current) {
+        editorRef.current.focus();
+        const range = document.createRange();
+        range.selectNodeContents(editorRef.current);
+        range.collapse(false);
+        const selection = window.getSelection();
+        if (selection) {
+          selection.removeAllRanges();
+          selection.addRange(range);
+        }
       }
     }, 0);
   };
 
-  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    onUpdate({ content: e.target.value });
+  const handleInput = () => {
+    if (editorRef.current) {
+      onUpdate({ content: editorRef.current.innerHTML });
+    }
   };
 
   const handleBlur = () => {
     setIsEditing(false);
     setShowToolbar(false);
+    if (editorRef.current) {
+      onUpdate({ content: editorRef.current.innerHTML });
+    }
   };
 
+  useEffect(() => {
+    if (editorRef.current) {
+      const isEditorFocused = document.activeElement === editorRef.current;
+      const currentInnerHTML = editorRef.current.innerHTML;
+      const newValue = content || "";
+
+      if (!isInitializedRef.current || !isEditorFocused) {
+        if (currentInnerHTML !== newValue) {
+          editorRef.current.innerHTML = newValue;
+        }
+      }
+
+      if (!isInitializedRef.current) {
+        isInitializedRef.current = true;
+      }
+    }
+  }, [content]);
+
   const applyFormatting = (format: "bold" | "italic" | "underline" | "bullet" | "number") => {
-    if (!textInputRef.current) return;
+    if (!editorRef.current) return;
 
-    const textarea = textInputRef.current;
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const selectedText = textarea.value.substring(start, end);
-    const beforeText = textarea.value.substring(0, start);
-    const afterText = textarea.value.substring(end);
+    const editor = editorRef.current;
+    const selection = window.getSelection();
 
-    let newText = "";
+    if (!selection || selection.toString().length === 0) {
+      return;
+    }
+
+    editor.focus();
+
+    let command = "";
     switch (format) {
       case "bold":
-        newText = `${beforeText}**${selectedText}**${afterText}`;
+        command = "bold";
         break;
       case "italic":
-        newText = `${beforeText}_${selectedText}_${afterText}`;
+        command = "italic";
         break;
       case "underline":
-        newText = `${beforeText}<u>${selectedText}</u>${afterText}`;
+        command = "underline";
         break;
       case "bullet":
-        newText = `${beforeText}• ${selectedText}${afterText}`;
+        command = "insertUnorderedList";
         break;
       case "number":
-        newText = `${beforeText}1. ${selectedText}${afterText}`;
+        command = "insertOrderedList";
         break;
     }
 
-    onUpdate({ content: newText });
+    if (command) {
+      document.execCommand(command, false);
+      onUpdate({ content: editor.innerHTML });
 
-    setTimeout(() => {
-      textarea.focus();
-      textarea.setSelectionRange(start + 2, start + 2 + selectedText.length);
-    }, 0);
+      setTimeout(() => {
+        editor.focus();
+      }, 0);
+    }
   };
 
   React.useEffect(() => {
