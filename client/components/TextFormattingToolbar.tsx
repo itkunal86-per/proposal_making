@@ -118,6 +118,34 @@ export const TextFormattingToolbar: React.FC<TextFormattingToolbarProps> = ({
 
   const handleTextAlignChange = (align: "left" | "center" | "right") => {
     setTextAlign(align);
+
+    // Try to apply alignment to contentEditable element
+    try {
+      let contentEditableElement = document.querySelector('[data-testid="rich-text-editor"]') as HTMLElement;
+      if (!contentEditableElement) {
+        contentEditableElement = document.querySelector('[contenteditable="true"]') as HTMLElement;
+      }
+
+      if (contentEditableElement) {
+        const selection = window.getSelection();
+        let savedRange: Range | null = null;
+        if (selection && selection.rangeCount > 0) {
+          savedRange = selection.getRangeAt(0).cloneRange();
+        }
+
+        contentEditableElement.focus();
+        if (savedRange) {
+          selection?.removeAllRanges();
+          selection?.addRange(savedRange);
+        }
+
+        const alignCommand = align === "left" ? "justifyLeft" : align === "center" ? "justifyCenter" : "justifyRight";
+        document.execCommand(alignCommand, false);
+      }
+    } catch (error) {
+      console.error(`Failed to apply text alignment ${align}:`, error);
+    }
+
     onFormatChange?.("textAlign", align);
   };
 
