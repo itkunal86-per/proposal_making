@@ -44,18 +44,27 @@ export const ImageElement: React.FC<ImageElementProps> = ({
         width: `${width}px`,
         height: `${height}px`,
         opacity: opacityValue,
-        borderWidth: borderWidth ? `${borderWidth}px` : "0px",
-        borderColor,
-        borderStyle: borderWidth ? "solid" : "none",
-        borderRadius: borderRadius ? `${borderRadius}px` : "0",
+        borderWidth: borderWidth ? `${borderWidth}px` : "2px",
+        borderColor: borderColor || "#d1d5db",
+        borderStyle: "solid",
+        borderRadius: borderRadius ? `${borderRadius}px` : "4px",
         outline: selected ? "2px solid #3b82f6" : "none",
         outlineOffset: "2px",
         cursor: "pointer",
-        backgroundImage: `url(${url})`,
+        backgroundImage: url ? `url(${url})` : undefined,
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
+        backgroundColor: url ? "transparent" : "#f3f4f6",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontSize: "12px",
+        color: "#6b7280",
+        fontWeight: "500",
       }}
-    />
+    >
+      {!url && "Click to add image URL"}
+    </div>
   );
 };
