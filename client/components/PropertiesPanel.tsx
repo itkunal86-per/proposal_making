@@ -3200,10 +3200,11 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     );
   }
 
+  console.log("PropertiesPanel: Falling through to final return - no matching type", { selectedElementType });
   return (
     <Card className="p-4">
       <div className="text-center text-muted-foreground">
-        <p className="text-sm">Unable to edit this element</p>
+        <p className="text-sm">Unable to edit this element (type: {selectedElementType})</p>
       </div>
     </Card>
   );
