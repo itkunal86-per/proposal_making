@@ -191,6 +191,7 @@ const SelectableElement: React.FC<ElementProps> = ({
       return (
         <div
           style={{
+            fontSize: fontSize ? `${fontSize}px` : `${defaultFontSize}px`,
             fontWeight: bold ? "bold" : "normal",
             fontStyle: italic ? "italic" : "normal",
             textDecoration: underline ? "underline" : strikethrough ? "line-through" : "none",
@@ -203,13 +204,13 @@ const SelectableElement: React.FC<ElementProps> = ({
 
     if (code && content) {
       return (
-        <div style={{ fontFamily: "ui-monospace, SFMono-Regular, Menlo, Courier, monospace", whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+        <div style={{ fontFamily: "ui-monospace, SFMono-Regular, Menlo, Courier, monospace", whiteSpace: "pre-wrap", wordBreak: "break-word", fontSize: fontSize ? `${fontSize}px` : `${defaultFontSize}px` }}>
           {decodedContent}
         </div>
       );
     }
 
-    return <div style={{ fontWeight: bold ? "bold" : "normal", fontStyle: italic ? "italic" : "normal", textDecoration: underline ? "underline" : strikethrough ? "line-through" : "none" }}>{decodedContent}</div>;
+    return <div style={{ fontSize: fontSize ? `${fontSize}px` : `${defaultFontSize}px`, fontWeight: bold ? "bold" : "normal", fontStyle: italic ? "italic" : "normal", textDecoration: underline ? "underline" : strikethrough ? "line-through" : "none" }}>{decodedContent}</div>;
   };
 
   return (
