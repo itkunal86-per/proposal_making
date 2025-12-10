@@ -1026,14 +1026,10 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                     }
                   />
                 ))}
-                {(section as any).images && (section as any).images.map((image: any, iIndex: number) => {
-                  const imageId = `image-${section.id}-${iIndex}`;
-                  const isSelected = selectedElementId === imageId;
-                  console.log("Rendering ImageEditor", { imageId, selectedElementId, isSelected, sectionId: section.id, iIndex });
-                  return (
+                {(section as any).images && (section as any).images.map((image: any, iIndex: number) => (
                   <ImageEditor
                     key={`image-${iIndex}`}
-                    id={imageId}
+                    id={`image-${section.id}-${iIndex}`}
                     url={image.url}
                     width={image.width}
                     height={image.height}
@@ -1043,22 +1039,15 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                     borderRadius={image.borderRadius}
                     top={image.top}
                     left={image.left}
-                    selected={isSelected}
-                    onSelect={() => {
-                      console.log("ImageEditor.onSelect callback - calling onSelectElement", {
-                        id: imageId,
-                        type: "image",
-                        sectionId: section.id,
-                        imageIndex: iIndex,
-                      });
-                      onSelectElement(imageId, "image");
-                    }}
+                    selected={selectedElementId === `image-${section.id}-${iIndex}`}
+                    onSelect={() =>
+                      onSelectElement(`image-${section.id}-${iIndex}`, "image")
+                    }
                     onUpdate={(updates) =>
                       onUpdateImage?.(section.id, iIndex, updates)
                     }
                   />
-                  );
-                })}
+                ))}
               </div>
             ) : null}
           </div>
