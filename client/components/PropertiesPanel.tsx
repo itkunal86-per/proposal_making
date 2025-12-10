@@ -1278,7 +1278,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                   <label className="text-xs font-medium">Background Color</label>
                   <Input
                     type="color"
-                    value={(section as any).columnStyles?.[columnIndex]?.backgroundColor || "#ffffff"}
+                    value={(section as any).columnStyles?.[columnIndex]?.backgroundColor || "#f0f0f0"}
                     onChange={(e) => {
                       const newColumnStyles = [...((section as any).columnStyles || [])];
                       newColumnStyles[columnIndex] = { ...newColumnStyles[columnIndex], backgroundColor: e.target.value };
