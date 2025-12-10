@@ -3068,17 +3068,18 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             <div className="flex gap-2 mt-2">
               <Input
                 type="color"
-                value={text.backgroundColor || "#ffffff"}
+                value={text.backgroundColor || "#f0f0f0"}
                 onChange={(e) =>
                   handleUpdateText({ backgroundColor: e.target.value })
                 }
                 className="w-16 h-10 p-1 cursor-pointer"
               />
               <Input
-                value={text.backgroundColor || "#ffffff"}
+                value={text.backgroundColor || ""}
                 onChange={(e) =>
                   handleUpdateText({ backgroundColor: e.target.value })
                 }
+                placeholder="transparent"
                 className="flex-1"
               />
             </div>
