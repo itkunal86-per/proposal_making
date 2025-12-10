@@ -92,7 +92,12 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
         margin: 10,
         filename: `${proposal.title}.pdf`,
         image: { type: "jpeg" as const, quality: 0.98 },
-        html2canvas: { scale: 2 },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          logging: false,
+        },
         jsPDF: { orientation: "portrait" as const, unit: "mm" as const, format: "a4" as const },
       };
 
