@@ -66,6 +66,17 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
 
   console.log("🔵 PropertiesPanel: Past early return, type=", selectedElementType);
 
+  if (selectedElementType === "image") {
+    console.log("🟢 IMAGE PANEL - Early render for debugging");
+    return (
+      <Card className="p-4 space-y-4">
+        <h2 className="font-bold">Image Editor Properties</h2>
+        <p>Selected Element ID: {selectedElementId}</p>
+        <p>Type: {selectedElementType}</p>
+      </Card>
+    );
+  }
+
   const updateTitleStyles = (styles: Partial<ElementStyle>) => {
     const updated = {
       ...proposal,
