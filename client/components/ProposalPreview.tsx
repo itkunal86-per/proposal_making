@@ -280,6 +280,8 @@ interface ProposalPreviewProps {
   onUpdateTable?: (sectionId: string, tableIndex: number, updates: any) => void;
   onAddText?: (sectionId: string, x: number, y: number) => void;
   onUpdateText?: (sectionId: string, textIndex: number, updates: any) => void;
+  onAddImage?: (sectionId: string, x: number, y: number) => void;
+  onUpdateImage?: (sectionId: string, imageIndex: number, updates: any) => void;
 }
 
 export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
@@ -295,6 +297,8 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
   onUpdateTable,
   onAddText,
   onUpdateText,
+  onAddImage,
+  onUpdateImage,
 }) => {
   const [dragOverSectionId, setDragOverSectionId] = React.useState<string | null>(null);
   const [canvasHeights, setCanvasHeights] = React.useState<Record<string, number>>({});
