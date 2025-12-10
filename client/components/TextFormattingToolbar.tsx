@@ -57,6 +57,52 @@ export const TextFormattingToolbar: React.FC<TextFormattingToolbarProps> = ({
       newFormats.add(format);
     }
     setActiveFormats(newFormats);
+
+    // Try to apply inline formatting to contentEditable element
+    try {
+      let contentEditableElement = document.querySelector('[data-testid="rich-text-editor"]') as HTMLElement;
+      if (!contentEditableElement) {
+        contentEditableElement = document.querySelector('[contenteditable="true"]') as HTMLElement;
+      }
+
+      if (contentEditableElement) {
+        const selection = window.getSelection();
+        let savedRange: Range | null = null;
+        if (selection && selection.rangeCount > 0) {
+          savedRange = selection.getRangeAt(0).cloneRange();
+        }
+
+        contentEditableElement.focus();
+        if (savedRange) {
+          selection?.removeAllRanges();
+          selection?.addRange(savedRange);
+        }
+
+        let command = "";
+        if (format === "bold") {
+          command = "bold";
+        } else if (format === "italic") {
+          command = "italic";
+        } else if (format === "underline") {
+          command = "underline";
+        } else if (format === "strikethrough") {
+          command = "strikeThrough";
+        } else if (format === "code") {
+          command = "formatBlock";
+        }
+
+        if (command) {
+          if (command === "formatBlock") {
+            document.execCommand(command, false, "<code>");
+          } else {
+            document.execCommand(command, false);
+          }
+        }
+      }
+    } catch (error) {
+      console.error(`Failed to apply inline formatting ${format}:`, error);
+    }
+
     onFormatChange?.(format, newFormats.has(format));
   };
 
