@@ -53,11 +53,6 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   variables,
   onOpenAI,
 }) => {
-  const [uploading, setUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [mediaUrl, setMediaUrl] = useState("");
-  const [mediaType, setMediaType] = useState<"image" | "video">("image");
-
   if (!selectedElementId || !selectedElementType) {
     return (
       <Card className="p-4">
@@ -67,6 +62,11 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
       </Card>
     );
   }
+
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [mediaUrl, setMediaUrl] = useState("");
+  const [mediaType, setMediaType] = useState<"image" | "video">("image");
 
   if (selectedElementType === "image") {
     // Parse ID format: "image-{sectionId}-{imageIndex}"
