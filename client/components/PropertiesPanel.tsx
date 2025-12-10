@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -6,8 +6,10 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Proposal, ProposalSection } from "@/services/proposalsService";
-import { X, Plus, Sparkles } from "lucide-react";
+import { X, Plus, Sparkles, Bold, Italic, Underline, List, ListOrdered, Upload, Loader2 } from "lucide-react";
 import { RichTextEditor } from "@/components/RichTextEditor";
+import { uploadMediaToProposal } from "@/services/mediaService";
+import { toast } from "@/hooks/use-toast";
 
 interface ElementStyle {
   color?: string;
@@ -51,12 +53,338 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   variables,
   onOpenAI,
 }) => {
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   if (!selectedElementId || !selectedElementType) {
     return (
       <Card className="p-4">
         <div className="text-center text-muted-foreground">
           <p className="text-sm">Select an element to edit its properties</p>
         </div>
+      </Card>
+    );
+  }
+
+  if (selectedElementType === "image") {
+    // Parse ID format: "image-{sectionId}-{imageIndex}"
+    const lastHyphenIndex = selectedElementId.lastIndexOf("-");
+    const imageIndex = selectedElementId.substring(lastHyphenIndex + 1);
+    const sectionId = selectedElementId.substring(6, lastHyphenIndex); // Skip "image-"
+
+    const section = proposal.sections.find((s) => s.id === sectionId);
+    if (!section) {
+      return (
+        <Card className="p-4">
+          <div className="text-center text-muted-foreground">
+            <p className="text-sm">Section not found: {sectionId}</p>
+          </div>
+        </Card>
+      );
+    }
+
+    const images = (section as any).images || [];
+    const image = images[parseInt(imageIndex)];
+
+    if (!image) {
+      return (
+        <Card className="p-4">
+          <div className="text-center text-muted-foreground">
+            <p className="text-sm">Image not found</p>
+          </div>
+        </Card>
+      );
+    }
+
+    const handleUpdateImage = (updates: Partial<typeof image>) => {
+      const newImages = images.map((img: any, idx: number) =>
+        idx === parseInt(imageIndex) ? { ...img, ...updates } : img
+      );
+      const updatedProposal = {
+        ...proposal,
+        sections: proposal.sections.map((s) =>
+          s.id === sectionId ? { ...s, images: newImages } : s
+        ),
+      };
+      onUpdateProposal(updatedProposal);
+    };
+
+    const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+
+      // Validate file type
+      if (!file.type.startsWith("image/")) {
+        toast({
+          title: "Invalid file type",
+          description: "Please select an image file",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setUploading(true);
+      try {
+        const result = await uploadMediaToProposal(file, proposal.id);
+
+        if (!result.success || !result.data) {
+          toast({
+            title: "Upload Failed",
+            description: result.error || "Failed to upload image",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        const imageUrl = result.data.media_record.url;
+        handleUpdateImage({ url: imageUrl });
+
+        toast({
+          title: "Upload Successful",
+          description: "Image uploaded successfully",
+        });
+
+        // Reset file input
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+      } catch (err) {
+        toast({
+          title: "Upload Error",
+          description: "An unexpected error occurred during upload",
+          variant: "destructive",
+        });
+      } finally {
+        setUploading(false);
+      }
+    };
+
+    return (
+      <Card className="p-4 space-y-4">
+        <h3 className="text-sm font-semibold">Image Properties</h3>
+
+        <Separator />
+
+        <div className="space-y-3">
+          <div>
+            <Label className="text-xs font-semibold">Upload Image</Label>
+            <div className="flex gap-2 mt-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                disabled={uploading}
+                className="hidden"
+              />
+              <Button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                size="sm"
+                className="w-full"
+              >
+                {uploading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="mr-2 h-4 w-4" />
+                    Choose Image
+                  </>
+                )}
+              </Button>
+            </div>
+            {image.url && (
+              <p className="text-xs text-muted-foreground mt-2">
+                Current: {image.url.split("/").pop() || "Image loaded"}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Width</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="50"
+                value={image.width}
+                onChange={(e) =>
+                  handleUpdateImage({ width: parseInt(e.target.value) || 200 })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">
+                px
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Height</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="50"
+                value={image.height}
+                onChange={(e) =>
+                  handleUpdateImage({ height: parseInt(e.target.value) || 150 })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">
+                px
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <Separator />
+
+        <div className="space-y-3">
+          <h3 className="text-xs font-semibold">Position</h3>
+
+          <div>
+            <Label className="text-xs font-semibold">Position - X</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="0"
+                value={image.left}
+                onChange={(e) =>
+                  handleUpdateImage({ left: parseInt(e.target.value) || 0 })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">
+                px
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Position - Y</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="0"
+                value={image.top}
+                onChange={(e) =>
+                  handleUpdateImage({ top: parseInt(e.target.value) || 0 })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">
+                px
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <Separator />
+
+        <div className="space-y-3">
+          <h3 className="text-xs font-semibold">Appearance</h3>
+
+          <div>
+            <Label className="text-xs font-semibold">Opacity</Label>
+            <div className="flex gap-2 mt-2 items-center">
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={parseInt(image.opacity || "100")}
+                onChange={(e) =>
+                  handleUpdateImage({ opacity: e.target.value })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm font-medium w-12 text-center">
+                {parseInt(image.opacity || "100")}%
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Border Width</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="0"
+                value={image.borderWidth || 0}
+                onChange={(e) =>
+                  handleUpdateImage({ borderWidth: parseInt(e.target.value) || 0 })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">
+                px
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Border Color</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="color"
+                value={image.borderColor || "#000000"}
+                onChange={(e) =>
+                  handleUpdateImage({ borderColor: e.target.value })
+                }
+                className="w-16 h-10 p-1 cursor-pointer"
+              />
+              <Input
+                value={image.borderColor || "#000000"}
+                onChange={(e) =>
+                  handleUpdateImage({ borderColor: e.target.value })
+                }
+                className="flex-1"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Border Radius</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="0"
+                value={image.borderRadius || 0}
+                onChange={(e) =>
+                  handleUpdateImage({ borderRadius: parseInt(e.target.value) || 0 })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">
+                px
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <Separator />
+
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={() => {
+            const newImages = images.filter(
+              (_: any, i: number) => i !== parseInt(imageIndex)
+            );
+            const updatedProposal = {
+              ...proposal,
+              sections: proposal.sections.map((s) =>
+                s.id === sectionId ? { ...s, images: newImages } : s
+              ),
+            };
+            onUpdateProposal(updatedProposal);
+          }}
+          className="w-full"
+        >
+          Remove Image
+        </Button>
       </Card>
     );
   }
@@ -1910,6 +2238,8 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     );
   }
 
+  console.log("🔵 Checking shape type", { selectedElementType, isShape: selectedElementType === "shape" });
+
   if (selectedElementType === "shape") {
     const parts = selectedElementId.split("-");
     const sectionId = parts[1];
@@ -2502,6 +2832,8 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     );
   }
 
+  console.log("🔵 Checking text type", { selectedElementType, isText: selectedElementType === "text" });
+
   if (selectedElementType === "text") {
     const parts = selectedElementId.split("-");
     const sectionId = parts[1];
@@ -2532,18 +2864,125 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
       onUpdateProposal(updatedProposal);
     };
 
+    const editorRef = useRef<HTMLDivElement>(null);
+
+    const applyFormatting = (format: "bold" | "italic" | "underline" | "bullet" | "number") => {
+      if (!editorRef.current) return;
+
+      const editor = editorRef.current;
+      const selection = window.getSelection();
+
+      if (!selection || selection.toString().length === 0) {
+        return;
+      }
+
+      editor.focus();
+
+      let command = "";
+      switch (format) {
+        case "bold":
+          command = "bold";
+          break;
+        case "italic":
+          command = "italic";
+          break;
+        case "underline":
+          command = "underline";
+          break;
+        case "bullet":
+          command = "insertUnorderedList";
+          break;
+        case "number":
+          command = "insertOrderedList";
+          break;
+      }
+
+      if (command) {
+        document.execCommand(command, false);
+        handleUpdateText({ content: editor.innerHTML });
+
+        // Keep selection and focus
+        setTimeout(() => {
+          editor.focus();
+        }, 0);
+      }
+    };
+
     return (
       <Card className="p-4 space-y-4">
         <div>
           <Label className="text-xs font-semibold">Content</Label>
+
+          {/* Formatting Toolbar */}
+          <div className="flex gap-1 mt-2 mb-2 p-2 bg-slate-50 rounded border border-slate-200">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => applyFormatting("bold")}
+              className="h-8 w-8 p-0"
+              title="Bold"
+            >
+              <Bold className="w-4 h-4" />
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => applyFormatting("italic")}
+              className="h-8 w-8 p-0"
+              title="Italic"
+            >
+              <Italic className="w-4 h-4" />
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => applyFormatting("underline")}
+              className="h-8 w-8 p-0"
+              title="Underline"
+            >
+              <Underline className="w-4 h-4" />
+            </Button>
+            <div className="w-px bg-slate-300" />
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => applyFormatting("bullet")}
+              className="h-8 w-8 p-0"
+              title="Bullet List"
+            >
+              <List className="w-4 h-4" />
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => applyFormatting("number")}
+              className="h-8 w-8 p-0"
+              title="Numbered List"
+            >
+              <ListOrdered className="w-4 h-4" />
+            </Button>
+          </div>
+
           <div className="flex gap-2 mt-2">
-            <Textarea
-              value={text.content || ""}
-              onChange={(e) =>
-                handleUpdateText({ content: e.target.value })
-              }
-              placeholder="Enter text content..."
-              className="min-h-20 flex-1"
+            <div
+              ref={editorRef}
+              contentEditable
+              suppressContentEditableWarning
+              onInput={(e) => {
+                const newContent = (e.currentTarget as HTMLDivElement).innerHTML;
+                handleUpdateText({ content: newContent });
+              }}
+              onBlur={(e) => {
+                const newContent = (e.currentTarget as HTMLDivElement).innerHTML;
+                handleUpdateText({ content: newContent });
+              }}
+              className="min-h-20 flex-1 border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              style={{
+                whiteSpace: "pre-wrap",
+                wordWrap: "break-word",
+                fontFamily: "inherit",
+              }}
+              dangerouslySetInnerHTML={{ __html: text.content || "" }}
             />
             <Button
               variant="outline"
@@ -2867,6 +3306,215 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
           className="w-full"
         >
           Remove Text
+        </Button>
+      </Card>
+    );
+  }
+
+  console.log("🔵 About to check if selectedElementType === 'image'", { selectedElementType, isImage: selectedElementType === "image" });
+
+  if (selectedElementType === "image") {
+    // Parse ID format: "image-{sectionId}-{imageIndex}"
+    const lastHyphenIndex = selectedElementId.lastIndexOf("-");
+    const imageIndex = selectedElementId.substring(lastHyphenIndex + 1);
+    const sectionId = selectedElementId.substring(6, lastHyphenIndex); // Skip "image-"
+
+    const section = proposal.sections.find((s) => s.id === sectionId);
+    if (!section) {
+      console.error("Section not found for sectionId:", sectionId);
+      return (
+        <Card className="p-4">
+          <div className="text-center text-muted-foreground">
+            <p className="text-sm">Section not found: {sectionId}</p>
+          </div>
+        </Card>
+      );
+    }
+
+    const images = (section as any).images || [];
+    const image = images[parseInt(imageIndex)];
+
+    console.log("Image found:", { imageIndex: parseInt(imageIndex), image, totalImages: images.length });
+
+    if (!image) {
+      return (
+        <Card className="p-4">
+          <div className="text-center text-muted-foreground">
+            <p className="text-sm">Image not found</p>
+          </div>
+        </Card>
+      );
+    }
+
+    const handleUpdateImage = (updates: Partial<typeof image>) => {
+      const newImages = images.map((img: any, idx: number) =>
+        idx === parseInt(imageIndex) ? { ...img, ...updates } : img
+      );
+      const updatedProposal = {
+        ...proposal,
+        sections: proposal.sections.map((s) =>
+          s.id === sectionId ? { ...s, images: newImages } : s
+        ),
+      };
+      onUpdateProposal(updatedProposal);
+    };
+
+    return (
+      <Card className="p-4 space-y-4">
+        <h3 className="text-sm font-semibold">Image Properties</h3>
+
+        <Separator />
+
+        <div className="space-y-3">
+          <div>
+            <Label className="text-xs font-semibold">Image URL</Label>
+            <Input
+              value={image.url || ""}
+              onChange={(e) => handleUpdateImage({ url: e.target.value })}
+              className="mt-2"
+              placeholder="Enter image URL"
+            />
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Width</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="50"
+                value={image.width}
+                onChange={(e) =>
+                  handleUpdateImage({ width: parseInt(e.target.value) || 200 })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">
+                px
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Height</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="50"
+                value={image.height}
+                onChange={(e) =>
+                  handleUpdateImage({ height: parseInt(e.target.value) || 150 })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">
+                px
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <Separator />
+
+        <div className="space-y-3">
+          <h3 className="text-xs font-semibold">Appearance</h3>
+
+          <div>
+            <Label className="text-xs font-semibold">Opacity</Label>
+            <div className="flex gap-2 mt-2 items-center">
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={parseInt(image.opacity || "100")}
+                onChange={(e) =>
+                  handleUpdateImage({ opacity: e.target.value })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm font-medium w-12 text-center">
+                {parseInt(image.opacity || "100")}%
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Border Width</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="0"
+                value={image.borderWidth || 0}
+                onChange={(e) =>
+                  handleUpdateImage({ borderWidth: parseInt(e.target.value) || 0 })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">
+                px
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Border Color</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="color"
+                value={image.borderColor || "#000000"}
+                onChange={(e) =>
+                  handleUpdateImage({ borderColor: e.target.value })
+                }
+                className="w-16 h-10 p-1 cursor-pointer"
+              />
+              <Input
+                value={image.borderColor || "#000000"}
+                onChange={(e) =>
+                  handleUpdateImage({ borderColor: e.target.value })
+                }
+                className="flex-1"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Border Radius</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="0"
+                value={image.borderRadius || 0}
+                onChange={(e) =>
+                  handleUpdateImage({ borderRadius: parseInt(e.target.value) || 0 })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">
+                px
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <Separator />
+
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={() => {
+            const newImages = images.filter(
+              (_: any, i: number) => i !== parseInt(imageIndex)
+            );
+            const updatedProposal = {
+              ...proposal,
+              sections: proposal.sections.map((s) =>
+                s.id === sectionId ? { ...s, images: newImages } : s
+              ),
+            };
+            onUpdateProposal(updatedProposal);
+          }}
+          className="w-full"
+        >
+          Remove Image
         </Button>
       </Card>
     );

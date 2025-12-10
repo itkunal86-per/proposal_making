@@ -19,13 +19,26 @@ export default function ProposalPublicView() {
       }
 
       try {
+        console.log("Loading public proposal with token:", token);
         const data = await getPublicProposal(token);
+        console.log("Loaded proposal data:", data);
+
         if (data) {
+          console.log("Proposal sections:", data.sections.map(s => ({
+            id: s.id,
+            title: s.title,
+            hasContent: !!s.content,
+            shapesCount: s.shapes?.length || 0,
+            textsCount: (s as any).texts?.length || 0,
+            tablesCount: s.tables?.length || 0,
+            imagesCount: (s as any).images?.length || 0,
+          })));
           setProposal(data);
         } else {
           setError("Proposal not found or link has expired");
         }
       } catch (err) {
+        console.error("Error loading proposal:", err);
         setError("Failed to load proposal");
       } finally {
         setIsLoading(false);
@@ -286,6 +299,181 @@ export default function ProposalPublicView() {
                   })}
                 </div>
               )}
+
+              {/* Shapes, Texts, Tables, Images, and Media Container */}
+              <div
+                style={{
+                  position: "relative",
+                  minHeight: section.shapes || section.tables || (section as any).texts || (section as any).images ? "200px" : "0px",
+                }}
+              >
+                {/* Shapes */}
+                {section.shapes && section.shapes.length > 0 && (
+                  <>
+                    {section.shapes.map((shape) => (
+                      <div
+                        key={shape.id}
+                        style={{
+                          position: "absolute",
+                          top: `${shape.top}px`,
+                          left: `${shape.left}px`,
+                          width: `${shape.width}px`,
+                          height: `${shape.height}px`,
+                          backgroundColor: shape.backgroundColor,
+                          backgroundImage: shape.backgroundImage ? `url(${shape.backgroundImage})` : undefined,
+                          backgroundSize: shape.backgroundSize || "cover",
+                          backgroundPosition: "center",
+                          backgroundRepeat: "no-repeat",
+                          borderRadius:
+                            shape.type === "circle"
+                              ? "50%"
+                              : shape.type === "triangle"
+                                ? "0"
+                                : shape.borderRadius
+                                  ? `${shape.borderRadius}px`
+                                  : "0",
+                          border:
+                            shape.borderWidth && shape.borderWidth > 0
+                              ? `${shape.borderWidth}px solid ${shape.borderColor || "#000"}`
+                              : "none",
+                          opacity: shape.backgroundOpacity ? parseInt(shape.backgroundOpacity) / 100 : 1,
+                        }}
+                      >
+                        {shape.type === "triangle" && (
+                          <div
+                            style={{
+                              width: "0",
+                              height: "0",
+                              borderLeft: `${shape.width / 2}px solid transparent`,
+                              borderRight: `${shape.width / 2}px solid transparent`,
+                              borderBottom: `${shape.height}px solid ${shape.backgroundColor}`,
+                            }}
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </>
+                )}
+
+                {/* Text Elements */}
+                {section.texts && section.texts.length > 0 && (
+                  <>
+                    {section.texts.map((text) => {
+                      // Ensure fontSize has px suffix if it's just a number
+                      const fontSize = text.fontSize
+                        ? /^\d+$/.test(text.fontSize)
+                          ? `${text.fontSize}px`
+                          : text.fontSize
+                        : "16px";
+
+                      return (
+                        <div
+                          key={text.id}
+                          style={{
+                            position: "absolute",
+                            top: `${text.top}px`,
+                            left: `${text.left}px`,
+                            width: text.width ? `${text.width}px` : "auto",
+                            height: text.height ? `${text.height}px` : "auto",
+                            color: text.color || "#000",
+                            fontSize: fontSize,
+                            fontWeight: text.fontWeight ? "bold" : "normal",
+                            backgroundColor: text.backgroundColor || "transparent",
+                            padding: `${text.paddingTop || 0}px ${text.paddingRight || 0}px ${text.paddingBottom || 0}px ${text.paddingLeft || 0}px`,
+                            border:
+                              text.borderWidth && parseInt(text.borderWidth) > 0
+                                ? `${text.borderWidth}px solid ${text.borderColor || "#000"}`
+                                : "none",
+                            borderRadius: text.borderRadius ? `${text.borderRadius}px` : "0",
+                          }}
+                          dangerouslySetInnerHTML={{
+                            __html: decodeHtmlEntities(text.content || ""),
+                          }}
+                        />
+                      );
+                    })}
+                  </>
+                )}
+
+                {/* Tables */}
+                {section.tables && section.tables.length > 0 && (
+                  <>
+                    {section.tables.map((table) => (
+                      <div
+                        key={table.id}
+                        style={{
+                          position: "absolute",
+                          top: `${table.top}px`,
+                          left: `${table.left}px`,
+                          width: `${table.width}px`,
+                          height: `${table.height}px`,
+                        }}
+                      >
+                        <table
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            borderCollapse: "collapse",
+                            borderWidth: `${table.borderWidth}px`,
+                            borderStyle: "solid",
+                            borderColor: table.borderColor,
+                          }}
+                        >
+                          <tbody>
+                            {table.cells.map((row, rowIndex) => (
+                              <tr key={rowIndex}>
+                                {row.map((cell, cellIndex) => (
+                                  <td
+                                    key={cellIndex}
+                                    style={{
+                                      border: `${table.borderWidth}px solid ${table.borderColor}`,
+                                      padding: `${table.padding}px`,
+                                      backgroundColor:
+                                        rowIndex === 0 && table.headerBackground
+                                          ? table.headerBackground
+                                          : table.cellBackground || "transparent",
+                                      color: table.textColor || "#000",
+                                    }}
+                                  >
+                                    {cell.content}
+                                  </td>
+                                ))}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    ))}
+                  </>
+                )}
+
+                {/* Images */}
+                {(section as any).images && (section as any).images.length > 0 && (
+                  <>
+                    {(section as any).images.map((image: any, idx: number) => (
+                      <div
+                        key={`image-${idx}`}
+                        style={{
+                          position: "absolute",
+                          top: `${image.top}px`,
+                          left: `${image.left}px`,
+                          width: `${image.width}px`,
+                          height: `${image.height}px`,
+                          opacity: image.opacity ? parseInt(image.opacity) / 100 : 1,
+                          borderWidth: image.borderWidth ? `${image.borderWidth}px` : "0px",
+                          borderColor: image.borderColor || "#000000",
+                          borderStyle: "solid",
+                          borderRadius: image.borderRadius ? `${image.borderRadius}px` : "0px",
+                          backgroundImage: image.url ? `url(${image.url})` : undefined,
+                          backgroundSize: "cover",
+                          backgroundPosition: "center",
+                          backgroundRepeat: "no-repeat",
+                        }}
+                      />
+                    ))}
+                  </>
+                )}
+              </div>
 
               {/* Media */}
               {section.media && section.media.length > 0 && (

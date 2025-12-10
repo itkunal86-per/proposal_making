@@ -15,6 +15,7 @@ import { ShareLinkDialog } from "@/components/ShareLinkDialog";
 import { ShapeEditor } from "@/components/ShapeEditor";
 import { TableEditor } from "@/components/TableEditor";
 import { TextEditor } from "@/components/TextEditor";
+import { ImageEditor } from "@/components/ImageEditor";
 
 interface ProposalPreviewModalProps {
   proposal: Proposal;
@@ -37,7 +38,8 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
     proposal.sections.forEach((section) => {
       if ((section.shapes && section.shapes.length > 0) ||
           (section.tables && section.tables.length > 0) ||
-          ((section as any).texts && (section as any).texts.length > 0)) {
+          ((section as any).texts && (section as any).texts.length > 0) ||
+          ((section as any).images && (section as any).images.length > 0)) {
         let maxHeight = 400; // minimum height
 
         // Calculate max height needed for shapes
@@ -70,6 +72,16 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
           });
         }
 
+        // Calculate max height needed for image elements
+        if ((section as any).images) {
+          (section as any).images.forEach((image: any) => {
+            const bottomPos = image.top + image.height + 20; // 20px padding
+            if (bottomPos > maxHeight) {
+              maxHeight = bottomPos;
+            }
+          });
+        }
+
         newHeights[section.id] = maxHeight;
       }
     });
@@ -88,11 +100,57 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
         return;
       }
 
+      // Wait for all img tags to load
+      const images = element.querySelectorAll("img");
+      const imageLoadPromises = Array.from(images).map((img) => {
+        return new Promise<void>((resolve) => {
+          const imgElement = img as HTMLImageElement;
+          if (imgElement.complete) {
+            resolve();
+          } else {
+            imgElement.onload = () => resolve();
+            imgElement.onerror = () => resolve();
+          }
+        });
+      });
+
+      // Also preload background images by creating temporary img elements
+      const elementsWithBg = element.querySelectorAll("[style*='background-image']");
+      const bgImagePromises = Array.from(elementsWithBg).map((el) => {
+        return new Promise<void>((resolve) => {
+          const style = window.getComputedStyle(el);
+          const bgImage = style.backgroundImage;
+          const match = bgImage.match(/url\(["']?([^"']+)["']?\)/);
+
+          if (match && match[1]) {
+            const tempImg = new Image();
+            tempImg.crossOrigin = "anonymous";
+            tempImg.onload = () => resolve();
+            tempImg.onerror = () => resolve();
+            tempImg.src = match[1];
+          } else {
+            resolve();
+          }
+        });
+      });
+
+      await Promise.all([...imageLoadPromises, ...bgImagePromises]);
+
+      // Additional delay to ensure rendering
+      await new Promise(resolve => setTimeout(resolve, 500));
+
       const opt = {
         margin: 10,
         filename: `${proposal.title}.pdf`,
         image: { type: "jpeg" as const, quality: 0.98 },
-        html2canvas: { scale: 2 },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          logging: false,
+          backgroundColor: "#ffffff",
+          windowHeight: element.scrollHeight || element.clientHeight,
+        },
         jsPDF: { orientation: "portrait" as const, unit: "mm" as const, format: "a4" as const },
       };
 
@@ -413,8 +471,8 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                   </div>
                 )}
 
-                {/* Shapes, Tables, and Texts */}
-                {(section.shapes && section.shapes.length > 0) || (section.tables && section.tables.length > 0) || ((section as any).texts && (section as any).texts.length > 0) ? (
+                {/* Shapes, Tables, Texts, and Images */}
+                {(section.shapes && section.shapes.length > 0) || (section.tables && section.tables.length > 0) || ((section as any).texts && (section as any).texts.length > 0) || ((section as any).images && (section as any).images.length > 0) ? (
                   <div className="relative mt-4 bg-gray-50 rounded" style={{ position: "relative", minHeight: `${canvasHeights[section.id] || 400}px`, pointerEvents: "none" }}>
                     {section.shapes && section.shapes.map((shape, sIndex) => (
                       <div key={`shape-${sIndex}`} style={{ pointerEvents: "auto" }}>
@@ -481,6 +539,25 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                           paddingRight={text.paddingRight}
                           paddingBottom={text.paddingBottom}
                           paddingLeft={text.paddingLeft}
+                          selected={false}
+                          onSelect={() => {}}
+                          onUpdate={() => {}}
+                        />
+                      </div>
+                    ))}
+                    {(section as any).images && (section as any).images.map((image: any, iIndex: number) => (
+                      <div key={`image-${iIndex}`} style={{ pointerEvents: "auto" }}>
+                        <ImageEditor
+                          id={`image-${section.id}-${iIndex}`}
+                          url={image.url}
+                          width={image.width}
+                          height={image.height}
+                          opacity={image.opacity}
+                          borderWidth={image.borderWidth}
+                          borderColor={image.borderColor}
+                          borderRadius={image.borderRadius}
+                          top={image.top}
+                          left={image.left}
                           selected={false}
                           onSelect={() => {}}
                           onUpdate={() => {}}

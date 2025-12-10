@@ -1,4 +1,6 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Bold, Italic, Underline, List, ListOrdered } from "lucide-react";
 
 interface TextEditorProps {
   id: string;
@@ -75,10 +77,13 @@ export const TextEditor: React.FC<TextEditorProps> = ({
   const [initialPos, setInitialPos] = useState({ top, left });
   const [initialSize, setInitialSize] = useState({ width });
   const containerRef = useRef<HTMLDivElement>(null);
-  const textInputRef = useRef<HTMLTextAreaElement>(null);
+  const editorRef = useRef<HTMLDivElement>(null);
+  const [showToolbar, setShowToolbar] = useState(false);
+  const isInitializedRef = useRef(false);
 
   const handleMouseDown = (e: React.MouseEvent, handle: ResizeHandle = null) => {
-    if ((e.target as HTMLElement).tagName === "TEXTAREA") {
+    const target = e.target as HTMLElement;
+    if (isEditing && editorRef.current?.contains(target)) {
       return;
     }
 
@@ -98,19 +103,93 @@ export const TextEditor: React.FC<TextEditorProps> = ({
 
   const handleDoubleClick = () => {
     setIsEditing(true);
+    setShowToolbar(true);
     setTimeout(() => {
-      if (textInputRef.current) {
-        textInputRef.current.focus();
+      if (editorRef.current) {
+        editorRef.current.focus();
+        const range = document.createRange();
+        range.selectNodeContents(editorRef.current);
+        range.collapse(false);
+        const selection = window.getSelection();
+        if (selection) {
+          selection.removeAllRanges();
+          selection.addRange(range);
+        }
       }
     }, 0);
   };
 
-  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    onUpdate({ content: e.target.value });
+  const handleInput = () => {
+    if (editorRef.current) {
+      onUpdate({ content: editorRef.current.innerHTML });
+    }
   };
 
   const handleBlur = () => {
     setIsEditing(false);
+    setShowToolbar(false);
+    if (editorRef.current) {
+      onUpdate({ content: editorRef.current.innerHTML });
+    }
+  };
+
+  useEffect(() => {
+    if (editorRef.current) {
+      const isEditorFocused = document.activeElement === editorRef.current;
+      const currentInnerHTML = editorRef.current.innerHTML;
+      const newValue = content || "";
+
+      if (!isInitializedRef.current || !isEditorFocused) {
+        if (currentInnerHTML !== newValue) {
+          editorRef.current.innerHTML = newValue;
+        }
+      }
+
+      if (!isInitializedRef.current) {
+        isInitializedRef.current = true;
+      }
+    }
+  }, [content]);
+
+  const applyFormatting = (format: "bold" | "italic" | "underline" | "bullet" | "number") => {
+    if (!editorRef.current) return;
+
+    const editor = editorRef.current;
+    const selection = window.getSelection();
+
+    if (!selection || selection.toString().length === 0) {
+      return;
+    }
+
+    editor.focus();
+
+    let command = "";
+    switch (format) {
+      case "bold":
+        command = "bold";
+        break;
+      case "italic":
+        command = "italic";
+        break;
+      case "underline":
+        command = "underline";
+        break;
+      case "bullet":
+        command = "insertUnorderedList";
+        break;
+      case "number":
+        command = "insertOrderedList";
+        break;
+    }
+
+    if (command) {
+      document.execCommand(command, false);
+      onUpdate({ content: editor.innerHTML });
+
+      setTimeout(() => {
+        editor.focus();
+      }, 0);
+    }
   };
 
   React.useEffect(() => {
@@ -203,7 +282,106 @@ export const TextEditor: React.FC<TextEditorProps> = ({
       onMouseDown={(e) => handleMouseDown(e, null)}
       onDoubleClick={handleDoubleClick}
     >
+      {isEditing && showToolbar && (
+        <div style={{
+          position: "absolute",
+          bottom: "100%",
+          left: 0,
+          right: 0,
+          backgroundColor: "white",
+          border: "1px solid #ccc",
+          borderRadius: "4px 4px 0 0",
+          display: "flex",
+          gap: "4px",
+          padding: "4px",
+          marginBottom: "2px",
+          zIndex: 11,
+        }}>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => applyFormatting("bold")}
+            className="h-7 w-7 p-0"
+            title="Bold"
+          >
+            <Bold className="w-4 h-4" />
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => applyFormatting("italic")}
+            className="h-7 w-7 p-0"
+            title="Italic"
+          >
+            <Italic className="w-4 h-4" />
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => applyFormatting("underline")}
+            className="h-7 w-7 p-0"
+            title="Underline"
+          >
+            <Underline className="w-4 h-4" />
+          </Button>
+          <div style={{ width: "1px", backgroundColor: "#ccc", margin: "0 2px" }} />
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => applyFormatting("bullet")}
+            className="h-7 w-7 p-0"
+            title="Bullet List"
+          >
+            <List className="w-4 h-4" />
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => applyFormatting("number")}
+            className="h-7 w-7 p-0"
+            title="Numbered List"
+          >
+            <ListOrdered className="w-4 h-4" />
+          </Button>
+        </div>
+      )}
+
+      <style>{`
+        [data-text-editor] ul {
+          list-style-type: disc;
+          margin-left: 20px;
+        }
+        [data-text-editor] ol {
+          list-style-type: decimal;
+          margin-left: 20px;
+        }
+        [data-text-editor] li {
+          margin: 4px 0;
+        }
+        [data-text-editor] b,
+        [data-text-editor] strong {
+          font-weight: bold;
+        }
+        [data-text-editor] i,
+        [data-text-editor] em {
+          font-style: italic;
+        }
+        [data-text-editor] u {
+          text-decoration: underline;
+        }
+      `}</style>
       <div
+        ref={editorRef}
+        contentEditable={isEditing}
+        suppressContentEditableWarning
+        onInput={handleInput}
+        onBlur={handleBlur}
+        onMouseDown={(e) => {
+          if (isEditing) {
+            e.stopPropagation();
+          }
+        }}
+        data-text-editor="true"
         style={{
           padding: `${paddingTop}px ${paddingRight}px ${paddingBottom}px ${paddingLeft}px`,
           border: `${borderWidth}px solid ${borderColor}`,
@@ -216,41 +394,13 @@ export const TextEditor: React.FC<TextEditorProps> = ({
           fontSize: `${fontSize}px`,
           color: color,
           fontWeight: fontWeight ? "bold" : "normal",
+          outline: isEditing ? "2px solid #3b82f6" : "none",
+          outlineOffset: "-2px",
+          whiteSpace: "pre-wrap",
+          overflowWrap: "break-word",
         }}
       >
-        {isEditing ? (
-          <textarea
-            ref={textInputRef}
-            value={content}
-            onChange={handleTextChange}
-            onBlur={handleBlur}
-            onMouseDown={(e) => e.stopPropagation()}
-            style={{
-              width: "100%",
-              minHeight: "40px",
-              border: "none",
-              outline: "none",
-              padding: "4px",
-              fontSize: `${fontSize}px`,
-              color: color,
-              fontWeight: fontWeight ? "bold" : "normal",
-              fontFamily: "inherit",
-              resize: "none",
-            }}
-          />
-        ) : (
-          <div
-            style={{
-              fontSize: `${fontSize}px`,
-              color: color,
-              fontWeight: fontWeight ? "bold" : "normal",
-              whiteSpace: "pre-wrap",
-              wordBreak: "break-word",
-            }}
-          >
-            {content || "Click to edit..."}
-          </div>
-        )}
+        {!content && !isEditing && "Click to edit..."}
       </div>
 
       {selected && !isEditing && (

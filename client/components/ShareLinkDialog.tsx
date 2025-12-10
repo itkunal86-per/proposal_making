@@ -65,31 +65,42 @@ export const ShareLinkDialog: React.FC<ShareLinkDialogProps> = ({
   const handleCopy = async () => {
     if (!shareLink) return;
 
-    try {
-      await navigator.clipboard.writeText(shareLink);
-      setCopied(true);
-      toast({ title: "Success", description: "Link copied to clipboard" });
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error("Clipboard API blocked, using fallback:", err);
-      // Fallback: select the text in the input field
-      if (inputRef.current) {
+    // Try modern Clipboard API first
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      try {
+        await navigator.clipboard.writeText(shareLink);
+        setCopied(true);
+        toast({ title: "Success", description: "Link copied to clipboard" });
+        setTimeout(() => setCopied(false), 2000);
+        return;
+      } catch (err) {
+        // If Clipboard API fails, fall through to fallback
+      }
+    }
+
+    // Fallback: select the text in the input field and use execCommand
+    if (inputRef.current) {
+      try {
         inputRef.current.select();
-        try {
-          document.execCommand("copy");
+        inputRef.current.setSelectionRange(0, 99999); // For mobile devices
+
+        if (document.execCommand("copy")) {
           setCopied(true);
           toast({ title: "Success", description: "Link copied to clipboard" });
           setTimeout(() => setCopied(false), 2000);
-        } catch (fallbackErr) {
-          console.error("Copy fallback failed:", fallbackErr);
-          toast({
-            title: "Manual Copy Required",
-            description: "Please select and copy the link manually",
-            variant: "default",
-          });
+          return;
         }
+      } catch (fallbackErr) {
+        // Continue to final fallback
       }
     }
+
+    // Final fallback: show toast with manual copy instruction
+    toast({
+      title: "Copy Link",
+      description: "Please select and copy the link manually (Ctrl+C or Cmd+C)",
+      variant: "default",
+    });
   };
 
   return (

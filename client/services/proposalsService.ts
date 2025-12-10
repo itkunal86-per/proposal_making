@@ -62,6 +62,19 @@ export interface TextElement {
   left: number;
 }
 
+export interface ImageElement {
+  id: string;
+  url: string;
+  width: number;
+  height: number;
+  opacity?: string;
+  borderWidth?: number;
+  borderColor?: string;
+  borderRadius?: number;
+  top: number;
+  left: number;
+}
+
 export interface ProposalSection {
   id: string;
   title: string;
@@ -73,6 +86,7 @@ export interface ProposalSection {
   shapes?: ShapeElement[];
   tables?: TableElement[];
   texts?: TextElement[];
+  images?: ImageElement[];
   comments?: { id: string; author: string; text: string; createdAt: number }[];
   titleStyles?: Record<string, any>;
   contentStyles?: Record<string, any>;
@@ -379,6 +393,18 @@ function normalizeProposal(raw: z.infer<typeof proposalSchema>): Proposal {
           top: typeof text.top === "number" ? text.top : 0,
           left: typeof text.left === "number" ? text.left : 0,
         })),
+        images: (s.images ?? []).map((image) => ({
+          id: String(image.id!),
+          url: image.url!,
+          width: image.width!,
+          height: image.height!,
+          opacity: image.opacity,
+          borderWidth: image.borderWidth,
+          borderColor: image.borderColor,
+          borderRadius: image.borderRadius,
+          top: typeof image.top === "number" ? image.top : 0,
+          left: typeof image.left === "number" ? image.left : 0,
+        })),
         comments: (s.comments ?? []).map((c) => ({
           id: String(c.id!),
           author: c.author!,
@@ -568,15 +594,27 @@ function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmai
             top: typeof text.top === "number" ? text.top : 0,
             left: typeof text.left === "number" ? text.left : 0,
           })) : [],
+          images: Array.isArray(s.images) ? s.images.map((image) => ({
+            id: String(image.id),
+            url: image.url,
+            width: image.width,
+            height: image.height,
+            opacity: image.opacity,
+            borderWidth: image.borderWidth,
+            borderColor: image.borderColor,
+            borderRadius: image.borderRadius,
+            top: typeof image.top === "number" ? image.top : 0,
+            left: typeof image.left === "number" ? image.left : 0,
+          })) : [],
           comments: Array.isArray(s.comments) ? s.comments : [],
           titleStyles: normalizeStyles(s.titleStyles),
           contentStyles: normalizeStyles(s.contentStyles),
         };
       })
     : [
-      { id: uuid(), title: "Overview", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], shapes: [], tables: [], texts: [], comments: [] },
-      { id: uuid(), title: "Scope", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], shapes: [], tables: [], texts: [], comments: [] },
-      { id: uuid(), title: "Timeline", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], shapes: [], tables: [], texts: [], comments: [] },
+      { id: uuid(), title: "Overview", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], shapes: [], tables: [], texts: [], images: [], comments: [] },
+      { id: uuid(), title: "Scope", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], shapes: [], tables: [], texts: [], images: [], comments: [] },
+      { id: uuid(), title: "Timeline", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], shapes: [], tables: [], texts: [], images: [], comments: [] },
     ] as ProposalSection[];
 
   const clientName = typeof apiProposal.client === "string" ? apiProposal.client : (apiProposal.client?.name || "");
@@ -621,26 +659,37 @@ async function fetchFromApi(): Promise<Proposal[]> {
     throw new Error("No authentication token available");
   }
 
-  const res = await fetch(PROPOSALS_ENDPOINT, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${token}`,
-    },
-    cache: "no-store",
-  });
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
-  if (!res.ok) {
-    throw new Error(`Failed to fetch proposals: ${res.statusText}`);
+    const res = await fetch(PROPOSALS_ENDPOINT, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+      cache: "no-store",
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!res.ok) {
+      throw new Error(`Failed to fetch proposals: ${res.statusText}`);
+    }
+
+    const json: ApiProposalResponse[] = await res.json();
+    const auth = getStoredAuth();
+    const userEmail = auth?.user?.email;
+
+    const list = json.map((p) => convertApiProposalToProposal(p, userEmail));
+    persist(list);
+    return list;
+  } catch (err) {
+    console.warn("API fetch failed, will use local storage:", err instanceof Error ? err.message : String(err));
+    throw err;
   }
-
-  const json: ApiProposalResponse[] = await res.json();
-  const auth = getStoredAuth();
-  const userEmail = auth?.user?.email;
-
-  const list = json.map((p) => convertApiProposalToProposal(p, userEmail));
-  persist(list);
-  return list;
 }
 
 async function fetchSeed(): Promise<Proposal[]> {
@@ -694,6 +743,9 @@ export async function getProposalDetails(id: string): Promise<Proposal | undefin
   }
 
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
     const res = await fetch(`${PROPOSALS_DETAILS_ENDPOINT}/${id}`, {
       method: "GET",
       headers: {
@@ -701,7 +753,10 @@ export async function getProposalDetails(id: string): Promise<Proposal | undefin
         "Authorization": `Bearer ${token}`,
       },
       cache: "no-store",
+      signal: controller.signal,
     });
+
+    clearTimeout(timeoutId);
 
     if (!res.ok) {
       console.warn(`Failed to fetch proposal details: ${res.statusText}, falling back to local storage`);
@@ -876,9 +931,9 @@ export async function createProposal(partial?: Partial<Proposal>): Promise<Propo
     createdAt: now,
     updatedAt: now,
     sections: partial?.sections ?? [
-      { id: uuid(), title: "Overview", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], shapes: [], tables: [], comments: [] },
-      { id: uuid(), title: "Scope", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], shapes: [], tables: [], comments: [] },
-      { id: uuid(), title: "Timeline", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], shapes: [], tables: [], comments: [] },
+      { id: uuid(), title: "Overview", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], shapes: [], tables: [], texts: [], images: [], comments: [] },
+      { id: uuid(), title: "Scope", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], shapes: [], tables: [], texts: [], images: [], comments: [] },
+      { id: uuid(), title: "Timeline", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], shapes: [], tables: [], texts: [], images: [], comments: [] },
     ] as ProposalSection[],
     pricing: partial?.pricing ?? {
       currency: "USD",
@@ -1076,7 +1131,7 @@ export async function addSection(p: Proposal, title = "New Section", layout: "si
   const titleStyles = columnCount > 0 ? { columnGap: 0 } : {};
   const contentStyles = { gapAfter: 10 };
 
-  const newSection = { id: uuid(), title, content: "", layout, columnContents, columnStyles, titleStyles, contentStyles, media: [], shapes: [], tables: [], comments: [] };
+  const newSection = { id: uuid(), title, content: "", layout, columnContents, columnStyles, titleStyles, contentStyles, media: [], shapes: [], tables: [], texts: [], images: [], comments: [] };
   const updated = {
     ...p,
     sections: [...p.sections, newSection],
@@ -1186,18 +1241,104 @@ export async function enableProposalSharing(proposalId: string): Promise<{ succe
 }
 
 export async function getPublicProposal(sharingToken: string): Promise<Proposal | null> {
+  console.log("getPublicProposal called with token:", sharingToken);
+
+  let apiProposal: Proposal | null = null;
+
+  // Try the external API first
   try {
     const res = await fetch(`https://propai-api.hirenq.com/api/public/proposal/${sharingToken}`);
 
-    if (!res.ok) {
-      console.error("Failed to fetch public proposal:", res.statusText);
-      return null;
-    }
+    if (res.ok) {
+      const data: ApiProposalResponse = await res.json();
+      apiProposal = convertApiProposalToProposal(data);
 
-    const data: ApiProposalResponse = await res.json();
-    return convertApiProposalToProposal(data);
+      // Verify we have sections
+      if (apiProposal.sections && apiProposal.sections.length > 0) {
+        console.log("Successfully fetched proposal from external API");
+      }
+    }
   } catch (err) {
-    console.error("Failed to fetch public proposal:", err);
-    return null;
+    console.warn("External API request failed, trying fallback methods:", err);
   }
+
+  // Fallback 1: Try local server endpoint
+  if (!apiProposal) {
+    try {
+      const res = await fetch(`/api/public/proposal/${sharingToken}`);
+
+      if (res.ok) {
+        const data: ApiProposalResponse = await res.json();
+        apiProposal = convertApiProposalToProposal(data);
+
+        // Verify we have sections
+        if (apiProposal.sections && apiProposal.sections.length > 0) {
+          console.log("Successfully fetched proposal from local API");
+        }
+      }
+    } catch (err) {
+      console.warn("Local API request failed:", err);
+    }
+  }
+
+  // Fallback 2: Check local storage for proposal with matching sharing token
+  // This is important because local storage contains the full proposal with shapes, texts, and tables
+  // which the backend API might not return
+  let localProposal: Proposal | null = null;
+  try {
+    const stored = readStored();
+    if (stored) {
+      localProposal = stored.find((p) => p.settings.sharing.token === sharingToken) || null;
+      if (localProposal && localProposal.sections && localProposal.sections.length > 0) {
+        console.log("Found proposal in local storage by sharing token");
+      }
+    }
+  } catch (err) {
+    console.warn("Local storage lookup failed:", err);
+  }
+
+  // If we have both API and local proposals, merge them
+  // The local proposal should take precedence for shapes, texts, tables
+  if (apiProposal && localProposal) {
+    console.log("Merging API proposal with local proposal data");
+    apiProposal = {
+      ...apiProposal,
+      sections: apiProposal.sections.map((apiSection) => {
+        const localSection = localProposal!.sections.find((s) => String(s.id) === String(apiSection.id));
+        if (localSection) {
+          // Merge sections - local takes precedence for shapes, texts, tables, and column data
+          return {
+            ...apiSection,
+            shapes: localSection.shapes && localSection.shapes.length > 0 ? localSection.shapes : apiSection.shapes,
+            tables: localSection.tables && localSection.tables.length > 0 ? localSection.tables : apiSection.tables,
+            texts: localSection.texts && localSection.texts.length > 0 ? localSection.texts : apiSection.texts,
+            columnContents: localSection.columnContents && localSection.columnContents.length > 0
+              ? localSection.columnContents
+              : apiSection.columnContents,
+            columnStyles: localSection.columnStyles && localSection.columnStyles.length > 0
+              ? localSection.columnStyles
+              : apiSection.columnStyles,
+            content: localSection.content || apiSection.content,
+            title: localSection.title || apiSection.title,
+            layout: localSection.layout || apiSection.layout,
+          };
+        }
+        return apiSection;
+      }),
+    };
+    return apiProposal;
+  }
+
+  // If we only have local proposal, use that
+  if (localProposal) {
+    return localProposal;
+  }
+
+  // If we only have API proposal, use that
+  if (apiProposal) {
+    return apiProposal;
+  }
+
+  console.error("Failed to fetch public proposal from all sources:", { sharingToken });
+  return null;
 }

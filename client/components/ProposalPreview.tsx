@@ -6,6 +6,7 @@ import { replaceVariables, decodeHtmlEntities } from "@/lib/variableUtils";
 import { ShapeEditor } from "@/components/ShapeEditor";
 import { TableEditor } from "@/components/TableEditor";
 import { TextEditor } from "@/components/TextEditor";
+import { ImageEditor } from "@/components/ImageEditor";
 
 interface ElementProps {
   id: string;
@@ -194,6 +195,7 @@ const SelectableElement: React.FC<ElementProps> = ({
             fontStyle: italic ? "italic" : "normal",
             textDecoration: underline ? "underline" : strikethrough ? "line-through" : "none",
           }}
+          className="prose prose-sm max-w-none [&_ul]:list-disc [&_ul]:ml-5 [&_ol]:list-decimal [&_ol]:ml-5 [&_li]:my-1"
           dangerouslySetInnerHTML={{ __html: decodedContent }}
         />
       );
@@ -279,6 +281,8 @@ interface ProposalPreviewProps {
   onUpdateTable?: (sectionId: string, tableIndex: number, updates: any) => void;
   onAddText?: (sectionId: string, x: number, y: number) => void;
   onUpdateText?: (sectionId: string, textIndex: number, updates: any) => void;
+  onAddImage?: (sectionId: string, x: number, y: number) => void;
+  onUpdateImage?: (sectionId: string, imageIndex: number, updates: any) => void;
 }
 
 export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
@@ -294,6 +298,8 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
   onUpdateTable,
   onAddText,
   onUpdateText,
+  onAddImage,
+  onUpdateImage,
 }) => {
   const [dragOverSectionId, setDragOverSectionId] = React.useState<string | null>(null);
   const [canvasHeights, setCanvasHeights] = React.useState<Record<string, number>>({});
@@ -305,7 +311,8 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
     proposal.sections.forEach((section) => {
       if ((section.shapes && section.shapes.length > 0) ||
           (section.tables && section.tables.length > 0) ||
-          ((section as any).texts && (section as any).texts.length > 0)) {
+          ((section as any).texts && (section as any).texts.length > 0) ||
+          ((section as any).images && (section as any).images.length > 0)) {
         let maxHeight = 400; // minimum height
 
         // Calculate max height needed for shapes
@@ -332,6 +339,16 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
         if ((section as any).texts) {
           (section as any).texts.forEach((text: any) => {
             const bottomPos = text.top + (text.height || 100) + 20; // 20px padding, assume 100px if no height
+            if (bottomPos > maxHeight) {
+              maxHeight = bottomPos;
+            }
+          });
+        }
+
+        // Calculate max height needed for image elements
+        if ((section as any).images) {
+          (section as any).images.forEach((image: any) => {
+            const bottomPos = image.top + image.height + 20; // 20px padding
             if (bottomPos > maxHeight) {
               maxHeight = bottomPos;
             }
@@ -373,6 +390,8 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
             onAddTable?.(sectionId, Math.max(0, x), Math.max(0, y));
           } else if (draggedItem.type === "text") {
             onAddText?.(sectionId, Math.max(0, x), Math.max(0, y));
+          } else if (draggedItem.type === "image") {
+            onAddImage?.(sectionId, Math.max(0, x), Math.max(0, y));
           }
         }
       }
@@ -1004,6 +1023,28 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                     }
                     onUpdate={(updates) =>
                       onUpdateText?.(section.id, tIndex, updates)
+                    }
+                  />
+                ))}
+                {(section as any).images && (section as any).images.map((image: any, iIndex: number) => (
+                  <ImageEditor
+                    key={`image-${iIndex}`}
+                    id={`image-${section.id}-${iIndex}`}
+                    url={image.url}
+                    width={image.width}
+                    height={image.height}
+                    opacity={image.opacity}
+                    borderWidth={image.borderWidth}
+                    borderColor={image.borderColor}
+                    borderRadius={image.borderRadius}
+                    top={image.top}
+                    left={image.left}
+                    selected={selectedElementId === `image-${section.id}-${iIndex}`}
+                    onSelect={() =>
+                      onSelectElement(`image-${section.id}-${iIndex}`, "image")
+                    }
+                    onUpdate={(updates) =>
+                      onUpdateImage?.(section.id, iIndex, updates)
                     }
                   />
                 ))}

@@ -8,12 +8,14 @@ interface BuildPanelProps {
   onShapeDragStart?: (e: React.DragEvent<HTMLDivElement>) => void;
   onTableDragStart?: (e: React.DragEvent<HTMLDivElement>) => void;
   onTextDragStart?: (e: React.DragEvent<HTMLDivElement>) => void;
+  onImageDragStart?: (e: React.DragEvent<HTMLDivElement>) => void;
 }
 
-export const BuildPanel: React.FC<BuildPanelProps> = ({ onAddContent, onShapeDragStart, onTableDragStart, onTextDragStart }) => {
+export const BuildPanel: React.FC<BuildPanelProps> = ({ onAddContent, onShapeDragStart, onTableDragStart, onTextDragStart, onImageDragStart }) => {
   const [isDraggingShape, setIsDraggingShape] = useState(false);
   const [isDraggingTable, setIsDraggingTable] = useState(false);
   const [isDraggingText, setIsDraggingText] = useState(false);
+  const [isDraggingImage, setIsDraggingImage] = useState(false);
 
   const contentTypes = [
     {
@@ -72,10 +74,18 @@ export const BuildPanel: React.FC<BuildPanelProps> = ({ onAddContent, onShapeDra
     onTextDragStart?.(e);
   };
 
+  const handleImageDragStart = (e: React.DragEvent<HTMLDivElement>) => {
+    e.dataTransfer.effectAllowed = "copy";
+    e.dataTransfer.setData("application/json", JSON.stringify({ type: "image" }));
+    setIsDraggingImage(true);
+    onImageDragStart?.(e);
+  };
+
   const handleDragEnd = () => {
     setIsDraggingShape(false);
     setIsDraggingTable(false);
     setIsDraggingText(false);
+    setIsDraggingImage(false);
   };
 
   return (
@@ -88,6 +98,7 @@ export const BuildPanel: React.FC<BuildPanelProps> = ({ onAddContent, onShapeDra
           const isShape = type.id === "shape";
           const isTable = type.id === "table";
           const isText = type.id === "text";
+          const isImage = type.id === "image";
 
           if (isShape) {
             return (
@@ -126,6 +137,20 @@ export const BuildPanel: React.FC<BuildPanelProps> = ({ onAddContent, onShapeDra
                 onDragEnd={handleDragEnd}
                 className={`flex flex-col items-center gap-2 p-4 h-auto border border-slate-200 rounded-md cursor-move hover:bg-slate-50 transition-colors ${isDraggingText ? "opacity-50" : ""}`}
                 title="Drag to add text"
+              >
+                <IconComponent className="w-6 h-6" />
+                <span className="text-sm font-medium">{type.label}</span>
+              </div>
+            );
+          } else if (isImage) {
+            return (
+              <div
+                key={type.id}
+                draggable
+                onDragStart={handleImageDragStart}
+                onDragEnd={handleDragEnd}
+                className={`flex flex-col items-center gap-2 p-4 h-auto border border-slate-200 rounded-md cursor-move hover:bg-slate-50 transition-colors ${isDraggingImage ? "opacity-50" : ""}`}
+                title="Drag to add an image"
               >
                 <IconComponent className="w-6 h-6" />
                 <span className="text-sm font-medium">{type.label}</span>

@@ -68,35 +68,47 @@ export default function ProposalEditor() {
   const previewContainerRef = useRef<HTMLDivElement>(null);
   const saveTimer = useRef<number | null>(null);
 
+
+
   useEffect(() => {
     (async () => {
-      console.log("ProposalEditor: Loading proposal with id:", id);
-      const found = await getProposalDetails(id);
-      console.log("ProposalEditor: getProposalDetails returned:", found);
-      if (!found) {
-        console.warn("ProposalEditor: Proposal not found, redirecting to /my/proposals");
-        nav("/my/proposals");
-        return;
-      }
-      console.log("Loaded proposal from getProposalDetails:", {
-        id: found.id,
-        sections: found.sections.map(s => ({
-          id: s.id,
-          title: s.title,
-          layout: s.layout,
-          columnContents: (s as any).columnContents,
-        })),
-      });
-      setP(found);
-
       try {
-        setIsLoadingClients(true);
-        const clientsList = await listClients();
-        setClients(clientsList);
+        console.log("ProposalEditor: Loading proposal with id:", id);
+        const found = await getProposalDetails(id);
+        console.log("ProposalEditor: getProposalDetails returned:", found);
+        if (!found) {
+          console.warn("ProposalEditor: Proposal not found, redirecting to /my/proposals");
+          nav("/my/proposals");
+          return;
+        }
+        console.log("Loaded proposal from getProposalDetails:", {
+          id: found.id,
+          sections: found.sections.map(s => ({
+            id: s.id,
+            title: s.title,
+            layout: s.layout,
+            columnContents: (s as any).columnContents,
+          })),
+        });
+        setP(found);
+
+        try {
+          setIsLoadingClients(true);
+          const clientsList = await listClients();
+          setClients(clientsList);
+        } catch (error) {
+          console.error("Failed to load clients:", error);
+        } finally {
+          setIsLoadingClients(false);
+        }
       } catch (error) {
-        console.error("Failed to load clients:", error);
-      } finally {
-        setIsLoadingClients(false);
+        console.error("Failed to load proposal:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load proposal. Please try again.",
+          variant: "destructive",
+        });
+        nav("/my/proposals");
       }
     })();
   }, [id, nav]);
@@ -461,9 +473,9 @@ export default function ProposalEditor() {
             <ProposalPreview
               proposal={p}
               selectedElementId={selectedElementId}
-              onSelectElement={(id, type) => {
-                setSelectedElementId(id);
-                setSelectedElementType(type);
+              onSelectElement={(elementId, elementType) => {
+                setSelectedElementId(elementId);
+                setSelectedElementType(elementType);
                 setActivePanel("properties");
               }}
               onAIElement={(id, type) => {
@@ -641,6 +653,51 @@ export default function ProposalEditor() {
                           ...s,
                           texts: ((s as any).texts || []).map((text: any, idx: number) =>
                             idx === textIndex ? { ...text, ...updates } : text
+                          ),
+                        }
+                      : s
+                  ),
+                };
+                commit(updated);
+              }}
+              onAddImage={(sectionId, x, y) => {
+                const section = p.sections.find((s) => s.id === sectionId);
+                if (section) {
+                  const newImage = {
+                    id: Math.random().toString(36).substring(2, 9),
+                    url: "",
+                    width: 200,
+                    height: 150,
+                    opacity: "100",
+                    borderWidth: 0,
+                    borderColor: "#000000",
+                    borderRadius: 0,
+                    left: Math.round(x),
+                    top: Math.round(y),
+                  };
+                  const updated = {
+                    ...p,
+                    sections: p.sections.map((s) =>
+                      s.id === sectionId
+                        ? { ...s, images: [...((s as any).images || []), newImage] }
+                        : s
+                    ),
+                  };
+                  commit(updated);
+                  setSelectedElementId(`image-${sectionId}-${((section as any).images || []).length}`);
+                  setSelectedElementType("image");
+                  setActivePanel("properties");
+                }
+              }}
+              onUpdateImage={(sectionId, imageIndex, updates) => {
+                const updated = {
+                  ...p,
+                  sections: p.sections.map((s) =>
+                    s.id === sectionId
+                      ? {
+                          ...s,
+                          images: ((s as any).images || []).map((image: any, idx: number) =>
+                            idx === imageIndex ? { ...image, ...updates } : image
                           ),
                         }
                       : s
