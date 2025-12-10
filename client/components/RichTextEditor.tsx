@@ -212,7 +212,6 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             fontStyle: italic ? "italic" : "normal",
             textDecoration: underline ? "underline" : "none",
             direction: "ltr",
-            unicodeBidi: "plaintext",
           }}
           data-placeholder={placeholder}
           data-testid="rich-text-editor"
