@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 
 interface TextEditorProps {
   id: string;
@@ -75,10 +75,12 @@ export const TextEditor: React.FC<TextEditorProps> = ({
   const [initialPos, setInitialPos] = useState({ top, left });
   const [initialSize, setInitialSize] = useState({ width });
   const containerRef = useRef<HTMLDivElement>(null);
-  const textInputRef = useRef<HTMLTextAreaElement>(null);
+  const editorRef = useRef<HTMLDivElement>(null);
+  const isInitializedRef = useRef(false);
 
   const handleMouseDown = (e: React.MouseEvent, handle: ResizeHandle = null) => {
-    if ((e.target as HTMLElement).tagName === "TEXTAREA") {
+    const target = e.target as HTMLElement;
+    if (isEditing && editorRef.current?.contains(target)) {
       return;
     }
 
@@ -99,19 +101,47 @@ export const TextEditor: React.FC<TextEditorProps> = ({
   const handleDoubleClick = () => {
     setIsEditing(true);
     setTimeout(() => {
-      if (textInputRef.current) {
-        textInputRef.current.focus();
+      if (editorRef.current) {
+        editorRef.current.focus();
+        const range = document.createRange();
+        range.selectNodeContents(editorRef.current);
+        range.collapse(false);
+        const selection = window.getSelection();
+        if (selection) {
+          selection.removeAllRanges();
+          selection.addRange(range);
+        }
       }
     }, 0);
   };
 
-  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    onUpdate({ content: e.target.value });
+  const handleInput = () => {
+    if (editorRef.current) {
+      onUpdate({ content: editorRef.current.innerHTML });
+    }
   };
 
   const handleBlur = () => {
     setIsEditing(false);
   };
+
+  useEffect(() => {
+    if (editorRef.current) {
+      const isEditorFocused = document.activeElement === editorRef.current;
+      const currentInnerHTML = editorRef.current.innerHTML;
+      const newValue = content || "";
+
+      if (!isInitializedRef.current || !isEditorFocused) {
+        if (currentInnerHTML !== newValue) {
+          editorRef.current.innerHTML = newValue;
+        }
+      }
+
+      if (!isInitializedRef.current) {
+        isInitializedRef.current = true;
+      }
+    }
+  }, [content]);
 
   React.useEffect(() => {
     if (!selected) return;
@@ -204,6 +234,17 @@ export const TextEditor: React.FC<TextEditorProps> = ({
       onDoubleClick={handleDoubleClick}
     >
       <div
+        ref={editorRef}
+        contentEditable={isEditing}
+        suppressContentEditableWarning
+        onInput={handleInput}
+        onBlur={handleBlur}
+        onMouseDown={(e) => {
+          if (isEditing) {
+            e.stopPropagation();
+          }
+        }}
+        data-testid="rich-text-editor"
         style={{
           padding: `${paddingTop}px ${paddingRight}px ${paddingBottom}px ${paddingLeft}px`,
           border: `${borderWidth}px solid ${borderColor}`,
@@ -216,41 +257,11 @@ export const TextEditor: React.FC<TextEditorProps> = ({
           fontSize: `${fontSize}px`,
           color: color,
           fontWeight: fontWeight ? "bold" : "normal",
+          outline: isEditing ? "2px solid #3b82f6" : "none",
+          outlineOffset: "-2px",
         }}
       >
-        {isEditing ? (
-          <textarea
-            ref={textInputRef}
-            value={content}
-            onChange={handleTextChange}
-            onBlur={handleBlur}
-            onMouseDown={(e) => e.stopPropagation()}
-            style={{
-              width: "100%",
-              minHeight: "40px",
-              border: "none",
-              outline: "none",
-              padding: "4px",
-              fontSize: `${fontSize}px`,
-              color: color,
-              fontWeight: fontWeight ? "bold" : "normal",
-              fontFamily: "inherit",
-              resize: "none",
-            }}
-          />
-        ) : (
-          <div
-            style={{
-              fontSize: `${fontSize}px`,
-              color: color,
-              fontWeight: fontWeight ? "bold" : "normal",
-              whiteSpace: "pre-wrap",
-              wordBreak: "break-word",
-            }}
-          >
-            {content || "Click to edit..."}
-          </div>
-        )}
+        {!content && !isEditing && "Click to edit..."}
       </div>
 
       {selected && !isEditing && (
