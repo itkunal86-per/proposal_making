@@ -53,6 +53,9 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   variables,
   onOpenAI,
 }) => {
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   if (!selectedElementId || !selectedElementType) {
     return (
       <Card className="p-4">
@@ -92,9 +95,6 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
         </Card>
       );
     }
-
-    const [uploading, setUploading] = useState(false);
-    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleUpdateImage = (updates: Partial<typeof image>) => {
       const newImages = images.map((img: any, idx: number) =>
