@@ -196,6 +196,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           suppressContentEditableWarning
           onInput={handleInput}
           onBlur={() => captureContent()}
+          dir="ltr"
           className={cn(
             "p-4 min-h-[200px] focus:outline-none prose prose-sm max-w-none",
             "text-foreground"
@@ -210,6 +211,8 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             fontWeight: bold ? "bold" : "normal",
             fontStyle: italic ? "italic" : "normal",
             textDecoration: underline ? "underline" : "none",
+            direction: "ltr",
+            unicodeBidi: "plaintext",
           }}
           data-placeholder={placeholder}
           data-testid="rich-text-editor"
