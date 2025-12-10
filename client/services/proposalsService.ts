@@ -634,26 +634,37 @@ async function fetchFromApi(): Promise<Proposal[]> {
     throw new Error("No authentication token available");
   }
 
-  const res = await fetch(PROPOSALS_ENDPOINT, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${token}`,
-    },
-    cache: "no-store",
-  });
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
-  if (!res.ok) {
-    throw new Error(`Failed to fetch proposals: ${res.statusText}`);
+    const res = await fetch(PROPOSALS_ENDPOINT, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+      cache: "no-store",
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!res.ok) {
+      throw new Error(`Failed to fetch proposals: ${res.statusText}`);
+    }
+
+    const json: ApiProposalResponse[] = await res.json();
+    const auth = getStoredAuth();
+    const userEmail = auth?.user?.email;
+
+    const list = json.map((p) => convertApiProposalToProposal(p, userEmail));
+    persist(list);
+    return list;
+  } catch (err) {
+    console.warn("API fetch failed, will use local storage:", err instanceof Error ? err.message : String(err));
+    throw err;
   }
-
-  const json: ApiProposalResponse[] = await res.json();
-  const auth = getStoredAuth();
-  const userEmail = auth?.user?.email;
-
-  const list = json.map((p) => convertApiProposalToProposal(p, userEmail));
-  persist(list);
-  return list;
 }
 
 async function fetchSeed(): Promise<Proposal[]> {
