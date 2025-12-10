@@ -870,7 +870,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             <div className="flex gap-2 mt-2">
               <Input
                 type="color"
-                value={sectionTitleStyles.backgroundColor || "#ffffff"}
+                value={sectionTitleStyles.backgroundColor || "#f0f0f0"}
                 onChange={(e) =>
                   handleUpdateSection({
                     titleStyles: { ...sectionTitleStyles, backgroundColor: e.target.value }
@@ -879,12 +879,13 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                 className="w-16 h-10 p-1 cursor-pointer"
               />
               <Input
-                value={sectionTitleStyles.backgroundColor || "#ffffff"}
+                value={sectionTitleStyles.backgroundColor || ""}
                 onChange={(e) =>
                   handleUpdateSection({
                     titleStyles: { ...sectionTitleStyles, backgroundColor: e.target.value }
                   })
                 }
+                placeholder="transparent"
                 className="flex-1"
               />
             </div>
