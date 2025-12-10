@@ -52,7 +52,6 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
 
   const handleMouseDown = (e: React.MouseEvent, handle: ResizeHandle = null) => {
     e.stopPropagation();
-    console.log("ImageEditor.handleMouseDown - onSelect called");
     onSelect();
 
     if (handle) {
