@@ -2985,6 +2985,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   }
 
   if (selectedElementType === "image") {
+    console.log("PropertiesPanel: Entering IMAGE type block");
     // Parse ID format: "image-{sectionId}-{imageIndex}"
     const lastHyphenIndex = selectedElementId.lastIndexOf("-");
     const imageIndex = selectedElementId.substring(lastHyphenIndex + 1);
