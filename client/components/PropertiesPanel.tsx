@@ -93,6 +93,9 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
       );
     }
 
+    const [uploading, setUploading] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
     const handleUpdateImage = (updates: Partial<typeof image>) => {
       const newImages = images.map((img: any, idx: number) =>
         idx === parseInt(imageIndex) ? { ...img, ...updates } : img
@@ -106,6 +109,56 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
       onUpdateProposal(updatedProposal);
     };
 
+    const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+
+      // Validate file type
+      if (!file.type.startsWith("image/")) {
+        toast({
+          title: "Invalid file type",
+          description: "Please select an image file",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setUploading(true);
+      try {
+        const result = await uploadMediaToProposal(file, proposal.id);
+
+        if (!result.success || !result.data) {
+          toast({
+            title: "Upload Failed",
+            description: result.error || "Failed to upload image",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        const imageUrl = result.data.media_record.url;
+        handleUpdateImage({ url: imageUrl });
+
+        toast({
+          title: "Upload Successful",
+          description: "Image uploaded successfully",
+        });
+
+        // Reset file input
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+      } catch (err) {
+        toast({
+          title: "Upload Error",
+          description: "An unexpected error occurred during upload",
+          variant: "destructive",
+        });
+      } finally {
+        setUploading(false);
+      }
+    };
+
     return (
       <Card className="p-4 space-y-4">
         <h3 className="text-sm font-semibold">Image Properties</h3>
@@ -114,13 +167,40 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
 
         <div className="space-y-3">
           <div>
-            <Label className="text-xs font-semibold">Image URL</Label>
-            <Input
-              value={image.url || ""}
-              onChange={(e) => handleUpdateImage({ url: e.target.value })}
-              className="mt-2"
-              placeholder="Enter image URL"
-            />
+            <Label className="text-xs font-semibold">Upload Image</Label>
+            <div className="flex gap-2 mt-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                disabled={uploading}
+                className="hidden"
+              />
+              <Button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                size="sm"
+                className="w-full"
+              >
+                {uploading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="mr-2 h-4 w-4" />
+                    Choose Image
+                  </>
+                )}
+              </Button>
+            </div>
+            {image.url && (
+              <p className="text-xs text-muted-foreground mt-2">
+                Current: {image.url.split("/").pop() || "Image loaded"}
+              </p>
+            )}
           </div>
 
           <div>
