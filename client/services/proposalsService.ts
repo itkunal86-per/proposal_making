@@ -62,6 +62,19 @@ export interface TextElement {
   left: number;
 }
 
+export interface ImageElement {
+  id: string;
+  url: string;
+  width: number;
+  height: number;
+  opacity?: string;
+  borderWidth?: number;
+  borderColor?: string;
+  borderRadius?: number;
+  top: number;
+  left: number;
+}
+
 export interface ProposalSection {
   id: string;
   title: string;
