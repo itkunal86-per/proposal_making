@@ -346,6 +346,30 @@ export const TextEditor: React.FC<TextEditorProps> = ({
         </div>
       )}
 
+      <style>{`
+        [data-text-editor] ul {
+          list-style-type: disc;
+          margin-left: 20px;
+        }
+        [data-text-editor] ol {
+          list-style-type: decimal;
+          margin-left: 20px;
+        }
+        [data-text-editor] li {
+          margin: 4px 0;
+        }
+        [data-text-editor] b,
+        [data-text-editor] strong {
+          font-weight: bold;
+        }
+        [data-text-editor] i,
+        [data-text-editor] em {
+          font-style: italic;
+        }
+        [data-text-editor] u {
+          text-decoration: underline;
+        }
+      `}</style>
       <div
         ref={editorRef}
         contentEditable={isEditing}
@@ -357,6 +381,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({
             e.stopPropagation();
           }
         }}
+        data-text-editor="true"
         style={{
           padding: `${paddingTop}px ${paddingRight}px ${paddingBottom}px ${paddingLeft}px`,
           border: `${borderWidth}px solid ${borderColor}`,
