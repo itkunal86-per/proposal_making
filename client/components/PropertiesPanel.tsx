@@ -51,7 +51,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   variables,
   onOpenAI,
 }) => {
-  console.log("PropertiesPanel component rendered", { selectedElementId, selectedElementType });
+  console.log("🔵 PropertiesPanel component rendered", { selectedElementId, selectedElementType });
 
   if (!selectedElementId || !selectedElementType) {
     console.log("PropertiesPanel: Early return - missing ID or type");
@@ -64,8 +64,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     );
   }
 
-  console.log("PropertiesPanel: Past early return check, selectedElementType =", selectedElementType);
-  console.log("Type checks: title=", selectedElementType === "title", "section-title=", selectedElementType === "section-title", "section-content=", selectedElementType === "section-content", "shape=", selectedElementType === "shape", "table=", selectedElementType === "table", "text=", selectedElementType === "text", "image=", selectedElementType === "image");
+  console.log("🔵 PropertiesPanel: Past early return, type=", selectedElementType);
 
   const updateTitleStyles = (styles: Partial<ElementStyle>) => {
     const updated = {
