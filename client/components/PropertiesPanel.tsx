@@ -51,10 +51,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   variables,
   onOpenAI,
 }) => {
-  console.log("🔵 PropertiesPanel component rendered", { selectedElementId, selectedElementType });
-
   if (!selectedElementId || !selectedElementType) {
-    console.log("PropertiesPanel: Early return - missing ID or type");
     return (
       <Card className="p-4">
         <div className="text-center text-muted-foreground">
