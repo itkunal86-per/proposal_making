@@ -311,7 +311,8 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
     proposal.sections.forEach((section) => {
       if ((section.shapes && section.shapes.length > 0) ||
           (section.tables && section.tables.length > 0) ||
-          ((section as any).texts && (section as any).texts.length > 0)) {
+          ((section as any).texts && (section as any).texts.length > 0) ||
+          ((section as any).images && (section as any).images.length > 0)) {
         let maxHeight = 400; // minimum height
 
         // Calculate max height needed for shapes
