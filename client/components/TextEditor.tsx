@@ -347,6 +347,16 @@ export const TextEditor: React.FC<TextEditorProps> = ({
       )}
 
       <div
+        ref={editorRef}
+        contentEditable={isEditing}
+        suppressContentEditableWarning
+        onInput={handleInput}
+        onBlur={handleBlur}
+        onMouseDown={(e) => {
+          if (isEditing) {
+            e.stopPropagation();
+          }
+        }}
         style={{
           padding: `${paddingTop}px ${paddingRight}px ${paddingBottom}px ${paddingLeft}px`,
           border: `${borderWidth}px solid ${borderColor}`,
@@ -359,43 +369,13 @@ export const TextEditor: React.FC<TextEditorProps> = ({
           fontSize: `${fontSize}px`,
           color: color,
           fontWeight: fontWeight ? "bold" : "normal",
-          position: "relative",
+          outline: isEditing ? "2px solid #3b82f6" : "none",
+          outlineOffset: "-2px",
+          whiteSpace: "pre-wrap",
+          overflowWrap: "break-word",
         }}
       >
-        {isEditing ? (
-          <textarea
-            ref={textInputRef}
-            value={content}
-            onChange={handleTextChange}
-            onBlur={handleBlur}
-            onMouseDown={(e) => e.stopPropagation()}
-            style={{
-              width: "100%",
-              minHeight: "40px",
-              border: "none",
-              outline: "none",
-              padding: "4px",
-              fontSize: `${fontSize}px`,
-              color: color,
-              fontWeight: fontWeight ? "bold" : "normal",
-              fontFamily: "inherit",
-              resize: "none",
-              backgroundColor: "white",
-            }}
-          />
-        ) : (
-          <div
-            style={{
-              fontSize: `${fontSize}px`,
-              color: color,
-              fontWeight: fontWeight ? "bold" : "normal",
-              whiteSpace: "pre-wrap",
-              wordBreak: "break-word",
-            }}
-          >
-            {content || "Click to edit..."}
-          </div>
-        )}
+        {!content && !isEditing && "Click to edit..."}
       </div>
 
       {selected && !isEditing && (
