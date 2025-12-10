@@ -488,17 +488,18 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             <div className="flex gap-2 mt-2">
               <Input
                 type="color"
-                value={titleStyles.backgroundColor || "#ffffff"}
+                value={titleStyles.backgroundColor || "#f0f0f0"}
                 onChange={(e) =>
                   updateTitleStyles({ backgroundColor: e.target.value })
                 }
                 className="w-16 h-10 p-1 cursor-pointer"
               />
               <Input
-                value={titleStyles.backgroundColor || "#ffffff"}
+                value={titleStyles.backgroundColor || ""}
                 onChange={(e) =>
                   updateTitleStyles({ backgroundColor: e.target.value })
                 }
+                placeholder="transparent"
                 className="flex-1"
               />
             </div>
