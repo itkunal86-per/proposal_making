@@ -1186,18 +1186,54 @@ export async function enableProposalSharing(proposalId: string): Promise<{ succe
 }
 
 export async function getPublicProposal(sharingToken: string): Promise<Proposal | null> {
+  // Try the external API first
   try {
     const res = await fetch(`https://propai-api.hirenq.com/api/public/proposal/${sharingToken}`);
 
-    if (!res.ok) {
-      console.error("Failed to fetch public proposal:", res.statusText);
-      return null;
-    }
+    if (res.ok) {
+      const data: ApiProposalResponse = await res.json();
+      const proposal = convertApiProposalToProposal(data);
 
-    const data: ApiProposalResponse = await res.json();
-    return convertApiProposalToProposal(data);
+      // Verify we have sections
+      if (proposal.sections && proposal.sections.length > 0) {
+        return proposal;
+      }
+    }
   } catch (err) {
-    console.error("Failed to fetch public proposal:", err);
-    return null;
+    console.warn("External API request failed, trying fallback methods:", err);
   }
+
+  // Fallback 1: Try local server endpoint
+  try {
+    const res = await fetch(`/api/public/proposal/${sharingToken}`);
+
+    if (res.ok) {
+      const data: ApiProposalResponse = await res.json();
+      const proposal = convertApiProposalToProposal(data);
+
+      // Verify we have sections
+      if (proposal.sections && proposal.sections.length > 0) {
+        return proposal;
+      }
+    }
+  } catch (err) {
+    console.warn("Local API request failed:", err);
+  }
+
+  // Fallback 2: Check local storage for proposal with matching sharing token
+  try {
+    const stored = readStored();
+    if (stored) {
+      const foundProposal = stored.find((p) => p.settings.sharing.token === sharingToken);
+      if (foundProposal && foundProposal.sections && foundProposal.sections.length > 0) {
+        console.log("Found proposal in local storage by sharing token");
+        return foundProposal;
+      }
+    }
+  } catch (err) {
+    console.warn("Local storage lookup failed:", err);
+  }
+
+  console.error("Failed to fetch public proposal from all sources:", { sharingToken });
+  return null;
 }
