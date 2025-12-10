@@ -86,6 +86,7 @@ export interface ProposalSection {
   shapes?: ShapeElement[];
   tables?: TableElement[];
   texts?: TextElement[];
+  images?: ImageElement[];
   comments?: { id: string; author: string; text: string; createdAt: number }[];
   titleStyles?: Record<string, any>;
   contentStyles?: Record<string, any>;
