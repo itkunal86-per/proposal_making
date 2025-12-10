@@ -472,9 +472,11 @@ export default function ProposalEditor() {
               proposal={p}
               selectedElementId={selectedElementId}
               onSelectElement={(id, type) => {
+                console.log("ProposalEditor.onSelectElement called", { id, type, currentActivePanel: activePanel });
                 setSelectedElementId(id);
                 setSelectedElementType(type);
                 setActivePanel("properties");
+                console.log("ProposalEditor.onSelectElement - state updated", { id, type });
               }}
               onAIElement={(id, type) => {
                 setAIElementId(id);
