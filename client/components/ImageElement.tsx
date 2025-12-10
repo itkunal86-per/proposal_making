@@ -34,9 +34,15 @@ export const ImageElement: React.FC<ImageElementProps> = ({
 }) => {
   const opacityValue = parseInt(opacity) / 100;
 
+  const handleClick = (e: React.MouseEvent) => {
+    console.log("ImageElement clicked", { id, selected });
+    e.stopPropagation();
+    onSelect();
+  };
+
   return (
     <div
-      onClick={onSelect}
+      onClick={handleClick}
       style={{
         position: "absolute",
         top: `${top}px`,
