@@ -69,9 +69,6 @@ export default function ProposalEditor() {
   const saveTimer = useRef<number | null>(null);
 
 
-  useEffect(() => {
-    console.log("State update - selectedElementId/activePanel changed", { selectedElementId, selectedElementType, activePanel });
-  }, [selectedElementId, selectedElementType, activePanel]);
 
   useEffect(() => {
     (async () => {
