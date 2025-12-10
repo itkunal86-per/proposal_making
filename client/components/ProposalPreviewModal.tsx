@@ -38,7 +38,8 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
     proposal.sections.forEach((section) => {
       if ((section.shapes && section.shapes.length > 0) ||
           (section.tables && section.tables.length > 0) ||
-          ((section as any).texts && (section as any).texts.length > 0)) {
+          ((section as any).texts && (section as any).texts.length > 0) ||
+          ((section as any).images && (section as any).images.length > 0)) {
         let maxHeight = 400; // minimum height
 
         // Calculate max height needed for shapes
@@ -65,6 +66,16 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
         if ((section as any).texts) {
           (section as any).texts.forEach((text: any) => {
             const bottomPos = text.top + (text.height || 100) + 20; // 20px padding, assume 100px if no height
+            if (bottomPos > maxHeight) {
+              maxHeight = bottomPos;
+            }
+          });
+        }
+
+        // Calculate max height needed for image elements
+        if ((section as any).images) {
+          (section as any).images.forEach((image: any) => {
+            const bottomPos = image.top + image.height + 20; // 20px padding
             if (bottomPos > maxHeight) {
               maxHeight = bottomPos;
             }
