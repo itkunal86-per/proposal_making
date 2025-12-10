@@ -1224,8 +1224,6 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     };
 
     const sectionContentStyles = (section as any).contentStyles || {};
-    const [mediaUrl, setMediaUrl] = useState("");
-    const [mediaType, setMediaType] = useState<"image" | "video">("image");
 
     const handleAddMedia = () => {
       if (!mediaUrl.trim()) return;
