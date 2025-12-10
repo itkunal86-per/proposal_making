@@ -1263,6 +1263,13 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               onChange={handleContentChange}
               variables={variables || []}
               placeholder="Enter your section content with rich text formatting..."
+              color={sectionContentStyles.color}
+              fontSize={sectionContentStyles.fontSize}
+              backgroundColor={sectionContentStyles.backgroundColor}
+              textAlign={sectionContentStyles.textAlign as "left" | "center" | "right"}
+              bold={sectionContentStyles.bold}
+              italic={sectionContentStyles.italic}
+              underline={sectionContentStyles.underline}
             />
           </div>
         </div>
