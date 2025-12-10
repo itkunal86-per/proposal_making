@@ -65,6 +65,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   }
 
   console.log("PropertiesPanel: Past early return check, selectedElementType =", selectedElementType);
+  console.log("Type checks: title=", selectedElementType === "title", "section-title=", selectedElementType === "section-title", "section-content=", selectedElementType === "section-content", "shape=", selectedElementType === "shape", "table=", selectedElementType === "table", "text=", selectedElementType === "text", "image=", selectedElementType === "image");
 
   const updateTitleStyles = (styles: Partial<ElementStyle>) => {
     const updated = {
