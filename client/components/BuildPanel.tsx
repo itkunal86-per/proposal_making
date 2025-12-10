@@ -8,12 +8,14 @@ interface BuildPanelProps {
   onShapeDragStart?: (e: React.DragEvent<HTMLDivElement>) => void;
   onTableDragStart?: (e: React.DragEvent<HTMLDivElement>) => void;
   onTextDragStart?: (e: React.DragEvent<HTMLDivElement>) => void;
+  onImageDragStart?: (e: React.DragEvent<HTMLDivElement>) => void;
 }
 
-export const BuildPanel: React.FC<BuildPanelProps> = ({ onAddContent, onShapeDragStart, onTableDragStart, onTextDragStart }) => {
+export const BuildPanel: React.FC<BuildPanelProps> = ({ onAddContent, onShapeDragStart, onTableDragStart, onTextDragStart, onImageDragStart }) => {
   const [isDraggingShape, setIsDraggingShape] = useState(false);
   const [isDraggingTable, setIsDraggingTable] = useState(false);
   const [isDraggingText, setIsDraggingText] = useState(false);
+  const [isDraggingImage, setIsDraggingImage] = useState(false);
 
   const contentTypes = [
     {
