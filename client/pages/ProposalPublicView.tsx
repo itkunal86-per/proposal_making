@@ -29,8 +29,9 @@ export default function ProposalPublicView() {
             title: s.title,
             hasContent: !!s.content,
             shapesCount: s.shapes?.length || 0,
-            textsCount: s.texts?.length || 0,
+            textsCount: (s as any).texts?.length || 0,
             tablesCount: s.tables?.length || 0,
+            imagesCount: (s as any).images?.length || 0,
           })));
           setProposal(data);
         } else {
