@@ -377,9 +377,10 @@ export default function ProposalPublicView() {
                               : "none",
                           borderRadius: text.borderRadius ? `${text.borderRadius}px` : "0",
                         }}
-                      >
-                        {text.content}
-                      </div>
+                        dangerouslySetInnerHTML={{
+                          __html: decodeHtmlEntities(text.content || ""),
+                        }}
+                      />
                     ))}
                   </>
                 )}
