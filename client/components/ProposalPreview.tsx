@@ -194,6 +194,7 @@ const SelectableElement: React.FC<ElementProps> = ({
             fontStyle: italic ? "italic" : "normal",
             textDecoration: underline ? "underline" : strikethrough ? "line-through" : "none",
           }}
+          className="prose prose-sm max-w-none [&_ul]:list-disc [&_ul]:ml-5 [&_ol]:list-decimal [&_ol]:ml-5 [&_li]:my-1"
           dangerouslySetInnerHTML={{ __html: decodedContent }}
         />
       );
