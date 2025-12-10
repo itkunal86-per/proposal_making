@@ -98,6 +98,7 @@ export const BuildPanel: React.FC<BuildPanelProps> = ({ onAddContent, onShapeDra
           const isShape = type.id === "shape";
           const isTable = type.id === "table";
           const isText = type.id === "text";
+          const isImage = type.id === "image";
 
           if (isShape) {
             return (
@@ -136,6 +137,20 @@ export const BuildPanel: React.FC<BuildPanelProps> = ({ onAddContent, onShapeDra
                 onDragEnd={handleDragEnd}
                 className={`flex flex-col items-center gap-2 p-4 h-auto border border-slate-200 rounded-md cursor-move hover:bg-slate-50 transition-colors ${isDraggingText ? "opacity-50" : ""}`}
                 title="Drag to add text"
+              >
+                <IconComponent className="w-6 h-6" />
+                <span className="text-sm font-medium">{type.label}</span>
+              </div>
+            );
+          } else if (isImage) {
+            return (
+              <div
+                key={type.id}
+                draggable
+                onDragStart={handleImageDragStart}
+                onDragEnd={handleDragEnd}
+                className={`flex flex-col items-center gap-2 p-4 h-auto border border-slate-200 rounded-md cursor-move hover:bg-slate-50 transition-colors ${isDraggingImage ? "opacity-50" : ""}`}
+                title="Drag to add an image"
               >
                 <IconComponent className="w-6 h-6" />
                 <span className="text-sm font-medium">{type.label}</span>
