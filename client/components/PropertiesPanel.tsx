@@ -2985,12 +2985,20 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     const imageIndex = selectedElementId.substring(lastHyphenIndex + 1);
     const sectionId = selectedElementId.substring(6, lastHyphenIndex); // Skip "image-"
 
+    console.log("Image properties panel - parsing:", {
+      selectedElementId,
+      sectionId,
+      imageIndex,
+      sections: proposal.sections.map(s => s.id),
+    });
+
     const section = proposal.sections.find((s) => s.id === sectionId);
     if (!section) {
+      console.error("Section not found for sectionId:", sectionId);
       return (
         <Card className="p-4">
           <div className="text-center text-muted-foreground">
-            <p className="text-sm">Section not found</p>
+            <p className="text-sm">Section not found: {sectionId}</p>
           </div>
         </Card>
       );
@@ -2998,6 +3006,8 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
 
     const images = (section as any).images || [];
     const image = images[parseInt(imageIndex)];
+
+    console.log("Image found:", { imageIndex: parseInt(imageIndex), image, totalImages: images.length });
 
     if (!image) {
       return (
