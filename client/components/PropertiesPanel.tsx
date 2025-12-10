@@ -2980,7 +2980,11 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   }
 
   if (selectedElementType === "image") {
-    const [sectionId, imageIndex] = selectedElementId.split("-").slice(1);
+    // Parse ID format: "image-{sectionId}-{imageIndex}"
+    const lastHyphenIndex = selectedElementId.lastIndexOf("-");
+    const imageIndex = selectedElementId.substring(lastHyphenIndex + 1);
+    const sectionId = selectedElementId.substring(6, lastHyphenIndex); // Skip "image-"
+
     const section = proposal.sections.find((s) => s.id === sectionId);
     if (!section) {
       return (
