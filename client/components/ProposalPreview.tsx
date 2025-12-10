@@ -345,6 +345,16 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
           });
         }
 
+        // Calculate max height needed for image elements
+        if ((section as any).images) {
+          (section as any).images.forEach((image: any) => {
+            const bottomPos = image.top + image.height + 20; // 20px padding
+            if (bottomPos > maxHeight) {
+              maxHeight = bottomPos;
+            }
+          });
+        }
+
         newHeights[section.id] = maxHeight;
       }
     });
