@@ -198,11 +198,18 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           onBlur={() => captureContent()}
           className={cn(
             "p-4 min-h-[200px] focus:outline-none prose prose-sm max-w-none",
-            "text-foreground bg-white"
+            "text-foreground"
           )}
           style={{
             wordWrap: "break-word",
             overflowWrap: "break-word",
+            color: color || "inherit",
+            fontSize: fontSize ? `${fontSize}px` : "16px",
+            backgroundColor: backgroundColor || "transparent",
+            textAlign: (textAlign as any) || "left",
+            fontWeight: bold ? "bold" : "normal",
+            fontStyle: italic ? "italic" : "normal",
+            textDecoration: underline ? "underline" : "none",
           }}
           data-placeholder={placeholder}
           data-testid="rich-text-editor"
