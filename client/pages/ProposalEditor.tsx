@@ -70,10 +70,16 @@ export default function ProposalEditor() {
 
   const handleSelectElement = useCallback((id: string, type: string) => {
     console.log("handleSelectElement called", { id, type });
-    setSelectedElementId(id);
-    setSelectedElementType(type);
-    setActivePanel("properties");
-    console.log("handleSelectElement - state setters called", { id, type });
+    try {
+      setSelectedElementId(id);
+      console.log("setSelectedElementId called for", id);
+      setSelectedElementType(type);
+      console.log("setSelectedElementType called for", type);
+      setActivePanel("properties");
+      console.log("setActivePanel called");
+    } catch (error) {
+      console.error("Error in handleSelectElement:", error);
+    }
   }, []);
 
   useEffect(() => {
