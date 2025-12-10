@@ -446,6 +446,33 @@ export default function ProposalPublicView() {
                     ))}
                   </>
                 )}
+
+                {/* Images */}
+                {(section as any).images && (section as any).images.length > 0 && (
+                  <>
+                    {(section as any).images.map((image: any, idx: number) => (
+                      <div
+                        key={`image-${idx}`}
+                        style={{
+                          position: "absolute",
+                          top: `${image.top}px`,
+                          left: `${image.left}px`,
+                          width: `${image.width}px`,
+                          height: `${image.height}px`,
+                          opacity: image.opacity ? parseInt(image.opacity) / 100 : 1,
+                          borderWidth: image.borderWidth ? `${image.borderWidth}px` : "0px",
+                          borderColor: image.borderColor || "#000000",
+                          borderStyle: "solid",
+                          borderRadius: image.borderRadius ? `${image.borderRadius}px` : "0px",
+                          backgroundImage: image.url ? `url(${image.url})` : undefined,
+                          backgroundSize: "cover",
+                          backgroundPosition: "center",
+                          backgroundRepeat: "no-repeat",
+                        }}
+                      />
+                    ))}
+                  </>
+                )}
               </div>
 
               {/* Media */}
