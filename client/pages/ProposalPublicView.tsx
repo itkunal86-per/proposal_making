@@ -19,13 +19,25 @@ export default function ProposalPublicView() {
       }
 
       try {
+        console.log("Loading public proposal with token:", token);
         const data = await getPublicProposal(token);
+        console.log("Loaded proposal data:", data);
+
         if (data) {
+          console.log("Proposal sections:", data.sections.map(s => ({
+            id: s.id,
+            title: s.title,
+            hasContent: !!s.content,
+            shapesCount: s.shapes?.length || 0,
+            textsCount: s.texts?.length || 0,
+            tablesCount: s.tables?.length || 0,
+          })));
           setProposal(data);
         } else {
           setError("Proposal not found or link has expired");
         }
       } catch (err) {
+        console.error("Error loading proposal:", err);
         setError("Failed to load proposal");
       } finally {
         setIsLoading(false);
