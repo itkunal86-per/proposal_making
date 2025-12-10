@@ -378,6 +378,8 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
             onAddTable?.(sectionId, Math.max(0, x), Math.max(0, y));
           } else if (draggedItem.type === "text") {
             onAddText?.(sectionId, Math.max(0, x), Math.max(0, y));
+          } else if (draggedItem.type === "image") {
+            onAddImage?.(sectionId, Math.max(0, x), Math.max(0, y));
           }
         }
       }
