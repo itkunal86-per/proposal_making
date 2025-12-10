@@ -6,8 +6,10 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Proposal, ProposalSection } from "@/services/proposalsService";
-import { X, Plus, Sparkles, Bold, Italic, Underline, List, ListOrdered } from "lucide-react";
+import { X, Plus, Sparkles, Bold, Italic, Underline, List, ListOrdered, Upload, Loader2 } from "lucide-react";
 import { RichTextEditor } from "@/components/RichTextEditor";
+import { uploadMediaToProposal } from "@/services/mediaService";
+import { toast } from "@/hooks/use-toast";
 
 interface ElementStyle {
   color?: string;
