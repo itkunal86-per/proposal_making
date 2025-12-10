@@ -1188,18 +1188,19 @@ export async function enableProposalSharing(proposalId: string): Promise<{ succe
 export async function getPublicProposal(sharingToken: string): Promise<Proposal | null> {
   console.log("getPublicProposal called with token:", sharingToken);
 
+  let apiProposal: Proposal | null = null;
+
   // Try the external API first
   try {
     const res = await fetch(`https://propai-api.hirenq.com/api/public/proposal/${sharingToken}`);
 
     if (res.ok) {
       const data: ApiProposalResponse = await res.json();
-      const proposal = convertApiProposalToProposal(data);
+      apiProposal = convertApiProposalToProposal(data);
 
       // Verify we have sections
-      if (proposal.sections && proposal.sections.length > 0) {
+      if (apiProposal.sections && apiProposal.sections.length > 0) {
         console.log("Successfully fetched proposal from external API");
-        return proposal;
       }
     }
   } catch (err) {
@@ -1207,52 +1208,80 @@ export async function getPublicProposal(sharingToken: string): Promise<Proposal 
   }
 
   // Fallback 1: Try local server endpoint
-  try {
-    const res = await fetch(`/api/public/proposal/${sharingToken}`);
+  if (!apiProposal) {
+    try {
+      const res = await fetch(`/api/public/proposal/${sharingToken}`);
 
-    if (res.ok) {
-      const data: ApiProposalResponse = await res.json();
-      const proposal = convertApiProposalToProposal(data);
+      if (res.ok) {
+        const data: ApiProposalResponse = await res.json();
+        apiProposal = convertApiProposalToProposal(data);
 
-      // Verify we have sections
-      if (proposal.sections && proposal.sections.length > 0) {
-        console.log("Successfully fetched proposal from local API");
-        return proposal;
+        // Verify we have sections
+        if (apiProposal.sections && apiProposal.sections.length > 0) {
+          console.log("Successfully fetched proposal from local API");
+        }
       }
+    } catch (err) {
+      console.warn("Local API request failed:", err);
     }
-  } catch (err) {
-    console.warn("Local API request failed:", err);
   }
 
   // Fallback 2: Check local storage for proposal with matching sharing token
+  // This is important because local storage contains the full proposal with shapes, texts, and tables
+  // which the backend API might not return
+  let localProposal: Proposal | null = null;
   try {
     const stored = readStored();
     if (stored) {
-      const foundProposal = stored.find((p) => p.settings.sharing.token === sharingToken);
-      if (foundProposal && foundProposal.sections && foundProposal.sections.length > 0) {
+      localProposal = stored.find((p) => p.settings.sharing.token === sharingToken) || null;
+      if (localProposal && localProposal.sections && localProposal.sections.length > 0) {
         console.log("Found proposal in local storage by sharing token");
-        return foundProposal;
       }
     }
   } catch (err) {
     console.warn("Local storage lookup failed:", err);
   }
 
-  // Fallback 3: Load seed data and check for matching sharing token
-  try {
-    const res = await fetch("/data/proposals.json");
-    if (res.ok) {
-      const seedData = await res.json();
-      const seedProposals = proposalListSchema.parse(seedData).map(normalizeProposal);
-      const foundProposal = seedProposals.find((p) => p.settings.sharing.token === sharingToken);
+  // If we have both API and local proposals, merge them
+  // The local proposal should take precedence for shapes, texts, tables
+  if (apiProposal && localProposal) {
+    console.log("Merging API proposal with local proposal data");
+    apiProposal = {
+      ...apiProposal,
+      sections: apiProposal.sections.map((apiSection) => {
+        const localSection = localProposal!.sections.find((s) => String(s.id) === String(apiSection.id));
+        if (localSection) {
+          // Merge sections - local takes precedence for shapes, texts, tables, and column data
+          return {
+            ...apiSection,
+            shapes: localSection.shapes && localSection.shapes.length > 0 ? localSection.shapes : apiSection.shapes,
+            tables: localSection.tables && localSection.tables.length > 0 ? localSection.tables : apiSection.tables,
+            texts: localSection.texts && localSection.texts.length > 0 ? localSection.texts : apiSection.texts,
+            columnContents: localSection.columnContents && localSection.columnContents.length > 0
+              ? localSection.columnContents
+              : apiSection.columnContents,
+            columnStyles: localSection.columnStyles && localSection.columnStyles.length > 0
+              ? localSection.columnStyles
+              : apiSection.columnStyles,
+            content: localSection.content || apiSection.content,
+            title: localSection.title || apiSection.title,
+            layout: localSection.layout || apiSection.layout,
+          };
+        }
+        return apiSection;
+      }),
+    };
+    return apiProposal;
+  }
 
-      if (foundProposal && foundProposal.sections && foundProposal.sections.length > 0) {
-        console.log("Found proposal in seed data by sharing token");
-        return foundProposal;
-      }
-    }
-  } catch (err) {
-    console.warn("Seed data lookup failed:", err);
+  // If we only have local proposal, use that
+  if (localProposal) {
+    return localProposal;
+  }
+
+  // If we only have API proposal, use that
+  if (apiProposal) {
+    return apiProposal;
   }
 
   console.error("Failed to fetch public proposal from all sources:", { sharingToken });
