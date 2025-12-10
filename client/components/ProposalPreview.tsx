@@ -1027,7 +1027,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                   />
                 ))}
                 {(section as any).images && (section as any).images.map((image: any, iIndex: number) => (
-                  <ImageElement
+                  <ImageEditor
                     key={`image-${iIndex}`}
                     id={`image-${section.id}-${iIndex}`}
                     url={image.url}
@@ -1042,6 +1042,9 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                     selected={selectedElementId === `image-${section.id}-${iIndex}`}
                     onSelect={() =>
                       onSelectElement(`image-${section.id}-${iIndex}`, "image")
+                    }
+                    onUpdate={(updates) =>
+                      onUpdateImage?.(section.id, iIndex, updates)
                     }
                   />
                 ))}
