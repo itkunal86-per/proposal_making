@@ -77,8 +77,8 @@ export const TextEditor: React.FC<TextEditorProps> = ({
   const [initialPos, setInitialPos] = useState({ top, left });
   const [initialSize, setInitialSize] = useState({ width });
   const containerRef = useRef<HTMLDivElement>(null);
-  const editorRef = useRef<HTMLDivElement>(null);
-  const isInitializedRef = useRef(false);
+  const textInputRef = useRef<HTMLTextAreaElement>(null);
+  const [showToolbar, setShowToolbar] = useState(false);
 
   const handleMouseDown = (e: React.MouseEvent, handle: ResizeHandle = null) => {
     const target = e.target as HTMLElement;
