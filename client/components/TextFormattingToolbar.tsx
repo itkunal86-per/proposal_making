@@ -108,11 +108,85 @@ export const TextFormattingToolbar: React.FC<TextFormattingToolbarProps> = ({
 
   const handleFontSizeChange = (value: string) => {
     setFontSize(value);
+
+    // Try to apply font size to contentEditable element
+    try {
+      let contentEditableElement = document.querySelector('[data-testid="rich-text-editor"]') as HTMLElement;
+      if (!contentEditableElement) {
+        contentEditableElement = document.querySelector('[contenteditable="true"]') as HTMLElement;
+      }
+
+      if (contentEditableElement) {
+        const selection = window.getSelection();
+        let savedRange: Range | null = null;
+        if (selection && selection.rangeCount > 0) {
+          savedRange = selection.getRangeAt(0).cloneRange();
+        }
+
+        contentEditableElement.focus();
+        if (savedRange) {
+          selection?.removeAllRanges();
+          selection?.addRange(savedRange);
+        }
+
+        document.execCommand("fontSize", false, "7");
+        const fontElements = contentEditableElement.querySelectorAll("font");
+        fontElements.forEach((el) => {
+          el.style.fontSize = `${value}px`;
+          if (el.parentNode) {
+            while (el.firstChild) {
+              el.parentNode.insertBefore(el.firstChild, el);
+            }
+            el.parentNode.removeChild(el);
+          }
+        });
+      }
+    } catch (error) {
+      console.error(`Failed to apply font size ${value}:`, error);
+    }
+
     onFormatChange?.("fontSize", value);
   };
 
   const handleFontFamilyChange = (value: string) => {
     setFontFamily(value);
+
+    // Try to apply font family to contentEditable element
+    try {
+      let contentEditableElement = document.querySelector('[data-testid="rich-text-editor"]') as HTMLElement;
+      if (!contentEditableElement) {
+        contentEditableElement = document.querySelector('[contenteditable="true"]') as HTMLElement;
+      }
+
+      if (contentEditableElement) {
+        const selection = window.getSelection();
+        let savedRange: Range | null = null;
+        if (selection && selection.rangeCount > 0) {
+          savedRange = selection.getRangeAt(0).cloneRange();
+        }
+
+        contentEditableElement.focus();
+        if (savedRange) {
+          selection?.removeAllRanges();
+          selection?.addRange(savedRange);
+        }
+
+        const fontMap: Record<string, string> = {
+          "normal-text": "Arial, sans-serif",
+          "work-sans": "'Work Sans', sans-serif",
+          "georgia": "Georgia, serif",
+          "courier": "'Courier New', monospace",
+          "arial": "Arial, sans-serif",
+          "times-new-roman": "'Times New Roman', serif",
+        };
+
+        const fontFamily = fontMap[value] || "Arial, sans-serif";
+        document.execCommand("fontName", false, fontFamily);
+      }
+    } catch (error) {
+      console.error(`Failed to apply font family ${value}:`, error);
+    }
+
     onFormatChange?.("fontFamily", value);
   };
 
