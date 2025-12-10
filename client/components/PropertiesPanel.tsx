@@ -2345,10 +2345,11 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                 className="w-16 h-10 p-1 cursor-pointer"
               />
               <Input
-                value={shape.backgroundColor || "#e5e7eb"}
+                value={shape.backgroundColor || ""}
                 onChange={(e) =>
                   handleUpdateShape({ backgroundColor: e.target.value })
                 }
+                placeholder="transparent"
                 className="flex-1"
               />
             </div>
