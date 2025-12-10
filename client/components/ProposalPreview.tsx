@@ -6,6 +6,7 @@ import { replaceVariables, decodeHtmlEntities } from "@/lib/variableUtils";
 import { ShapeEditor } from "@/components/ShapeEditor";
 import { TableEditor } from "@/components/TableEditor";
 import { TextEditor } from "@/components/TextEditor";
+import { ImageElement } from "@/components/ImageElement";
 
 interface ElementProps {
   id: string;
