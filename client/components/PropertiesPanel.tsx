@@ -2532,12 +2532,103 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
       onUpdateProposal(updatedProposal);
     };
 
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+    const applyFormatting = (format: "bold" | "italic" | "underline" | "bullet" | "number") => {
+      if (!textareaRef.current) return;
+
+      const textarea = textareaRef.current;
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const selectedText = textarea.value.substring(start, end);
+      const beforeText = textarea.value.substring(0, start);
+      const afterText = textarea.value.substring(end);
+
+      let newText = "";
+      switch (format) {
+        case "bold":
+          newText = `${beforeText}**${selectedText}**${afterText}`;
+          break;
+        case "italic":
+          newText = `${beforeText}_${selectedText}_${afterText}`;
+          break;
+        case "underline":
+          newText = `${beforeText}<u>${selectedText}</u>${afterText}`;
+          break;
+        case "bullet":
+          newText = `${beforeText}• ${selectedText}${afterText}`;
+          break;
+        case "number":
+          newText = `${beforeText}1. ${selectedText}${afterText}`;
+          break;
+      }
+
+      handleUpdateText({ content: newText });
+
+      setTimeout(() => {
+        textarea.focus();
+        textarea.setSelectionRange(start + 2, start + 2 + selectedText.length);
+      }, 0);
+    };
+
     return (
       <Card className="p-4 space-y-4">
         <div>
           <Label className="text-xs font-semibold">Content</Label>
+
+          {/* Formatting Toolbar */}
+          <div className="flex gap-1 mt-2 mb-2 p-2 bg-slate-50 rounded border border-slate-200">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => applyFormatting("bold")}
+              className="h-8 w-8 p-0"
+              title="Bold"
+            >
+              <Bold className="w-4 h-4" />
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => applyFormatting("italic")}
+              className="h-8 w-8 p-0"
+              title="Italic"
+            >
+              <Italic className="w-4 h-4" />
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => applyFormatting("underline")}
+              className="h-8 w-8 p-0"
+              title="Underline"
+            >
+              <Underline className="w-4 h-4" />
+            </Button>
+            <div className="w-px bg-slate-300" />
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => applyFormatting("bullet")}
+              className="h-8 w-8 p-0"
+              title="Bullet List"
+            >
+              <List className="w-4 h-4" />
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => applyFormatting("number")}
+              className="h-8 w-8 p-0"
+              title="Numbered List"
+            >
+              <ListOrdered className="w-4 h-4" />
+            </Button>
+          </div>
+
           <div className="flex gap-2 mt-2">
             <Textarea
+              ref={textareaRef}
               value={text.content || ""}
               onChange={(e) =>
                 handleUpdateText({ content: e.target.value })
