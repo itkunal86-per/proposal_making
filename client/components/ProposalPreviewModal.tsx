@@ -88,20 +88,41 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
         return;
       }
 
-      // Wait for all images to load
+      // Wait for all img tags to load
       const images = element.querySelectorAll("img");
       const imageLoadPromises = Array.from(images).map((img) => {
         return new Promise<void>((resolve) => {
-          if ((img as HTMLImageElement).complete) {
+          const imgElement = img as HTMLImageElement;
+          if (imgElement.complete) {
             resolve();
           } else {
-            img.onload = () => resolve();
-            img.onerror = () => resolve();
+            imgElement.onload = () => resolve();
+            imgElement.onerror = () => resolve();
           }
         });
       });
 
-      await Promise.all(imageLoadPromises);
+      // Also preload background images by creating temporary img elements
+      const elementsWithBg = element.querySelectorAll("[style*='background-image']");
+      const bgImagePromises = Array.from(elementsWithBg).map((el) => {
+        return new Promise<void>((resolve) => {
+          const style = window.getComputedStyle(el);
+          const bgImage = style.backgroundImage;
+          const match = bgImage.match(/url\(["']?([^"']+)["']?\)/);
+
+          if (match && match[1]) {
+            const tempImg = new Image();
+            tempImg.crossOrigin = "anonymous";
+            tempImg.onload = () => resolve();
+            tempImg.onerror = () => resolve();
+            tempImg.src = match[1];
+          } else {
+            resolve();
+          }
+        });
+      });
+
+      await Promise.all([...imageLoadPromises, ...bgImagePromises]);
 
       // Additional delay to ensure rendering
       await new Promise(resolve => setTimeout(resolve, 500));
