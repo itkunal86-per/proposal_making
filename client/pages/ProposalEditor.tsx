@@ -476,7 +476,13 @@ export default function ProposalEditor() {
             <ProposalPreview
               proposal={p}
               selectedElementId={selectedElementId}
-              onSelectElement={handleSelectElement}
+              onSelectElement={(elementId, elementType) => {
+                console.log("ProposalEditor onSelectElement handler - before state update", { elementId, elementType, currentSelectedId: selectedElementId, currentActivePanel: activePanel });
+                setSelectedElementId(elementId);
+                setSelectedElementType(elementType);
+                setActivePanel("properties");
+                console.log("ProposalEditor onSelectElement handler - after state update calls");
+              }}
               onAIElement={(id, type) => {
                 setAIElementId(id);
                 setAIElementType(type);
