@@ -300,11 +300,11 @@ export default function ProposalPublicView() {
                 </div>
               )}
 
-              {/* Shapes, Texts, Tables, and Media Container */}
+              {/* Shapes, Texts, Tables, Images, and Media Container */}
               <div
                 style={{
                   position: "relative",
-                  minHeight: section.shapes || section.tables || section.texts ? "200px" : "0px",
+                  minHeight: section.shapes || section.tables || (section as any).texts || (section as any).images ? "200px" : "0px",
                 }}
               >
                 {/* Shapes */}
