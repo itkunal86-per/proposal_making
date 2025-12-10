@@ -7,6 +7,13 @@ interface RichTextEditorProps {
   variables?: Array<{ id: string | number; name: string; value: string }>;
   className?: string;
   placeholder?: string;
+  color?: string;
+  fontSize?: string;
+  backgroundColor?: string;
+  textAlign?: "left" | "center" | "right";
+  bold?: boolean;
+  italic?: boolean;
+  underline?: boolean;
 }
 
 interface VariableDropdown {
