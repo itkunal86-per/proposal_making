@@ -658,6 +658,51 @@ export default function ProposalEditor() {
                 };
                 commit(updated);
               }}
+              onAddImage={(sectionId, x, y) => {
+                const section = p.sections.find((s) => s.id === sectionId);
+                if (section) {
+                  const newImage = {
+                    id: Math.random().toString(36).substring(2, 9),
+                    url: "",
+                    width: 200,
+                    height: 150,
+                    opacity: "100",
+                    borderWidth: 0,
+                    borderColor: "#000000",
+                    borderRadius: 0,
+                    left: Math.round(x),
+                    top: Math.round(y),
+                  };
+                  const updated = {
+                    ...p,
+                    sections: p.sections.map((s) =>
+                      s.id === sectionId
+                        ? { ...s, images: [...((s as any).images || []), newImage] }
+                        : s
+                    ),
+                  };
+                  commit(updated);
+                  setSelectedElementId(`image-${sectionId}-${((section as any).images || []).length}`);
+                  setSelectedElementType("image");
+                  setActivePanel("properties");
+                }
+              }}
+              onUpdateImage={(sectionId, imageIndex, updates) => {
+                const updated = {
+                  ...p,
+                  sections: p.sections.map((s) =>
+                    s.id === sectionId
+                      ? {
+                          ...s,
+                          images: ((s as any).images || []).map((image: any, idx: number) =>
+                            idx === imageIndex ? { ...image, ...updates } : image
+                          ),
+                        }
+                      : s
+                  ),
+                };
+                commit(updated);
+              }}
             />
           </div>
 
