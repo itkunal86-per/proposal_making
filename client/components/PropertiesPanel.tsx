@@ -2753,7 +2753,6 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   console.log("🔵 Checking text type", { selectedElementType, isText: selectedElementType === "text" });
 
   if (selectedElementType === "text") {
-    console.log("🟢 TEXT type matched!");
     const parts = selectedElementId.split("-");
     const sectionId = parts[1];
     const textIndex = parseInt(parts[2]);
