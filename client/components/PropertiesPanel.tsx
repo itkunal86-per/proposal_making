@@ -3200,11 +3200,12 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     );
   }
 
-  console.log("PropertiesPanel: Falling through to final return - no matching type", { selectedElementType });
+  console.log("🔴 PropertiesPanel: No matching type handler", { selectedElementType, typeName: String(selectedElementType), typeOf: typeof selectedElementType });
   return (
     <Card className="p-4">
       <div className="text-center text-muted-foreground">
-        <p className="text-sm">Unable to edit this element (type: {selectedElementType})</p>
+        <p className="text-sm">⚠️ Type handler missing: "{selectedElementType}"</p>
+        <p className="text-xs text-gray-500 mt-2">Type: {typeof selectedElementType}</p>
       </div>
     </Card>
   );
