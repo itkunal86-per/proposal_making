@@ -61,8 +61,6 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     );
   }
 
-  console.log("🔵 PropertiesPanel: Past early return, type=", selectedElementType);
-
   if (selectedElementType === "image") {
     // Parse ID format: "image-{sectionId}-{imageIndex}"
     const lastHyphenIndex = selectedElementId.lastIndexOf("-");
