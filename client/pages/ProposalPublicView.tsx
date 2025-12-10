@@ -357,31 +357,40 @@ export default function ProposalPublicView() {
                 {/* Text Elements */}
                 {section.texts && section.texts.length > 0 && (
                   <>
-                    {section.texts.map((text) => (
-                      <div
-                        key={text.id}
-                        style={{
-                          position: "absolute",
-                          top: `${text.top}px`,
-                          left: `${text.left}px`,
-                          width: text.width ? `${text.width}px` : "auto",
-                          height: text.height ? `${text.height}px` : "auto",
-                          color: text.color || "#000",
-                          fontSize: text.fontSize || "16px",
-                          fontWeight: text.fontWeight ? "bold" : "normal",
-                          backgroundColor: text.backgroundColor || "transparent",
-                          padding: `${text.paddingTop || 0}px ${text.paddingRight || 0}px ${text.paddingBottom || 0}px ${text.paddingLeft || 0}px`,
-                          border:
-                            text.borderWidth && parseInt(text.borderWidth) > 0
-                              ? `${text.borderWidth}px solid ${text.borderColor || "#000"}`
-                              : "none",
-                          borderRadius: text.borderRadius ? `${text.borderRadius}px` : "0",
-                        }}
-                        dangerouslySetInnerHTML={{
-                          __html: decodeHtmlEntities(text.content || ""),
-                        }}
-                      />
-                    ))}
+                    {section.texts.map((text) => {
+                      // Ensure fontSize has px suffix if it's just a number
+                      const fontSize = text.fontSize
+                        ? /^\d+$/.test(text.fontSize)
+                          ? `${text.fontSize}px`
+                          : text.fontSize
+                        : "16px";
+
+                      return (
+                        <div
+                          key={text.id}
+                          style={{
+                            position: "absolute",
+                            top: `${text.top}px`,
+                            left: `${text.left}px`,
+                            width: text.width ? `${text.width}px` : "auto",
+                            height: text.height ? `${text.height}px` : "auto",
+                            color: text.color || "#000",
+                            fontSize: fontSize,
+                            fontWeight: text.fontWeight ? "bold" : "normal",
+                            backgroundColor: text.backgroundColor || "transparent",
+                            padding: `${text.paddingTop || 0}px ${text.paddingRight || 0}px ${text.paddingBottom || 0}px ${text.paddingLeft || 0}px`,
+                            border:
+                              text.borderWidth && parseInt(text.borderWidth) > 0
+                                ? `${text.borderWidth}px solid ${text.borderColor || "#000"}`
+                                : "none",
+                            borderRadius: text.borderRadius ? `${text.borderRadius}px` : "0",
+                          }}
+                          dangerouslySetInnerHTML={{
+                            __html: decodeHtmlEntities(text.content || ""),
+                          }}
+                        />
+                      );
+                    })}
                   </>
                 )}
 
