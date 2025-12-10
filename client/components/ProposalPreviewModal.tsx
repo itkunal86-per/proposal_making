@@ -88,6 +88,24 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
         return;
       }
 
+      // Wait for all images to load
+      const images = element.querySelectorAll("img");
+      const imageLoadPromises = Array.from(images).map((img) => {
+        return new Promise<void>((resolve) => {
+          if ((img as HTMLImageElement).complete) {
+            resolve();
+          } else {
+            img.onload = () => resolve();
+            img.onerror = () => resolve();
+          }
+        });
+      });
+
+      await Promise.all(imageLoadPromises);
+
+      // Additional delay to ensure rendering
+      await new Promise(resolve => setTimeout(resolve, 500));
+
       const opt = {
         margin: 10,
         filename: `${proposal.title}.pdf`,
@@ -97,6 +115,8 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
           useCORS: true,
           allowTaint: true,
           logging: false,
+          backgroundColor: "#ffffff",
+          windowHeight: element.scrollHeight || element.clientHeight,
         },
         jsPDF: { orientation: "portrait" as const, unit: "mm" as const, format: "a4" as const },
       };
