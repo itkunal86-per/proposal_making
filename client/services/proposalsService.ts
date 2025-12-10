@@ -248,9 +248,9 @@ const imageElementSchema = z.object({
   width: z.number(),
   height: z.number(),
   opacity: z.string().optional(),
-  borderWidth: z.string().optional(),
+  borderWidth: z.number().optional(),
   borderColor: z.string().optional(),
-  borderRadius: z.string().optional(),
+  borderRadius: z.number().optional(),
   top: z.number().optional(),
   left: z.number().optional(),
 }).passthrough();
