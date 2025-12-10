@@ -2988,6 +2988,14 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
 
   if (selectedElementType === "image") {
     console.log("PropertiesPanel: Entering IMAGE type block");
+
+    // TEMPORARY: Direct return to test
+    return (
+      <Card className="p-4 space-y-4">
+        <h3 className="text-sm font-semibold">IMAGE PANEL TEST - If you see this, the condition works!</h3>
+      </Card>
+    );
+
     // Parse ID format: "image-{sectionId}-{imageIndex}"
     const lastHyphenIndex = selectedElementId.lastIndexOf("-");
     const imageIndex = selectedElementId.substring(lastHyphenIndex + 1);
