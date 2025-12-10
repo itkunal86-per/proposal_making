@@ -393,6 +393,18 @@ function normalizeProposal(raw: z.infer<typeof proposalSchema>): Proposal {
           top: typeof text.top === "number" ? text.top : 0,
           left: typeof text.left === "number" ? text.left : 0,
         })),
+        images: (s.images ?? []).map((image) => ({
+          id: String(image.id!),
+          url: image.url!,
+          width: image.width!,
+          height: image.height!,
+          opacity: image.opacity,
+          borderWidth: image.borderWidth,
+          borderColor: image.borderColor,
+          borderRadius: image.borderRadius,
+          top: typeof image.top === "number" ? image.top : 0,
+          left: typeof image.left === "number" ? image.left : 0,
+        })),
         comments: (s.comments ?? []).map((c) => ({
           id: String(c.id!),
           author: c.author!,
