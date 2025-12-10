@@ -1,4 +1,6 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import { Bold, Italic, Underline, List, ListOrdered } from "lucide-react";
 
 interface TextEditorProps {
   id: string;
