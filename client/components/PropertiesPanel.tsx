@@ -2995,6 +2995,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                 fontFamily: "inherit",
                 direction: "ltr",
                 textAlign: "left",
+                unicodeBidi: "bidi-override",
               }}
               dangerouslySetInnerHTML={{ __html: text.content || "" }}
             />
