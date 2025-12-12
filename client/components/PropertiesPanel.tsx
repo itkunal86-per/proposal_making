@@ -2876,8 +2876,6 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
       onUpdateProposal(updatedProposal);
     };
 
-    const editorRef = useRef<HTMLDivElement>(null);
-
     const applyFormatting = (format: "bold" | "italic" | "underline" | "bullet" | "number") => {
       if (!editorRef.current) return;
 
