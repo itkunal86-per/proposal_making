@@ -63,7 +63,7 @@ export const TableElement: React.FC<TableElementProps> = ({
                   }}
                 >
                   <textarea
-                    value={cell.content}
+                    value={cell.content ?? ""}
                     onChange={(e) =>
                       onUpdateCell?.(rowIndex, colIndex, e.target.value)
                     }

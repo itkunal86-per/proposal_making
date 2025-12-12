@@ -206,6 +206,7 @@ const RichContentEditor: React.FC<RichContentEditorProps> = ({
         ref={editorRef}
         contentEditable
         suppressContentEditableWarning
+        dir="ltr"
         onInput={handleInput}
         onPaste={handlePaste}
         className={`border rounded-md p-3 bg-white text-sm min-h-[200px] max-h-[300px] overflow-y-auto focus:outline-none focus:ring-2 focus:ring-ring ${className}`}
@@ -213,6 +214,9 @@ const RichContentEditor: React.FC<RichContentEditorProps> = ({
           wordBreak: "break-word",
           whiteSpace: "pre-wrap",
           fontFamily: "inherit",
+          direction: "ltr",
+          textAlign: "left",
+          unicodeBidi: "bidi-override",
         }}
       >
         {value}

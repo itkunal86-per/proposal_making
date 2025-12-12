@@ -105,4 +105,10 @@
     content: attr(data-placeholder);
     @apply text-muted-foreground pointer-events-none;
   }
+
+  [contenteditable] {
+    direction: ltr !important;
+    unicode-bidi: isolate-override !important;
+    text-align: left !important;
+  }
 }

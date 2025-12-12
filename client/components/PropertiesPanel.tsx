@@ -53,6 +53,12 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   variables,
   onOpenAI,
 }) => {
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [mediaUrl, setMediaUrl] = useState("");
+  const [mediaType, setMediaType] = useState<"image" | "video">("image");
+  const editorRef = useRef<HTMLDivElement>(null);
+
   if (!selectedElementId || !selectedElementType) {
     return (
       <Card className="p-4">
@@ -62,11 +68,6 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
       </Card>
     );
   }
-
-  const [uploading, setUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [mediaUrl, setMediaUrl] = useState("");
-  const [mediaType, setMediaType] = useState<"image" | "video">("image");
 
   if (selectedElementType === "image") {
     // Parse ID format: "image-{sectionId}-{imageIndex}"
@@ -2875,8 +2876,6 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
       onUpdateProposal(updatedProposal);
     };
 
-    const editorRef = useRef<HTMLDivElement>(null);
-
     const applyFormatting = (format: "bold" | "italic" | "underline" | "bullet" | "number") => {
       if (!editorRef.current) return;
 
@@ -2975,25 +2974,13 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
           </div>
 
           <div className="flex gap-2 mt-2">
-            <div
-              ref={editorRef}
-              contentEditable
-              suppressContentEditableWarning
-              onInput={(e) => {
-                const newContent = (e.currentTarget as HTMLDivElement).innerHTML;
-                handleUpdateText({ content: newContent });
-              }}
-              onBlur={(e) => {
-                const newContent = (e.currentTarget as HTMLDivElement).innerHTML;
-                handleUpdateText({ content: newContent });
-              }}
-              className="min-h-20 flex-1 border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              style={{
-                whiteSpace: "pre-wrap",
-                wordWrap: "break-word",
-                fontFamily: "inherit",
-              }}
-              dangerouslySetInnerHTML={{ __html: text.content || "" }}
+            <Textarea
+              value={text.content || ""}
+              onChange={(e) =>
+                handleUpdateText({ content: e.target.value })
+              }
+              placeholder="Enter text content"
+              className="flex-1 min-h-20 resize-none"
             />
             <Button
               variant="outline"

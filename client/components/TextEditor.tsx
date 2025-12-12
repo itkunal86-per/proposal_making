@@ -381,6 +381,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({
             e.stopPropagation();
           }
         }}
+        dir="ltr"
         data-text-editor="true"
         style={{
           padding: `${paddingTop}px ${paddingRight}px ${paddingBottom}px ${paddingLeft}px`,
