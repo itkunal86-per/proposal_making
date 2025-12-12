@@ -401,6 +401,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({
           overflowWrap: "break-word",
           direction: "ltr",
           textAlign: "left",
+          unicodeBidi: "bidi-override",
         }}
       >
         {!content && !isEditing && "Click to edit..."}
