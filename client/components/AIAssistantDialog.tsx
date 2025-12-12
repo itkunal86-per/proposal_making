@@ -216,6 +216,7 @@ const RichContentEditor: React.FC<RichContentEditorProps> = ({
           fontFamily: "inherit",
           direction: "ltr",
           textAlign: "left",
+          unicodeBidi: "bidi-override",
         }}
       >
         {value}
