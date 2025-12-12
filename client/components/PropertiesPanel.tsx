@@ -2992,6 +2992,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                 whiteSpace: "pre-wrap",
                 wordWrap: "break-word",
                 fontFamily: "inherit",
+                direction: "ltr",
               }}
               dangerouslySetInnerHTML={{ __html: text.content || "" }}
             />
