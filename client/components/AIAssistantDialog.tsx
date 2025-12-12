@@ -213,6 +213,7 @@ const RichContentEditor: React.FC<RichContentEditorProps> = ({
           wordBreak: "break-word",
           whiteSpace: "pre-wrap",
           fontFamily: "inherit",
+          direction: "ltr",
         }}
       >
         {value}
