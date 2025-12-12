@@ -2974,29 +2974,13 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
           </div>
 
           <div className="flex gap-2 mt-2">
-            <div
-              ref={editorRef}
-              contentEditable
-              suppressContentEditableWarning
-              dir="ltr"
-              onInput={(e) => {
-                const newContent = (e.currentTarget as HTMLDivElement).innerHTML;
-                handleUpdateText({ content: newContent });
-              }}
-              onBlur={(e) => {
-                const newContent = (e.currentTarget as HTMLDivElement).innerHTML;
-                handleUpdateText({ content: newContent });
-              }}
-              className="min-h-20 flex-1 border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              style={{
-                whiteSpace: "pre-wrap",
-                wordWrap: "break-word",
-                fontFamily: "inherit",
-                direction: "ltr",
-                textAlign: "left",
-                unicodeBidi: "bidi-override",
-              }}
-              dangerouslySetInnerHTML={{ __html: text.content || "" }}
+            <Textarea
+              value={text.content || ""}
+              onChange={(e) =>
+                handleUpdateText({ content: e.target.value })
+              }
+              placeholder="Enter text content"
+              className="flex-1 min-h-20 resize-none"
             />
             <Button
               variant="outline"
