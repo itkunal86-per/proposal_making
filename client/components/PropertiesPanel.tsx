@@ -2979,6 +2979,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               ref={editorRef}
               contentEditable
               suppressContentEditableWarning
+              dir="ltr"
               onInput={(e) => {
                 const newContent = (e.currentTarget as HTMLDivElement).innerHTML;
                 handleUpdateText({ content: newContent });
@@ -2993,6 +2994,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                 wordWrap: "break-word",
                 fontFamily: "inherit",
                 direction: "ltr",
+                textAlign: "left",
               }}
               dangerouslySetInnerHTML={{ __html: text.content || "" }}
             />
