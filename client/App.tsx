@@ -27,6 +27,8 @@ import MyProposals from "./pages/MyProposals";
 import MyClients from "./pages/MyClients";
 import Integrations from "./pages/Integrations";
 import SubscriberSettings from "./pages/SubscriberSettings";
+import Privacy from "./pages/Privacy";
+import TermsAndConditions from "./pages/TermsAndConditions";
 import { AuthProvider } from "@/providers/AuthProvider";
 import { RequireAuth, RequireRole } from "@/components/auth/RouteGuards";
 
@@ -46,6 +48,8 @@ const App = () => (
               <Route path="/login" element={<Login />} />
               <Route path="/reset" element={<Reset />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/terms" element={<TermsAndConditions />} />
               <Route path="/p/:token" element={<ProposalView />} />
               <Route path="/proposal/:token" element={<ProposalPublicView />} />
               <Route path="/invite/:token" element={<AcceptInvite />} />
