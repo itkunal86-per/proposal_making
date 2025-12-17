@@ -1,6 +1,8 @@
+import Footer from "@/components/layout/Footer";
+
 export default function Privacy() {
   return (
-    <div className="relative">
+    <div className="relative flex min-h-screen flex-col">
       <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(1400px_700px_at_50%_-200px,rgba(99,102,241,0.15),transparent)]" />
 
       <section className="container py-16 sm:py-24">
@@ -116,6 +118,8 @@ export default function Privacy() {
           </div>
         </div>
       </section>
+
+      <Footer />
     </div>
   );
 }
