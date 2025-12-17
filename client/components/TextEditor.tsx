@@ -148,47 +148,6 @@ export const TextEditor: React.FC<TextEditorProps> = ({
     }
   }, [content]);
 
-  const applyFormatting = (format: "bold" | "italic" | "underline" | "bullet" | "number") => {
-    if (!editorRef.current) return;
-
-    const editor = editorRef.current;
-    const selection = window.getSelection();
-
-    if (!selection || selection.toString().length === 0) {
-      return;
-    }
-
-    editor.focus();
-
-    let command = "";
-    switch (format) {
-      case "bold":
-        command = "bold";
-        break;
-      case "italic":
-        command = "italic";
-        break;
-      case "underline":
-        command = "underline";
-        break;
-      case "bullet":
-        command = "insertUnorderedList";
-        break;
-      case "number":
-        command = "insertOrderedList";
-        break;
-    }
-
-    if (command) {
-      document.execCommand(command, false);
-      onUpdate({ content: editor.innerHTML });
-
-      setTimeout(() => {
-        editor.focus();
-      }, 0);
-    }
-  };
-
   React.useEffect(() => {
     if (!selected) return;
 
