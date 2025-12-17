@@ -131,10 +131,9 @@ export default function AppShell({ children }: { children: ReactNode }) {
                   </span>
                 </div>
                 <Button
-                  variant="outline"
                   size="sm"
                   onClick={handleSignOut}
-                  className="w-full mt-2 gap-2 border-slate-700 hover:bg-slate-700 text-white hover:text-white"
+                  className="w-full mt-2 gap-2 bg-slate-800 hover:bg-slate-700 text-white hover:text-white border border-slate-700"
                 >
                   <LogOut className="w-4 h-4" />
                   Sign out
