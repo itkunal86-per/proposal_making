@@ -2877,9 +2877,13 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     };
 
     const applyFormatting = (format: "bold" | "italic" | "underline" | "bullet" | "number") => {
-      if (!editorRef.current) return;
+      // Find the contentEditable element in the editor ref
+      let editor = editorRef.current?.querySelector('[contenteditable="true"]') as HTMLElement;
+      if (!editor) {
+        editor = editorRef.current as HTMLElement;
+      }
+      if (!editor) return;
 
-      const editor = editorRef.current;
       const selection = window.getSelection();
 
       if (!selection || selection.toString().length === 0) {
