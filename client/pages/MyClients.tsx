@@ -1,16 +1,16 @@
 import AppShell from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
-import { MoreVertical, Users as UsersIcon, Mail } from "lucide-react";
+import { MoreVertical, Users as UsersIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { type ClientRecord, type ClientStatus, type CreateClientResult, type UpdateClientResult, type DeleteClientResult, listClients, createClient, updateClient, deleteClient } from "@/services/clientsService";
 
@@ -141,90 +141,84 @@ export default function MyClients() {
           </Select>
         </div>
 
-        {/* Clients Grid */}
+        {/* Table View */}
         {filtered.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filtered.map((r) => {
-              const statusBg = r.status === "active"
-                ? "bg-green-100 text-green-700 border-green-200"
-                : "bg-slate-100 text-slate-700 border-slate-200";
-
-              return (
-                <div
-                  key={r.id}
-                  className="group relative overflow-hidden rounded-xl border border-border/50 bg-gradient-to-br from-white/80 to-muted/30 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:border-border/80 hover:from-white hover:to-muted/50"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-                  <div className="relative p-5 space-y-4">
-                    {/* Name and Status */}
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-foreground text-lg truncate hover:text-primary transition-colors cursor-pointer">
-                          {r.name}
-                        </h3>
-                        {r.company && (
-                          <p className="text-sm text-muted-foreground mt-0.5 truncate">{r.company}</p>
-                        )}
-                      </div>
-                      <span className={`px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap border ${statusBg}`}>
-                        {r.status.charAt(0).toUpperCase() + r.status.slice(1)}
-                      </span>
-                    </div>
-
-                    {/* Email and Created Date */}
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Mail className="w-4 h-4 flex-shrink-0" />
-                        <a href={`mailto:${r.email}`} className="hover:text-primary transition-colors truncate">
-                          {r.email}
-                        </a>
-                      </div>
-                    </div>
-
-                    {/* Divider */}
-                    <div className="h-px bg-border/40" />
-
-                    {/* Footer */}
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-muted-foreground">
-                        Added {new Date(r.createdAt).toLocaleDateString(undefined, {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric'
-                        })}
-                      </span>
+          <div className="rounded-lg border border-border bg-white/50 backdrop-blur-sm overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow className="border-b border-border/50 hover:bg-transparent bg-muted/30">
+                  <TableHead className="font-semibold text-foreground">Name</TableHead>
+                  <TableHead className="font-semibold text-foreground">Email</TableHead>
+                  <TableHead className="font-semibold text-foreground">Company</TableHead>
+                  <TableHead className="font-semibold text-foreground">Status</TableHead>
+                  <TableHead className="font-semibold text-foreground">Added</TableHead>
+                  <TableHead className="text-right font-semibold text-foreground">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filtered.map((client) => (
+                  <TableRow
+                    key={client.id}
+                    className="border-b border-border/50 hover:bg-muted/50 transition-colors"
+                  >
+                    <TableCell className="font-medium text-foreground">
+                      {client.name}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      <a href={`mailto:${client.email}`} className="hover:text-primary transition-colors">
+                        {client.email}
+                      </a>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {client.company || "—"}
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={client.status === "active" ? "default" : "secondary"}
+                        className={client.status === "active" ? "bg-green-100 text-green-700 border border-green-200 hover:bg-green-100" : "bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-100"}
+                      >
+                        {client.status.charAt(0).toUpperCase() + client.status.slice(1)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground text-sm">
+                      {new Date(client.createdAt).toLocaleDateString(undefined, {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                      })}
+                    </TableCell>
+                    <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                            className="h-8 w-8 p-0"
                           >
                             <MoreVertical className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-40">
                           <DropdownMenuItem
-                            onClick={() => setOpenEdit(r)}
+                            onClick={() => setOpenEdit(client)}
                             className="cursor-pointer"
                           >
                             Edit
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
-                            onClick={() => showDeleteConfirm(r.id, r.name)}
+                            onClick={() => showDeleteConfirm(client.id, client.name)}
                             className="text-destructive cursor-pointer focus:text-destructive"
                           >
                             Delete
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-16">

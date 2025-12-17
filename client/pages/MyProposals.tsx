@@ -1,12 +1,13 @@
 import AppShell from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -27,6 +28,13 @@ import { type ClientRecord, listClients } from "@/services/clientsService";
 import { GenerateProposalDialog } from "@/components/GenerateProposalDialog";
 import { ProposalPreviewModal } from "@/components/ProposalPreviewModal";
 import { Wand2, MoreVertical, FileText } from "lucide-react";
+
+const statusStyles: Record<string, string> = {
+  draft: "bg-slate-100 text-slate-700 border border-slate-200",
+  sent: "bg-blue-100 text-blue-700 border border-blue-200",
+  accepted: "bg-green-100 text-green-700 border border-green-200",
+  declined: "bg-red-100 text-red-700 border border-red-200",
+};
 
 export default function MyProposals() {
   const { user } = useAuth();
@@ -248,100 +256,105 @@ export default function MyProposals() {
           </div>
         </div>
 
-        {/* Proposals Grid */}
+        {/* Table View */}
         {pageRows.length > 0 ? (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-              {pageRows.map((r) => {
-                const statusColors: Record<string, string> = {
-                  draft: "bg-slate-100 text-slate-700 border-slate-200",
-                  sent: "bg-blue-100 text-blue-700 border-blue-200",
-                  accepted: "bg-green-100 text-green-700 border-green-200",
-                  declined: "bg-red-100 text-red-700 border-red-200",
-                };
-
-                return (
-                  <div
-                    key={r.id}
-                    className="group relative overflow-hidden rounded-xl border border-border/50 bg-gradient-to-br from-white/80 to-muted/30 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:border-border/80 hover:from-white hover:to-muted/50"
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-                    <div className="relative p-5 space-y-4">
-                      {/* Title and Status */}
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-foreground truncate hover:text-primary transition-colors cursor-pointer text-lg">
-                            {r.title}
-                          </h3>
-                          <p className="text-sm text-muted-foreground mt-1">{r.client || "No client"}</p>
-                        </div>
-                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap border ${statusColors[r.status] || statusColors.draft}`}>
-                          {r.status.charAt(0).toUpperCase() + r.status.slice(1)}
-                        </span>
-                      </div>
-
-                      {/* Divider */}
-                      <div className="h-px bg-border/40" />
-
-                      {/* Footer with Date and Actions */}
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-muted-foreground">
-                          {new Date(r.updatedAt).toLocaleDateString(undefined, {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric'
-                          })}
-                        </span>
+            <div className="rounded-lg border border-border bg-white/50 backdrop-blur-sm overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-b border-border/50 hover:bg-transparent bg-muted/30">
+                    <TableHead className="font-semibold text-foreground">Title</TableHead>
+                    <TableHead className="font-semibold text-foreground">Client</TableHead>
+                    <TableHead className="font-semibold text-foreground">Status</TableHead>
+                    <TableHead className="font-semibold text-foreground">Created By</TableHead>
+                    <TableHead className="font-semibold text-foreground">Updated</TableHead>
+                    <TableHead className="text-right font-semibold text-foreground">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {pageRows.map((proposal) => (
+                    <TableRow
+                      key={proposal.id}
+                      className="border-b border-border/50 hover:bg-muted/50 transition-colors"
+                    >
+                      <TableCell className="font-medium text-foreground">
+                        <button
+                          onClick={() => nav(`/proposals/${proposal.id}/edit`)}
+                          className="text-primary hover:underline truncate max-w-xs"
+                        >
+                          {proposal.title}
+                        </button>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {proposal.client || "—"}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          className={`${statusStyles[proposal.status] || statusStyles.draft}`}
+                        >
+                          {proposal.status.charAt(0).toUpperCase() + proposal.status.slice(1)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {proposal.createdBy}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-sm">
+                        {new Date(proposal.updatedAt).toLocaleDateString(undefined, {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric'
+                        })}
+                      </TableCell>
+                      <TableCell className="text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                              className="h-8 w-8 p-0"
                             >
                               <MoreVertical className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-40">
                             <DropdownMenuItem
-                              onClick={() => onPreview(r.id)}
+                              onClick={() => onPreview(proposal.id)}
                               disabled={isLoadingPreview}
                               className="cursor-pointer"
                             >
                               Preview
                             </DropdownMenuItem>
                             <DropdownMenuItem
-                              onClick={() => nav(`/proposals/${r.id}/edit`)}
+                              onClick={() => nav(`/proposals/${proposal.id}/edit`)}
                               className="cursor-pointer"
                             >
                               Edit
                             </DropdownMenuItem>
                             <DropdownMenuItem
-                              onClick={() => onDuplicate(r.id)}
+                              onClick={() => onDuplicate(proposal.id)}
                               className="cursor-pointer"
                             >
                               Duplicate
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
-                              onClick={() => onDeleteClick(r.id)}
+                              onClick={() => onDeleteClick(proposal.id)}
                               className="text-destructive cursor-pointer focus:text-destructive"
                             >
                               Delete
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-center">
+              <div className="flex items-center justify-center mt-6">
                 <Pagination>
                   <PaginationContent className="gap-1">
                     <PaginationItem>
