@@ -1,17 +1,16 @@
 import AppShell from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
-import { MoreVertical } from "lucide-react";
+import { MoreVertical, Users as UsersIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { type ClientRecord, type ClientStatus, type CreateClientResult, type UpdateClientResult, type DeleteClientResult, listClients, createClient, updateClient, deleteClient } from "@/services/clientsService";
 
@@ -101,73 +100,116 @@ export default function MyClients() {
 
   return (
     <AppShell>
-      <section className="container py-6">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-bold">Clients</h1>
-            <p className="text-muted-foreground">Manage your client directory and keep it up to date.</p>
+      <section className="container py-8 px-4 lg:px-8">
+        {/* Header Section */}
+        <div className="mb-8">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 md:gap-6">
+            <div>
+              <h1 className="text-3xl lg:text-4xl font-bold tracking-tight text-foreground">Clients</h1>
+              <p className="text-base text-muted-foreground mt-1">Manage your client directory and keep it up to date</p>
+            </div>
+            <Button
+              onClick={() => setOpenAdd(true)}
+              className="w-full sm:w-auto gap-2 bg-gradient-to-r from-primary to-accent hover:shadow-lg transition-shadow"
+            >
+              <span>+</span>
+              Add client
+            </Button>
           </div>
-          <Button onClick={() => setOpenAdd(true)}>Add client</Button>
         </div>
 
-        <Card className="mt-4 p-4">
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2">
-              <Label htmlFor="q" className="text-xs text-muted-foreground">Search</Label>
-              <Input id="q" value={search} onChange={(e) => setSearch(e.target.value)} className="w-72" placeholder="Name, email, company" />
-            </div>
-            <div className="flex items-center gap-2">
-              <Label className="text-xs text-muted-foreground">Status</Label>
-              <Select value={status} onValueChange={(v) => setStatus(v as any)}>
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder="All" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+        {/* Filters Section */}
+        <div className="mb-6 flex flex-col sm:flex-row gap-3">
+          <div className="flex-1 relative">
+            <Input
+              id="q"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search by name, email, or company..."
+              className="w-full pl-4 pr-4 h-11 border-border bg-white/50 backdrop-blur-sm focus:bg-white transition-colors"
+            />
           </div>
+          <Select value={status} onValueChange={(v) => setStatus(v as any)}>
+            <SelectTrigger className="w-full sm:w-40 h-11 border-border bg-white/50 backdrop-blur-sm focus:bg-white transition-colors">
+              <SelectValue placeholder="Filter by status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Clients</SelectItem>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="inactive">Inactive</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
-          <div className="overflow-x-auto mt-4">
+        {/* Table View */}
+        {filtered.length > 0 ? (
+          <div className="rounded-lg border border-border bg-white/50 backdrop-blur-sm overflow-hidden">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Company</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead className="w-[1%] whitespace-nowrap text-right">Actions</TableHead>
+                <TableRow className="border-b border-border/50 hover:bg-transparent bg-muted/30">
+                  <TableHead className="font-semibold text-foreground">Name</TableHead>
+                  <TableHead className="font-semibold text-foreground">Email</TableHead>
+                  <TableHead className="font-semibold text-foreground">Company</TableHead>
+                  <TableHead className="font-semibold text-foreground">Status</TableHead>
+                  <TableHead className="font-semibold text-foreground">Added</TableHead>
+                  <TableHead className="text-right font-semibold text-foreground">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filtered.map((r) => (
-                  <TableRow key={r.id} className="hover:bg-muted/40">
-                    <TableCell className="font-medium">{r.name}</TableCell>
-                    <TableCell>{r.email}</TableCell>
-                    <TableCell>{r.company || "—"}</TableCell>
+                {filtered.map((client) => (
+                  <TableRow
+                    key={client.id}
+                    className="border-b border-border/50 hover:bg-muted/50 transition-colors"
+                  >
+                    <TableCell className="font-medium text-foreground">
+                      {client.name}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      <a href={`mailto:${client.email}`} className="hover:text-primary transition-colors">
+                        {client.email}
+                      </a>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {client.company || "—"}
+                    </TableCell>
                     <TableCell>
-                      <Badge variant={r.status === "active" ? "default" : "secondary"}>
-                        {r.status}
+                      <Badge
+                        variant={client.status === "active" ? "default" : "secondary"}
+                        className={client.status === "active" ? "bg-green-100 text-green-700 border border-green-200 hover:bg-green-100" : "bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-100"}
+                      >
+                        {client.status.charAt(0).toUpperCase() + client.status.slice(1)}
                       </Badge>
                     </TableCell>
-                    <TableCell>{new Date(r.createdAt).toLocaleDateString()}</TableCell>
-                    <TableCell className="text-right whitespace-nowrap">
+                    <TableCell className="text-muted-foreground text-sm">
+                      {new Date(client.createdAt).toLocaleDateString(undefined, {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                      })}
+                    </TableCell>
+                    <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="outline" size="sm">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0"
+                          >
                             <MoreVertical className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => setOpenEdit(r)}>
+                        <DropdownMenuContent align="end" className="w-40">
+                          <DropdownMenuItem
+                            onClick={() => setOpenEdit(client)}
+                            className="cursor-pointer"
+                          >
                             Edit
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={() => showDeleteConfirm(r.id, r.name)} className="text-destructive">
+                          <DropdownMenuItem
+                            onClick={() => showDeleteConfirm(client.id, client.name)}
+                            className="text-destructive cursor-pointer focus:text-destructive"
+                          >
                             Delete
                           </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -178,7 +220,20 @@ export default function MyClients() {
               </TableBody>
             </Table>
           </div>
-        </Card>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-16">
+            <div className="text-center space-y-3">
+              <div className="h-16 w-16 mx-auto bg-gradient-to-br from-primary/20 to-accent/20 rounded-full flex items-center justify-center">
+                <UsersIcon className="h-8 w-8 text-primary/40" />
+              </div>
+              <p className="text-lg font-medium text-foreground">No clients yet</p>
+              <p className="text-sm text-muted-foreground">Add your first client to get started</p>
+              <Button onClick={() => setOpenAdd(true)} className="mt-4">
+                Add Client
+              </Button>
+            </div>
+          </div>
+        )}
       </section>
 
       <AddDialog open={openAdd} onOpenChange={setOpenAdd} onSubmit={(p, cb) => onAdd({ ...p, onError: cb })} />

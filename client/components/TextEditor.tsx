@@ -1,6 +1,4 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Bold, Italic, Underline, List, ListOrdered } from "lucide-react";
 
 interface TextEditorProps {
   id: string;
@@ -78,7 +76,6 @@ export const TextEditor: React.FC<TextEditorProps> = ({
   const [initialSize, setInitialSize] = useState({ width });
   const containerRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<HTMLDivElement>(null);
-  const [showToolbar, setShowToolbar] = useState(false);
   const isInitializedRef = useRef(false);
 
   const handleMouseDown = (e: React.MouseEvent, handle: ResizeHandle = null) => {
@@ -103,7 +100,6 @@ export const TextEditor: React.FC<TextEditorProps> = ({
 
   const handleDoubleClick = () => {
     setIsEditing(true);
-    setShowToolbar(true);
     setTimeout(() => {
       if (editorRef.current) {
         editorRef.current.focus();
@@ -127,7 +123,6 @@ export const TextEditor: React.FC<TextEditorProps> = ({
 
   const handleBlur = () => {
     setIsEditing(false);
-    setShowToolbar(false);
     if (editorRef.current) {
       onUpdate({ content: editorRef.current.innerHTML });
     }
@@ -150,47 +145,6 @@ export const TextEditor: React.FC<TextEditorProps> = ({
       }
     }
   }, [content]);
-
-  const applyFormatting = (format: "bold" | "italic" | "underline" | "bullet" | "number") => {
-    if (!editorRef.current) return;
-
-    const editor = editorRef.current;
-    const selection = window.getSelection();
-
-    if (!selection || selection.toString().length === 0) {
-      return;
-    }
-
-    editor.focus();
-
-    let command = "";
-    switch (format) {
-      case "bold":
-        command = "bold";
-        break;
-      case "italic":
-        command = "italic";
-        break;
-      case "underline":
-        command = "underline";
-        break;
-      case "bullet":
-        command = "insertUnorderedList";
-        break;
-      case "number":
-        command = "insertOrderedList";
-        break;
-    }
-
-    if (command) {
-      document.execCommand(command, false);
-      onUpdate({ content: editor.innerHTML });
-
-      setTimeout(() => {
-        editor.focus();
-      }, 0);
-    }
-  };
 
   React.useEffect(() => {
     if (!selected) return;
@@ -282,69 +236,6 @@ export const TextEditor: React.FC<TextEditorProps> = ({
       onMouseDown={(e) => handleMouseDown(e, null)}
       onDoubleClick={handleDoubleClick}
     >
-      {isEditing && showToolbar && (
-        <div style={{
-          position: "absolute",
-          bottom: "100%",
-          left: 0,
-          right: 0,
-          backgroundColor: "white",
-          border: "1px solid #ccc",
-          borderRadius: "4px 4px 0 0",
-          display: "flex",
-          gap: "4px",
-          padding: "4px",
-          marginBottom: "2px",
-          zIndex: 11,
-        }}>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => applyFormatting("bold")}
-            className="h-7 w-7 p-0"
-            title="Bold"
-          >
-            <Bold className="w-4 h-4" />
-          </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => applyFormatting("italic")}
-            className="h-7 w-7 p-0"
-            title="Italic"
-          >
-            <Italic className="w-4 h-4" />
-          </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => applyFormatting("underline")}
-            className="h-7 w-7 p-0"
-            title="Underline"
-          >
-            <Underline className="w-4 h-4" />
-          </Button>
-          <div style={{ width: "1px", backgroundColor: "#ccc", margin: "0 2px" }} />
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => applyFormatting("bullet")}
-            className="h-7 w-7 p-0"
-            title="Bullet List"
-          >
-            <List className="w-4 h-4" />
-          </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => applyFormatting("number")}
-            className="h-7 w-7 p-0"
-            title="Numbered List"
-          >
-            <ListOrdered className="w-4 h-4" />
-          </Button>
-        </div>
-      )}
 
       <style>{`
         [data-text-editor] ul {

@@ -1,13 +1,13 @@
 import AppShell from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -27,7 +27,14 @@ import {
 import { type ClientRecord, listClients } from "@/services/clientsService";
 import { GenerateProposalDialog } from "@/components/GenerateProposalDialog";
 import { ProposalPreviewModal } from "@/components/ProposalPreviewModal";
-import { Wand2, MoreVertical } from "lucide-react";
+import { Wand2, MoreVertical, FileText } from "lucide-react";
+
+const statusStyles: Record<string, string> = {
+  draft: "bg-slate-100 text-slate-700 border border-slate-200",
+  sent: "bg-blue-100 text-blue-700 border border-blue-200",
+  accepted: "bg-green-100 text-green-700 border border-green-200",
+  declined: "bg-red-100 text-red-700 border border-red-200",
+};
 
 export default function MyProposals() {
   const { user } = useAuth();
@@ -208,89 +215,186 @@ export default function MyProposals() {
 
   return (
     <AppShell>
-      <section className="container py-6">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-bold">My Proposals</h1>
-            <p className="text-muted-foreground">Create and manage proposals you own.</p>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={handleOpenGenerateDialog}>
-              <Wand2 className="mr-2 h-4 w-4" />
-              AI Generate
-            </Button>
-            <Button onClick={handleOpenCreateDialog}>New proposal</Button>
+      <section className="container py-8 px-4 lg:px-8">
+        {/* Header Section */}
+        <div className="mb-8">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 md:gap-6">
+            <div>
+              <h1 className="text-3xl lg:text-4xl font-bold tracking-tight text-foreground">My Proposals</h1>
+              <p className="text-base text-muted-foreground mt-1">Create and manage proposals you own</p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Button
+                variant="outline"
+                onClick={handleOpenGenerateDialog}
+                className="gap-2 border-border hover:bg-muted/50"
+              >
+                <Wand2 className="h-4 w-4" />
+                AI Generate
+              </Button>
+              <Button
+                onClick={handleOpenCreateDialog}
+                className="gap-2 bg-gradient-to-r from-primary to-accent hover:shadow-lg transition-shadow"
+              >
+                <span>+</span>
+                New proposal
+              </Button>
+            </div>
           </div>
         </div>
 
-        <Card className="mt-4 p-4">
-          <div className="flex items-center gap-3">
-            <Label htmlFor="q" className="text-xs text-muted-foreground">Search</Label>
-            <Input id="q" value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} className="w-80" placeholder="Title, client, owner" />
+        {/* Search Section */}
+        <div className="mb-6">
+          <div className="relative">
+            <Input
+              id="q"
+              value={search}
+              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+              placeholder="Search by title, client, or owner..."
+              className="w-full pl-4 pr-4 h-11 border-border bg-white/50 backdrop-blur-sm focus:bg-white transition-colors"
+            />
           </div>
+        </div>
 
-          <div className="overflow-x-auto mt-4">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Title</TableHead>
-                  <TableHead>Client</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Last modified</TableHead>
-                  <TableHead className="w-[1%] whitespace-nowrap text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {pageRows.map((r) => (
-                  <TableRow key={r.id} className="hover:bg-muted/40">
-                    <TableCell className="font-medium">{r.title}</TableCell>
-                    <TableCell>{r.client || "—"}</TableCell>
-                    <TableCell className="capitalize">{r.status}</TableCell>
-                    <TableCell>{new Date(r.updatedAt).toLocaleString()}</TableCell>
-                    <TableCell className="text-right whitespace-nowrap">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="outline" size="sm">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => onPreview(r.id)} disabled={isLoadingPreview}>
-                            Preview
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => nav(`/proposals/${r.id}/edit`)}>
-                            Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => onDuplicate(r.id)}>
-                            Duplicate
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={() => onDeleteClick(r.id)} className="text-destructive">
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
+        {/* Table View */}
+        {pageRows.length > 0 ? (
+          <>
+            <div className="rounded-lg border border-border bg-white/50 backdrop-blur-sm overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-b border-border/50 hover:bg-transparent bg-muted/30">
+                    <TableHead className="font-semibold text-foreground">Title</TableHead>
+                    <TableHead className="font-semibold text-foreground">Client</TableHead>
+                    <TableHead className="font-semibold text-foreground">Status</TableHead>
+                    <TableHead className="font-semibold text-foreground">Created By</TableHead>
+                    <TableHead className="font-semibold text-foreground">Updated</TableHead>
+                    <TableHead className="text-right font-semibold text-foreground">Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+                </TableHeader>
+                <TableBody>
+                  {pageRows.map((proposal) => (
+                    <TableRow
+                      key={proposal.id}
+                      className="border-b border-border/50 hover:bg-muted/50 transition-colors"
+                    >
+                      <TableCell className="font-medium text-foreground">
+                        <button
+                          onClick={() => nav(`/proposals/${proposal.id}/edit`)}
+                          className="text-primary hover:underline truncate max-w-xs"
+                        >
+                          {proposal.title}
+                        </button>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {proposal.client || "—"}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          className={`${statusStyles[proposal.status] || statusStyles.draft}`}
+                        >
+                          {proposal.status.charAt(0).toUpperCase() + proposal.status.slice(1)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {proposal.createdBy}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-sm">
+                        {new Date(proposal.updatedAt).toLocaleDateString(undefined, {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric'
+                        })}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0"
+                            >
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-40">
+                            <DropdownMenuItem
+                              onClick={() => onPreview(proposal.id)}
+                              disabled={isLoadingPreview}
+                              className="cursor-pointer"
+                            >
+                              Preview
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => nav(`/proposals/${proposal.id}/edit`)}
+                              className="cursor-pointer"
+                            >
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => onDuplicate(proposal.id)}
+                              className="cursor-pointer"
+                            >
+                              Duplicate
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={() => onDeleteClick(proposal.id)}
+                              className="text-destructive cursor-pointer focus:text-destructive"
+                            >
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
 
-          <Pagination className="mt-4">
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious href="#" onClick={(e) => { e.preventDefault(); setPage((p) => Math.max(1, p - 1)); }} />
-              </PaginationItem>
-              <PaginationItem>
-                <span className="px-3 text-sm text-muted-foreground">Page {page} of {totalPages}</span>
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationNext href="#" onClick={(e) => { e.preventDefault(); setPage((p) => Math.min(totalPages, p + 1)); }} />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        </Card>
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center mt-6">
+                <Pagination>
+                  <PaginationContent className="gap-1">
+                    <PaginationItem>
+                      <PaginationPrevious
+                        href="#"
+                        onClick={(e) => { e.preventDefault(); setPage((p) => Math.max(1, p - 1)); }}
+                        className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                      />
+                    </PaginationItem>
+                    <PaginationItem>
+                      <span className="px-3 py-2 text-sm font-medium text-muted-foreground">
+                        Page {page} of {totalPages}
+                      </span>
+                    </PaginationItem>
+                    <PaginationItem>
+                      <PaginationNext
+                        href="#"
+                        onClick={(e) => { e.preventDefault(); setPage((p) => Math.min(totalPages, p + 1)); }}
+                        className={page === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-16">
+            <div className="text-center space-y-3">
+              <div className="h-16 w-16 mx-auto bg-gradient-to-br from-primary/20 to-accent/20 rounded-full flex items-center justify-center">
+                <FileText className="h-8 w-8 text-primary/40" />
+              </div>
+              <p className="text-lg font-medium text-foreground">No proposals yet</p>
+              <p className="text-sm text-muted-foreground">Create your first proposal to get started</p>
+              <Button onClick={handleOpenCreateDialog} className="mt-4">
+                Create Proposal
+              </Button>
+            </div>
+          </div>
+        )}
       </section>
 
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>

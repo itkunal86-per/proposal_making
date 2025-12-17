@@ -1,7 +1,6 @@
 import React, { useState, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -2877,9 +2876,13 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     };
 
     const applyFormatting = (format: "bold" | "italic" | "underline" | "bullet" | "number") => {
-      if (!editorRef.current) return;
+      // Find the contentEditable element in the editor ref
+      let editor = editorRef.current?.querySelector('[contenteditable="true"]') as HTMLElement;
+      if (!editor) {
+        editor = editorRef.current as HTMLElement;
+      }
+      if (!editor) return;
 
-      const editor = editorRef.current;
       const selection = window.getSelection();
 
       if (!selection || selection.toString().length === 0) {
@@ -2974,14 +2977,15 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
           </div>
 
           <div className="flex gap-2 mt-2">
-            <Textarea
-              value={text.content || ""}
-              onChange={(e) =>
-                handleUpdateText({ content: e.target.value })
-              }
-              placeholder="Enter text content"
-              className="flex-1 min-h-20 resize-none"
-            />
+            <div ref={editorRef} className="flex-1">
+              <RichTextEditor
+                value={text.content || ""}
+                onChange={(content) => handleUpdateText({ content })}
+                placeholder="Enter text content"
+                variables={variables}
+                className="min-h-20 p-2 border rounded resize-none bg-white"
+              />
+            </div>
             <Button
               variant="outline"
               size="sm"
