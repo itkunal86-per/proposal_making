@@ -97,8 +97,43 @@
     @apply border-border;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1 {
+    @apply text-4xl font-bold leading-tight tracking-tight;
+  }
+
+  h2 {
+    @apply text-3xl font-bold leading-snug tracking-tight;
+  }
+
+  h3 {
+    @apply text-2xl font-semibold leading-snug tracking-tight;
+  }
+
+  h4 {
+    @apply text-xl font-semibold leading-snug;
+  }
+
+  h5 {
+    @apply text-lg font-semibold leading-snug;
+  }
+
+  h6 {
+    @apply text-base font-semibold leading-snug;
+  }
+
+  p {
+    @apply leading-relaxed;
   }
 
   [contenteditable][data-placeholder]:empty:before {
@@ -110,5 +145,33 @@
     direction: ltr !important;
     unicode-bidi: isolate-override !important;
     text-align: left !important;
+  }
+
+  /* Smooth transitions for interactive elements */
+  button, a, input, select, textarea {
+    transition: all 0.2s ease-out;
+  }
+
+  /* Better focus states for accessibility */
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /* Container spacing improvements */
+  .container {
+    @apply px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Card hover effects */
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-md hover:border-border/80;
+  }
+
+  /* Badge improvements */
+  .badge-base {
+    @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border transition-colors duration-200;
   }
 }
