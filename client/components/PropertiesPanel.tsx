@@ -2974,14 +2974,15 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
           </div>
 
           <div className="flex gap-2 mt-2">
-            <Textarea
-              value={text.content || ""}
-              onChange={(e) =>
-                handleUpdateText({ content: e.target.value })
-              }
-              placeholder="Enter text content"
-              className="flex-1 min-h-20 resize-none"
-            />
+            <div ref={editorRef} className="flex-1">
+              <RichTextEditor
+                value={text.content || ""}
+                onChange={(content) => handleUpdateText({ content })}
+                placeholder="Enter text content"
+                variables={variables}
+                className="min-h-20 p-2 border rounded resize-none bg-white"
+              />
+            </div>
             <Button
               variant="outline"
               size="sm"
