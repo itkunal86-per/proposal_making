@@ -208,89 +208,181 @@ export default function MyProposals() {
 
   return (
     <AppShell>
-      <section className="container py-6">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-bold">My Proposals</h1>
-            <p className="text-muted-foreground">Create and manage proposals you own.</p>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={handleOpenGenerateDialog}>
-              <Wand2 className="mr-2 h-4 w-4" />
-              AI Generate
-            </Button>
-            <Button onClick={handleOpenCreateDialog}>New proposal</Button>
+      <section className="container py-8 px-4 lg:px-8">
+        {/* Header Section */}
+        <div className="mb-8">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 md:gap-6">
+            <div>
+              <h1 className="text-3xl lg:text-4xl font-bold tracking-tight text-foreground">My Proposals</h1>
+              <p className="text-base text-muted-foreground mt-1">Create and manage proposals you own</p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Button
+                variant="outline"
+                onClick={handleOpenGenerateDialog}
+                className="gap-2 border-border hover:bg-muted/50"
+              >
+                <Wand2 className="h-4 w-4" />
+                AI Generate
+              </Button>
+              <Button
+                onClick={handleOpenCreateDialog}
+                className="gap-2 bg-gradient-to-r from-primary to-accent hover:shadow-lg transition-shadow"
+              >
+                <span>+</span>
+                New proposal
+              </Button>
+            </div>
           </div>
         </div>
 
-        <Card className="mt-4 p-4">
-          <div className="flex items-center gap-3">
-            <Label htmlFor="q" className="text-xs text-muted-foreground">Search</Label>
-            <Input id="q" value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} className="w-80" placeholder="Title, client, owner" />
+        {/* Search Section */}
+        <div className="mb-6">
+          <div className="relative">
+            <Input
+              id="q"
+              value={search}
+              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+              placeholder="Search by title, client, or owner..."
+              className="w-full pl-4 pr-4 h-11 border-border bg-white/50 backdrop-blur-sm focus:bg-white transition-colors"
+            />
           </div>
+        </div>
 
-          <div className="overflow-x-auto mt-4">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Title</TableHead>
-                  <TableHead>Client</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Last modified</TableHead>
-                  <TableHead className="w-[1%] whitespace-nowrap text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {pageRows.map((r) => (
-                  <TableRow key={r.id} className="hover:bg-muted/40">
-                    <TableCell className="font-medium">{r.title}</TableCell>
-                    <TableCell>{r.client || "—"}</TableCell>
-                    <TableCell className="capitalize">{r.status}</TableCell>
-                    <TableCell>{new Date(r.updatedAt).toLocaleString()}</TableCell>
-                    <TableCell className="text-right whitespace-nowrap">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="outline" size="sm">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => onPreview(r.id)} disabled={isLoadingPreview}>
-                            Preview
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => nav(`/proposals/${r.id}/edit`)}>
-                            Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => onDuplicate(r.id)}>
-                            Duplicate
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={() => onDeleteClick(r.id)} className="text-destructive">
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+        {/* Proposals Grid */}
+        {pageRows.length > 0 ? (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+              {pageRows.map((r) => {
+                const statusColors: Record<string, string> = {
+                  draft: "bg-slate-100 text-slate-700 border-slate-200",
+                  sent: "bg-blue-100 text-blue-700 border-blue-200",
+                  accepted: "bg-green-100 text-green-700 border-green-200",
+                  declined: "bg-red-100 text-red-700 border-red-200",
+                };
+
+                return (
+                  <div
+                    key={r.id}
+                    className="group relative overflow-hidden rounded-xl border border-border/50 bg-gradient-to-br from-white/80 to-muted/30 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:border-border/80 hover:from-white hover:to-muted/50"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+                    <div className="relative p-5 space-y-4">
+                      {/* Title and Status */}
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-foreground truncate hover:text-primary transition-colors cursor-pointer text-lg">
+                            {r.title}
+                          </h3>
+                          <p className="text-sm text-muted-foreground mt-1">{r.client || "No client"}</p>
+                        </div>
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap border ${statusColors[r.status] || statusColors.draft}`}>
+                          {r.status.charAt(0).toUpperCase() + r.status.slice(1)}
+                        </span>
+                      </div>
+
+                      {/* Divider */}
+                      <div className="h-px bg-border/40" />
+
+                      {/* Footer with Date and Actions */}
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(r.updatedAt).toLocaleDateString(undefined, {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric'
+                          })}
+                        </span>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-40">
+                            <DropdownMenuItem
+                              onClick={() => onPreview(r.id)}
+                              disabled={isLoadingPreview}
+                              className="cursor-pointer"
+                            >
+                              Preview
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => nav(`/proposals/${r.id}/edit`)}
+                              className="cursor-pointer"
+                            >
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => onDuplicate(r.id)}
+                              className="cursor-pointer"
+                            >
+                              Duplicate
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={() => onDeleteClick(r.id)}
+                              className="text-destructive cursor-pointer focus:text-destructive"
+                            >
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center">
+                <Pagination>
+                  <PaginationContent className="gap-1">
+                    <PaginationItem>
+                      <PaginationPrevious
+                        href="#"
+                        onClick={(e) => { e.preventDefault(); setPage((p) => Math.max(1, p - 1)); }}
+                        className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                      />
+                    </PaginationItem>
+                    <PaginationItem>
+                      <span className="px-3 py-2 text-sm font-medium text-muted-foreground">
+                        Page {page} of {totalPages}
+                      </span>
+                    </PaginationItem>
+                    <PaginationItem>
+                      <PaginationNext
+                        href="#"
+                        onClick={(e) => { e.preventDefault(); setPage((p) => Math.min(totalPages, p + 1)); }}
+                        className={page === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-16">
+            <div className="text-center space-y-3">
+              <div className="h-16 w-16 mx-auto bg-gradient-to-br from-primary/20 to-accent/20 rounded-full flex items-center justify-center">
+                <FileText className="h-8 w-8 text-primary/40" />
+              </div>
+              <p className="text-lg font-medium text-foreground">No proposals yet</p>
+              <p className="text-sm text-muted-foreground">Create your first proposal to get started</p>
+              <Button onClick={handleOpenCreateDialog} className="mt-4">
+                Create Proposal
+              </Button>
+            </div>
           </div>
-
-          <Pagination className="mt-4">
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious href="#" onClick={(e) => { e.preventDefault(); setPage((p) => Math.max(1, p - 1)); }} />
-              </PaginationItem>
-              <PaginationItem>
-                <span className="px-3 text-sm text-muted-foreground">Page {page} of {totalPages}</span>
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationNext href="#" onClick={(e) => { e.preventDefault(); setPage((p) => Math.min(totalPages, p + 1)); }} />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        </Card>
+        )}
       </section>
 
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
