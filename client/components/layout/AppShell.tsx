@@ -67,21 +67,21 @@ export default function AppShell({ children }: { children: ReactNode }) {
   return (
     <SidebarProvider>
       <div className="flex w-full min-h-screen">
-        <Sidebar collapsible="offcanvas" className="border-r border-border bg-gradient-to-b from-background to-muted/10">
-          <SidebarHeader className="border-b border-border/40 bg-white/50 backdrop-blur-sm">
+        <Sidebar collapsible="offcanvas" className="border-r border-slate-800 bg-slate-900">
+          <SidebarHeader className="border-b border-slate-800 bg-slate-900">
             <div className="flex items-center justify-between gap-3 px-3 py-3">
               <div className="flex items-center gap-3 flex-1">
                 <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center flex-shrink-0 shadow-md" />
                 <div className="flex flex-col">
-                  <span className="text-sm font-bold text-foreground">Proposal AI</span>
-                  <span className="text-xs text-muted-foreground">v1.0</span>
+                  <span className="text-sm font-bold text-white">Proposal AI</span>
+                  <span className="text-xs text-slate-400">v1.0</span>
                 </div>
               </div>
             </div>
           </SidebarHeader>
-          <SidebarContent className="px-3 py-4">
+          <SidebarContent className="px-3 py-4 bg-slate-900">
             <SidebarGroup className="pb-6">
-              <SidebarGroupLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2 mb-3">
+              <SidebarGroupLabel className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-2 mb-3">
                 Navigation
               </SidebarGroupLabel>
               <SidebarMenu className="gap-1">
@@ -96,14 +96,14 @@ export default function AppShell({ children }: { children: ReactNode }) {
                           to={item.href}
                           className={cn(
                             "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 cursor-pointer group",
-                            "hover:bg-muted/60 text-foreground/70 hover:text-foreground",
-                            active && "bg-primary/10 text-primary font-medium shadow-sm border border-primary/20",
+                            "hover:bg-slate-800 text-slate-300 hover:text-white",
+                            active && "bg-primary/20 text-white font-medium shadow-sm border border-primary/30",
                           )}
                           aria-current={active ? "page" : undefined}
                         >
                           <span className={cn(
                             "transition-colors duration-200",
-                            active ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
+                            active ? "text-primary" : "text-slate-400 group-hover:text-white"
                           )}>
                             {item.icon}
                           </span>
@@ -118,15 +118,15 @@ export default function AppShell({ children }: { children: ReactNode }) {
             </SidebarGroup>
           </SidebarContent>
           {user && (
-            <SidebarFooter className="border-t border-border/40 bg-white/50 backdrop-blur-sm px-3 py-3">
-              <div className="rounded-lg bg-gradient-to-br from-primary/5 to-accent/5 border border-primary/10 p-3 text-xs space-y-2">
-                <div className="font-semibold text-foreground">{user.name}</div>
+            <SidebarFooter className="border-t border-slate-800 bg-slate-900 px-3 py-3">
+              <div className="rounded-lg bg-slate-800/50 border border-slate-700 p-3 text-xs space-y-2">
+                <div className="font-semibold text-white">{user.name}</div>
                 {user.company && (
-                  <div className="text-xs text-muted-foreground">{user.company}</div>
+                  <div className="text-xs text-slate-400">{user.company}</div>
                 )}
-                <div className="text-xs text-muted-foreground truncate">{user.email}</div>
+                <div className="text-xs text-slate-400 truncate">{user.email}</div>
                 <div className="inline-block">
-                  <span className="rounded-full bg-primary/20 text-primary px-2 py-1 text-xs font-medium">
+                  <span className="rounded-full bg-primary/30 text-primary px-2 py-1 text-xs font-medium">
                     {user.role === "admin" ? "Admin" : "Subscriber"}
                   </span>
                 </div>
@@ -134,7 +134,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
                   variant="outline"
                   size="sm"
                   onClick={handleSignOut}
-                  className="w-full mt-2 gap-2 border-primary/20 hover:bg-primary/5"
+                  className="w-full mt-2 gap-2 border-slate-700 hover:bg-slate-700 text-white hover:text-white"
                 >
                   <LogOut className="w-4 h-4" />
                   Sign out
