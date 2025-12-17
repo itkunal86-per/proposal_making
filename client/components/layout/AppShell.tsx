@@ -18,25 +18,35 @@ import { useAuth } from "@/hooks/useAuth";
 import type { UserRole } from "@/data/users";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import {
+  LayoutDashboard,
+  Users,
+  Box,
+  FileText,
+  Settings,
+  Zap,
+  LogOut,
+} from "lucide-react";
 
 interface NavItem {
   href: string;
   label: string;
+  icon: React.ReactNode;
 }
 
 const navByRole: Record<UserRole, NavItem[]> = {
   admin: [
-    { href: "/dashboard", label: "Dashboard" },
-    { href: "/admin/users", label: "Users" },
-    { href: "/admin/packages", label: "Packages" },
-    { href: "/admin/templates", label: "Templates" },
-    { href: "/admin/settings", label: "Settings" },
+    { href: "/dashboard", label: "Dashboard", icon: <LayoutDashboard className="w-5 h-5" /> },
+    { href: "/admin/users", label: "Users", icon: <Users className="w-5 h-5" /> },
+    { href: "/admin/packages", label: "Packages", icon: <Box className="w-5 h-5" /> },
+    { href: "/admin/templates", label: "Templates", icon: <FileText className="w-5 h-5" /> },
+    { href: "/admin/settings", label: "Settings", icon: <Settings className="w-5 h-5" /> },
   ],
   subscriber: [
-    { href: "/my/proposals", label: "My Proposals" },
-    { href: "/my/clients", label: "My Clients" },
-    { href: "/integrations", label: "Integrations" },
-    { href: "/my/settings", label: "Settings" },
+    { href: "/my/proposals", label: "My Proposals", icon: <FileText className="w-5 h-5" /> },
+    { href: "/my/clients", label: "My Clients", icon: <Users className="w-5 h-5" /> },
+    { href: "/integrations", label: "Integrations", icon: <Zap className="w-5 h-5" /> },
+    { href: "/my/settings", label: "Settings", icon: <Settings className="w-5 h-5" /> },
   ],
 };
 
@@ -57,24 +67,24 @@ export default function AppShell({ children }: { children: ReactNode }) {
   return (
     <SidebarProvider>
       <div className="flex w-full min-h-screen">
-        <Sidebar collapsible="offcanvas" className="border-r">
-          <SidebarHeader>
-            <div className="flex items-center justify-between gap-2 px-2 py-1.5">
-              <div className="flex items-center gap-2">
-                <div className="h-6 w-6 rounded-md bg-gradient-to-br from-primary to-cyan-500" />
-                <span className="text-sm font-semibold">Proposal AI</span>
+        <Sidebar collapsible="offcanvas" className="border-r border-border bg-gradient-to-b from-background to-muted/10">
+          <SidebarHeader className="border-b border-border/40 bg-white/50 backdrop-blur-sm">
+            <div className="flex items-center justify-between gap-3 px-3 py-3">
+              <div className="flex items-center gap-3 flex-1">
+                <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center flex-shrink-0 shadow-md" />
+                <div className="flex flex-col">
+                  <span className="text-sm font-bold text-foreground">Proposal AI</span>
+                  <span className="text-xs text-muted-foreground">v1.0</span>
+                </div>
               </div>
-              {user && (
-                <span className="rounded-full bg-sidebar-accent px-2 py-0.5 text-xs font-medium text-sidebar-accent-foreground">
-                  {user.role === "admin" ? "Admin" : "Subscriber"}
-                </span>
-              )}
             </div>
           </SidebarHeader>
-          <SidebarContent>
-            <SidebarGroup>
-              <SidebarGroupLabel>Menu</SidebarGroupLabel>
-              <SidebarMenu>
+          <SidebarContent className="px-3 py-4">
+            <SidebarGroup className="pb-6">
+              <SidebarGroupLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2 mb-3">
+                Navigation
+              </SidebarGroupLabel>
+              <SidebarMenu className="gap-1">
                 {navItems.map((item) => {
                   const active =
                     location.pathname === item.href ||
@@ -85,12 +95,20 @@ export default function AppShell({ children }: { children: ReactNode }) {
                         <Link
                           to={item.href}
                           className={cn(
-                            "flex items-center gap-2",
-                            active && "bg-sidebar-accent text-sidebar-accent-foreground",
+                            "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 cursor-pointer group",
+                            "hover:bg-muted/60 text-foreground/70 hover:text-foreground",
+                            active && "bg-primary/10 text-primary font-medium shadow-sm border border-primary/20",
                           )}
                           aria-current={active ? "page" : undefined}
                         >
-                          <span>{item.label}</span>
+                          <span className={cn(
+                            "transition-colors duration-200",
+                            active ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
+                          )}>
+                            {item.icon}
+                          </span>
+                          <span className="text-sm font-medium">{item.label}</span>
+                          {active && <div className="ml-auto h-1.5 w-1.5 rounded-full bg-primary" />}
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -100,18 +118,27 @@ export default function AppShell({ children }: { children: ReactNode }) {
             </SidebarGroup>
           </SidebarContent>
           {user && (
-            <SidebarFooter>
-              <div className="rounded-lg border bg-background p-3 text-xs">
-                <div className="font-medium text-foreground">{user.name}</div>
+            <SidebarFooter className="border-t border-border/40 bg-white/50 backdrop-blur-sm px-3 py-3">
+              <div className="rounded-lg bg-gradient-to-br from-primary/5 to-accent/5 border border-primary/10 p-3 text-xs space-y-2">
+                <div className="font-semibold text-foreground">{user.name}</div>
                 {user.company && (
-                  <div className="text-muted-foreground">{user.company}</div>
+                  <div className="text-xs text-muted-foreground">{user.company}</div>
                 )}
-                <div className="mt-3 flex items-center justify-between gap-2">
-                  <span className="text-muted-foreground">{user.email}</span>
-                  <Button variant="outline" size="sm" onClick={handleSignOut}>
-                    Sign out
-                  </Button>
+                <div className="text-xs text-muted-foreground truncate">{user.email}</div>
+                <div className="inline-block">
+                  <span className="rounded-full bg-primary/20 text-primary px-2 py-1 text-xs font-medium">
+                    {user.role === "admin" ? "Admin" : "Subscriber"}
+                  </span>
                 </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleSignOut}
+                  className="w-full mt-2 gap-2 border-primary/20 hover:bg-primary/5"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Sign out
+                </Button>
               </div>
             </SidebarFooter>
           )}
