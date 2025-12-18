@@ -87,10 +87,34 @@ export default function ProposalPublicView() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto">
-        <div ref={contentRef} className="max-w-4xl mx-auto bg-white p-8 shadow-sm mt-6 mb-6">
+    <div className="min-h-screen bg-slate-50 flex flex-col">
+      {/* Left Sidebar */}
+      <div className="flex flex-1 overflow-hidden">
+        <div className="w-48 border-r border-slate-200 bg-white overflow-y-auto">
+          <div className="sticky top-0 bg-white border-b border-slate-200 p-4 z-10">
+            <h3 className="text-sm font-semibold text-slate-900">Sections</h3>
+          </div>
+          <nav className="p-2">
+            {proposal?.sections.map((section) => (
+              <button
+                key={section.id}
+                onClick={() => scrollToSection(section.id)}
+                className={`w-full text-left px-3 py-2 rounded text-sm transition-colors ${
+                  activeSection === section.id
+                    ? 'bg-blue-50 text-blue-700 font-medium'
+                    : 'text-slate-700 hover:bg-slate-50'
+                }`}
+                title={section.title}
+              >
+                <div className="truncate">{section.title}</div>
+              </button>
+            ))}
+          </nav>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto">
+          <div ref={contentRef} className="max-w-4xl mx-auto bg-white p-8 shadow-sm mt-6 mb-6">
           {/* Title */}
           <div
             className="mb-8 relative"
@@ -131,44 +155,13 @@ export default function ProposalPublicView() {
 
           {/* Sections */}
           {proposal.sections.map((section) => (
-            <div key={section.id} className="mb-8">
-              {/* Section Title */}
-              <div
-                className="mb-4 relative"
-                style={{
-                  color: (section as any).titleStyles?.color,
-                  fontSize: `${(section as any).titleStyles?.fontSize || 24}px`,
-                  textAlign: ((section as any).titleStyles?.textAlign || "left") as any,
-                  backgroundColor: (section as any).titleStyles?.backgroundColor,
-                  backgroundImage: (section as any).titleStyles?.backgroundImage ? `url(${(section as any).titleStyles?.backgroundImage})` : undefined,
-                  backgroundSize: (section as any).titleStyles?.backgroundSize || "cover",
-                  backgroundPosition: "center",
-                  backgroundRepeat: "no-repeat",
-                  padding: `${(section as any).titleStyles?.paddingTop || 0}px ${(section as any).titleStyles?.paddingRight || 0}px ${(section as any).titleStyles?.paddingBottom || 0}px ${(section as any).titleStyles?.paddingLeft || 0}px`,
-                  borderRadius: (section as any).titleStyles?.borderRadius ? `${(section as any).titleStyles?.borderRadius}px` : undefined,
-                  fontWeight: (section as any).titleStyles?.bold ? "bold" : "normal",
-                  fontStyle: (section as any).titleStyles?.italic ? "italic" : "normal",
-                  textDecoration: (section as any).titleStyles?.underline ? "underline" : (section as any).titleStyles?.strikethrough ? "line-through" : "none",
-                }}
-              >
-                {(section as any).titleStyles?.backgroundImage && (section as any).titleStyles?.backgroundOpacity && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      backgroundColor: `rgba(255, 255, 255, ${(100 - parseInt((section as any).titleStyles?.backgroundOpacity || "100")) / 100})`,
-                      borderRadius: (section as any).titleStyles?.borderRadius ? `${(section as any).titleStyles?.borderRadius}px` : undefined,
-                      pointerEvents: "none",
-                    }}
-                  />
-                )}
-                <div style={{ position: "relative", zIndex: 1 }}>
-                  {section.title}
-                </div>
-              </div>
+            <div
+              key={section.id}
+              className="mb-8"
+              ref={(el) => {
+                if (el) sectionRefs.current.set(section.id, el);
+              }}
+            >
 
               {/* Section Content */}
               {section.layout !== "two-column" && section.layout !== "three-column" ? (
@@ -520,6 +513,7 @@ export default function ProposalPublicView() {
               )}
             </div>
           ))}
+        </div>
         </div>
       </div>
     </div>
