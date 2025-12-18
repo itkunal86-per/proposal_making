@@ -345,44 +345,6 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                   if (el) sectionRefs.current.set(section.id, el);
                 }}
               >
-                {/* Section Title */}
-                <div
-                  className="mb-4 relative"
-                  style={{
-                    color: (section as any).titleStyles?.color,
-                    fontSize: `${(section as any).titleStyles?.fontSize || 24}px`,
-                    textAlign: ((section as any).titleStyles?.textAlign || "left") as any,
-                    backgroundColor: (section as any).titleStyles?.backgroundColor,
-                    backgroundImage: (section as any).titleStyles?.backgroundImage ? `url(${(section as any).titleStyles?.backgroundImage})` : undefined,
-                    backgroundSize: (section as any).titleStyles?.backgroundSize || "cover",
-                    backgroundPosition: "center",
-                    backgroundRepeat: "no-repeat",
-                    padding: `${(section as any).titleStyles?.paddingTop || 0}px ${(section as any).titleStyles?.paddingRight || 0}px ${(section as any).titleStyles?.paddingBottom || 0}px ${(section as any).titleStyles?.paddingLeft || 0}px`,
-                    borderRadius: (section as any).titleStyles?.borderRadius ? `${(section as any).titleStyles?.borderRadius}px` : undefined,
-                    fontWeight: (section as any).titleStyles?.bold ? "bold" : "normal",
-                    fontStyle: (section as any).titleStyles?.italic ? "italic" : "normal",
-                    textDecoration: (section as any).titleStyles?.underline ? "underline" : (section as any).titleStyles?.strikethrough ? "line-through" : "none",
-                  }}
-                >
-                  {(section as any).titleStyles?.backgroundImage && (section as any).titleStyles?.backgroundOpacity && (
-                    <div
-                      style={{
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        backgroundColor: `rgba(255, 255, 255, ${(100 - parseInt((section as any).titleStyles?.backgroundOpacity || "100")) / 100})`,
-                        borderRadius: (section as any).titleStyles?.borderRadius ? `${(section as any).titleStyles?.borderRadius}px` : undefined,
-                        pointerEvents: "none",
-                      }}
-                    />
-                  )}
-                  <div style={{ position: "relative", zIndex: 1 }}>
-                    {section.title}
-                  </div>
-                </div>
-
                 {/* Section Content */}
                 {section.layout !== "two-column" && section.layout !== "three-column" ? (
                   <div
