@@ -271,8 +271,33 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto bg-slate-50">
-          <div ref={contentRef} className="max-w-4xl mx-auto bg-white p-8 shadow-sm">
+        <div className="flex-1 flex overflow-hidden bg-slate-50">
+          {/* Left Sidebar */}
+          <div className="w-48 border-r border-slate-200 bg-white overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-slate-200 p-4 z-10">
+              <h3 className="text-sm font-semibold text-slate-900">Sections</h3>
+            </div>
+            <nav className="p-2">
+              {proposal.sections.map((section) => (
+                <button
+                  key={section.id}
+                  onClick={() => scrollToSection(section.id)}
+                  className={`w-full text-left px-3 py-2 rounded text-sm transition-colors ${
+                    activeSection === section.id
+                      ? 'bg-blue-50 text-blue-700 font-medium'
+                      : 'text-slate-700 hover:bg-slate-50'
+                  }`}
+                  title={section.title}
+                >
+                  <div className="truncate">{section.title}</div>
+                </button>
+              ))}
+            </nav>
+          </div>
+
+          {/* Main Content */}
+          <div className="flex-1 overflow-y-auto">
+            <div ref={contentRef} className="max-w-4xl mx-auto bg-white p-8 shadow-sm">
             {/* Title */}
             <div
               className="mb-8 relative"
@@ -313,7 +338,13 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
 
             {/* Sections */}
             {proposal.sections.map((section) => (
-              <div key={section.id} className="mb-8">
+              <div
+                key={section.id}
+                className="mb-8"
+                ref={(el) => {
+                  if (el) sectionRefs.current.set(section.id, el);
+                }}
+              >
                 {/* Section Title */}
                 <div
                   className="mb-4 relative"
@@ -683,6 +714,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                 ) : null}
               </div>
             ))}
+          </div>
           </div>
         </div>
       </div>
