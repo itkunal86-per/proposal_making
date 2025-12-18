@@ -9,6 +9,8 @@ export default function ProposalPublicView() {
   const [proposal, setProposal] = useState<Proposal | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeSection, setActiveSection] = useState<string | null>(null);
+  const sectionRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
   useEffect(() => {
     const loadProposal = async () => {
