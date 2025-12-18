@@ -114,8 +114,8 @@ export default function ProposalPublicView() {
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto">
-          <div ref={contentRef} className="max-w-4xl mx-auto bg-white p-8 shadow-sm mt-6 mb-6">
-          {/* Title */}
+          <div ref={contentRef} className="max-w-4xl mx-auto bg-white p-8 shadow-sm">
+            {/* Title */}
           <div
             className="mb-8 relative"
             style={{
