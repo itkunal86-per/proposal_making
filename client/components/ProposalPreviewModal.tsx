@@ -565,28 +565,88 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                 {/* Shapes, Tables, Texts, and Images */}
                 {(section.shapes && section.shapes.length > 0) || (section.tables && section.tables.length > 0) || ((section as any).texts && (section as any).texts.length > 0) || ((section as any).images && (section as any).images.length > 0) ? (
                   <div className="relative mt-4 bg-gray-50 rounded" style={{ position: "relative", minHeight: `${canvasHeights[section.id] || 400}px`, pointerEvents: "none" }}>
-                    {section.shapes && section.shapes.map((shape, sIndex) => (
-                      <div key={`shape-${sIndex}`} style={{ pointerEvents: "auto" }}>
-                        <ShapeEditor
-                          id={`shape-${section.id}-${sIndex}`}
-                          type={shape.type}
-                          width={shape.width}
-                          height={shape.height}
-                          backgroundColor={shape.backgroundColor}
-                          backgroundImage={shape.backgroundImage}
-                          backgroundSize={shape.backgroundSize}
-                          backgroundOpacity={shape.backgroundOpacity}
-                          borderWidth={shape.borderWidth}
-                          borderColor={shape.borderColor}
-                          borderRadius={shape.borderRadius}
-                          top={shape.top}
-                          left={shape.left}
-                          selected={false}
-                          onSelect={() => {}}
-                          onUpdate={() => {}}
-                        />
-                      </div>
-                    ))}
+                    {section.shapes && section.shapes.map((shape, sIndex) => {
+                      const backgroundOverlayOpacity = shape.backgroundImage && shape.backgroundOpacity ? (100 - parseInt(shape.backgroundOpacity || "100")) / 100 : 0;
+                      const commonShapeStyle: React.CSSProperties = {
+                        position: "absolute",
+                        left: `${shape.left}px`,
+                        top: `${shape.top}px`,
+                        width: `${shape.width}px`,
+                        height: `${shape.height}px`,
+                        cursor: "default",
+                        backgroundColor: shape.backgroundColor,
+                        backgroundImage: shape.backgroundImage ? `url(${shape.backgroundImage})` : undefined,
+                        backgroundSize: shape.backgroundImage ? shape.backgroundSize : undefined,
+                        backgroundPosition: "center",
+                        backgroundRepeat: "no-repeat",
+                        borderWidth: shape.borderWidth ? `${shape.borderWidth}px` : "0px",
+                        borderColor: shape.borderColor,
+                        borderStyle: shape.borderWidth ? "solid" : "none",
+                      };
+
+                      return (
+                        <div key={`shape-${sIndex}`} style={{ pointerEvents: "none" }}>
+                          {shape.type === "circle" ? (
+                            <div
+                              style={{
+                                ...commonShapeStyle,
+                                borderRadius: "50%",
+                              }}
+                            >
+                              {shape.backgroundImage && backgroundOverlayOpacity > 0 && (
+                                <div
+                                  style={{
+                                    position: "absolute",
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    bottom: 0,
+                                    backgroundColor: `rgba(255, 255, 255, ${backgroundOverlayOpacity})`,
+                                    borderRadius: "50%",
+                                    pointerEvents: "none",
+                                  }}
+                                />
+                              )}
+                            </div>
+                          ) : shape.type === "triangle" ? (
+                            <div
+                              style={{
+                                position: "absolute",
+                                left: `${shape.left}px`,
+                                top: `${shape.top}px`,
+                                width: 0,
+                                height: 0,
+                                borderLeft: `${shape.width / 2}px solid transparent`,
+                                borderRight: `${shape.width / 2}px solid transparent`,
+                                borderBottom: `${shape.height}px solid ${shape.backgroundColor}`,
+                              }}
+                            />
+                          ) : (
+                            <div
+                              style={{
+                                ...commonShapeStyle,
+                                borderRadius: shape.borderRadius ? `${shape.borderRadius}px` : "0px",
+                              }}
+                            >
+                              {shape.backgroundImage && backgroundOverlayOpacity > 0 && (
+                                <div
+                                  style={{
+                                    position: "absolute",
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    bottom: 0,
+                                    backgroundColor: `rgba(255, 255, 255, ${backgroundOverlayOpacity})`,
+                                    borderRadius: shape.borderRadius ? `${shape.borderRadius}px` : "0px",
+                                    pointerEvents: "none",
+                                  }}
+                                />
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                     {section.tables && section.tables.map((table, tIndex) => (
                       <div key={`table-${tIndex}`} style={{ pointerEvents: "auto" }}>
                         <TableEditor
