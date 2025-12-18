@@ -109,7 +109,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
       tempContainer.style.top = '-9999px';
       tempContainer.style.left = '-9999px';
       tempContainer.style.visibility = 'hidden';
-      tempContainer.style.width = clonedElement.offsetWidth + 'px';
+      tempContainer.style.width = element.offsetWidth + 'px';
       tempContainer.appendChild(clonedElement);
       document.body.appendChild(tempContainer);
 
@@ -131,79 +131,96 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
         await Promise.all(imageLoadPromises);
 
         // Convert background images to actual img tags for better PDF support
-        const elementsWithBg = clonedElement.querySelectorAll("[style*='background-image']");
+        const elementsWithBg = clonedElement.querySelectorAll("[style*='background']");
         const bgImagePromises: Promise<void>[] = [];
 
         elementsWithBg.forEach((el) => {
           const styleAttr = (el as HTMLElement).getAttribute('style') || '';
-          const match = styleAttr.match(/background-image:\s*url\(["']?([^"']+)["']?\)/);
+          // Match both url() formats
+          const matches = styleAttr.match(/background(?:-image)?:\s*url\(["']?([^"')\s]+)["']?\)/g);
 
-          if (match && match[1]) {
-            const imageUrl = match[1];
+          if (matches) {
+            matches.forEach((match) => {
+              const urlMatch = match.match(/url\(["']?([^"')\s]+)["']?\)/);
+              if (urlMatch && urlMatch[1]) {
+                const imageUrl = urlMatch[1];
 
-            // Create promise to load and insert image
-            const promise = new Promise<void>((resolve) => {
-              const img = new Image();
-              img.crossOrigin = "anonymous";
+                // Create promise to load and insert image
+                const promise = new Promise<void>((resolve) => {
+                  const img = new Image();
+                  img.crossOrigin = "anonymous";
 
-              const onLoadOrError = () => {
-                // Create img element and insert it
-                const imgElement = document.createElement('img');
-                imgElement.src = imageUrl;
-                imgElement.style.width = '100%';
-                imgElement.style.height = '100%';
-                imgElement.style.objectFit = 'cover';
-                imgElement.style.objectPosition = 'center';
-                imgElement.style.display = 'block';
-                imgElement.style.position = 'absolute';
-                imgElement.style.top = '0';
-                imgElement.style.left = '0';
-                imgElement.style.zIndex = '0';
+                  const onLoadOrError = () => {
+                    // Create img element and insert it at the beginning
+                    const imgElement = document.createElement('img');
+                    imgElement.src = imageUrl;
+                    imgElement.style.width = '100%';
+                    imgElement.style.height = '100%';
+                    imgElement.style.objectFit = 'cover';
+                    imgElement.style.objectPosition = 'center';
+                    imgElement.style.display = 'block';
+                    imgElement.style.position = 'absolute';
+                    imgElement.style.top = '0';
+                    imgElement.style.left = '0';
+                    imgElement.style.zIndex = '0';
+                    imgElement.style.margin = '0';
+                    imgElement.style.padding = '0';
 
-                const targetEl = el as HTMLElement;
-                targetEl.style.position = 'relative';
+                    const targetEl = el as HTMLElement;
+                    targetEl.style.position = 'relative';
 
-                // Move existing children to a wrapper with higher z-index
-                const contentWrapper = document.createElement('div');
-                contentWrapper.style.position = 'relative';
-                contentWrapper.style.zIndex = '1';
+                    // Move existing children to a wrapper with higher z-index
+                    if (targetEl.hasChildNodes()) {
+                      const contentWrapper = document.createElement('div');
+                      contentWrapper.style.position = 'relative';
+                      contentWrapper.style.zIndex = '1';
+                      contentWrapper.style.width = '100%';
+                      contentWrapper.style.height = '100%';
 
-                while (targetEl.firstChild) {
-                  contentWrapper.appendChild(targetEl.firstChild);
-                }
-                targetEl.appendChild(imgElement);
-                targetEl.appendChild(contentWrapper);
+                      while (targetEl.firstChild) {
+                        contentWrapper.appendChild(targetEl.firstChild);
+                      }
+                      targetEl.appendChild(imgElement);
+                      targetEl.appendChild(contentWrapper);
+                    } else {
+                      targetEl.appendChild(imgElement);
+                    }
 
-                // Remove or modify background-image style
-                const newStyle = styleAttr
-                  .replace(/background-image:\s*url\([^)]+\);?/g, '')
-                  .replace(/background-size:[^;]*;?/g, '')
-                  .replace(/background-position:[^;]*;?/g, '')
-                  .replace(/background-repeat:[^;]*;?/g, '');
+                    // Remove background properties from style
+                    const newStyle = styleAttr
+                      .replace(/background(?:-image)?:\s*url\([^)]+\);?/g, '')
+                      .replace(/background-size:[^;]*;?/g, '')
+                      .replace(/background-position:[^;]*;?/g, '')
+                      .replace(/background-repeat:[^;]*;?/g, '')
+                      .replace(/background-attachment:[^;]*;?/g, '')
+                      .replace(/;\s*;/g, ';') // Remove double semicolons
+                      .trim();
 
-                if (newStyle.trim()) {
-                  targetEl.setAttribute('style', newStyle);
-                } else {
-                  targetEl.removeAttribute('style');
-                }
+                    if (newStyle && newStyle !== ';') {
+                      targetEl.setAttribute('style', newStyle.replace(/^;|;$/, ''));
+                    } else {
+                      targetEl.removeAttribute('style');
+                    }
 
-                resolve();
-              };
+                    resolve();
+                  };
 
-              img.onload = onLoadOrError;
-              img.onerror = onLoadOrError;
-              img.src = imageUrl;
+                  img.onload = onLoadOrError;
+                  img.onerror = onLoadOrError;
+                  img.src = imageUrl;
+                });
+
+                bgImagePromises.push(promise);
+              }
             });
-
-            bgImagePromises.push(promise);
           }
         });
 
         // Wait for all background images to be processed
         await Promise.all(bgImagePromises);
 
-        // Additional delay to ensure all rendering is complete
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Additional delay to ensure all rendering is complete and canvas ready
+        await new Promise(resolve => setTimeout(resolve, 1200));
 
         const opt = {
           margin: [10, 10, 10, 10],
@@ -215,7 +232,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
             allowTaint: true,
             logging: false,
             backgroundColor: "#ffffff",
-            windowHeight: clonedElement.scrollHeight || clonedElement.clientHeight,
+            windowHeight: clonedElement.scrollHeight + 100,
           },
           jsPDF: { orientation: "portrait" as const, unit: "mm" as const, format: "a4" as const },
         };
@@ -224,7 +241,11 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
         toast({ title: "Success", description: "Proposal exported as PDF" });
       } finally {
         // Clean up temporary container
-        document.body.removeChild(tempContainer);
+        setTimeout(() => {
+          if (tempContainer.parentNode) {
+            document.body.removeChild(tempContainer);
+          }
+        }, 100);
       }
     } catch (error) {
       console.error("PDF export error:", error);
