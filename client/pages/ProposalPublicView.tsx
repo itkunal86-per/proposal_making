@@ -145,34 +145,33 @@ export default function ProposalPublicView() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
-      {/* Left Sidebar */}
-      <div className="flex flex-1 overflow-hidden">
-        <div className="w-48 border-r border-slate-200 bg-white overflow-y-auto">
-          <div className="sticky top-0 bg-white border-b border-slate-200 p-4 z-10">
-            <h3 className="text-sm font-semibold text-slate-900">Sections</h3>
-          </div>
-          <nav className="p-2">
-            {proposal?.sections.map((section) => (
-              <button
-                key={section.id}
-                onClick={() => scrollToSection(section.id)}
-                className={`w-full text-left px-3 py-2 rounded text-sm transition-colors ${
-                  activeSection === section.id
-                    ? 'bg-blue-50 text-blue-700 font-medium'
-                    : 'text-slate-700 hover:bg-slate-50'
-                }`}
-                title={section.title}
-              >
-                <div className="truncate">{section.title}</div>
-              </button>
-            ))}
-          </nav>
+    <div className="min-h-screen bg-slate-50">
+      {/* Left Sidebar - Fixed */}
+      <div className="fixed left-0 top-0 h-screen w-48 border-r border-slate-200 bg-white flex flex-col z-40">
+        <div className="border-b border-slate-200 p-4">
+          <h3 className="text-sm font-semibold text-slate-900">Sections</h3>
         </div>
+        <nav className="flex-1 overflow-y-auto p-2">
+          {proposal?.sections.map((section) => (
+            <button
+              key={section.id}
+              onClick={() => scrollToSection(section.id)}
+              className={`w-full text-left px-3 py-2 rounded text-sm transition-colors ${
+                activeSection === section.id
+                  ? 'bg-blue-50 text-blue-700 font-medium'
+                  : 'text-slate-700 hover:bg-slate-50'
+              }`}
+              title={section.title}
+            >
+              <div className="truncate">{section.title}</div>
+            </button>
+          ))}
+        </nav>
+      </div>
 
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto">
-          <div ref={contentRef} className="max-w-4xl mx-auto bg-white p-8 shadow-sm">
+      {/* Content - Offset for fixed sidebar */}
+      <div className="ml-48">
+        <div ref={contentRef} className="max-w-4xl mx-auto bg-white p-8 shadow-sm">
               {/* Title */}
             <div
               className="mb-8 relative"
@@ -568,7 +567,6 @@ export default function ProposalPublicView() {
               </div>
             ))}
           </div>
-        </div>
       </div>
     </div>
   );
