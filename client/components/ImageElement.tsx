@@ -56,20 +56,35 @@ export const ImageElement: React.FC<ImageElementProps> = ({
         outline: selected ? "2px solid #3b82f6" : "none",
         outlineOffset: "2px",
         cursor: "pointer",
-        backgroundImage: url ? `url(${url})` : undefined,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-        backgroundColor: url ? "transparent" : "#f3f4f6",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         fontSize: "12px",
         color: "#6b7280",
         fontWeight: "500",
+        overflow: "hidden",
+        backgroundColor: url ? "transparent" : "#f3f4f6",
       }}
     >
-      {!url && "Click to add image URL"}
+      {url ? (
+        <img
+          src={url}
+          alt="Element"
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            objectPosition: "center",
+            display: "block",
+            pointerEvents: "none",
+          }}
+          onError={(e) => {
+            (e.target as HTMLImageElement).style.display = "none";
+          }}
+        />
+      ) : (
+        "Click to add image URL"
+      )}
     </div>
   );
 };
