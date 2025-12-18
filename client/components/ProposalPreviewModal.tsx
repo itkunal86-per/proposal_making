@@ -100,99 +100,87 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
         return;
       }
 
-      // Store original styles to restore later
-      const originalElements: Array<{ element: HTMLElement; originalHtml: string }> = [];
+      // Clone the element to avoid modifying the actual modal
+      const clonedElement = element.cloneNode(true) as HTMLElement;
 
       // Find and process all elements with background-image style
-      const elementsWithBg = element.querySelectorAll("[style*='background']");
+      const elementsWithBg = clonedElement.querySelectorAll("[style*='background-image']");
 
-      for (const el of Array.from(elementsWithBg)) {
+      elementsWithBg.forEach((el) => {
         const htmlElement = el as HTMLElement;
         const styleAttr = htmlElement.getAttribute('style') || '';
 
-        // Store original for restoration
-        originalElements.push({
-          element: htmlElement,
-          originalHtml: htmlElement.outerHTML,
-        });
+        // Extract background image URL
+        const bgMatch = styleAttr.match(/background-image:\s*url\(["']?([^"'()]+)["']?\)/);
 
-        // Extract background image URLs
-        const bgMatches = styleAttr.match(/background-image:\s*url\(["']?([^"'()]+)["']?\)/g);
+        if (bgMatch?.[1]) {
+          const imageUrl = bgMatch[1];
 
-        if (bgMatches) {
-          for (const bgMatch of bgMatches) {
-            const urlMatch = bgMatch.match(/url\(["']?([^"'()]+)["']?\)/);
-            if (urlMatch?.[1]) {
-              const imageUrl = urlMatch[1];
+          // Create actual img element
+          const img = document.createElement('img');
+          img.src = imageUrl;
+          img.style.cssText = `
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 0;
+            display: block;
+            margin: 0;
+            padding: 0;
+            border: none;
+          `;
 
-              // Create actual img element
-              const img = document.createElement('img');
-              img.src = imageUrl;
-              img.style.cssText = `
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-                object-position: center;
-                position: absolute;
-                top: 0;
-                left: 0;
-                z-index: 0;
-                display: block;
-              `;
+          // Wrap existing content
+          const contentWrapper = document.createElement('div');
+          contentWrapper.style.cssText = 'position: relative; z-index: 1; width: 100%; height: 100%;';
 
-              // Wrap existing content
-              if (htmlElement.children.length > 0) {
-                const contentWrapper = document.createElement('div');
-                contentWrapper.style.cssText = 'position: relative; z-index: 1; width: 100%; height: 100%;';
+          while (htmlElement.firstChild) {
+            contentWrapper.appendChild(htmlElement.firstChild);
+          }
 
-                while (htmlElement.firstChild) {
-                  contentWrapper.appendChild(htmlElement.firstChild);
-                }
+          htmlElement.style.position = 'relative';
+          htmlElement.appendChild(img);
+          if (contentWrapper.children.length > 0 || contentWrapper.textContent) {
+            htmlElement.appendChild(contentWrapper);
+          }
 
-                htmlElement.style.position = 'relative';
-                htmlElement.appendChild(img);
-                htmlElement.appendChild(contentWrapper);
-              } else {
-                htmlElement.style.position = 'relative';
-                htmlElement.appendChild(img);
-              }
+          // Remove background-image styles
+          const newStyle = styleAttr
+            .replace(/background-image:\s*url\([^)]+\);?/g, '')
+            .replace(/background-size:\s*[^;]+;?/g, '')
+            .replace(/background-position:\s*[^;]+;?/g, '')
+            .replace(/background-repeat:\s*[^;]+;?/g, '');
 
-              // Remove background-image style
-              const newStyle = styleAttr
-                .replace(/background-image:\s*url\([^)]+\);?/g, '')
-                .replace(/background-size:\s*[^;]+;?/g, '')
-                .replace(/background-position:\s*[^;]+;?/g, '')
-                .replace(/background-repeat:\s*[^;]+;?/g, '');
-
-              if (newStyle.trim()) {
-                htmlElement.setAttribute('style', newStyle);
-              } else {
-                htmlElement.removeAttribute('style');
-              }
-            }
+          if (newStyle.trim()) {
+            htmlElement.setAttribute('style', newStyle);
+          } else {
+            htmlElement.removeAttribute('style');
           }
         }
-      }
+      });
 
-      // Wait for all images to load
-      const allImages = element.querySelectorAll('img');
+      // Wait for all images in cloned element to load
+      const allImages = clonedElement.querySelectorAll('img');
       const imageLoadPromises = Array.from(allImages).map(
         (img) =>
           new Promise<void>((resolve) => {
             const imgEl = img as HTMLImageElement;
-            if (imgEl.complete) {
-              resolve();
-            } else {
-              imgEl.onload = () => resolve();
-              imgEl.onerror = () => resolve();
-            }
+            // Force image loading from cloned element
+            const tempImg = new Image();
+            tempImg.onload = () => resolve();
+            tempImg.onerror = () => resolve();
+            tempImg.src = imgEl.src;
           })
       );
 
       await Promise.all(imageLoadPromises);
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 800));
 
-      // Export to PDF
+      // Export to PDF from cloned element
       const opt = {
         margin: 10,
         filename: `${proposal.title}.pdf`,
@@ -207,13 +195,8 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
         jsPDF: { orientation: 'portrait' as const, unit: 'mm' as const, format: 'a4' as const },
       };
 
-      html2pdf().set(opt).from(element).save();
+      html2pdf().set(opt).from(clonedElement).save();
       toast({ title: 'Success', description: 'Proposal exported as PDF' });
-
-      // Restore original HTML for all modified elements
-      for (const { element: el, originalHtml } of originalElements) {
-        el.outerHTML = originalHtml;
-      }
     } catch (error) {
       console.error('PDF export error:', error);
       toast({ title: 'Error', description: 'Failed to export PDF' });
