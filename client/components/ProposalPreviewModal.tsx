@@ -217,11 +217,9 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
     const element = sectionRefs.current.get(sectionId);
     if (element) {
       setActiveSection(sectionId);
-      const scrollContainer = element.closest('.flex-1');
-      if (scrollContainer) {
-        const offset = element.offsetTop - 20;
-        scrollContainer.scrollTop = offset;
-      }
+      setTimeout(() => {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
     }
   };
 
