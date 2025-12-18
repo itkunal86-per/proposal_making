@@ -9,6 +9,9 @@ export default function ProposalPublicView() {
   const [proposal, setProposal] = useState<Proposal | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeSection, setActiveSection] = useState<string | null>(null);
+  const [canvasHeights, setCanvasHeights] = useState<Record<string, number>>({});
+  const sectionRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
   useEffect(() => {
     const loadProposal = async () => {
@@ -48,6 +51,75 @@ export default function ProposalPublicView() {
     loadProposal();
   }, [token]);
 
+  React.useEffect(() => {
+    if (!proposal) return;
+
+    const newHeights: Record<string, number> = {};
+
+    proposal.sections.forEach((section) => {
+      if ((section.shapes && section.shapes.length > 0) ||
+          (section.tables && section.tables.length > 0) ||
+          ((section as any).texts && (section as any).texts.length > 0) ||
+          ((section as any).images && (section as any).images.length > 0)) {
+        let maxHeight = 400; // minimum height
+
+        // Calculate max height needed for shapes
+        if (section.shapes) {
+          section.shapes.forEach((shape) => {
+            const bottomPos = shape.top + shape.height + 20;
+            if (bottomPos > maxHeight) {
+              maxHeight = bottomPos;
+            }
+          });
+        }
+
+        // Calculate max height needed for tables
+        if (section.tables) {
+          section.tables.forEach((table) => {
+            const bottomPos = table.top + table.height + 20;
+            if (bottomPos > maxHeight) {
+              maxHeight = bottomPos;
+            }
+          });
+        }
+
+        // Calculate max height needed for text elements
+        if ((section as any).texts) {
+          (section as any).texts.forEach((text: any) => {
+            const bottomPos = text.top + (text.height || 100) + 20;
+            if (bottomPos > maxHeight) {
+              maxHeight = bottomPos;
+            }
+          });
+        }
+
+        // Calculate max height needed for image elements
+        if ((section as any).images) {
+          (section as any).images.forEach((image: any) => {
+            const bottomPos = image.top + image.height + 20;
+            if (bottomPos > maxHeight) {
+              maxHeight = bottomPos;
+            }
+          });
+        }
+
+        newHeights[section.id] = maxHeight;
+      }
+    });
+
+    setCanvasHeights(newHeights);
+  }, [proposal]);
+
+  const scrollToSection = (sectionId: string) => {
+    const element = sectionRefs.current.get(sectionId);
+    if (element) {
+      setActiveSection(sectionId);
+      setTimeout(() => {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -74,89 +146,80 @@ export default function ProposalPublicView() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto">
-        <div ref={contentRef} className="max-w-4xl mx-auto bg-white p-8 shadow-sm mt-6 mb-6">
-          {/* Title */}
-          <div
-            className="mb-8 relative"
-            style={{
-              color: (proposal as any).titleStyles?.color,
-              fontSize: `${(proposal as any).titleStyles?.fontSize || 32}px`,
-              textAlign: ((proposal as any).titleStyles?.textAlign || "left") as any,
-              backgroundColor: (proposal as any).titleStyles?.backgroundColor,
-              backgroundImage: (proposal as any).titleStyles?.backgroundImage ? `url(${(proposal as any).titleStyles?.backgroundImage})` : undefined,
-              backgroundSize: (proposal as any).titleStyles?.backgroundSize || "cover",
-              backgroundPosition: "center",
-              backgroundRepeat: "no-repeat",
-              padding: `${(proposal as any).titleStyles?.paddingTop || 0}px ${(proposal as any).titleStyles?.paddingRight || 0}px ${(proposal as any).titleStyles?.paddingBottom || 0}px ${(proposal as any).titleStyles?.paddingLeft || 0}px`,
-              borderRadius: (proposal as any).titleStyles?.borderRadius ? `${(proposal as any).titleStyles?.borderRadius}px` : undefined,
-              fontWeight: (proposal as any).titleStyles?.bold ? "bold" : "normal",
-              fontStyle: (proposal as any).titleStyles?.italic ? "italic" : "normal",
-              textDecoration: (proposal as any).titleStyles?.underline ? "underline" : (proposal as any).titleStyles?.strikethrough ? "line-through" : "none",
-            }}
-          >
-            {(proposal as any).titleStyles?.backgroundImage && (proposal as any).titleStyles?.backgroundOpacity && (
-              <div
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  backgroundColor: `rgba(255, 255, 255, ${(100 - parseInt((proposal as any).titleStyles?.backgroundOpacity || "100")) / 100})`,
-                  borderRadius: (proposal as any).titleStyles?.borderRadius ? `${(proposal as any).titleStyles?.borderRadius}px` : undefined,
-                  pointerEvents: "none",
-                }}
-              />
-            )}
-            <div style={{ position: "relative", zIndex: 1 }}>
-              {proposal.title}
-            </div>
-          </div>
+      {/* Left Sidebar - Fixed */}
+      <div className="fixed left-0 top-0 h-screen w-48 border-r border-slate-200 bg-white flex flex-col z-40">
+        <div className="border-b border-slate-200 p-4">
+          <h3 className="text-sm font-semibold text-slate-900">Sections</h3>
+        </div>
+        <nav className="flex-1 overflow-y-auto p-2">
+          {proposal?.sections.map((section) => (
+            <button
+              key={section.id}
+              onClick={() => scrollToSection(section.id)}
+              className={`w-full text-left px-3 py-2 rounded text-sm transition-colors ${
+                activeSection === section.id
+                  ? 'bg-blue-50 text-blue-700 font-medium'
+                  : 'text-slate-700 hover:bg-slate-50'
+              }`}
+              title={section.title}
+            >
+              <div className="truncate">{section.title}</div>
+            </button>
+          ))}
+        </nav>
+      </div>
 
-          {/* Sections */}
-          {proposal.sections.map((section) => (
-            <div key={section.id} className="mb-8">
-              {/* Section Title */}
+      {/* Content - Offset for fixed sidebar */}
+      <div className="ml-48">
+        <div ref={contentRef} className="max-w-4xl mx-auto bg-white p-8 shadow-sm">
+              {/* Title */}
+            <div
+              className="mb-8 relative"
+              style={{
+                color: (proposal as any).titleStyles?.color,
+                fontSize: `${(proposal as any).titleStyles?.fontSize || 32}px`,
+                textAlign: ((proposal as any).titleStyles?.textAlign || "left") as any,
+                backgroundColor: (proposal as any).titleStyles?.backgroundColor,
+                backgroundImage: (proposal as any).titleStyles?.backgroundImage ? `url(${(proposal as any).titleStyles?.backgroundImage})` : undefined,
+                backgroundSize: (proposal as any).titleStyles?.backgroundSize || "cover",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
+                padding: `${(proposal as any).titleStyles?.paddingTop || 0}px ${(proposal as any).titleStyles?.paddingRight || 0}px ${(proposal as any).titleStyles?.paddingBottom || 0}px ${(proposal as any).titleStyles?.paddingLeft || 0}px`,
+                borderRadius: (proposal as any).titleStyles?.borderRadius ? `${(proposal as any).titleStyles?.borderRadius}px` : undefined,
+                fontWeight: (proposal as any).titleStyles?.bold ? "bold" : "normal",
+                fontStyle: (proposal as any).titleStyles?.italic ? "italic" : "normal",
+                textDecoration: (proposal as any).titleStyles?.underline ? "underline" : (proposal as any).titleStyles?.strikethrough ? "line-through" : "none",
+              }}
+            >
+              {(proposal as any).titleStyles?.backgroundImage && (proposal as any).titleStyles?.backgroundOpacity && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: `rgba(255, 255, 255, ${(100 - parseInt((proposal as any).titleStyles?.backgroundOpacity || "100")) / 100})`,
+                    borderRadius: (proposal as any).titleStyles?.borderRadius ? `${(proposal as any).titleStyles?.borderRadius}px` : undefined,
+                    pointerEvents: "none",
+                  }}
+                />
+              )}
+              <div style={{ position: "relative", zIndex: 1 }}>
+                {proposal.title}
+              </div>
+            </div>
+
+            {/* Sections */}
+            {proposal.sections.map((section) => (
               <div
-                className="mb-4 relative"
-                style={{
-                  color: (section as any).titleStyles?.color,
-                  fontSize: `${(section as any).titleStyles?.fontSize || 24}px`,
-                  textAlign: ((section as any).titleStyles?.textAlign || "left") as any,
-                  backgroundColor: (section as any).titleStyles?.backgroundColor,
-                  backgroundImage: (section as any).titleStyles?.backgroundImage ? `url(${(section as any).titleStyles?.backgroundImage})` : undefined,
-                  backgroundSize: (section as any).titleStyles?.backgroundSize || "cover",
-                  backgroundPosition: "center",
-                  backgroundRepeat: "no-repeat",
-                  padding: `${(section as any).titleStyles?.paddingTop || 0}px ${(section as any).titleStyles?.paddingRight || 0}px ${(section as any).titleStyles?.paddingBottom || 0}px ${(section as any).titleStyles?.paddingLeft || 0}px`,
-                  borderRadius: (section as any).titleStyles?.borderRadius ? `${(section as any).titleStyles?.borderRadius}px` : undefined,
-                  fontWeight: (section as any).titleStyles?.bold ? "bold" : "normal",
-                  fontStyle: (section as any).titleStyles?.italic ? "italic" : "normal",
-                  textDecoration: (section as any).titleStyles?.underline ? "underline" : (section as any).titleStyles?.strikethrough ? "line-through" : "none",
+                key={section.id}
+                className="mb-8"
+                ref={(el) => {
+                  if (el) sectionRefs.current.set(section.id, el);
                 }}
               >
-                {(section as any).titleStyles?.backgroundImage && (section as any).titleStyles?.backgroundOpacity && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      backgroundColor: `rgba(255, 255, 255, ${(100 - parseInt((section as any).titleStyles?.backgroundOpacity || "100")) / 100})`,
-                      borderRadius: (section as any).titleStyles?.borderRadius ? `${(section as any).titleStyles?.borderRadius}px` : undefined,
-                      pointerEvents: "none",
-                    }}
-                  />
-                )}
-                <div style={{ position: "relative", zIndex: 1 }}>
-                  {section.title}
-                </div>
-              </div>
-
-              {/* Section Content */}
+                {/* Section Content */}
               {section.layout !== "two-column" && section.layout !== "three-column" ? (
                 <div
                   className="relative prose prose-sm max-w-none"
@@ -301,12 +364,8 @@ export default function ProposalPublicView() {
               )}
 
               {/* Shapes, Texts, Tables, Images, and Media Container */}
-              <div
-                style={{
-                  position: "relative",
-                  minHeight: section.shapes || section.tables || (section as any).texts || (section as any).images ? "200px" : "0px",
-                }}
-              >
+              {(section.shapes && section.shapes.length > 0) || (section.tables && section.tables.length > 0) || ((section as any).texts && (section as any).texts.length > 0) || ((section as any).images && (section as any).images.length > 0) ? (
+                <div className="relative mt-4 bg-gray-50 rounded" style={{ position: "relative", minHeight: `${canvasHeights[section.id] || 400}px`, pointerEvents: "none" }}>
                 {/* Shapes */}
                 {section.shapes && section.shapes.length > 0 && (
                   <>
@@ -473,7 +532,8 @@ export default function ProposalPublicView() {
                     ))}
                   </>
                 )}
-              </div>
+                </div>
+              ) : null}
 
               {/* Media */}
               {section.media && section.media.length > 0 && (
@@ -504,9 +564,9 @@ export default function ProposalPublicView() {
                   ))}
                 </div>
               )}
-            </div>
-          ))}
-        </div>
+              </div>
+            ))}
+          </div>
       </div>
     </div>
   );

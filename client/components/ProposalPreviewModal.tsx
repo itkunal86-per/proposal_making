@@ -31,6 +31,8 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
   const contentRef = useRef<HTMLDivElement>(null);
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [canvasHeights, setCanvasHeights] = useState<Record<string, number>>({});
+  const [activeSection, setActiveSection] = useState<string | null>(null);
+  const sectionRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
   React.useEffect(() => {
     const newHeights: Record<string, number> = {};
@@ -100,65 +102,106 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
         return;
       }
 
-      // Wait for all img tags to load
-      const images = element.querySelectorAll("img");
-      const imageLoadPromises = Array.from(images).map((img) => {
-        return new Promise<void>((resolve) => {
-          const imgElement = img as HTMLImageElement;
-          if (imgElement.complete) {
-            resolve();
-          } else {
-            imgElement.onload = () => resolve();
-            imgElement.onerror = () => resolve();
+      // Clone the element to avoid modifying the actual modal
+      const clonedElement = element.cloneNode(true) as HTMLElement;
+
+      // Find and process all elements with background-image style
+      const elementsWithBg = clonedElement.querySelectorAll("[style*='background-image']");
+
+      elementsWithBg.forEach((el) => {
+        const htmlElement = el as HTMLElement;
+        const styleAttr = htmlElement.getAttribute('style') || '';
+
+        // Extract background image URL
+        const bgMatch = styleAttr.match(/background-image:\s*url\(["']?([^"'()]+)["']?\)/);
+
+        if (bgMatch?.[1]) {
+          const imageUrl = bgMatch[1];
+
+          // Create actual img element
+          const img = document.createElement('img');
+          img.src = imageUrl;
+          img.style.cssText = `
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 0;
+            display: block;
+            margin: 0;
+            padding: 0;
+            border: none;
+          `;
+
+          // Wrap existing content
+          const contentWrapper = document.createElement('div');
+          contentWrapper.style.cssText = 'position: relative; z-index: 1; width: 100%; height: 100%;';
+
+          while (htmlElement.firstChild) {
+            contentWrapper.appendChild(htmlElement.firstChild);
           }
-        });
+
+          htmlElement.style.position = 'relative';
+          htmlElement.appendChild(img);
+          if (contentWrapper.children.length > 0 || contentWrapper.textContent) {
+            htmlElement.appendChild(contentWrapper);
+          }
+
+          // Remove background-image styles
+          const newStyle = styleAttr
+            .replace(/background-image:\s*url\([^)]+\);?/g, '')
+            .replace(/background-size:\s*[^;]+;?/g, '')
+            .replace(/background-position:\s*[^;]+;?/g, '')
+            .replace(/background-repeat:\s*[^;]+;?/g, '');
+
+          if (newStyle.trim()) {
+            htmlElement.setAttribute('style', newStyle);
+          } else {
+            htmlElement.removeAttribute('style');
+          }
+        }
       });
 
-      // Also preload background images by creating temporary img elements
-      const elementsWithBg = element.querySelectorAll("[style*='background-image']");
-      const bgImagePromises = Array.from(elementsWithBg).map((el) => {
-        return new Promise<void>((resolve) => {
-          const style = window.getComputedStyle(el);
-          const bgImage = style.backgroundImage;
-          const match = bgImage.match(/url\(["']?([^"']+)["']?\)/);
-
-          if (match && match[1]) {
+      // Wait for all images in cloned element to load
+      const allImages = clonedElement.querySelectorAll('img');
+      const imageLoadPromises = Array.from(allImages).map(
+        (img) =>
+          new Promise<void>((resolve) => {
+            const imgEl = img as HTMLImageElement;
+            // Force image loading from cloned element
             const tempImg = new Image();
-            tempImg.crossOrigin = "anonymous";
             tempImg.onload = () => resolve();
             tempImg.onerror = () => resolve();
-            tempImg.src = match[1];
-          } else {
-            resolve();
-          }
-        });
-      });
+            tempImg.src = imgEl.src;
+          })
+      );
 
-      await Promise.all([...imageLoadPromises, ...bgImagePromises]);
+      await Promise.all(imageLoadPromises);
+      await new Promise((resolve) => setTimeout(resolve, 800));
 
-      // Additional delay to ensure rendering
-      await new Promise(resolve => setTimeout(resolve, 500));
-
+      // Export to PDF from cloned element
       const opt = {
         margin: 10,
         filename: `${proposal.title}.pdf`,
-        image: { type: "jpeg" as const, quality: 0.98 },
+        image: { type: 'jpeg' as const, quality: 0.98 },
         html2canvas: {
           scale: 2,
           useCORS: true,
           allowTaint: true,
           logging: false,
-          backgroundColor: "#ffffff",
-          windowHeight: element.scrollHeight || element.clientHeight,
+          backgroundColor: '#ffffff',
         },
-        jsPDF: { orientation: "portrait" as const, unit: "mm" as const, format: "a4" as const },
+        jsPDF: { orientation: 'portrait' as const, unit: 'mm' as const, format: 'a4' as const },
       };
 
-      html2pdf().set(opt).from(element).save();
-      toast({ title: "Success", description: "Proposal exported as PDF" });
+      html2pdf().set(opt).from(clonedElement).save();
+      toast({ title: 'Success', description: 'Proposal exported as PDF' });
     } catch (error) {
-      console.error("PDF export error:", error);
-      toast({ title: "Error", description: "Failed to export PDF" });
+      console.error('PDF export error:', error);
+      toast({ title: 'Error', description: 'Failed to export PDF' });
     }
   };
 
@@ -168,6 +211,16 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
 
   const handleSendEmail = () => {
     toast({ title: "Coming soon", description: "Send email feature will be available soon" });
+  };
+
+  const scrollToSection = (sectionId: string) => {
+    const element = sectionRefs.current.get(sectionId);
+    if (element) {
+      setActiveSection(sectionId);
+      setTimeout(() => {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
   };
 
   return (
@@ -216,8 +269,33 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto bg-slate-50">
-          <div ref={contentRef} className="max-w-4xl mx-auto bg-white p-8 shadow-sm">
+        <div className="flex-1 flex overflow-hidden bg-slate-50">
+          {/* Left Sidebar */}
+          <div className="w-48 border-r border-slate-200 bg-white overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-slate-200 p-4 z-10">
+              <h3 className="text-sm font-semibold text-slate-900">Sections</h3>
+            </div>
+            <nav className="p-2">
+              {proposal.sections.map((section) => (
+                <button
+                  key={section.id}
+                  onClick={() => scrollToSection(section.id)}
+                  className={`w-full text-left px-3 py-2 rounded text-sm transition-colors ${
+                    activeSection === section.id
+                      ? 'bg-blue-50 text-blue-700 font-medium'
+                      : 'text-slate-700 hover:bg-slate-50'
+                  }`}
+                  title={section.title}
+                >
+                  <div className="truncate">{section.title}</div>
+                </button>
+              ))}
+            </nav>
+          </div>
+
+          {/* Main Content */}
+          <div className="flex-1 overflow-y-auto">
+            <div ref={contentRef} className="max-w-4xl mx-auto bg-white p-8 shadow-sm">
             {/* Title */}
             <div
               className="mb-8 relative"
@@ -258,45 +336,13 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
 
             {/* Sections */}
             {proposal.sections.map((section) => (
-              <div key={section.id} className="mb-8">
-                {/* Section Title */}
-                <div
-                  className="mb-4 relative"
-                  style={{
-                    color: (section as any).titleStyles?.color,
-                    fontSize: `${(section as any).titleStyles?.fontSize || 24}px`,
-                    textAlign: ((section as any).titleStyles?.textAlign || "left") as any,
-                    backgroundColor: (section as any).titleStyles?.backgroundColor,
-                    backgroundImage: (section as any).titleStyles?.backgroundImage ? `url(${(section as any).titleStyles?.backgroundImage})` : undefined,
-                    backgroundSize: (section as any).titleStyles?.backgroundSize || "cover",
-                    backgroundPosition: "center",
-                    backgroundRepeat: "no-repeat",
-                    padding: `${(section as any).titleStyles?.paddingTop || 0}px ${(section as any).titleStyles?.paddingRight || 0}px ${(section as any).titleStyles?.paddingBottom || 0}px ${(section as any).titleStyles?.paddingLeft || 0}px`,
-                    borderRadius: (section as any).titleStyles?.borderRadius ? `${(section as any).titleStyles?.borderRadius}px` : undefined,
-                    fontWeight: (section as any).titleStyles?.bold ? "bold" : "normal",
-                    fontStyle: (section as any).titleStyles?.italic ? "italic" : "normal",
-                    textDecoration: (section as any).titleStyles?.underline ? "underline" : (section as any).titleStyles?.strikethrough ? "line-through" : "none",
-                  }}
-                >
-                  {(section as any).titleStyles?.backgroundImage && (section as any).titleStyles?.backgroundOpacity && (
-                    <div
-                      style={{
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        backgroundColor: `rgba(255, 255, 255, ${(100 - parseInt((section as any).titleStyles?.backgroundOpacity || "100")) / 100})`,
-                        borderRadius: (section as any).titleStyles?.borderRadius ? `${(section as any).titleStyles?.borderRadius}px` : undefined,
-                        pointerEvents: "none",
-                      }}
-                    />
-                  )}
-                  <div style={{ position: "relative", zIndex: 1 }}>
-                    {section.title}
-                  </div>
-                </div>
-
+              <div
+                key={section.id}
+                className="mb-8"
+                ref={(el) => {
+                  if (el) sectionRefs.current.set(section.id, el);
+                }}
+              >
                 {/* Section Content */}
                 {section.layout !== "two-column" && section.layout !== "three-column" ? (
                   <div
@@ -474,28 +520,88 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                 {/* Shapes, Tables, Texts, and Images */}
                 {(section.shapes && section.shapes.length > 0) || (section.tables && section.tables.length > 0) || ((section as any).texts && (section as any).texts.length > 0) || ((section as any).images && (section as any).images.length > 0) ? (
                   <div className="relative mt-4 bg-gray-50 rounded" style={{ position: "relative", minHeight: `${canvasHeights[section.id] || 400}px`, pointerEvents: "none" }}>
-                    {section.shapes && section.shapes.map((shape, sIndex) => (
-                      <div key={`shape-${sIndex}`} style={{ pointerEvents: "auto" }}>
-                        <ShapeEditor
-                          id={`shape-${section.id}-${sIndex}`}
-                          type={shape.type}
-                          width={shape.width}
-                          height={shape.height}
-                          backgroundColor={shape.backgroundColor}
-                          backgroundImage={shape.backgroundImage}
-                          backgroundSize={shape.backgroundSize}
-                          backgroundOpacity={shape.backgroundOpacity}
-                          borderWidth={shape.borderWidth}
-                          borderColor={shape.borderColor}
-                          borderRadius={shape.borderRadius}
-                          top={shape.top}
-                          left={shape.left}
-                          selected={false}
-                          onSelect={() => {}}
-                          onUpdate={() => {}}
-                        />
-                      </div>
-                    ))}
+                    {section.shapes && section.shapes.map((shape, sIndex) => {
+                      const backgroundOverlayOpacity = shape.backgroundImage && shape.backgroundOpacity ? (100 - parseInt(shape.backgroundOpacity || "100")) / 100 : 0;
+                      const commonShapeStyle: React.CSSProperties = {
+                        position: "absolute",
+                        left: `${shape.left}px`,
+                        top: `${shape.top}px`,
+                        width: `${shape.width}px`,
+                        height: `${shape.height}px`,
+                        cursor: "default",
+                        backgroundColor: shape.backgroundColor,
+                        backgroundImage: shape.backgroundImage ? `url(${shape.backgroundImage})` : undefined,
+                        backgroundSize: shape.backgroundImage ? shape.backgroundSize : undefined,
+                        backgroundPosition: "center",
+                        backgroundRepeat: "no-repeat",
+                        borderWidth: shape.borderWidth ? `${shape.borderWidth}px` : "0px",
+                        borderColor: shape.borderColor,
+                        borderStyle: shape.borderWidth ? "solid" : "none",
+                      };
+
+                      return (
+                        <div key={`shape-${sIndex}`} style={{ pointerEvents: "none" }}>
+                          {shape.type === "circle" ? (
+                            <div
+                              style={{
+                                ...commonShapeStyle,
+                                borderRadius: "50%",
+                              }}
+                            >
+                              {shape.backgroundImage && backgroundOverlayOpacity > 0 && (
+                                <div
+                                  style={{
+                                    position: "absolute",
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    bottom: 0,
+                                    backgroundColor: `rgba(255, 255, 255, ${backgroundOverlayOpacity})`,
+                                    borderRadius: "50%",
+                                    pointerEvents: "none",
+                                  }}
+                                />
+                              )}
+                            </div>
+                          ) : shape.type === "triangle" ? (
+                            <div
+                              style={{
+                                position: "absolute",
+                                left: `${shape.left}px`,
+                                top: `${shape.top}px`,
+                                width: 0,
+                                height: 0,
+                                borderLeft: `${shape.width / 2}px solid transparent`,
+                                borderRight: `${shape.width / 2}px solid transparent`,
+                                borderBottom: `${shape.height}px solid ${shape.backgroundColor}`,
+                              }}
+                            />
+                          ) : (
+                            <div
+                              style={{
+                                ...commonShapeStyle,
+                                borderRadius: shape.borderRadius ? `${shape.borderRadius}px` : "0px",
+                              }}
+                            >
+                              {shape.backgroundImage && backgroundOverlayOpacity > 0 && (
+                                <div
+                                  style={{
+                                    position: "absolute",
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    bottom: 0,
+                                    backgroundColor: `rgba(255, 255, 255, ${backgroundOverlayOpacity})`,
+                                    borderRadius: shape.borderRadius ? `${shape.borderRadius}px` : "0px",
+                                    pointerEvents: "none",
+                                  }}
+                                />
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                     {section.tables && section.tables.map((table, tIndex) => (
                       <div key={`table-${tIndex}`} style={{ pointerEvents: "auto" }}>
                         <TableEditor
@@ -568,6 +674,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                 ) : null}
               </div>
             ))}
+          </div>
           </div>
         </div>
       </div>
