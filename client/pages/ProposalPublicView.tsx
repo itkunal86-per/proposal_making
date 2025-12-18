@@ -367,12 +367,8 @@ export default function ProposalPublicView() {
               )}
 
               {/* Shapes, Texts, Tables, Images, and Media Container */}
-              <div
-                style={{
-                  position: "relative",
-                  minHeight: section.shapes || section.tables || (section as any).texts || (section as any).images ? "200px" : "0px",
-                }}
-              >
+              {(section.shapes && section.shapes.length > 0) || (section.tables && section.tables.length > 0) || ((section as any).texts && (section as any).texts.length > 0) || ((section as any).images && (section as any).images.length > 0) ? (
+                <div className="relative mt-4 bg-gray-50 rounded" style={{ position: "relative", minHeight: `${canvasHeights[section.id] || 400}px`, pointerEvents: "none" }}>
                 {/* Shapes */}
                 {section.shapes && section.shapes.length > 0 && (
                   <>
@@ -539,7 +535,8 @@ export default function ProposalPublicView() {
                     ))}
                   </>
                 )}
-              </div>
+                </div>
+              ) : null}
 
               {/* Media */}
               {section.media && section.media.length > 0 && (
