@@ -213,6 +213,18 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
     toast({ title: "Coming soon", description: "Send email feature will be available soon" });
   };
 
+  const scrollToSection = (sectionId: string) => {
+    const element = sectionRefs.current.get(sectionId);
+    if (element) {
+      setActiveSection(sectionId);
+      const scrollContainer = element.closest('.flex-1');
+      if (scrollContainer) {
+        const offset = element.offsetTop - 20;
+        scrollContainer.scrollTop = offset;
+      }
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black/50 z-40">
       <div className="fixed inset-0 z-50 flex flex-col bg-white">
