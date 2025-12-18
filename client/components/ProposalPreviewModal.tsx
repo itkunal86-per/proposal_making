@@ -100,156 +100,123 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
         return;
       }
 
-      // Clone the element to preserve original rendering
-      const clonedElement = element.cloneNode(true) as HTMLElement;
+      // Store original styles to restore later
+      const originalElements: Array<{ element: HTMLElement; originalHtml: string }> = [];
 
-      // Create a temporary container and append to body to ensure proper rendering
-      const tempContainer = document.createElement('div');
-      tempContainer.style.position = 'absolute';
-      tempContainer.style.top = '-9999px';
-      tempContainer.style.left = '-9999px';
-      tempContainer.style.visibility = 'hidden';
-      tempContainer.style.width = element.offsetWidth + 'px';
-      tempContainer.appendChild(clonedElement);
-      document.body.appendChild(tempContainer);
+      // Find and process all elements with background-image style
+      const elementsWithBg = element.querySelectorAll("[style*='background']");
 
-      try {
-        // Wait for all img tags to load (original images)
-        const images = clonedElement.querySelectorAll("img");
-        const imageLoadPromises = Array.from(images).map((img) => {
-          return new Promise<void>((resolve) => {
-            const imgElement = img as HTMLImageElement;
-            if (imgElement.complete) {
+      for (const el of Array.from(elementsWithBg)) {
+        const htmlElement = el as HTMLElement;
+        const styleAttr = htmlElement.getAttribute('style') || '';
+
+        // Store original for restoration
+        originalElements.push({
+          element: htmlElement,
+          originalHtml: htmlElement.outerHTML,
+        });
+
+        // Extract background image URLs
+        const bgMatches = styleAttr.match(/background-image:\s*url\(["']?([^"'()]+)["']?\)/g);
+
+        if (bgMatches) {
+          for (const bgMatch of bgMatches) {
+            const urlMatch = bgMatch.match(/url\(["']?([^"'()]+)["']?\)/);
+            if (urlMatch?.[1]) {
+              const imageUrl = urlMatch[1];
+
+              // Create actual img element
+              const img = document.createElement('img');
+              img.src = imageUrl;
+              img.style.cssText = `
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                object-position: center;
+                position: absolute;
+                top: 0;
+                left: 0;
+                z-index: 0;
+                display: block;
+              `;
+
+              // Wrap existing content
+              if (htmlElement.children.length > 0) {
+                const contentWrapper = document.createElement('div');
+                contentWrapper.style.cssText = 'position: relative; z-index: 1; width: 100%; height: 100%;';
+
+                while (htmlElement.firstChild) {
+                  contentWrapper.appendChild(htmlElement.firstChild);
+                }
+
+                htmlElement.style.position = 'relative';
+                htmlElement.appendChild(img);
+                htmlElement.appendChild(contentWrapper);
+              } else {
+                htmlElement.style.position = 'relative';
+                htmlElement.appendChild(img);
+              }
+
+              // Remove background-image style
+              const newStyle = styleAttr
+                .replace(/background-image:\s*url\([^)]+\);?/g, '')
+                .replace(/background-size:\s*[^;]+;?/g, '')
+                .replace(/background-position:\s*[^;]+;?/g, '')
+                .replace(/background-repeat:\s*[^;]+;?/g, '');
+
+              if (newStyle.trim()) {
+                htmlElement.setAttribute('style', newStyle);
+              } else {
+                htmlElement.removeAttribute('style');
+              }
+            }
+          }
+        }
+      }
+
+      // Wait for all images to load
+      const allImages = element.querySelectorAll('img');
+      const imageLoadPromises = Array.from(allImages).map(
+        (img) =>
+          new Promise<void>((resolve) => {
+            const imgEl = img as HTMLImageElement;
+            if (imgEl.complete) {
               resolve();
             } else {
-              imgElement.onload = () => resolve();
-              imgElement.onerror = () => resolve();
+              imgEl.onload = () => resolve();
+              imgEl.onerror = () => resolve();
             }
-          });
-        });
+          })
+      );
 
-        await Promise.all(imageLoadPromises);
+      await Promise.all(imageLoadPromises);
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
-        // Convert background images to actual img tags for better PDF support
-        const elementsWithBg = clonedElement.querySelectorAll("[style*='background']");
-        const bgImagePromises: Promise<void>[] = [];
+      // Export to PDF
+      const opt = {
+        margin: 10,
+        filename: `${proposal.title}.pdf`,
+        image: { type: 'jpeg' as const, quality: 0.98 },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          logging: false,
+          backgroundColor: '#ffffff',
+        },
+        jsPDF: { orientation: 'portrait' as const, unit: 'mm' as const, format: 'a4' as const },
+      };
 
-        elementsWithBg.forEach((el) => {
-          const styleAttr = (el as HTMLElement).getAttribute('style') || '';
-          // Match both url() formats
-          const matches = styleAttr.match(/background(?:-image)?:\s*url\(["']?([^"')\s]+)["']?\)/g);
+      html2pdf().set(opt).from(element).save();
+      toast({ title: 'Success', description: 'Proposal exported as PDF' });
 
-          if (matches) {
-            matches.forEach((match) => {
-              const urlMatch = match.match(/url\(["']?([^"')\s]+)["']?\)/);
-              if (urlMatch && urlMatch[1]) {
-                const imageUrl = urlMatch[1];
-
-                // Create promise to load and insert image
-                const promise = new Promise<void>((resolve) => {
-                  const img = new Image();
-                  img.crossOrigin = "anonymous";
-
-                  const onLoadOrError = () => {
-                    // Create img element and insert it at the beginning
-                    const imgElement = document.createElement('img');
-                    imgElement.src = imageUrl;
-                    imgElement.style.width = '100%';
-                    imgElement.style.height = '100%';
-                    imgElement.style.objectFit = 'cover';
-                    imgElement.style.objectPosition = 'center';
-                    imgElement.style.display = 'block';
-                    imgElement.style.position = 'absolute';
-                    imgElement.style.top = '0';
-                    imgElement.style.left = '0';
-                    imgElement.style.zIndex = '0';
-                    imgElement.style.margin = '0';
-                    imgElement.style.padding = '0';
-
-                    const targetEl = el as HTMLElement;
-                    targetEl.style.position = 'relative';
-
-                    // Move existing children to a wrapper with higher z-index
-                    if (targetEl.hasChildNodes()) {
-                      const contentWrapper = document.createElement('div');
-                      contentWrapper.style.position = 'relative';
-                      contentWrapper.style.zIndex = '1';
-                      contentWrapper.style.width = '100%';
-                      contentWrapper.style.height = '100%';
-
-                      while (targetEl.firstChild) {
-                        contentWrapper.appendChild(targetEl.firstChild);
-                      }
-                      targetEl.appendChild(imgElement);
-                      targetEl.appendChild(contentWrapper);
-                    } else {
-                      targetEl.appendChild(imgElement);
-                    }
-
-                    // Remove background properties from style
-                    const newStyle = styleAttr
-                      .replace(/background(?:-image)?:\s*url\([^)]+\);?/g, '')
-                      .replace(/background-size:[^;]*;?/g, '')
-                      .replace(/background-position:[^;]*;?/g, '')
-                      .replace(/background-repeat:[^;]*;?/g, '')
-                      .replace(/background-attachment:[^;]*;?/g, '')
-                      .replace(/;\s*;/g, ';') // Remove double semicolons
-                      .trim();
-
-                    if (newStyle && newStyle !== ';') {
-                      targetEl.setAttribute('style', newStyle.replace(/^;|;$/, ''));
-                    } else {
-                      targetEl.removeAttribute('style');
-                    }
-
-                    resolve();
-                  };
-
-                  img.onload = onLoadOrError;
-                  img.onerror = onLoadOrError;
-                  img.src = imageUrl;
-                });
-
-                bgImagePromises.push(promise);
-              }
-            });
-          }
-        });
-
-        // Wait for all background images to be processed
-        await Promise.all(bgImagePromises);
-
-        // Additional delay to ensure all rendering is complete and canvas ready
-        await new Promise(resolve => setTimeout(resolve, 1200));
-
-        const opt = {
-          margin: [10, 10, 10, 10],
-          filename: `${proposal.title}.pdf`,
-          image: { type: "jpeg" as const, quality: 0.98 },
-          html2canvas: {
-            scale: 2,
-            useCORS: true,
-            allowTaint: true,
-            logging: false,
-            backgroundColor: "#ffffff",
-            windowHeight: clonedElement.scrollHeight + 100,
-          },
-          jsPDF: { orientation: "portrait" as const, unit: "mm" as const, format: "a4" as const },
-        };
-
-        html2pdf().set(opt).from(clonedElement).save();
-        toast({ title: "Success", description: "Proposal exported as PDF" });
-      } finally {
-        // Clean up temporary container
-        setTimeout(() => {
-          if (tempContainer.parentNode) {
-            document.body.removeChild(tempContainer);
-          }
-        }, 100);
+      // Restore original HTML for all modified elements
+      for (const { element: el, originalHtml } of originalElements) {
+        el.outerHTML = originalHtml;
       }
     } catch (error) {
-      console.error("PDF export error:", error);
-      toast({ title: "Error", description: "Failed to export PDF" });
+      console.error('PDF export error:', error);
+      toast({ title: 'Error', description: 'Failed to export PDF' });
     }
   };
 
