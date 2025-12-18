@@ -136,7 +136,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
 
         elementsWithBg.forEach((el) => {
           const styleAttr = (el as HTMLElement).getAttribute('style') || '';
-          const match = styleAttr.match(/background-image:\s*url\(["']?([^"')+]+)["']?\)/);
+          const match = styleAttr.match(/background-image:\s*url\(["']?([^"']+)["']?\)/);
 
           if (match && match[1]) {
             const imageUrl = match[1];
