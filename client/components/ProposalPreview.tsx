@@ -310,6 +310,9 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
   onUpdateImage,
   onUpdateSignatureField,
   onDeleteSignatureField,
+  onAddSignatureField,
+  isAddingSignatureMode = false,
+  selectedSignatoryId = null,
 }) => {
   const [dragOverSectionId, setDragOverSectionId] = React.useState<string | null>(null);
   const [canvasHeights, setCanvasHeights] = React.useState<Record<string, number>>({});
