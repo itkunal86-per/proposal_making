@@ -59,6 +59,8 @@ export default function ProposalEditor() {
   const [activePanel, setActivePanel] = useState<PanelType>("properties");
   const [documentSettings, setDocumentSettings] = useState<DocumentSettings>({});
   const [textFormatting, setTextFormatting] = useState<Record<string, any>>({});
+  const [addingSignatureMode, setAddingSignatureMode] = useState(false);
+  const [selectedSignatoryId, setSelectedSignatoryId] = useState<string | null>(null);
   const [documentMedia, setDocumentMedia] = useState<Array<{ id: string; url: string; type: "image" | "video"; name: string }>>([]);
   const [libraryMedia, setLibraryMedia] = useState<Array<{ id: string; url: string; type: "image" | "video"; name: string }>>([]);
   const [variables, setVariables] = useState<Array<{ id: string | number; name: string; value: string }>>([]);
