@@ -155,7 +155,10 @@ export const SignaturesPanel: React.FC<SignaturesPanelProps> = ({
         const updated = {
           ...proposal,
           signatories: signatories.filter((r) => r.id !== localId),
-          signatureFields: signatureFields.filter((f) => f.recipientId !== localId),
+          sections: proposal.sections.map((s) => ({
+            ...s,
+            signatureFields: (s.signatureFields || []).filter((f) => f.recipientId !== localId),
+          })),
         };
         onUpdateProposal(updated);
 
