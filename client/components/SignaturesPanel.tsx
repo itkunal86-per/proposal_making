@@ -59,7 +59,7 @@ export const SignaturesPanel: React.FC<SignaturesPanelProps> = ({
     };
 
     fetchSignatories();
-  }, [proposal.id, onSignatoriesFetched]);
+  }, [proposal.id]);
 
   const signatories = proposal.signatories || [];
   const signatureFields = proposal.signatureFields || [];
