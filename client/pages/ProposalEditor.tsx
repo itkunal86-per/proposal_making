@@ -783,6 +783,16 @@ export default function ProposalEditor() {
               <SignaturesPanel
                 proposal={p}
                 onUpdateProposal={commit}
+                isAddingSignatureField={addingSignatureMode}
+                selectedSignatoryId={selectedSignatoryId}
+                onStartAddingSignatureField={(signatoryId) => {
+                  setAddingSignatureMode(true);
+                  setSelectedSignatoryId(signatoryId);
+                }}
+                onStopAddingSignatureField={() => {
+                  setAddingSignatureMode(false);
+                  setSelectedSignatoryId(null);
+                }}
               />
             ) : activePanel === "variables" ? (
               <VariablesPanel
