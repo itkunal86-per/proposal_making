@@ -960,7 +960,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
               </div>
             )}
 
-            {(section.shapes && section.shapes.length > 0) || (section.tables && section.tables.length > 0) || ((section as any).texts && (section as any).texts.length > 0) ? (
+            {(section.shapes && section.shapes.length > 0) || (section.tables && section.tables.length > 0) || ((section as any).texts && (section as any).texts.length > 0) || ((section as any).images && (section as any).images.length > 0) || (section.signatureFields && section.signatureFields.length > 0) ? (
               <div
                 className={isMultiColumn ? "col-span-full relative mt-4 bg-gray-50 rounded" : "relative mt-4 bg-gray-50 rounded"}
                 style={{ position: "relative", minHeight: `${canvasHeights[section.id] || 400}px` }}>
