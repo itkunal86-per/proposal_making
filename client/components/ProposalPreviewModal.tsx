@@ -670,6 +670,42 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                         />
                       </div>
                     ))}
+                    {section.signatureFields && section.signatureFields.map((field, sIndex) => {
+                      const recipient = proposal.signatories?.find((s) => s.id === field.recipientId);
+                      return (
+                        <div
+                          key={`signature-${sIndex}`}
+                          style={{
+                            position: "absolute",
+                            left: `${field.left}px`,
+                            top: `${field.top}px`,
+                            width: `${field.width}px`,
+                            height: `${field.height}px`,
+                            borderRadius: field.borderRadius ? `${field.borderRadius}px` : "0px",
+                            borderWidth: field.borderWidth ? `${field.borderWidth}px` : "2px",
+                            borderStyle: "dashed",
+                            borderColor: field.borderColor || "#d1d5db",
+                            backgroundColor: "#f1f5f9",
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            pointerEvents: "none",
+                          }}
+                        >
+                          <div style={{ textAlign: "center" }}>
+                            <div style={{ fontSize: "12px", fontWeight: "bold", padding: "4px 8px", backgroundColor: "#e2e8f0", borderRadius: "4px" }}>
+                              {recipient?.name || "Unknown"}
+                            </div>
+                            {recipient?.role && (
+                              <div style={{ fontSize: "11px", color: "#64748b", marginTop: "4px" }}>
+                                {recipient.role}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 ) : null}
               </div>
