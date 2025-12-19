@@ -353,36 +353,32 @@ export const SignaturesPanel: React.FC<SignaturesPanelProps> = ({
               Cancel
             </Button>
           </div>
-        ) : (
+        ) : apiSignatories.length > 0 ? (
           <>
-            {signatories.length > 0 ? (
-              <>
-                <div className="space-y-2">
-                  <Label className="text-xs font-semibold">Select signatory to add field for:</Label>
-                  <Select value={selectedSignatoryId || ""} onValueChange={(id) => onStartAddingSignatureField?.(id)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Choose a signatory..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {apiSignatories.map((signatory) => (
-                        <SelectItem key={signatory.id} value={String(signatory.id)}>
-                          {signatory.name} ({signatory.role || "No role"})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="text-xs text-muted-foreground bg-slate-50 p-2 rounded">
-                  Select a signatory above, then click on the proposal to place their signature field.
-                </div>
-              </>
-            ) : (
-              <div className="p-4 bg-slate-50 border border-slate-200 rounded text-center text-sm text-muted-foreground">
-                <PenTool className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                <p>Add at least one signatory in the Recipients tab first.</p>
-              </div>
-            )}
+            <div className="space-y-2">
+              <Label className="text-xs font-semibold">Select signatory to add field for:</Label>
+              <Select value={selectedSignatoryId || ""} onValueChange={(id) => onStartAddingSignatureField?.(id)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose a signatory..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {apiSignatories.map((signatory) => (
+                    <SelectItem key={signatory.id} value={String(signatory.id)}>
+                      {signatory.name} ({signatory.role || "No role"})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="text-xs text-muted-foreground bg-slate-50 p-2 rounded">
+              Select a signatory above, then click on the proposal to place their signature field.
+            </div>
           </>
+        ) : (
+          <div className="p-4 bg-slate-50 border border-slate-200 rounded text-center text-sm text-muted-foreground">
+            <PenTool className="w-8 h-8 mx-auto mb-2 opacity-50" />
+            <p>Add at least one signatory in the Recipients tab first.</p>
+          </div>
         )}
 
         {signatureFields.length > 0 && (
