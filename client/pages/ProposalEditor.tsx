@@ -143,6 +143,37 @@ export default function ProposalEditor() {
     })();
   }, [id]);
 
+  // Fetch and sync signatories when proposal is loaded
+  useEffect(() => {
+    if (!p || !p.id) return;
+
+    (async () => {
+      try {
+        const result = await getSignatories(p.id);
+        if (result.success && result.data) {
+          // Sync API signatories with proposal
+          const converted = result.data.map((s) => ({
+            id: String(s.id),
+            name: s.name,
+            email: s.email,
+            role: s.role,
+            order: s.order,
+          }));
+
+          // Only update if different
+          if (JSON.stringify(p.signatories) !== JSON.stringify(converted)) {
+            setP({
+              ...p,
+              signatories: converted,
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch signatories:", error);
+      }
+    })();
+  }, [p?.id]);
+
   function commit(next: Proposal, keepVersion = false, note?: string) {
     console.log("Proposal Edit Form Submitted:", next);
     setP(next);
