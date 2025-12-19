@@ -286,6 +286,8 @@ interface ProposalPreviewProps {
   onUpdateText?: (sectionId: string, textIndex: number, updates: any) => void;
   onAddImage?: (sectionId: string, x: number, y: number) => void;
   onUpdateImage?: (sectionId: string, imageIndex: number, updates: any) => void;
+  onUpdateSignatureField?: (sectionId: string, fieldId: string, updates: any) => void;
+  onDeleteSignatureField?: (sectionId: string, fieldId: string) => void;
 }
 
 export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
