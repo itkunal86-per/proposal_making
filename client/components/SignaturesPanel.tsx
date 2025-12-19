@@ -222,73 +222,83 @@ export const SignaturesPanel: React.FC<SignaturesPanelProps> = ({
 
       {/* TAB 2: FIELDS */}
       <TabsContent value="fields" className="space-y-4">
-        <div className="text-sm text-muted-foreground bg-blue-50 border border-blue-200 rounded p-3">
-          <p className="font-semibold text-blue-900 mb-1">How to add signature fields:</p>
-          <ol className="list-decimal list-inside space-y-1 text-blue-800">
-            <li>Click in the proposal to select where you want the signature</li>
-            <li>Use the "Add Signature" button below to place a field</li>
-            <li>Select which signatory should sign at that location</li>
-          </ol>
-        </div>
-
-        <div className="space-y-3">
-          {signatureFields.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <PenTool className="w-8 h-8 mx-auto mb-2 opacity-50" />
-              <p className="text-sm">No signature fields added yet</p>
+        {isAddingSignatureField ? (
+          <div className="bg-blue-50 border border-blue-300 rounded p-3 space-y-3">
+            <div className="text-sm text-blue-900 font-semibold">
+              Adding signature field for: <span className="block mt-1">{signatories.find((s) => s.id === selectedSignatoryId)?.name || "Select signatory"}</span>
             </div>
-          ) : (
-            signatureFields.map((field) => {
+            <div className="text-xs text-blue-700 bg-blue-100 p-2 rounded">
+              Now click on the proposal editor to place the signature field at your desired location.
+            </div>
+            <Button
+              variant="outline"
+              onClick={onStopAddingSignatureField}
+              className="w-full text-sm text-red-600 border-red-200 hover:bg-red-50"
+            >
+              Cancel
+            </Button>
+          </div>
+        ) : (
+          <>
+            {signatories.length > 0 ? (
+              <>
+                <div className="space-y-2">
+                  <Label className="text-xs font-semibold">Select signatory to add field for:</Label>
+                  <Select value={selectedSignatoryId || ""} onValueChange={(id) => onStartAddingSignatureField?.(id)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Choose a signatory..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {signatories.map((signatory) => (
+                        <SelectItem key={signatory.id} value={signatory.id}>
+                          {signatory.name} ({signatory.role || "No role"})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="text-xs text-muted-foreground bg-slate-50 p-2 rounded">
+                  Select a signatory above, then click on the proposal to place their signature field.
+                </div>
+              </>
+            ) : (
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded text-center text-sm text-muted-foreground">
+                <PenTool className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                <p>Add at least one signatory in the Recipients tab first.</p>
+              </div>
+            )}
+          </>
+        )}
+
+        {signatureFields.length > 0 && (
+          <div className="space-y-3 border-t pt-4">
+            <h3 className="text-sm font-semibold">Added fields</h3>
+            {signatureFields.map((field) => {
               const recipient = signatories.find((r) => r.id === field.recipientId);
               return (
-                <Card key={field.id} className="p-3 space-y-2">
+                <Card key={field.id} className="p-3">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <div className="font-semibold text-sm">
-                        {recipient?.name || "Unknown"}
-                      </div>
+                      <div className="font-semibold text-sm">{recipient?.name || "Unknown"}</div>
                       <div className="text-xs text-muted-foreground">
-                        Section: {proposal.sections.find((s) => s.id === field.sectionId)?.title || "Unknown"}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        Position: ({field.left}, {field.top})
+                        {proposal.sections.find((s) => s.id === field.sectionId)?.title || "Unknown"}
                       </div>
                     </div>
-                    <div className="text-xs font-semibold text-center">
-                      <span
-                        className={`inline-block px-2 py-1 rounded ${
-                          field.status === "signed"
-                            ? "bg-green-100 text-green-700"
-                            : field.status === "declined"
-                            ? "bg-red-100 text-red-700"
-                            : "bg-yellow-100 text-yellow-700"
-                        }`}
-                      >
-                        {field.status.charAt(0).toUpperCase() + field.status.slice(1)}
-                      </span>
-                    </div>
+                    <span
+                      className={`text-xs font-semibold px-2 py-1 rounded ${
+                        field.status === "signed"
+                          ? "bg-green-100 text-green-700"
+                          : field.status === "declined"
+                          ? "bg-red-100 text-red-700"
+                          : "bg-yellow-100 text-yellow-700"
+                      }`}
+                    >
+                      {field.status.charAt(0).toUpperCase() + field.status.slice(1)}
+                    </span>
                   </div>
                 </Card>
               );
-            })
-          )}
-        </div>
-
-        {signatories.length > 0 && (
-          <Button
-            variant="outline"
-            className="w-full h-auto py-4 flex flex-col items-center gap-2 text-orange-600 border-orange-200 hover:bg-orange-50"
-            disabled
-            title="Click on the proposal to add a signature field. This button is for reference only."
-          >
-            <PenTool className="w-5 h-5" />
-            <span className="text-sm font-medium">Add Signature Field (Click on proposal)</span>
-          </Button>
-        )}
-
-        {signatories.length === 0 && (
-          <div className="p-3 bg-slate-50 border border-slate-200 rounded text-sm text-muted-foreground">
-            Add at least one signatory in the Recipients tab first.
+            })}
           </div>
         )}
       </TabsContent>
