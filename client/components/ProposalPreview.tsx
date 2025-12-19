@@ -1055,6 +1055,27 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                     }
                   />
                 ))}
+                {section.signatureFields && section.signatureFields.map((field) => {
+                  const recipient = proposal.signatories?.find((s) => s.id === field.recipientId);
+                  return (
+                    <SignatureFieldEditor
+                      key={`signature-${field.id}`}
+                      id={`signature-${section.id}-${field.id}`}
+                      field={field}
+                      recipient={recipient}
+                      selected={selectedElementId === `signature-${section.id}-${field.id}`}
+                      onSelect={() =>
+                        onSelectElement(`signature-${section.id}-${field.id}`, "signature")
+                      }
+                      onUpdate={(updates) =>
+                        onUpdateSignatureField?.(section.id, field.id, updates)
+                      }
+                      onDelete={() =>
+                        onDeleteSignatureField?.(section.id, field.id)
+                      }
+                    />
+                  );
+                })}
               </div>
             ) : null}
           </div>
