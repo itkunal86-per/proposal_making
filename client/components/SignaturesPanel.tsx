@@ -26,6 +26,10 @@ interface SignaturesPanelProps {
 export const SignaturesPanel: React.FC<SignaturesPanelProps> = ({
   proposal,
   onUpdateProposal,
+  isAddingSignatureField = false,
+  selectedSignatoryId = null,
+  onStartAddingSignatureField,
+  onStopAddingSignatureField,
 }) => {
   const [newRecipient, setNewRecipient] = useState({ name: "", email: "", role: "" });
   const [addingRecipient, setAddingRecipient] = useState(false);
