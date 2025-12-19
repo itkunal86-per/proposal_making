@@ -301,9 +301,17 @@ export const SignaturesPanel: React.FC<SignaturesPanelProps> = ({
               <Button
                 size="sm"
                 onClick={handleAddRecipient}
+                disabled={isCreating}
                 className="flex-1 bg-blue-600 hover:bg-blue-700"
               >
-                Add
+                {isCreating ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Adding...
+                  </>
+                ) : (
+                  "Add"
+                )}
               </Button>
               <Button
                 size="sm"
