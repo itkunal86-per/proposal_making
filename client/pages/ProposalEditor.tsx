@@ -742,7 +742,7 @@ export default function ProposalEditor() {
               }}
               onAddSignatureField={(sectionId, recipientId, x, y) => {
                 const newField = {
-                  id: Math.random().toString(36).substring(2, 9),
+                  id: 0,
                   recipientId,
                   sectionId,
                   width: 200,
