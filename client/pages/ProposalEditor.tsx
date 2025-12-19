@@ -58,7 +58,6 @@ export default function ProposalEditor() {
   const [aiElementType, setAIElementType] = useState<string | undefined>(undefined);
   const [activePanel, setActivePanel] = useState<PanelType>("properties");
   const [documentSettings, setDocumentSettings] = useState<DocumentSettings>({});
-  const [signatureRecipient, setSignatureRecipient] = useState("");
   const [textFormatting, setTextFormatting] = useState<Record<string, any>>({});
   const [documentMedia, setDocumentMedia] = useState<Array<{ id: string; url: string; type: "image" | "video"; name: string }>>([]);
   const [libraryMedia, setLibraryMedia] = useState<Array<{ id: string; url: string; type: "image" | "video"; name: string }>>([]);
