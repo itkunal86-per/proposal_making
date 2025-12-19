@@ -517,8 +517,8 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                   </div>
                 )}
 
-                {/* Shapes, Tables, Texts, and Images */}
-                {(section.shapes && section.shapes.length > 0) || (section.tables && section.tables.length > 0) || ((section as any).texts && (section as any).texts.length > 0) || ((section as any).images && (section as any).images.length > 0) ? (
+                {/* Shapes, Tables, Texts, Images, and Signature Fields */}
+                {(section.shapes && section.shapes.length > 0) || (section.tables && section.tables.length > 0) || ((section as any).texts && (section as any).texts.length > 0) || ((section as any).images && (section as any).images.length > 0) || (section.signatureFields && section.signatureFields.length > 0) ? (
                   <div className="relative mt-4 bg-gray-50 rounded" style={{ position: "relative", minHeight: `${canvasHeights[section.id] || 400}px`, pointerEvents: "none" }}>
                     {section.shapes && section.shapes.map((shape, sIndex) => {
                       const backgroundOverlayOpacity = shape.backgroundImage && shape.backgroundOpacity ? (100 - parseInt(shape.backgroundOpacity || "100")) / 100 : 0;
