@@ -7,6 +7,7 @@ import { ShapeEditor } from "@/components/ShapeEditor";
 import { TableEditor } from "@/components/TableEditor";
 import { TextEditor } from "@/components/TextEditor";
 import { ImageEditor } from "@/components/ImageEditor";
+import { SignatureFieldEditor } from "@/components/SignatureFieldEditor";
 
 interface ElementProps {
   id: string;
