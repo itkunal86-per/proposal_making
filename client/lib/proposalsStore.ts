@@ -1,10 +1,37 @@
 export type ProposalStatus = "draft" | "sent" | "accepted" | "declined";
 
+export interface SignatureRecipient {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  order: number;
+}
+
+export type SignatureStatus = "pending" | "signed" | "declined";
+
+export interface SignatureField {
+  id: string;
+  recipientId: string;
+  sectionId: string;
+  width: number;
+  height: number;
+  top: number;
+  left: number;
+  signedAt?: number;
+  signatureData?: string;
+  status: SignatureStatus;
+  borderColor?: string;
+  borderWidth?: number;
+  borderRadius?: number;
+}
+
 export interface ProposalSection {
   id: string;
   title: string;
   content: string;
   media?: { type: "image" | "video"; url: string }[];
+  signatureFields?: SignatureField[];
   comments?: { id: string; author: string; text: string; createdAt: number }[];
 }
 
