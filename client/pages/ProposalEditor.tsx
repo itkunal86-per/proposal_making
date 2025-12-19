@@ -736,6 +736,37 @@ export default function ProposalEditor() {
                 };
                 commit(updated);
               }}
+              onAddSignatureField={(sectionId, recipientId, x, y) => {
+                const newField = {
+                  id: Math.random().toString(36).substring(2, 9),
+                  recipientId,
+                  sectionId,
+                  width: 200,
+                  height: 80,
+                  top: y,
+                  left: x,
+                  status: "pending" as const,
+                  borderColor: "#d1d5db",
+                  borderWidth: 2,
+                  borderRadius: 4,
+                };
+                const updated = {
+                  ...p,
+                  sections: p.sections.map((s) =>
+                    s.id === sectionId
+                      ? {
+                          ...s,
+                          signatureFields: [...(s.signatureFields || []), newField],
+                        }
+                      : s
+                  ),
+                };
+                commit(updated);
+                setAddingSignatureMode(false);
+                setSelectedSignatoryId(null);
+              }}
+              isAddingSignatureMode={addingSignatureMode}
+              selectedSignatoryId={selectedSignatoryId}
             />
           </div>
 
