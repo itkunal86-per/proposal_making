@@ -33,9 +33,36 @@ export const SignaturesPanel: React.FC<SignaturesPanelProps> = ({
   selectedSignatoryId = null,
   onStartAddingSignatureField,
   onStopAddingSignatureField,
+  onSignatoriesFetched,
 }) => {
   const [newRecipient, setNewRecipient] = useState({ name: "", email: "", role: "" });
   const [addingRecipient, setAddingRecipient] = useState(false);
+  const [apiSignatories, setApiSignatories] = useState<SignatoryData[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [isDeletingId, setIsDeletingId] = useState<number | null>(null);
+
+  // Fetch signatories on component mount
+  useEffect(() => {
+    const fetchSignatories = async () => {
+      setIsLoading(true);
+      try {
+        const result = await getSignatories(proposal.id);
+        if (result.success && result.data) {
+          setApiSignatories(result.data);
+          onSignatoriesFetched?.(result.data);
+        } else {
+          console.error("Failed to fetch signatories:", result.error);
+        }
+      } catch (error) {
+        console.error("Error fetching signatories:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSignatories();
+  }, [proposal.id, onSignatoriesFetched]);
 
   const signatories = proposal.signatories || [];
   const signatureFields = proposal.signatureFields || [];
