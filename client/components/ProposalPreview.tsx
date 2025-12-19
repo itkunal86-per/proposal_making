@@ -288,6 +288,9 @@ interface ProposalPreviewProps {
   onUpdateImage?: (sectionId: string, imageIndex: number, updates: any) => void;
   onUpdateSignatureField?: (sectionId: string, fieldId: string, updates: any) => void;
   onDeleteSignatureField?: (sectionId: string, fieldId: string) => void;
+  onAddSignatureField?: (sectionId: string, recipientId: string, x: number, y: number) => void;
+  isAddingSignatureMode?: boolean;
+  selectedSignatoryId?: string | null;
 }
 
 export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
