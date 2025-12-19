@@ -48,6 +48,22 @@ export const SignaturesPanel: React.FC<SignaturesPanelProps> = ({
         const result = await getSignatories(proposal.id);
         if (result.success && result.data) {
           setApiSignatories(result.data);
+
+          // Sync API signatories with proposal
+          const converted: SignatureRecipient[] = result.data.map((s) => ({
+            id: String(s.id),
+            name: s.name,
+            email: s.email,
+            role: s.role,
+            order: s.order,
+          }));
+
+          if (JSON.stringify(proposal.signatories) !== JSON.stringify(converted)) {
+            onUpdateProposal({
+              ...proposal,
+              signatories: converted,
+            });
+          }
         } else {
           console.error("Failed to fetch signatories:", result.error);
         }
@@ -59,7 +75,7 @@ export const SignaturesPanel: React.FC<SignaturesPanelProps> = ({
     };
 
     fetchSignatories();
-  }, [proposal.id]);
+  }, [proposal.id, onUpdateProposal]);
 
   const signatories = proposal.signatories || [];
   const signatureFields = proposal.signatureFields || [];
