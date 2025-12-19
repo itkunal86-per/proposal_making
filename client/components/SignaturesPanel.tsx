@@ -67,36 +67,103 @@ export const SignaturesPanel: React.FC<SignaturesPanelProps> = ({
   const signatories = proposal.signatories || [];
   const signatureFields = proposal.signatureFields || [];
 
-  const handleAddRecipient = () => {
+  const handleAddRecipient = async () => {
     if (!newRecipient.name || !newRecipient.email) {
-      alert("Please fill in name and email");
+      toast({
+        title: "Validation Error",
+        description: "Please fill in name and email",
+        variant: "destructive",
+      });
       return;
     }
 
-    const recipient: SignatureRecipient = {
-      id: Math.random().toString(36).substring(2, 9),
-      name: newRecipient.name,
-      email: newRecipient.email,
-      role: newRecipient.role,
-      order: signatories.length + 1,
-    };
+    setIsCreating(true);
+    try {
+      const result = await createSignatory({
+        proposal_id: proposal.id,
+        name: newRecipient.name,
+        email: newRecipient.email,
+        role: newRecipient.role,
+        order: apiSignatories.length + 1,
+      });
 
-    const updated = {
-      ...proposal,
-      signatories: [...signatories, recipient],
-    };
-    onUpdateProposal(updated);
-    setNewRecipient({ name: "", email: "", role: "" });
-    setAddingRecipient(false);
+      if (result.success && result.data) {
+        setApiSignatories([...apiSignatories, result.data]);
+
+        // Update proposal with new signatory
+        const recipient: SignatureRecipient = {
+          id: String(result.data.id),
+          name: result.data.name,
+          email: result.data.email,
+          role: result.data.role,
+          order: result.data.order,
+        };
+        const updated = {
+          ...proposal,
+          signatories: [...signatories, recipient],
+        };
+        onUpdateProposal(updated);
+
+        toast({
+          title: "Success",
+          description: `${result.data.name} added as signatory`,
+        });
+
+        setNewRecipient({ name: "", email: "", role: "" });
+        setAddingRecipient(false);
+      } else {
+        toast({
+          title: "Error",
+          description: result.error || "Failed to add signatory",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to add signatory",
+        variant: "destructive",
+      });
+    } finally {
+      setIsCreating(false);
+    }
   };
 
-  const handleRemoveRecipient = (id: string) => {
-    const updated = {
-      ...proposal,
-      signatories: signatories.filter((r) => r.id !== id),
-      signatureFields: signatureFields.filter((f) => f.recipientId !== id),
-    };
-    onUpdateProposal(updated);
+  const handleRemoveRecipient = async (apiId: number | string, localId: string) => {
+    setIsDeletingId(apiId as number);
+    try {
+      const result = await deleteSignatory(apiId);
+
+      if (result.success) {
+        setApiSignatories(apiSignatories.filter((s) => s.id !== apiId));
+
+        const updated = {
+          ...proposal,
+          signatories: signatories.filter((r) => r.id !== localId),
+          signatureFields: signatureFields.filter((f) => f.recipientId !== localId),
+        };
+        onUpdateProposal(updated);
+
+        toast({
+          title: "Success",
+          description: "Signatory removed",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: result.error || "Failed to remove signatory",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to remove signatory",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeletingId(null);
+    }
   };
 
   const handleUpdateRecipientOrder = (id: string, newOrder: number) => {
