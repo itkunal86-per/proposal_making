@@ -23,7 +23,6 @@ interface SignaturesPanelProps {
   selectedSignatoryId?: string | null;
   onStartAddingSignatureField?: (signatoryId: string) => void;
   onStopAddingSignatureField?: () => void;
-  onSignatoriesFetched?: (signatories: SignatoryData[]) => void;
 }
 
 export const SignaturesPanel: React.FC<SignaturesPanelProps> = ({
@@ -33,7 +32,6 @@ export const SignaturesPanel: React.FC<SignaturesPanelProps> = ({
   selectedSignatoryId = null,
   onStartAddingSignatureField,
   onStopAddingSignatureField,
-  onSignatoriesFetched,
 }) => {
   const [newRecipient, setNewRecipient] = useState({ name: "", email: "", role: "" });
   const [addingRecipient, setAddingRecipient] = useState(false);
@@ -50,7 +48,6 @@ export const SignaturesPanel: React.FC<SignaturesPanelProps> = ({
         const result = await getSignatories(proposal.id);
         if (result.success && result.data) {
           setApiSignatories(result.data);
-          onSignatoriesFetched?.(result.data);
         } else {
           console.error("Failed to fetch signatories:", result.error);
         }
@@ -166,26 +163,13 @@ export const SignaturesPanel: React.FC<SignaturesPanelProps> = ({
     }
   };
 
-  const handleUpdateRecipientOrder = (id: string, newOrder: number) => {
-    const updated = {
-      ...proposal,
-      signatories: signatories.map((r) =>
-        r.id === id ? { ...r, order: newOrder } : r
-      ),
-    };
-    onUpdateProposal(updated);
-  };
 
-  const getSignatureStatusCount = (status: "pending" | "signed" | "declined") => {
-    return signatureFields.filter((f) => f.status === status).length;
-  };
 
   return (
     <Tabs defaultValue="recipients" className="w-full">
-      <TabsList className="grid w-full grid-cols-3">
+      <TabsList className="grid w-full grid-cols-2">
         <TabsTrigger value="recipients">Recipients</TabsTrigger>
         <TabsTrigger value="fields">Fields</TabsTrigger>
-        <TabsTrigger value="status">Status</TabsTrigger>
       </TabsList>
 
       {/* TAB 1: RECIPIENTS */}
@@ -229,26 +213,6 @@ export const SignaturesPanel: React.FC<SignaturesPanelProps> = ({
                         <Trash2 className="w-4 h-4" />
                       )}
                     </Button>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Label className="text-xs">Order:</Label>
-                    <Select
-                      value={String(signatory.order)}
-                      onValueChange={(value) =>
-                        handleUpdateRecipientOrder(String(signatory.id!), parseInt(value))
-                      }
-                    >
-                      <SelectTrigger className="w-20 h-8">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {apiSignatories.map((_, idx) => (
-                          <SelectItem key={idx} value={String(idx + 1)}>
-                            {idx + 1}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
                   </div>
                 </Card>
               ))
@@ -414,80 +378,6 @@ export const SignaturesPanel: React.FC<SignaturesPanelProps> = ({
         )}
       </TabsContent>
 
-      {/* TAB 3: STATUS */}
-      <TabsContent value="status" className="space-y-4">
-        <div className="grid grid-cols-3 gap-3">
-          <Card className="p-4 text-center">
-            <div className="text-2xl font-bold text-yellow-600">
-              {getSignatureStatusCount("pending")}
-            </div>
-            <div className="text-xs text-muted-foreground mt-1">Pending</div>
-          </Card>
-          <Card className="p-4 text-center">
-            <div className="text-2xl font-bold text-green-600">
-              {getSignatureStatusCount("signed")}
-            </div>
-            <div className="text-xs text-muted-foreground mt-1">Signed</div>
-          </Card>
-          <Card className="p-4 text-center">
-            <div className="text-2xl font-bold text-red-600">
-              {getSignatureStatusCount("declined")}
-            </div>
-            <div className="text-xs text-muted-foreground mt-1">Declined</div>
-          </Card>
-        </div>
-
-        <Card className="p-4">
-          <h3 className="font-semibold text-sm mb-3">Signature Details</h3>
-          <div className="space-y-3">
-            {signatureFields.length === 0 ? (
-              <div className="text-center py-6 text-muted-foreground">
-                <p className="text-sm">No signatures to track yet</p>
-              </div>
-            ) : (
-              signatureFields
-                .sort((a, b) => {
-                  const recipientA = signatories.find((r) => r.id === a.recipientId);
-                  const recipientB = signatories.find((r) => r.id === b.recipientId);
-                  return (recipientA?.order || 0) - (recipientB?.order || 0);
-                })
-                .map((field) => {
-                  const recipient = signatories.find((r) => r.id === field.recipientId);
-                  return (
-                    <div key={field.id} className="pb-3 border-b last:pb-0 last:border-b-0">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="font-semibold text-sm">
-                            {recipient?.name || "Unknown"}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            {recipient?.email}
-                          </div>
-                        </div>
-                        <span
-                          className={`text-xs font-semibold px-2 py-1 rounded ${
-                            field.status === "signed"
-                              ? "bg-green-100 text-green-700"
-                              : field.status === "declined"
-                              ? "bg-red-100 text-red-700"
-                              : "bg-yellow-100 text-yellow-700"
-                          }`}
-                        >
-                          {field.status.charAt(0).toUpperCase() + field.status.slice(1)}
-                        </span>
-                      </div>
-                      {field.signedAt && (
-                        <div className="text-xs text-muted-foreground mt-2">
-                          Signed: {new Date(field.signedAt).toLocaleDateString()}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })
-            )}
-          </div>
-        </Card>
-      </TabsContent>
     </Tabs>
   );
 };
