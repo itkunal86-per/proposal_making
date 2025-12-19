@@ -65,6 +65,8 @@ export interface Proposal {
     sharing: { public: boolean; token?: string; allowComments: boolean };
   };
   versions: ProposalVersionSnapshot[];
+  signatories?: SignatureRecipient[];
+  signatureFields?: SignatureField[];
 }
 
 const KEY = "app_proposals";
