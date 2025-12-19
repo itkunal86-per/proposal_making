@@ -714,21 +714,6 @@ function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmai
       role: s.role,
       order: parseInt(String(s.order)),
     })) : [],
-    signatureFields: Array.isArray((apiProposal as any).signatureFields) ? (apiProposal as any).signatureFields.map((f: any) => ({
-      id: String(f.id),
-      recipientId: String(f.recipientId),
-      sectionId: String(f.sectionId),
-      width: f.width,
-      height: f.height,
-      top: typeof f.top === "number" ? f.top : 0,
-      left: typeof f.left === "number" ? f.left : 0,
-      status: f.status,
-      signedAt: f.signedAt,
-      signatureData: f.signatureData,
-      borderColor: f.borderColor,
-      borderWidth: f.borderWidth,
-      borderRadius: f.borderRadius,
-    })) : [],
   };
 }
 
