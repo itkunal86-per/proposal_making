@@ -719,9 +719,6 @@ export default function ProposalEditor() {
                         }
                       : s
                   ),
-                  signatureFields: (p.signatureFields || []).map((field) =>
-                    field.id === fieldId ? { ...field, ...updates } : field
-                  ),
                 };
                 commit(updated);
               }}
@@ -736,7 +733,6 @@ export default function ProposalEditor() {
                         }
                       : s
                   ),
-                  signatureFields: (p.signatureFields || []).filter((field) => field.id !== fieldId),
                 };
                 commit(updated);
               }}
