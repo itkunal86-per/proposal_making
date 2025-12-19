@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,8 +11,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { PenTool, Trash2, Plus } from "lucide-react";
+import { PenTool, Trash2, Plus, Loader2 } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 import { Proposal, SignatureRecipient, SignatureField } from "@/services/proposalsService";
+import { createSignatory, getSignatories, deleteSignatory, SignatoryData } from "@/services/signaturesService";
 
 interface SignaturesPanelProps {
   proposal: Proposal;
