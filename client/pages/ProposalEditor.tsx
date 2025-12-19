@@ -34,6 +34,7 @@ import { SignaturesPanel } from "@/components/SignaturesPanel";
 import { VariablesPanel } from "@/components/VariablesPanel";
 import { TextFormattingToolbar } from "@/components/TextFormattingToolbar";
 import { fetchVariables, type Variable as ApiVariable } from "@/services/variablesService";
+import { getSignatories } from "@/services/signaturesService";
 
 interface DocumentSettings {
   company?: string;
