@@ -7,6 +7,7 @@ import { ShapeEditor } from "@/components/ShapeEditor";
 import { TableEditor } from "@/components/TableEditor";
 import { TextEditor } from "@/components/TextEditor";
 import { ImageEditor } from "@/components/ImageEditor";
+import { SignatureFieldEditor } from "@/components/SignatureFieldEditor";
 
 interface ElementProps {
   id: string;
@@ -285,6 +286,11 @@ interface ProposalPreviewProps {
   onUpdateText?: (sectionId: string, textIndex: number, updates: any) => void;
   onAddImage?: (sectionId: string, x: number, y: number) => void;
   onUpdateImage?: (sectionId: string, imageIndex: number, updates: any) => void;
+  onUpdateSignatureField?: (sectionId: string, fieldId: string, updates: any) => void;
+  onDeleteSignatureField?: (sectionId: string, fieldId: string) => void;
+  onAddSignatureField?: (sectionId: string, recipientId: string, x: number, y: number) => void;
+  isAddingSignatureMode?: boolean;
+  selectedSignatoryId?: string | null;
 }
 
 export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
@@ -302,6 +308,11 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
   onUpdateText,
   onAddImage,
   onUpdateImage,
+  onUpdateSignatureField,
+  onDeleteSignatureField,
+  onAddSignatureField,
+  isAddingSignatureMode = false,
+  selectedSignatoryId = null,
 }) => {
   const [dragOverSectionId, setDragOverSectionId] = React.useState<string | null>(null);
   const [canvasHeights, setCanvasHeights] = React.useState<Record<string, number>>({});
@@ -314,7 +325,8 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
       if ((section.shapes && section.shapes.length > 0) ||
           (section.tables && section.tables.length > 0) ||
           ((section as any).texts && (section as any).texts.length > 0) ||
-          ((section as any).images && (section as any).images.length > 0)) {
+          ((section as any).images && (section as any).images.length > 0) ||
+          (section.signatureFields && section.signatureFields.length > 0)) {
         let maxHeight = 400; // minimum height
 
         // Calculate max height needed for shapes
@@ -351,6 +363,16 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
         if ((section as any).images) {
           (section as any).images.forEach((image: any) => {
             const bottomPos = image.top + image.height + 20; // 20px padding
+            if (bottomPos > maxHeight) {
+              maxHeight = bottomPos;
+            }
+          });
+        }
+
+        // Calculate max height needed for signature fields
+        if (section.signatureFields) {
+          section.signatureFields.forEach((field) => {
+            const bottomPos = field.top + field.height + 20; // 20px padding
             if (bottomPos > maxHeight) {
               maxHeight = bottomPos;
             }
@@ -944,10 +966,18 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
               </div>
             )}
 
-            {(section.shapes && section.shapes.length > 0) || (section.tables && section.tables.length > 0) || ((section as any).texts && (section as any).texts.length > 0) ? (
+            {(section.shapes && section.shapes.length > 0) || (section.tables && section.tables.length > 0) || ((section as any).texts && (section as any).texts.length > 0) || ((section as any).images && (section as any).images.length > 0) || (section.signatureFields && section.signatureFields.length > 0) || isAddingSignatureMode ? (
               <div
                 className={isMultiColumn ? "col-span-full relative mt-4 bg-gray-50 rounded" : "relative mt-4 bg-gray-50 rounded"}
-                style={{ position: "relative", minHeight: `${canvasHeights[section.id] || 400}px` }}>
+                style={{ position: "relative", minHeight: `${canvasHeights[section.id] || 400}px`, cursor: isAddingSignatureMode ? "crosshair" : "default" }}
+                onClick={(e) => {
+                  if (isAddingSignatureMode && selectedSignatoryId && onAddSignatureField) {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    onAddSignatureField(section.id, selectedSignatoryId, x, y);
+                  }
+                }}>
                 {section.shapes && section.shapes.map((shape, sIndex) => (
                   <ShapeEditor
                     key={`shape-${sIndex}`}
@@ -1050,6 +1080,27 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                     }
                   />
                 ))}
+                {section.signatureFields && section.signatureFields.map((field) => {
+                  const recipient = proposal.signatories?.find((s) => s.id === field.recipientId);
+                  return (
+                    <SignatureFieldEditor
+                      key={`signature-${field.id}`}
+                      id={`signature-${section.id}-${field.id}`}
+                      field={field}
+                      recipient={recipient}
+                      selected={selectedElementId === `signature-${section.id}-${field.id}`}
+                      onSelect={() =>
+                        onSelectElement(`signature-${section.id}-${field.id}`, "signature")
+                      }
+                      onUpdate={(updates) =>
+                        onUpdateSignatureField?.(section.id, field.id, updates)
+                      }
+                      onDelete={() =>
+                        onDeleteSignatureField?.(section.id, field.id)
+                      }
+                    />
+                  );
+                })}
               </div>
             ) : null}
           </div>

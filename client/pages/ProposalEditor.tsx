@@ -34,6 +34,7 @@ import { SignaturesPanel } from "@/components/SignaturesPanel";
 import { VariablesPanel } from "@/components/VariablesPanel";
 import { TextFormattingToolbar } from "@/components/TextFormattingToolbar";
 import { fetchVariables, type Variable as ApiVariable } from "@/services/variablesService";
+import { getSignatories } from "@/services/signaturesService";
 
 interface DocumentSettings {
   company?: string;
@@ -58,8 +59,9 @@ export default function ProposalEditor() {
   const [aiElementType, setAIElementType] = useState<string | undefined>(undefined);
   const [activePanel, setActivePanel] = useState<PanelType>("properties");
   const [documentSettings, setDocumentSettings] = useState<DocumentSettings>({});
-  const [signatureRecipient, setSignatureRecipient] = useState("");
   const [textFormatting, setTextFormatting] = useState<Record<string, any>>({});
+  const [addingSignatureMode, setAddingSignatureMode] = useState(false);
+  const [selectedSignatoryId, setSelectedSignatoryId] = useState<string | null>(null);
   const [documentMedia, setDocumentMedia] = useState<Array<{ id: string; url: string; type: "image" | "video"; name: string }>>([]);
   const [libraryMedia, setLibraryMedia] = useState<Array<{ id: string; url: string; type: "image" | "video"; name: string }>>([]);
   const [variables, setVariables] = useState<Array<{ id: string | number; name: string; value: string }>>([]);
@@ -140,6 +142,42 @@ export default function ProposalEditor() {
       }
     })();
   }, [id]);
+
+  // Fetch and sync signatories when proposal is loaded
+  useEffect(() => {
+    if (!p || !p.id) return;
+
+    const proposalId = p.id;
+
+    (async () => {
+      try {
+        const result = await getSignatories(proposalId);
+        // Check if proposal ID is still the same (in case it changed while fetching)
+        if (p?.id !== proposalId) return;
+
+        if (result.success && result.data) {
+          // Sync API signatories with proposal
+          const converted = result.data.map((s) => ({
+            id: String(s.id),
+            name: s.name,
+            email: s.email,
+            role: s.role,
+            order: s.order,
+          }));
+
+          // Only update if different
+          if (JSON.stringify(p.signatories) !== JSON.stringify(converted)) {
+            setP((prevP) => ({
+              ...prevP,
+              signatories: converted,
+            }));
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch signatories:", error);
+      }
+    })();
+  }, [p?.id]);
 
   function commit(next: Proposal, keepVersion = false, note?: string) {
     console.log("Proposal Edit Form Submitted:", next);
@@ -705,6 +743,67 @@ export default function ProposalEditor() {
                 };
                 commit(updated);
               }}
+              onUpdateSignatureField={(sectionId, fieldId, updates) => {
+                const updated = {
+                  ...p,
+                  sections: p.sections.map((s) =>
+                    s.id === sectionId
+                      ? {
+                          ...s,
+                          signatureFields: (s.signatureFields || []).map((field) =>
+                            field.id === fieldId ? { ...field, ...updates } : field
+                          ),
+                        }
+                      : s
+                  ),
+                };
+                commit(updated);
+              }}
+              onDeleteSignatureField={(sectionId, fieldId) => {
+                const updated = {
+                  ...p,
+                  sections: p.sections.map((s) =>
+                    s.id === sectionId
+                      ? {
+                          ...s,
+                          signatureFields: (s.signatureFields || []).filter((field) => field.id !== fieldId),
+                        }
+                      : s
+                  ),
+                };
+                commit(updated);
+              }}
+              onAddSignatureField={(sectionId, recipientId, x, y) => {
+                const newField = {
+                  id: 0,
+                  recipientId,
+                  sectionId,
+                  width: 200,
+                  height: 80,
+                  top: y,
+                  left: x,
+                  status: "pending" as const,
+                  borderColor: "#d1d5db",
+                  borderWidth: 2,
+                  borderRadius: 4,
+                };
+                const updated = {
+                  ...p,
+                  sections: p.sections.map((s) =>
+                    s.id === sectionId
+                      ? {
+                          ...s,
+                          signatureFields: [...(s.signatureFields || []), newField],
+                        }
+                      : s
+                  ),
+                };
+                commit(updated);
+                setAddingSignatureMode(false);
+                setSelectedSignatoryId(null);
+              }}
+              isAddingSignatureMode={addingSignatureMode}
+              selectedSignatoryId={selectedSignatoryId}
             />
           </div>
 
@@ -750,10 +849,17 @@ export default function ProposalEditor() {
               />
             ) : activePanel === "signatures" ? (
               <SignaturesPanel
-                signatureRecipient={signatureRecipient}
-                onChangeRecipient={setSignatureRecipient}
-                onAddSignature={() => {
-                  console.log("Add signature");
+                proposal={p}
+                onUpdateProposal={commit}
+                isAddingSignatureField={addingSignatureMode}
+                selectedSignatoryId={selectedSignatoryId}
+                onStartAddingSignatureField={(signatoryId) => {
+                  setAddingSignatureMode(true);
+                  setSelectedSignatoryId(signatoryId);
+                }}
+                onStopAddingSignatureField={() => {
+                  setAddingSignatureMode(false);
+                  setSelectedSignatoryId(null);
                 }}
               />
             ) : activePanel === "variables" ? (

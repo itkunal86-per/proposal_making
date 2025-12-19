@@ -75,6 +75,32 @@ export interface ImageElement {
   left: number;
 }
 
+export interface SignatureRecipient {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  order: number;
+}
+
+export type SignatureStatus = "pending" | "signed" | "declined";
+
+export interface SignatureField {
+  id: string | number;
+  recipientId: string;
+  sectionId: string;
+  width: number;
+  height: number;
+  top: number;
+  left: number;
+  signedAt?: number;
+  signatureData?: string;
+  status: SignatureStatus;
+  borderColor?: string;
+  borderWidth?: number;
+  borderRadius?: number;
+}
+
 export interface ProposalSection {
   id: string;
   title: string;
@@ -87,6 +113,7 @@ export interface ProposalSection {
   tables?: TableElement[];
   texts?: TextElement[];
   images?: ImageElement[];
+  signatureFields?: SignatureField[];
   comments?: { id: string; author: string; text: string; createdAt: number }[];
   titleStyles?: Record<string, any>;
   contentStyles?: Record<string, any>;
@@ -124,6 +151,7 @@ export interface Proposal {
   };
   versions: ProposalVersionSnapshot[];
   titleStyles?: Record<string, any>;
+  signatories?: SignatureRecipient[];
 }
 
 const STORAGE_KEY = "app_proposals";
@@ -620,6 +648,21 @@ function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmai
             top: typeof image.top === "number" ? image.top : 0,
             left: typeof image.left === "number" ? image.left : 0,
           })) : [],
+          signatureFields: Array.isArray(s.signatureFields) ? s.signatureFields.map((field) => ({
+            id: String(field.id),
+            recipientId: String(field.recipientId),
+            sectionId: String(field.sectionId),
+            width: field.width,
+            height: field.height,
+            top: typeof field.top === "number" ? field.top : 0,
+            left: typeof field.left === "number" ? field.left : 0,
+            status: field.status,
+            signedAt: field.signedAt,
+            signatureData: field.signatureData,
+            borderColor: field.borderColor,
+            borderWidth: field.borderWidth,
+            borderRadius: field.borderRadius,
+          })) : [],
           comments: Array.isArray(s.comments) ? s.comments : [],
           titleStyles: normalizeStyles(s.titleStyles),
           contentStyles: normalizeStyles(s.contentStyles),
@@ -664,6 +707,13 @@ function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmai
       },
     },
     versions: Array.isArray((apiProposal as any).versions) ? (apiProposal as any).versions : [],
+    signatories: Array.isArray((apiProposal as any).signatories) ? (apiProposal as any).signatories.map((s: any) => ({
+      id: String(s.id),
+      name: s.name,
+      email: s.email,
+      role: s.role,
+      order: parseInt(String(s.order)),
+    })) : [],
   };
 }
 
