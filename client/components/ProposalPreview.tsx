@@ -1093,10 +1093,10 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                         onSelectElement(`signature-${section.id}-${field.id}`, "signature")
                       }
                       onUpdate={(updates) =>
-                        onUpdateSignatureField?.(section.id, field.id, updates)
+                        onUpdateSignatureField?.(section.id, String(field.id), updates)
                       }
                       onDelete={() =>
-                        onDeleteSignatureField?.(section.id, field.id)
+                        onDeleteSignatureField?.(section.id, String(field.id))
                       }
                     />
                   );
