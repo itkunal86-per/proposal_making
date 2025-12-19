@@ -78,7 +78,9 @@ export const SignaturesPanel: React.FC<SignaturesPanelProps> = ({
   }, [proposal.id, onUpdateProposal]);
 
   const signatories = proposal.signatories || [];
-  const signatureFields = proposal.signatureFields || [];
+
+  // Aggregate all signature fields from all sections
+  const allSignatureFields = proposal.sections.flatMap(s => s.signatureFields || []);
 
   const handleAddRecipient = async () => {
     if (!newRecipient.name || !newRecipient.email) {
