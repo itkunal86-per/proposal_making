@@ -704,6 +704,36 @@ export default function ProposalEditor() {
                 };
                 commit(updated);
               }}
+              onUpdateSignatureField={(sectionId, fieldId, updates) => {
+                const updated = {
+                  ...p,
+                  sections: p.sections.map((s) =>
+                    s.id === sectionId
+                      ? {
+                          ...s,
+                          signatureFields: (s.signatureFields || []).map((field) =>
+                            field.id === fieldId ? { ...field, ...updates } : field
+                          ),
+                        }
+                      : s
+                  ),
+                };
+                commit(updated);
+              }}
+              onDeleteSignatureField={(sectionId, fieldId) => {
+                const updated = {
+                  ...p,
+                  sections: p.sections.map((s) =>
+                    s.id === sectionId
+                      ? {
+                          ...s,
+                          signatureFields: (s.signatureFields || []).filter((field) => field.id !== fieldId),
+                        }
+                      : s
+                  ),
+                };
+                commit(updated);
+              }}
             />
           </div>
 
