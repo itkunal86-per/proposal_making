@@ -366,10 +366,10 @@ export const SignaturesPanel: React.FC<SignaturesPanelProps> = ({
           </div>
         )}
 
-        {signatureFields.length > 0 && (
+        {allSignatureFields.length > 0 && (
           <div className="space-y-3 border-t pt-4">
             <h3 className="text-sm font-semibold">Added fields</h3>
-            {signatureFields.map((field) => {
+            {allSignatureFields.map((field) => {
               const recipient = signatories.find((r) => r.id === field.recipientId);
               return (
                 <Card key={field.id} className="p-3">
