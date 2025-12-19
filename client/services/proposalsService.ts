@@ -86,7 +86,7 @@ export interface SignatureRecipient {
 export type SignatureStatus = "pending" | "signed" | "declined";
 
 export interface SignatureField {
-  id: string;
+  id: string | number;
   recipientId: string;
   sectionId: string;
   width: number;
