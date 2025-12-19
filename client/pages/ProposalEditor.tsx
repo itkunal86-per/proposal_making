@@ -824,6 +824,21 @@ export default function ProposalEditor() {
                   setAddingSignatureMode(false);
                   setSelectedSignatoryId(null);
                 }}
+                onSignatoriesFetched={(apiSignatories) => {
+                  // Sync API signatories with proposal
+                  if (apiSignatories.length > 0) {
+                    const converted: typeof p.signatories = apiSignatories.map((s) => ({
+                      id: String(s.id),
+                      name: s.name,
+                      email: s.email,
+                      role: s.role,
+                      order: parseInt(String(s.order)),
+                    }));
+                    if (JSON.stringify(p.signatories) !== JSON.stringify(converted)) {
+                      commit({ ...p, signatories: converted });
+                    }
+                  }
+                }}
               />
             ) : activePanel === "variables" ? (
               <VariablesPanel
