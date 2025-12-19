@@ -23,6 +23,7 @@ interface SignaturesPanelProps {
   selectedSignatoryId?: string | null;
   onStartAddingSignatureField?: (signatoryId: string) => void;
   onStopAddingSignatureField?: () => void;
+  onSignatoriesFetched?: (signatories: SignatoryData[]) => void;
 }
 
 export const SignaturesPanel: React.FC<SignaturesPanelProps> = ({
