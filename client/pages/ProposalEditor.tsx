@@ -749,11 +749,8 @@ export default function ProposalEditor() {
               />
             ) : activePanel === "signatures" ? (
               <SignaturesPanel
-                signatureRecipient={signatureRecipient}
-                onChangeRecipient={setSignatureRecipient}
-                onAddSignature={() => {
-                  console.log("Add signature");
-                }}
+                proposal={p}
+                onUpdateProposal={commit}
               />
             ) : activePanel === "variables" ? (
               <VariablesPanel
