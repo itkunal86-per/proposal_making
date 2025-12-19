@@ -319,7 +319,8 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
       if ((section.shapes && section.shapes.length > 0) ||
           (section.tables && section.tables.length > 0) ||
           ((section as any).texts && (section as any).texts.length > 0) ||
-          ((section as any).images && (section as any).images.length > 0)) {
+          ((section as any).images && (section as any).images.length > 0) ||
+          (section.signatureFields && section.signatureFields.length > 0)) {
         let maxHeight = 400; // minimum height
 
         // Calculate max height needed for shapes
@@ -356,6 +357,16 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
         if ((section as any).images) {
           (section as any).images.forEach((image: any) => {
             const bottomPos = image.top + image.height + 20; // 20px padding
+            if (bottomPos > maxHeight) {
+              maxHeight = bottomPos;
+            }
+          });
+        }
+
+        // Calculate max height needed for signature fields
+        if (section.signatureFields) {
+          section.signatureFields.forEach((field) => {
+            const bottomPos = field.top + field.height + 20; // 20px padding
             if (bottomPos > maxHeight) {
               maxHeight = bottomPos;
             }
