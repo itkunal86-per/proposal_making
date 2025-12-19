@@ -113,6 +113,7 @@ export interface ProposalSection {
   tables?: TableElement[];
   texts?: TextElement[];
   images?: ImageElement[];
+  signatureFields?: SignatureField[];
   comments?: { id: string; author: string; text: string; createdAt: number }[];
   titleStyles?: Record<string, any>;
   contentStyles?: Record<string, any>;
