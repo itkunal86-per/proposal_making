@@ -191,48 +191,58 @@ export const SignaturesPanel: React.FC<SignaturesPanelProps> = ({
       {/* TAB 1: RECIPIENTS */}
       <TabsContent value="recipients" className="space-y-4">
         <div className="space-y-3">
-          {signatories.length === 0 ? (
+          {isLoading ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <Loader2 className="w-8 h-8 mx-auto mb-2 animate-spin" />
+              <p className="text-sm">Loading signatories...</p>
+            </div>
+          ) : apiSignatories.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <PenTool className="w-8 h-8 mx-auto mb-2 opacity-50" />
               <p className="text-sm">No signatories added yet</p>
             </div>
           ) : (
-            signatories
-              .sort((a, b) => a.order - b.order)
-              .map((recipient) => (
-                <Card key={recipient.id} className="p-3 space-y-2">
+            apiSignatories
+              .sort((a, b) => parseInt(String(a.order)) - parseInt(String(b.order)))
+              .map((signatory) => (
+                <Card key={signatory.id} className="p-3 space-y-2">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <div className="font-semibold text-sm">{recipient.name}</div>
-                      <div className="text-xs text-muted-foreground">{recipient.email}</div>
-                      {recipient.role && (
+                      <div className="font-semibold text-sm">{signatory.name}</div>
+                      <div className="text-xs text-muted-foreground">{signatory.email}</div>
+                      {signatory.role && (
                         <div className="text-xs text-muted-foreground mt-1">
-                          Role: {recipient.role}
+                          Role: {signatory.role}
                         </div>
                       )}
                     </div>
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleRemoveRecipient(recipient.id)}
+                      onClick={() => handleRemoveRecipient(signatory.id!, String(signatory.id!))}
+                      disabled={isDeletingId === signatory.id}
                       className="text-destructive hover:text-destructive hover:bg-destructive/10"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      {isDeletingId === signatory.id ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="w-4 h-4" />
+                      )}
                     </Button>
                   </div>
                   <div className="flex items-center gap-2">
                     <Label className="text-xs">Order:</Label>
                     <Select
-                      value={String(recipient.order)}
+                      value={String(signatory.order)}
                       onValueChange={(value) =>
-                        handleUpdateRecipientOrder(recipient.id, parseInt(value))
+                        handleUpdateRecipientOrder(String(signatory.id!), parseInt(value))
                       }
                     >
                       <SelectTrigger className="w-20 h-8">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {signatories.map((_, idx) => (
+                        {apiSignatories.map((_, idx) => (
                           <SelectItem key={idx} value={String(idx + 1)}>
                             {idx + 1}
                           </SelectItem>
