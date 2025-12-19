@@ -98,18 +98,6 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
     setIsResizing(true);
   };
 
-  const statusColors = {
-    pending: "border-yellow-300 bg-yellow-50",
-    signed: "border-green-300 bg-green-50",
-    declined: "border-red-300 bg-red-50",
-  };
-
-  const statusBgColors = {
-    pending: "bg-yellow-100",
-    signed: "bg-green-100",
-    declined: "bg-red-100",
-  };
-
   return (
     <div
       ref={containerRef}
@@ -124,9 +112,9 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
     >
       <div
         ref={elementRef}
-        className={`absolute pointer-events-auto transition-all duration-200 flex flex-col items-center justify-center ${
-          statusColors[field.status]
-        } ${selected ? "ring-2 ring-blue-500 ring-offset-1" : ""}`}
+        className={`absolute pointer-events-auto transition-all duration-200 flex flex-col items-center justify-center border-slate-300 bg-slate-50 ${
+          selected ? "ring-2 ring-blue-500 ring-offset-1" : ""
+        }`}
         style={{
           left: `${field.left}px`,
           top: `${field.top}px`,
@@ -140,15 +128,12 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
         onMouseDown={handleMouseDown}
       >
         <div className="text-center pointer-events-none">
-          <div className={`text-xs font-semibold px-2 py-1 rounded ${statusBgColors[field.status]} text-foreground`}>
+          <div className="text-xs font-semibold px-2 py-1 rounded bg-slate-200 text-foreground">
             {recipient?.name || "Unknown"}
           </div>
-          <div className="text-xs text-muted-foreground mt-1">
-            {field.status === "signed" ? "✓ Signed" : field.status === "declined" ? "✗ Declined" : "Pending"}
-          </div>
-          {field.signedAt && (
+          {recipient?.role && (
             <div className="text-xs text-muted-foreground mt-1">
-              {new Date(field.signedAt).toLocaleDateString()}
+              {recipient.role}
             </div>
           )}
         </div>
