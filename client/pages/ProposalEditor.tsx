@@ -147,9 +147,14 @@ export default function ProposalEditor() {
   useEffect(() => {
     if (!p || !p.id) return;
 
+    const proposalId = p.id;
+
     (async () => {
       try {
-        const result = await getSignatories(p.id);
+        const result = await getSignatories(proposalId);
+        // Check if proposal ID is still the same (in case it changed while fetching)
+        if (p?.id !== proposalId) return;
+
         if (result.success && result.data) {
           // Sync API signatories with proposal
           const converted = result.data.map((s) => ({
@@ -162,10 +167,10 @@ export default function ProposalEditor() {
 
           // Only update if different
           if (JSON.stringify(p.signatories) !== JSON.stringify(converted)) {
-            setP({
-              ...p,
+            setP((prevP) => ({
+              ...prevP,
               signatories: converted,
-            });
+            }));
           }
         }
       } catch (error) {
