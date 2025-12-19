@@ -764,7 +764,6 @@ export default function ProposalEditor() {
                         }
                       : s
                   ),
-                  signatureFields: [...(p.signatureFields || []), newField],
                 };
                 commit(updated);
                 setAddingSignatureMode(false);
