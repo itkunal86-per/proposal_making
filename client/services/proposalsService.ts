@@ -152,7 +152,6 @@ export interface Proposal {
   versions: ProposalVersionSnapshot[];
   titleStyles?: Record<string, any>;
   signatories?: SignatureRecipient[];
-  signatureFields?: SignatureField[];
 }
 
 const STORAGE_KEY = "app_proposals";
