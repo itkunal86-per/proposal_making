@@ -364,8 +364,8 @@ export const SignaturesPanel: React.FC<SignaturesPanelProps> = ({
                       <SelectValue placeholder="Choose a signatory..." />
                     </SelectTrigger>
                     <SelectContent>
-                      {signatories.map((signatory) => (
-                        <SelectItem key={signatory.id} value={signatory.id}>
+                      {apiSignatories.map((signatory) => (
+                        <SelectItem key={signatory.id} value={String(signatory.id)}>
                           {signatory.name} ({signatory.role || "No role"})
                         </SelectItem>
                       ))}
