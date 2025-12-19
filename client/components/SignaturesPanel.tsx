@@ -17,6 +17,10 @@ import { Proposal, SignatureRecipient, SignatureField } from "@/services/proposa
 interface SignaturesPanelProps {
   proposal: Proposal;
   onUpdateProposal: (proposal: Proposal) => void;
+  isAddingSignatureField?: boolean;
+  selectedSignatoryId?: string | null;
+  onStartAddingSignatureField?: (signatoryId: string) => void;
+  onStopAddingSignatureField?: () => void;
 }
 
 export const SignaturesPanel: React.FC<SignaturesPanelProps> = ({
