@@ -337,6 +337,8 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
   isAddingSignatureMode = false,
   selectedSignatoryId = null,
 }) => {
+  console.log("ProposalPreview render - variables prop received:", { variablesLength: variables?.length || 0, variables });
+
   const [dragOverSectionId, setDragOverSectionId] = React.useState<string | null>(null);
   const [canvasHeights, setCanvasHeights] = React.useState<Record<string, number>>({});
 
