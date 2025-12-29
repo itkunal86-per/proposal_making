@@ -2,7 +2,7 @@ import React from "react";
 import { Proposal, ProposalSection } from "@/services/proposalsService";
 import { Button } from "@/components/ui/button";
 import { Sparkles, Trash2 } from "lucide-react";
-import { replaceVariables, decodeHtmlEntities } from "@/lib/variableUtils";
+import { replaceVariables, decodeHtmlEntities, extractVariableNames } from "@/lib/variableUtils";
 import { ShapeEditor } from "@/components/ShapeEditor";
 import { TableEditor } from "@/components/TableEditor";
 import { TextEditor } from "@/components/TextEditor";
