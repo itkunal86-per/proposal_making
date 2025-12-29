@@ -190,6 +190,7 @@ const SelectableElement: React.FC<ElementProps> = ({
 
     // Apply variable replacement to the content
     if (typeof decodedContent === "string" && variables.length > 0) {
+      console.log("Replacing variables:", { content: decodedContent, variables, result: replaceVariables(decodedContent, variables) });
       decodedContent = replaceVariables(decodedContent, variables);
     }
 
