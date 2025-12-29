@@ -141,13 +141,23 @@ export default function MyClients() {
               <h1 className="text-3xl lg:text-4xl font-bold tracking-tight text-foreground">Clients</h1>
               <p className="text-base text-muted-foreground mt-1">Manage your client directory and keep it up to date</p>
             </div>
-            <Button
-              onClick={() => setOpenAdd(true)}
-              className="w-full sm:w-auto gap-2 bg-gradient-to-r from-primary to-accent hover:shadow-lg transition-shadow"
-            >
-              <span>+</span>
-              Add client
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+              <Button
+                onClick={() => setOpenAdd(true)}
+                className="w-full sm:w-auto gap-2 bg-gradient-to-r from-primary to-accent hover:shadow-lg transition-shadow"
+              >
+                <span>+</span>
+                Add client
+              </Button>
+              <Button
+                onClick={syncFromGHL}
+                disabled={isSyncing}
+                variant="outline"
+                className="w-full sm:w-auto gap-2"
+              >
+                {isSyncing ? "Syncing..." : "Sync From GHL"}
+              </Button>
+            </div>
           </div>
         </div>
 
