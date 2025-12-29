@@ -237,6 +237,18 @@ export default function ProposalEditor() {
 
   const section = p.sections[current];
 
+  console.log("ProposalEditor render - variables and content:", {
+    variablesCount: variables.length,
+    variables: variables.map(v => ({ id: v.id, name: v.name, value: v.value })),
+    sectionsWithContent: p.sections.map(s => ({
+      id: s.id,
+      title: s.title,
+      contentLength: s.content?.length || 0,
+      contentSample: s.content?.substring(0, 100) || "",
+      columnContents: (s as any).columnContents?.map((c: string) => c?.substring(0, 50) || "") || [],
+    })),
+  });
+
   return (
     <div className="flex h-screen bg-slate-50">
       <ProposalEditorSidebar
