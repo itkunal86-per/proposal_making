@@ -186,7 +186,12 @@ const SelectableElement: React.FC<ElementProps> = ({
 
     // Check for both literal HTML tags and encoded HTML entities
     const isHtml = typeof content === "string" && (content.includes("<") || content.includes("&lt;") || content.includes("&amp;"));
-    const decodedContent = isHtml && typeof content === "string" ? decodeHtmlEntities(content) : content;
+    let decodedContent = isHtml && typeof content === "string" ? decodeHtmlEntities(content) : content;
+
+    // Apply variable replacement to the content
+    if (typeof decodedContent === "string" && variables.length > 0) {
+      decodedContent = replaceVariables(decodedContent, variables);
+    }
 
     // Prioritize HTML rendering - if content has HTML tags, render as HTML
     // This ensures rich text editor content (with ul/li, nested divs, etc.) displays correctly
