@@ -184,13 +184,29 @@ const SelectableElement: React.FC<ElementProps> = ({
   const renderContent = () => {
     const content = children === undefined || children === null ? (type === "section-content" ? "Click to add content..." : "") : children;
 
+    console.log("SelectableElement renderContent called", {
+      id,
+      type,
+      contentLength: typeof content === "string" ? content.length : "not-string",
+      contentSample: typeof content === "string" ? content.substring(0, 100) : content,
+      variablesCount: variables.length,
+      variables,
+    });
+
     // Check for both literal HTML tags and encoded HTML entities
     const isHtml = typeof content === "string" && (content.includes("<") || content.includes("&lt;") || content.includes("&amp;"));
     let decodedContent = isHtml && typeof content === "string" ? decodeHtmlEntities(content) : content;
 
+    console.log("After decoding", {
+      id,
+      decodedContentSample: typeof decodedContent === "string" ? decodedContent.substring(0, 100) : decodedContent,
+    });
+
     // Apply variable replacement to the content
     if (typeof decodedContent === "string" && variables.length > 0) {
+      console.log("Before replacement", { id, decodedContent });
       decodedContent = replaceVariables(decodedContent, variables);
+      console.log("After replacement", { id, decodedContent });
     }
 
     // Prioritize HTML rendering - if content has HTML tags, render as HTML
