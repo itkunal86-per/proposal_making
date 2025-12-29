@@ -42,10 +42,16 @@ export default function MyClients() {
   async function syncFromGHL() {
     setIsSyncing(true);
     try {
+      const token = getStoredToken();
+      if (!token) {
+        throw new Error("Authentication token not found. Please log in again.");
+      }
+
       const response = await fetch("https://propai-api.hirenq.com/api/clients/sync-from-ghl", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
         },
       });
 
