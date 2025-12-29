@@ -256,7 +256,7 @@ export default function ProposalPublicView() {
                   <div
                     style={{ position: "relative", zIndex: 1 }}
                     dangerouslySetInnerHTML={{
-                      __html: decodeHtmlEntities(replaceVariables(section.content, [])),
+                      __html: decodeHtmlEntities(replaceVariables(decodeHtmlEntities(section.content), proposal.variables || [])),
                     }}
                   />
                 </div>
