@@ -338,6 +338,14 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
   selectedSignatoryId = null,
 }) => {
   console.log("ProposalPreview render - variables prop received:", { variablesLength: variables?.length || 0, variables });
+  console.log("ProposalPreview render - proposal sections:", proposal.sections.map(s => ({
+    id: s.id,
+    title: s.title,
+    contentLength: s.content?.length || 0,
+    contentSample: s.content?.substring(0, 100) || "(empty)",
+    layout: s.layout,
+    columnContentsLengths: (s as any).columnContents?.map((c: string) => c?.length || 0) || [],
+  })));
 
   const [dragOverSectionId, setDragOverSectionId] = React.useState<string | null>(null);
   const [canvasHeights, setCanvasHeights] = React.useState<Record<string, number>>({});
