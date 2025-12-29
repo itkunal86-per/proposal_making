@@ -44,6 +44,7 @@ interface ElementProps {
   bulletList?: boolean;
   numberList?: boolean;
   code?: boolean;
+  variables?: Array<{ id: string | number; name: string; value: string }>;
 }
 
 const SelectableElement: React.FC<ElementProps> = ({
