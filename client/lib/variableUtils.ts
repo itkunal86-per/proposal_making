@@ -39,7 +39,13 @@ export function replaceVariables(
     // Escape special regex characters in the variable name
     const escapedPlaceholder = placeholder.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const regex = new RegExp(escapedPlaceholder, "g");
-    result = result.replace(regex, variable.value || "");
+    const replaced = result.replace(regex, variable.value || "");
+
+    if (replaced !== result) {
+      console.log(`Variable replacement: "${placeholder}" -> "${variable.value || ""}"`, { before: result, after: replaced });
+    }
+
+    result = replaced;
   }
 
   return result;
