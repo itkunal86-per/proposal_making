@@ -126,13 +126,13 @@ export default function ProposalEditor() {
           return;
         }
         if (data) {
-          setVariables(
-            data.map((v) => ({
-              id: v.id,
-              name: v.variable_name,
-              value: v.variable_value,
-            }))
-          );
+          const mappedVariables = data.map((v) => ({
+            id: v.id,
+            name: v.variable_name,
+            value: v.variable_value,
+          }));
+          console.log("Variables loaded:", mappedVariables);
+          setVariables(mappedVariables);
         }
       } catch (error) {
         console.error("Failed to fetch variables:", error);
