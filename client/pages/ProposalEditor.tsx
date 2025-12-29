@@ -133,6 +133,9 @@ export default function ProposalEditor() {
           }));
           console.log("Variables loaded:", mappedVariables);
           setVariables(mappedVariables);
+          console.log("setVariables called, state should update now");
+        } else {
+          console.log("fetchVariables returned no data");
         }
       } catch (error) {
         console.error("Failed to fetch variables:", error);
