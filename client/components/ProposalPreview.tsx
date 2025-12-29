@@ -342,9 +342,10 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
     id: s.id,
     title: s.title,
     contentLength: s.content?.length || 0,
-    contentSample: s.content?.substring(0, 100) || "(empty)",
+    contentSample: s.content?.substring(0, 200) || "(empty)",
     layout: s.layout,
     columnContentsLengths: (s as any).columnContents?.map((c: string) => c?.length || 0) || [],
+    hasPlaceholders: (s.content || "").includes("{{"),
   })));
 
   const [dragOverSectionId, setDragOverSectionId] = React.useState<string | null>(null);
