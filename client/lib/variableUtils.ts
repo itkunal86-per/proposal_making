@@ -30,9 +30,6 @@ export function replaceVariables(
 ): string {
   let result = content;
 
-  // First decode HTML entities so we can match variables properly
-  const decodedContent = decodeHtmlEntities(result);
-
   for (const variable of variables) {
     const placeholder = `{{${variable.name}}}`;
     const regex = new RegExp(placeholder.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g");
