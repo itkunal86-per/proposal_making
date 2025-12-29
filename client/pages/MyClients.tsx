@@ -21,6 +21,7 @@ export default function MyClients() {
   const [openEdit, setOpenEdit] = useState<null | ClientRecord>(null);
   const [openAdd, setOpenAdd] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; clientId: string; clientName: string }>({ open: false, clientId: "", clientName: "" });
+  const [isSyncing, setIsSyncing] = useState(false);
 
   useEffect(() => { (async () => setRows(await listClients()))(); }, []);
 
@@ -35,6 +36,38 @@ export default function MyClients() {
 
   async function refresh() {
     setRows(await listClients());
+  }
+
+  async function syncFromGHL() {
+    setIsSyncing(true);
+    try {
+      const response = await fetch("https://propai-api.hirenq.com/api/clients/sync-from-ghl", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      toast({
+        title: data.message || "Clients synced successfully",
+        description: `${data.count || 0} client(s) synced from GoHighLevel`,
+      });
+      await refresh();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to sync clients from GoHighLevel";
+      toast({
+        title: "Sync failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsSyncing(false);
+    }
   }
 
   async function onAdd(payload: { name: string; email: string; company?: string; status: ClientStatus; onError?: (errors: Record<string, string | string[]>) => void }) {
