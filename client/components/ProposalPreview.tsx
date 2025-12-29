@@ -938,6 +938,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                         bulletList={(section as any).columnStyles?.[2]?.bulletList || (section as any).contentStyles?.bulletList}
                         numberList={(section as any).columnStyles?.[2]?.numberList || (section as any).contentStyles?.numberList}
                         code={(section as any).columnStyles?.[2]?.code || (section as any).contentStyles?.code}
+                        variables={variables}
                       >
                         {(section as any).columnContents?.[2] || ""}
                       </SelectableElement>
