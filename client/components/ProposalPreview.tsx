@@ -935,7 +935,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                         numberList={(section as any).columnStyles?.[2]?.numberList || (section as any).contentStyles?.numberList}
                         code={(section as any).columnStyles?.[2]?.code || (section as any).contentStyles?.code}
                       >
-                        {replaceVariables((section as any).columnContents?.[2] || "", variables)}
+                        {(section as any).columnContents?.[2] || ""}
                       </SelectableElement>
                     </div>
                   </>
