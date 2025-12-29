@@ -28,12 +28,18 @@ export function replaceVariables(
   content: string,
   variables: Array<{ id: string | number; name: string; value: string }>
 ): string {
+  if (!content || variables.length === 0) return content;
+
   let result = content;
 
   for (const variable of variables) {
+    if (!variable.name) continue;
+
     const placeholder = `{{${variable.name}}}`;
-    const regex = new RegExp(placeholder.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g");
-    result = result.replace(regex, variable.value);
+    // Escape special regex characters in the variable name
+    const escapedPlaceholder = placeholder.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const regex = new RegExp(escapedPlaceholder, "g");
+    result = result.replace(regex, variable.value || "");
   }
 
   return result;
