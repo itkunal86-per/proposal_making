@@ -1,25 +1,35 @@
 /**
  * Decode HTML entities while preserving HTML tags
- * Handles encoded entities like &lt; and &amp; but keeps structural tags
- * Examples: "&lt;div&gt;" -> "<div>", "&lcub;&lcub;name&rcub;&rcub;" -> "{{name}}"
+ * This function is careful to handle:
+ * 1. Encoded entities: &lt; &gt; &amp; &lcub; &rcub; etc.
+ * 2. HTML tags: <div> <p> <span> etc. are preserved
+ *
+ * Strategy: Use a temporary div to decode entities, but only if content looks like it has entities
  */
 export function decodeHtmlEntities(text: string): string {
   if (!text || typeof text !== "string") return text;
 
-  // Create a temporary element to decode entities
-  const textarea = document.createElement("textarea");
+  // Check if content contains encoded entities (e.g., &lt;, &lcub;, &amp;)
+  const hasEncodedEntities = /&[a-z]+;/i.test(text);
 
-  // Decode the HTML entities by setting innerHTML and reading textContent
-  // But only decode once to avoid stripping actual HTML tags
-  textarea.innerHTML = text;
+  if (!hasEncodedEntities) {
+    // No entities to decode, return as-is
+    console.log("📝 decodeHtmlEntities: no entities found, returning as-is");
+    return text;
+  }
 
-  // Get the decoded content - this handles entity decoding
-  const decoded = textarea.value;
+  // Content has entities, decode them carefully
+  // Use a div instead of textarea to preserve HTML structure
+  const div = document.createElement("div");
+  div.innerHTML = text;
+
+  // Get the HTML content back, which now has decoded entities but preserved tags
+  let decoded = div.innerHTML;
 
   console.log("📝 decodeHtmlEntities:", {
     input: text.substring(0, 100),
     output: decoded.substring(0, 100),
-    hasHtmlTags: text.includes("<") || text.includes(">"),
+    hadEntities: true,
   });
 
   return decoded;
