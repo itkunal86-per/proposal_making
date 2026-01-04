@@ -326,9 +326,6 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
   const [dragOverSectionId, setDragOverSectionId] = React.useState<string | null>(null);
   const [canvasHeights, setCanvasHeights] = React.useState<Record<string, number>>({});
 
-  React.useEffect(() => {
-    console.log("ProposalPreview received variables:", variables);
-  }, [variables]);;
   const sectionRefs = React.useRef<Map<string, HTMLDivElement>>(new Map());
 
   React.useEffect(() => {
