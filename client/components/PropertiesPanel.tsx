@@ -785,7 +785,15 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             value={section.title}
             onChange={(e) => handleUpdateSection({ title: e.target.value })}
             className="mt-2"
+            placeholder="e.g., Section {{project name}}"
           />
+          {variables && variables.length > 0 && (
+            <p className="text-xs text-blue-600 mt-2">
+              💡 Use variables like {"{{"}
+              {variables[0]?.name || "variable_name"}
+              {"}}"}
+            </p>
+          )}
         </div>
 
         <Separator />
