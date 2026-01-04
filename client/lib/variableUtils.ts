@@ -1,38 +1,34 @@
 /**
- * Decode HTML entities while preserving HTML tags
- * This function is careful to handle:
+ * Decode HTML entities while preserving HTML tags and structure
+ * Handles:
  * 1. Encoded entities: &lt; &gt; &amp; &lcub; &rcub; etc.
  * 2. HTML tags: <div> <p> <span> etc. are preserved
  *
- * Strategy: Use a temporary div to decode entities, but only if content looks like it has entities
+ * Strategy: Use innerHTML to normalize and decode entities, which preserves actual HTML tags
  */
 export function decodeHtmlEntities(text: string): string {
   if (!text || typeof text !== "string") return text;
 
-  // Check if content contains encoded entities (e.g., &lt;, &lcub;, &amp;)
-  const hasEncodedEntities = /&[a-z]+;/i.test(text);
+  try {
+    // Use a div to parse and normalize the HTML
+    // Setting innerHTML and reading it back decodes entities while preserving tags
+    const div = document.createElement("div");
+    div.innerHTML = text;
 
-  if (!hasEncodedEntities) {
-    // No entities to decode, return as-is
-    console.log("📝 decodeHtmlEntities: no entities found, returning as-is");
-    return text;
+    // Get back the normalized HTML - entities are decoded but tags preserved
+    const decoded = div.innerHTML;
+
+    console.log("📝 decodeHtmlEntities:", {
+      input: text.substring(0, 100),
+      output: decoded.substring(0, 100),
+      changed: text !== decoded,
+    });
+
+    return decoded;
+  } catch (err) {
+    console.error("Error in decodeHtmlEntities:", err);
+    return text; // Return original if error
   }
-
-  // Content has entities, decode them carefully
-  // Use a div instead of textarea to preserve HTML structure
-  const div = document.createElement("div");
-  div.innerHTML = text;
-
-  // Get the HTML content back, which now has decoded entities but preserved tags
-  let decoded = div.innerHTML;
-
-  console.log("📝 decodeHtmlEntities:", {
-    input: text.substring(0, 100),
-    output: decoded.substring(0, 100),
-    hadEntities: true,
-  });
-
-  return decoded;
 }
 
 /**
