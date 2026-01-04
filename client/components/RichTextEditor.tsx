@@ -43,10 +43,6 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     searchTerm: "",
   });
 
-  // Log when variables change
-  React.useEffect(() => {
-    console.log("📋 RichTextEditor received variables:", variables.map(v => `${v.name}=${v.value}`));
-  }, [variables]);
 
   // Initialize editor content and update when value prop changes
   useEffect(() => {
