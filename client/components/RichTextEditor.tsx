@@ -68,6 +68,12 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   const captureContent = () => {
     if (!editorRef.current) return;
     const content = editorRef.current.innerHTML;
+    console.log("📤 RichTextEditor captureContent:", {
+      innerHTML: content,
+      textContent: editorRef.current.textContent,
+      hasPlaceholder: content.includes("{{") || content.includes("&lcub;"),
+      sample: content.substring(0, 200),
+    });
     onChange(content);
   };
 
