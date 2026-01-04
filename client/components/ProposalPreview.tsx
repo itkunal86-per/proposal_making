@@ -184,17 +184,27 @@ const SelectableElement: React.FC<ElementProps> = ({
   const renderContent = () => {
     const content = children === undefined || children === null ? (type === "section-content" ? "Click to add content..." : "") : children;
 
-    console.log("🔍 SelectableElement renderContent called", {
-      id,
-      type,
-      childrenValue: children,
-      childrenType: typeof children,
-      contentLength: typeof content === "string" ? content.length : "not-string",
-      contentSample: typeof content === "string" ? content.substring(0, 100) : content,
-      variablesCount: variables.length,
-      variables: variables.map(v => `${v.name}=${v.value}`),
-      hasPlaceholder: typeof content === "string" && content.includes("{{"),
-    });
+    // Enhanced logging for section-content specifically
+    if (type === "section-content") {
+      console.log("🎯 SECTION-CONTENT renderContent START", {
+        id,
+        type,
+        childrenReceived: children?.substring?.(0, 100) || children,
+        contentLength: typeof content === "string" ? content.length : "not-string",
+        variablesCount: variables.length,
+        variablesList: variables.map(v => ({ name: v.name, value: v.value })),
+        hasPlaceholder: typeof content === "string" && content.includes("{{"),
+      });
+    } else {
+      console.log("🔍 SelectableElement renderContent called", {
+        id,
+        type,
+        contentLength: typeof content === "string" ? content.length : "not-string",
+        contentSample: typeof content === "string" ? content.substring(0, 50) : content,
+        variablesCount: variables.length,
+        variables: variables.map(v => `${v.name}=${v.value}`),
+      });
+    }
 
     // Check for both literal HTML tags and encoded HTML entities
     const isHtml = typeof content === "string" && (content.includes("<") || content.includes("&lt;") || content.includes("&amp;"));
