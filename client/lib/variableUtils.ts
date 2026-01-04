@@ -16,15 +16,7 @@ export function decodeHtmlEntities(text: string): string {
     div.innerHTML = text;
 
     // Get back the normalized HTML - entities are decoded but tags preserved
-    const decoded = div.innerHTML;
-
-    console.log("📝 decodeHtmlEntities:", {
-      input: text.substring(0, 100),
-      output: decoded.substring(0, 100),
-      changed: text !== decoded,
-    });
-
-    return decoded;
+    return div.innerHTML;
   } catch (err) {
     console.error("Error in decodeHtmlEntities:", err);
     return text; // Return original if error
