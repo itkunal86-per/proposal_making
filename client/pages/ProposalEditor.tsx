@@ -131,11 +131,11 @@ export default function ProposalEditor() {
             name: v.variable_name,
             value: v.variable_value,
           }));
-          console.log("Variables loaded:", mappedVariables);
+          console.log("✅ Variables loaded from API:", mappedVariables.map(v => `${v.name}=${v.value}`));
           setVariables(mappedVariables);
-          console.log("setVariables called, state should update now");
+          console.log("✅ setVariables called with", mappedVariables.length, "variables");
         } else {
-          console.log("fetchVariables returned no data");
+          console.log("⚠️ fetchVariables returned no data");
         }
       } catch (error) {
         console.error("Failed to fetch variables:", error);
