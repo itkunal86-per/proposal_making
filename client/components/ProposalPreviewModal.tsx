@@ -341,7 +341,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                 />
               )}
               <div style={{ position: "relative", zIndex: 1 }}>
-                {proposal.title}
+                {decodeHtmlEntities(replaceVariables(proposal.title, variables))}
               </div>
             </div>
 
