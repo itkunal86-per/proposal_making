@@ -497,6 +497,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
         marginRight={(proposal as any).titleStyles?.marginRight}
         marginBottom={(proposal as any).titleStyles?.marginBottom}
         marginLeft={(proposal as any).titleStyles?.marginLeft}
+        variables={variables}
       >
         {proposal.title}
       </SelectableElement>
@@ -572,6 +573,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                   bulletList={(section as any).titleStyles?.bulletList}
                   numberList={(section as any).titleStyles?.numberList}
                   code={(section as any).titleStyles?.code}
+                  variables={variables}
                 >
                   {section.title}
                 </SelectableElement>
@@ -613,6 +615,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                 bulletList={(section as any).titleStyles?.bulletList}
                 numberList={(section as any).titleStyles?.numberList}
                 code={(section as any).titleStyles?.code}
+                variables={variables}
               >
                 {section.title}
               </SelectableElement>
