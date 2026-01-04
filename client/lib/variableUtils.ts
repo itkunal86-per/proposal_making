@@ -35,6 +35,7 @@ export function replaceVariables(
   if (!content || variables.length === 0) return content;
 
   let result = content;
+  let replacementsMade = 0;
 
   for (const variable of variables) {
     if (!variable.name) continue;
@@ -54,10 +55,15 @@ export function replaceVariables(
       const replaced = result.replace(regex, variable.value || "");
 
       if (replaced !== result) {
+        replacementsMade++;
         result = replaced;
         break; // Found and replaced this variable, move to next variable
       }
     }
+  }
+
+  if (replacementsMade > 0) {
+    console.log(`✅ Variable replacements made: ${replacementsMade}`);
   }
 
   return result;
