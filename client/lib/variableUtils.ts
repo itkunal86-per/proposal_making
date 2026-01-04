@@ -23,6 +23,7 @@ export function decodeHtmlEntities(text: string): string {
 /**
  * Replace {{variable_name}} placeholders with actual values
  * Works with both plain text and HTML content
+ * Handles both literal {{ }} and encoded &lcub; &rcub;
  */
 export function replaceVariables(
   content: string,
@@ -35,17 +36,24 @@ export function replaceVariables(
   for (const variable of variables) {
     if (!variable.name) continue;
 
-    const placeholder = `{{${variable.name}}}`;
-    // Escape special regex characters in the variable name
-    const escapedPlaceholder = placeholder.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    const regex = new RegExp(escapedPlaceholder, "g");
-    const replaced = result.replace(regex, variable.value || "");
+    // Try both literal and HTML-encoded versions
+    const placeholders = [
+      `{{${variable.name}}}`,  // literal version
+      `&lcub;&lcub;${variable.name}&rcub;&rcub;`,  // HTML-encoded version
+    ];
 
-    if (replaced !== result) {
-      console.log(`Variable replacement: "${placeholder}" -> "${variable.value || ""}"`, { before: result, after: replaced });
+    for (const placeholder of placeholders) {
+      // Escape special regex characters in the placeholder
+      const escapedPlaceholder = placeholder.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const regex = new RegExp(escapedPlaceholder, "g");
+      const replaced = result.replace(regex, variable.value || "");
+
+      if (replaced !== result) {
+        console.log(`🎯 Variable replacement: "${placeholder}" -> "${variable.value || ""}"`, { before: result, after: replaced });
+      }
+
+      result = replaced;
     }
-
-    result = replaced;
   }
 
   return result;
