@@ -186,14 +186,18 @@ const SelectableElement: React.FC<ElementProps> = ({
 
     // Enhanced logging for section-content specifically
     if (type === "section-content") {
+      const contentStr = typeof content === "string" ? content : String(content);
       console.log("🎯 SECTION-CONTENT renderContent START", {
         id,
         type,
-        childrenReceived: children?.substring?.(0, 100) || children,
-        contentLength: typeof content === "string" ? content.length : "not-string",
+        childrenType: typeof children,
+        childrenLength: typeof children === "string" ? children.length : "not-string",
+        childrenSample: typeof children === "string" ? children.substring(0, 150) : children,
+        contentLength: contentStr.length,
         variablesCount: variables.length,
-        variablesList: variables.map(v => ({ name: v.name, value: v.value })),
-        hasPlaceholder: typeof content === "string" && content.includes("{{"),
+        variablesInfo: variables.map(v => `"${v.name}" -> "${v.value}"`).join(", "),
+        hasPlaceholder: contentStr.includes("{{"),
+        hasHtmlTags: contentStr.includes("<") || contentStr.includes(">"),
       });
     } else {
       console.log("🔍 SelectableElement renderContent called", {
