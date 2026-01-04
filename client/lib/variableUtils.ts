@@ -1,21 +1,26 @@
 /**
- * Decode HTML entities to proper HTML
- * Handles both encoded entities like &lt; and &amp; and literal tags
- * Recursively decodes multiple levels of encoding
+ * Decode HTML entities while preserving HTML tags
+ * Handles encoded entities like &lt; and &amp; but keeps structural tags
+ * Examples: "&lt;div&gt;" -> "<div>", "&lcub;&lcub;name&rcub;&rcub;" -> "{{name}}"
  */
 export function decodeHtmlEntities(text: string): string {
   if (!text || typeof text !== "string") return text;
 
+  // Create a temporary element to decode entities
   const textarea = document.createElement("textarea");
-  let decoded = text;
-  let previousDecoded = "";
 
-  // Recursively decode until no more encoded entities are found
-  while (decoded !== previousDecoded) {
-    previousDecoded = decoded;
-    textarea.innerHTML = decoded;
-    decoded = textarea.value;
-  }
+  // Decode the HTML entities by setting innerHTML and reading textContent
+  // But only decode once to avoid stripping actual HTML tags
+  textarea.innerHTML = text;
+
+  // Get the decoded content - this handles entity decoding
+  const decoded = textarea.value;
+
+  console.log("📝 decodeHtmlEntities:", {
+    input: text.substring(0, 100),
+    output: decoded.substring(0, 100),
+    hasHtmlTags: text.includes("<") || text.includes(">"),
+  });
 
   return decoded;
 }
