@@ -23,7 +23,7 @@ export function decodeHtmlEntities(text: string): string {
 /**
  * Replace {{variable_name}} placeholders with actual values
  * Works with both plain text and HTML content
- * Handles both literal {{ }} and encoded &lcub; &rcub;
+ * Handles both literal {{ }} and encoded &lcub; &rcub; and mixed encodings
  */
 export function replaceVariables(
   content: string,
@@ -36,25 +36,37 @@ export function replaceVariables(
   for (const variable of variables) {
     if (!variable.name) continue;
 
-    // Try both literal and HTML-encoded versions
+    // Try multiple encoding variations
     const placeholders = [
-      `{{${variable.name}}}`,  // literal version
-      `&lcub;&lcub;${variable.name}&rcub;&rcub;`,  // HTML-encoded version
+      `{{${variable.name}}}`,  // literal version: {{name}}
+      `&lcub;&lcub;${variable.name}&rcub;&rcub;`,  // fully encoded: &lcub;&lcub;name&rcub;&rcub;
+      `&lcub;{${variable.name}}&rcub;`,  // partially encoded: &lcub;{name}&rcub;
+      `&lcub;{${variable.name}&rcub;}`,  // other partial: &lcub;{name&rcub;}
     ];
 
     for (const placeholder of placeholders) {
       // Escape special regex characters in the placeholder
-      const escapedPlaceholder = placeholder.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const escapedPlaceholder = placeholder.replace(/[.*+?^${}()|[\]\\&]/g, "\\$&");
       const regex = new RegExp(escapedPlaceholder, "g");
       const replaced = result.replace(regex, variable.value || "");
 
       if (replaced !== result) {
-        console.log(`🎯 Variable replacement: "${placeholder}" -> "${variable.value || ""}"`, { before: result, after: replaced });
+        console.log(`🎯 Variable replacement: "${placeholder}" -> "${variable.value || ""}"`, {
+          before: result.substring(0, 100),
+          after: replaced.substring(0, 100),
+          matched: true
+        });
       }
 
       result = replaced;
     }
   }
+
+  console.log("✅ replaceVariables final result:", {
+    hasVariables: variables.length > 0,
+    variableNames: variables.map(v => v.name),
+    resultSample: result.substring(0, 100),
+  });
 
   return result;
 }
