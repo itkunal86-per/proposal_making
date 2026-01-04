@@ -29,9 +29,23 @@ export function replaceVariables(
   content: string,
   variables: Array<{ id: string | number; name: string; value: string }>
 ): string {
-  if (!content || variables.length === 0) return content;
+  if (!content || variables.length === 0) {
+    console.log("⚠️ replaceVariables early return:", {
+      contentExists: !!content,
+      contentLength: content?.length || 0,
+      variablesCount: variables.length,
+    });
+    return content;
+  }
 
   let result = content;
+
+  console.log("🔍 replaceVariables START:", {
+    variablesCount: variables.length,
+    variablesList: variables.map(v => ({ name: v.name, value: v.value })),
+    contentSample: content.substring(0, 150),
+    contentLength: content.length,
+  });
 
   for (const variable of variables) {
     if (!variable.name) continue;
@@ -51,21 +65,21 @@ export function replaceVariables(
       const replaced = result.replace(regex, variable.value || "");
 
       if (replaced !== result) {
-        console.log(`🎯 Variable replacement: "${placeholder}" -> "${variable.value || ""}"`, {
+        console.log(`✅ MATCHED & REPLACED: "${placeholder}" -> "${variable.value || ""}"`, {
+          variableName: variable.name,
           before: result.substring(0, 100),
           after: replaced.substring(0, 100),
-          matched: true
         });
+        result = replaced;
+        break; // Found and replaced this variable, move to next variable
       }
-
-      result = replaced;
     }
   }
 
-  console.log("✅ replaceVariables final result:", {
-    hasVariables: variables.length > 0,
-    variableNames: variables.map(v => v.name),
-    resultSample: result.substring(0, 100),
+  console.log("✅ replaceVariables FINAL RESULT:", {
+    variablesCount: variables.length,
+    resultSample: result.substring(0, 150),
+    contentChanged: result !== content,
   });
 
   return result;
