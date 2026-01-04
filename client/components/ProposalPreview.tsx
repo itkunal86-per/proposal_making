@@ -184,76 +184,14 @@ const SelectableElement: React.FC<ElementProps> = ({
   const renderContent = () => {
     const content = children === undefined || children === null ? (type === "section-content" ? "Click to add content..." : "") : children;
 
-    // Enhanced logging for section-content specifically
-    if (type === "section-content") {
-      const contentStr = typeof content === "string" ? content : String(content);
-      console.log("🎯 SECTION-CONTENT renderContent START", {
-        id,
-        type,
-        childrenType: typeof children,
-        childrenLength: typeof children === "string" ? children.length : "not-string",
-        childrenSample: typeof children === "string" ? children.substring(0, 150) : children,
-        contentLength: contentStr.length,
-        variablesCount: variables.length,
-        variablesInfo: variables.map(v => `"${v.name}" -> "${v.value}"`).join(", "),
-        hasPlaceholder: contentStr.includes("{{"),
-        hasHtmlTags: contentStr.includes("<") || contentStr.includes(">"),
-      });
-    } else {
-      console.log("🔍 SelectableElement renderContent called", {
-        id,
-        type,
-        contentLength: typeof content === "string" ? content.length : "not-string",
-        contentSample: typeof content === "string" ? content.substring(0, 50) : content,
-        variablesCount: variables.length,
-        variables: variables.map(v => `${v.name}=${v.value}`),
-      });
-    }
-
     // Check for both literal HTML tags and encoded HTML entities
     const isHtml = typeof content === "string" && (content.includes("<") || content.includes("&lt;") || content.includes("&amp;"));
     let decodedContent = isHtml && typeof content === "string" ? decodeHtmlEntities(content) : content;
 
-    if (type === "section-content") {
-      console.log("📝 SECTION-CONTENT after decoding", {
-        id,
-        isHtml,
-        contentType: typeof decodedContent,
-        decodedContentLength: typeof decodedContent === "string" ? decodedContent.length : "not-string",
-        decodedSample: typeof decodedContent === "string" ? decodedContent.substring(0, 150) : decodedContent,
-        hasPlaceholder: typeof decodedContent === "string" && decodedContent.includes("{{"),
-      });
-    } else {
-      console.log("📝 After decoding", {
-        id,
-        isHtml,
-        contentType: typeof decodedContent,
-        decodedContentSample: typeof decodedContent === "string" ? decodedContent.substring(0, 100) : decodedContent,
-      });
-    }
-
     // Apply variable replacement to the content
     // This works for both plain text and HTML content
     if (typeof decodedContent === "string" && variables.length > 0) {
-      console.log("🔄 Before replacement", {
-        id,
-        decodedContentLength: decodedContent.length,
-        decodedContentSample: decodedContent.substring(0, 100),
-        variablesList: variables.map(v => ({ name: v.name, value: v.value }))
-      });
       decodedContent = replaceVariables(decodedContent, variables);
-      console.log("✅ After replacement", {
-        id,
-        decodedContentSample: decodedContent.substring(0, 100),
-        changed: decodedContent.length > 0
-      });
-    } else {
-      console.log("⚠️ Skipped replacement", {
-        isString: typeof decodedContent === "string",
-        hasVariables: variables.length > 0,
-        variablesCount: variables.length,
-        contentLength: typeof decodedContent === "string" ? decodedContent.length : "n/a"
-      });
     }
 
     // Prioritize HTML rendering - if content has HTML tags, render as HTML
