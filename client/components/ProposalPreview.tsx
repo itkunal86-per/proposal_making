@@ -370,14 +370,13 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
   isAddingSignatureMode = false,
   selectedSignatoryId = null,
 }) => {
-  console.log("ProposalPreview render - variables prop received:", { variablesLength: variables?.length || 0, variables });
-  console.log("ProposalPreview render - proposal sections:", proposal.sections.map(s => ({
+  console.log("🚀 ProposalPreview RENDERING:", { variablesLength: variables?.length || 0, variablesList: variables?.map(v => `${v.name}=${v.value}`) || [] });
+  console.log("📋 ProposalPreview sections:", proposal.sections.map(s => ({
     id: s.id,
     title: s.title,
     contentLength: s.content?.length || 0,
     contentSample: s.content?.substring(0, 200) || "(empty)",
     layout: s.layout,
-    columnContentsLengths: (s as any).columnContents?.map((c: string) => c?.length || 0) || [],
     hasPlaceholders: (s.content || "").includes("{{"),
   })));
 
