@@ -214,13 +214,23 @@ const SelectableElement: React.FC<ElementProps> = ({
     const isHtml = typeof content === "string" && (content.includes("<") || content.includes("&lt;") || content.includes("&amp;"));
     let decodedContent = isHtml && typeof content === "string" ? decodeHtmlEntities(content) : content;
 
-    console.log("📝 After decoding", {
-      id,
-      isHtml,
-      contentType: typeof decodedContent,
-      decodedContentSample: typeof decodedContent === "string" ? decodedContent.substring(0, 100) : decodedContent,
-      hasPlaceholderAfterDecode: typeof decodedContent === "string" && (decodedContent.includes("{{") || decodedContent.includes("&lcub;")),
-    });
+    if (type === "section-content") {
+      console.log("📝 SECTION-CONTENT after decoding", {
+        id,
+        isHtml,
+        contentType: typeof decodedContent,
+        decodedContentLength: typeof decodedContent === "string" ? decodedContent.length : "not-string",
+        decodedSample: typeof decodedContent === "string" ? decodedContent.substring(0, 150) : decodedContent,
+        hasPlaceholder: typeof decodedContent === "string" && decodedContent.includes("{{"),
+      });
+    } else {
+      console.log("📝 After decoding", {
+        id,
+        isHtml,
+        contentType: typeof decodedContent,
+        decodedContentSample: typeof decodedContent === "string" ? decodedContent.substring(0, 100) : decodedContent,
+      });
+    }
 
     // Apply variable replacement to the content
     // This works for both plain text and HTML content
