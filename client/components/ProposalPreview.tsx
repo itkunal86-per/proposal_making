@@ -203,20 +203,32 @@ const SelectableElement: React.FC<ElementProps> = ({
     console.log("📝 After decoding", {
       id,
       isHtml,
+      contentType: typeof decodedContent,
       decodedContentSample: typeof decodedContent === "string" ? decodedContent.substring(0, 100) : decodedContent,
-      hasPlaceholderAfterDecode: typeof decodedContent === "string" && decodedContent.includes("{{"),
+      hasPlaceholderAfterDecode: typeof decodedContent === "string" && (decodedContent.includes("{{") || decodedContent.includes("&lcub;")),
     });
 
     // Apply variable replacement to the content
+    // This works for both plain text and HTML content
     if (typeof decodedContent === "string" && variables.length > 0) {
-      console.log("🔄 Before replacement", { id, decodedContent, variablesList: variables.map(v => ({ name: v.name, value: v.value })) });
+      console.log("🔄 Before replacement", {
+        id,
+        decodedContentLength: decodedContent.length,
+        decodedContentSample: decodedContent.substring(0, 100),
+        variablesList: variables.map(v => ({ name: v.name, value: v.value }))
+      });
       decodedContent = replaceVariables(decodedContent, variables);
-      console.log("✅ After replacement", { id, decodedContent });
+      console.log("✅ After replacement", {
+        id,
+        decodedContentSample: decodedContent.substring(0, 100),
+        changed: decodedContent.length > 0
+      });
     } else {
       console.log("⚠️ Skipped replacement", {
         isString: typeof decodedContent === "string",
         hasVariables: variables.length > 0,
-        variablesCount: variables.length
+        variablesCount: variables.length,
+        contentLength: typeof decodedContent === "string" ? decodedContent.length : "n/a"
       });
     }
 
