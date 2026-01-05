@@ -37,6 +37,7 @@ export const SectionsDialog: React.FC<SectionsDialogProps> = ({
   currentSectionIndex,
   onSelectSection,
   onUpdateProposal,
+  onSelectElement,
   isTemplateEdit = false,
 }) => {
   const [loading, setLoading] = useState(false);
