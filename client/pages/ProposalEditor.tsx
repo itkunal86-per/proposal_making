@@ -542,6 +542,16 @@ export default function ProposalEditor() {
               >
                 Preview Proposal
               </Button>
+              {isSystemTemplateEdit && (
+                <Button
+                  onClick={() => setShowDeleteConfirm(true)}
+                  variant="destructive"
+                  size="sm"
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? "Deleting..." : "Delete Template"}
+                </Button>
+              )}
               <div className="text-xs text-muted-foreground whitespace-nowrap">
                 {saving ? "Saving..." : "Saved"}
               </div>
