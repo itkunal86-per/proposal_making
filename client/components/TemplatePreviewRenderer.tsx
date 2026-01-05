@@ -125,11 +125,8 @@ export const TemplatePreviewRenderer: React.FC<TemplatePreviewRendererProps> = (
             {/* Section Content */}
             {section.content && (
               <div className="text-xs text-slate-600 line-clamp-2 leading-tight">
-                <div
-                  dangerouslySetInnerHTML={{
-                    __html: decodeHtmlEntities(section.content).substring(0, 120) + '...',
-                  }}
-                />
+                {decodeHtmlEntities(section.content).replace(/<[^>]*>/g, '').substring(0, 120)}
+                {decodeHtmlEntities(section.content).replace(/<[^>]*>/g, '').length > 120 ? '...' : ''}
               </div>
             )}
 
