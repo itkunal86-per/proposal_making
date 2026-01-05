@@ -157,6 +157,7 @@ export default function MyProposals() {
     toast({ title: "Proposal created successfully" });
     setFormData({ title: "", client_id: "", status: "draft", due_date: "" });
     setIsCreateDialogOpen(false);
+    setIsCreating(false);
 
     if (result.data) {
       const proposalId = result.data.id;
