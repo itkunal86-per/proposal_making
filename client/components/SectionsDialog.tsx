@@ -12,6 +12,7 @@ import { Proposal, addSection, removeSection, reorderSection } from "@/services/
 import { SectionTemplateDialog, type SectionLayout } from "@/components/SectionTemplateDialog";
 import { ChevronUp, ChevronDown, Trash2, Plus } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { v4 as uuid } from "uuid";
 
 interface SectionsDialogProps {
   open: boolean;
@@ -20,6 +21,7 @@ interface SectionsDialogProps {
   currentSectionIndex: number;
   onSelectSection: (index: number) => void;
   onUpdateProposal: (proposal: Proposal) => void;
+  isTemplateEdit?: boolean;
 }
 
 export const SectionsDialog: React.FC<SectionsDialogProps> = ({
