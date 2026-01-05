@@ -762,7 +762,23 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     const sectionId = selectedElementId.replace("section-title-", "");
     const section = proposal.sections.find((s) => s.id === sectionId);
 
-    if (!section) return null;
+    console.log("PropertiesPanel: section-title selected", {
+      selectedElementId,
+      extractedSectionId: sectionId,
+      sectionFound: !!section,
+      availableSectionIds: proposal.sections.map(s => s.id),
+    });
+
+    if (!section) {
+      return (
+        <Card className="p-4">
+          <div className="text-center text-muted-foreground">
+            <p className="text-sm">Section not found: {sectionId}</p>
+            <p className="text-xs mt-2">Available sections: {proposal.sections.map(s => s.id).join(", ")}</p>
+          </div>
+        </Card>
+      );
+    }
 
     const handleUpdateSection = (updates: Partial<ProposalSection>) => {
       const updatedProposal = {
