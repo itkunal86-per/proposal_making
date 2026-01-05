@@ -1005,6 +1005,12 @@ export default function ProposalEditor() {
           setCurrent(index);
           setSectionsDialogOpen(false);
         }}
+        onSelectElement={(elementId, elementType) => {
+          setSelectedElementId(elementId);
+          setSelectedElementType(elementType);
+          setActivePanel("properties");
+          setSectionsDialogOpen(false);
+        }}
         onUpdateProposal={(updated) => {
           setP(updated);
           commit(updated);
