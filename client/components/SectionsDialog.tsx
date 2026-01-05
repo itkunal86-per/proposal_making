@@ -26,6 +26,7 @@ interface SectionsDialogProps {
   currentSectionIndex: number;
   onSelectSection: (index: number) => void;
   onUpdateProposal: (proposal: Proposal) => void;
+  onSelectElement?: (elementId: string, elementType: string) => void;
   isTemplateEdit?: boolean;
 }
 
