@@ -232,16 +232,19 @@ export default function ProposalEditor() {
               const sectionData: any = {
                 id: s.id,
                 title: s.title,
-                content: s.content,
+                content: s.content || "",
+                layout: s.layout || "",
+                columnContents: s.columnContents || [],
+                columnStyles: (s as any).columnStyles || [],
+                media: s.media || [],
+                contentStyles: (s as any).contentStyles || {},
+                titleStyles: (s as any).titleStyles || {},
+                texts: (s as any).texts || [],
+                shapes: s.shapes || [],
+                tables: s.tables || [],
+                images: (s as any).images || [],
+                signatureFields: s.signatureFields || [],
               };
-
-              // Include optional fields if they exist
-              if (s.layout) {
-                sectionData.layout = s.layout;
-              }
-              if (s.columnContents && s.columnContents.length > 0) {
-                sectionData.columnContents = s.columnContents;
-              }
 
               return sectionData;
             }),
