@@ -172,9 +172,9 @@ export default function ProposalEditor() {
     })();
   }, [id, isSystemTemplateEdit]);
 
-  // Fetch and sync signatories when proposal is loaded
+  // Fetch and sync signatories when proposal is loaded (skip for template edits)
   useEffect(() => {
-    if (!p || !p.id) return;
+    if (!p || !p.id || isSystemTemplateEdit) return;
 
     const proposalId = p.id;
 
@@ -206,7 +206,7 @@ export default function ProposalEditor() {
         console.error("Failed to fetch signatories:", error);
       }
     })();
-  }, [p?.id]);
+  }, [p?.id, isSystemTemplateEdit]);
 
   function commit(next: Proposal, keepVersion = false, note?: string) {
     console.log("Proposal Edit Form Submitted:", next);
