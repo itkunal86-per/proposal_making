@@ -141,6 +141,7 @@ export default function ProposalEditor() {
                   tablesCount: s.tables?.length,
                 })),
               });
+              console.log("FULL SECTION DATA WITH ALL FIELDS:", JSON.stringify(found.sections, null, 2));
               // Store in localStorage for future access
               localStorage.setItem(`template_draft_${templateId}`, JSON.stringify(found));
             } else {
