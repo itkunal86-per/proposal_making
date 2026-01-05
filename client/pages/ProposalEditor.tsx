@@ -70,6 +70,8 @@ export default function ProposalEditor() {
   const [variables, setVariables] = useState<Array<{ id: string | number; name: string; value: string }>>([]);
   const [isLoadingVariables, setIsLoadingVariables] = useState(false);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const previewContainerRef = useRef<HTMLDivElement>(null);
   const saveTimer = useRef<number | null>(null);
 
