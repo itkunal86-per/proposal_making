@@ -21,6 +21,8 @@ import ProposalPublicView from "./pages/ProposalPublicView";
 import AcceptInvite from "./pages/AcceptInvite";
 import AdminPackages from "./pages/AdminPackages";
 import AdminTemplates from "./pages/AdminTemplates";
+import AdminSystemTemplates from "./pages/AdminSystemTemplates";
+import AdminClientTemplates from "./pages/AdminClientTemplates";
 import AdminSettings from "./pages/AdminSettings";
 import AdminUsers from "./pages/AdminUsers";
 import MyProposals from "./pages/MyProposals";
@@ -60,6 +62,8 @@ const App = () => (
                   <Route path="/admin/users" element={<AdminUsers />} />
                   <Route path="/admin/packages" element={<AdminPackages />} />
                   <Route path="/admin/templates" element={<AdminTemplates />} />
+                  <Route path="/admin/templates/system" element={<AdminSystemTemplates />} />
+                  <Route path="/admin/templates/clients" element={<AdminClientTemplates />} />
                   <Route path="/admin/settings" element={<AdminSettings />} />
                 </Route>
 

@@ -1,9 +1,17 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -20,6 +28,7 @@ import {
   persistProposal,
   valueTotal,
 } from "@/services/proposalsService";
+import { updateSystemTemplate, getSystemTemplateDetails, deleteSystemTemplate, type SystemTemplate } from "@/services/systemTemplatesService";
 import { type ClientRecord, listClients } from "@/services/clientsService";
 import { ProposalPreview } from "@/components/ProposalPreview";
 import { ProposalPreviewModal } from "@/components/ProposalPreviewModal";
@@ -46,6 +55,8 @@ interface DocumentSettings {
 export default function ProposalEditor() {
   const { id = "" } = useParams();
   const nav = useNavigate();
+  const [searchParams] = useSearchParams();
+  const isSystemTemplateEdit = !!searchParams.get("templateId");
   const [p, setP] = useState<Proposal | null>(null);
   const [current, setCurrent] = useState(0);
   const [saving, setSaving] = useState(false);
@@ -67,6 +78,8 @@ export default function ProposalEditor() {
   const [variables, setVariables] = useState<Array<{ id: string | number; name: string; value: string }>>([]);
   const [isLoadingVariables, setIsLoadingVariables] = useState(false);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const previewContainerRef = useRef<HTMLDivElement>(null);
   const saveTimer = useRef<number | null>(null);
 
@@ -75,24 +88,128 @@ export default function ProposalEditor() {
   useEffect(() => {
     (async () => {
       try {
-        console.log("ProposalEditor: Loading proposal with id:", id);
-        const found = await getProposalDetails(id);
-        console.log("ProposalEditor: getProposalDetails returned:", found);
-        if (!found) {
-          console.warn("ProposalEditor: Proposal not found, redirecting to /my/proposals");
-          nav("/my/proposals");
-          return;
+        let found: Proposal | null = null;
+
+        // Check if this is a system template edit
+        const templateId = searchParams.get("templateId");
+        if (isSystemTemplateEdit && templateId) {
+          const storedData = localStorage.getItem(`template_draft_${templateId}`);
+          let useStoredData = false;
+
+          if (storedData) {
+            const parsed = JSON.parse(storedData) as Proposal;
+            // Validate that stored data has all required section fields
+            const hasAllFields = parsed.sections?.every((s: any) =>
+              s.texts !== undefined &&
+              s.images !== undefined &&
+              s.shapes !== undefined &&
+              s.tables !== undefined
+            );
+
+            if (hasAllFields && parsed.sections && parsed.sections.length > 0) {
+              found = parsed;
+              useStoredData = true;
+              console.log("Loaded complete system template from localStorage:", found);
+            } else {
+              console.log("Stored data incomplete, will fetch fresh from API");
+            }
+          }
+
+          if (!useStoredData) {
+            // Fetch from API if not in localStorage
+            console.log("Template not in localStorage, fetching from API:", templateId);
+            const templateData = await getSystemTemplateDetails(templateId);
+            console.log("API Response - templateData:", templateData);
+            if (templateData) {
+              // Convert SystemTemplate to Proposal format
+              // Ensure all section data is preserved exactly as received from API
+              const sectionsWithDefaults = (templateData.sections || []).map((s: any) => ({
+                id: s.id,
+                title: s.title || "",
+                content: s.content || "",
+                layout: s.layout || "",
+                columnContents: s.columnContents || [],
+                columnStyles: s.columnStyles || [],
+                media: s.media || [],
+                contentStyles: s.contentStyles || {},
+                titleStyles: s.titleStyles || {},
+                texts: s.texts || [],
+                shapes: s.shapes || [],
+                tables: s.tables || [],
+                images: s.images || [],
+                signatureFields: s.signatureFields || [],
+                comments: s.comments || [],
+              }));
+
+              found = {
+                id: templateData.id,
+                title: templateData.title || "Untitled Template",
+                status: templateData.status === "Active" ? "sent" : "draft",
+                createdBy: templateData.createdBy,
+                createdAt: templateData.createdAt,
+                updatedAt: templateData.updatedAt,
+                sections: sectionsWithDefaults,
+                pricing: [],
+                settings: {},
+                signatories: [],
+                versions: [],
+                client: null,
+                client_id: null,
+              };
+              console.log("Converted template to Proposal format:", {
+                id: found.id,
+                title: found.title,
+                sectionsCount: found.sections?.length,
+                sections: found.sections?.map((s: any) => ({
+                  id: s.id,
+                  title: s.title,
+                  textsCount: s.texts?.length,
+                  imagesCount: s.images?.length,
+                  shapesCount: s.shapes?.length,
+                  tablesCount: s.tables?.length,
+                })),
+              });
+              console.log("FULL SECTION DATA WITH ALL FIELDS:", JSON.stringify(found.sections, null, 2));
+              // Store in localStorage for future access
+              localStorage.setItem(`template_draft_${templateId}`, JSON.stringify(found));
+            } else {
+              console.warn("Failed to fetch template from API");
+              nav("/admin/templates/system");
+              return;
+            }
+          }
+        } else {
+          // Load regular proposal from API
+          console.log("ProposalEditor: Loading proposal with id:", id);
+          found = await getProposalDetails(id);
+          console.log("ProposalEditor: getProposalDetails returned:", found);
+          if (!found) {
+            console.warn("ProposalEditor: Proposal not found, redirecting to /my/proposals");
+            nav("/my/proposals");
+            return;
+          }
         }
-        console.log("Loaded proposal from getProposalDetails:", {
+
+        console.log("Loaded proposal - before setP:", {
           id: found.id,
-          sections: found.sections.map(s => ({
+          title: found.title,
+          status: found.status,
+          sectionsCount: found.sections?.length,
+          sections: found.sections?.map(s => ({
             id: s.id,
             title: s.title,
             layout: s.layout,
             columnContents: (s as any).columnContents,
+            textsCount: (s as any).texts?.length,
+            shapesCount: s.shapes?.length,
           })),
         });
         setP(found);
+
+        // Log state immediately after setting (won't show updated state due to closure)
+        setTimeout(() => {
+          console.log("State updated - checking p state");
+        }, 100);
 
         try {
           setIsLoadingClients(true);
@@ -113,9 +230,15 @@ export default function ProposalEditor() {
         nav("/my/proposals");
       }
     })();
-  }, [id, nav]);
+  }, [id, nav, isSystemTemplateEdit, searchParams.get("templateId")]);
 
   useEffect(() => {
+    // Skip variables fetch for system template edits
+    if (isSystemTemplateEdit) {
+      setVariables([]);
+      return;
+    }
+
     (async () => {
       setIsLoadingVariables(true);
       try {
@@ -144,11 +267,18 @@ export default function ProposalEditor() {
         setIsLoadingVariables(false);
       }
     })();
-  }, [id]);
+  }, [id, isSystemTemplateEdit]);
 
-  // Fetch and sync signatories when proposal is loaded
+  // Reset activePanel to valid panel when switching to template edit mode
   useEffect(() => {
-    if (!p || !p.id) return;
+    if (isSystemTemplateEdit && (activePanel === "signatures" || activePanel === "variables")) {
+      setActivePanel("properties");
+    }
+  }, [isSystemTemplateEdit, activePanel]);
+
+  // Fetch and sync signatories when proposal is loaded (skip for template edits)
+  useEffect(() => {
+    if (!p || !p.id || isSystemTemplateEdit) return;
 
     const proposalId = p.id;
 
@@ -180,7 +310,7 @@ export default function ProposalEditor() {
         console.error("Failed to fetch signatories:", error);
       }
     })();
-  }, [p?.id]);
+  }, [p?.id, isSystemTemplateEdit]);
 
   function commit(next: Proposal, keepVersion = false, note?: string) {
     console.log("Proposal Edit Form Submitted:", next);
@@ -192,13 +322,64 @@ export default function ProposalEditor() {
     void persistProposal(next);
 
     saveTimer.current = window.setTimeout(() => {
-      void updateProposal(next, { keepVersion, note });
-      setSaving(false);
+      if (isSystemTemplateEdit) {
+        // For system templates, call the update template API
+        const templateId = searchParams.get("templateId");
+        if (templateId) {
+          const updateData = {
+            title: next.title,
+            status: (next.status === "draft" ? "Active" : "Inactive") as "Active" | "Inactive",
+            client: next.client,
+            client_id: next.client_id,
+            sections: next.sections.map((s) => {
+              const sectionData: any = {
+                id: s.id,
+                title: s.title,
+                content: s.content || "",
+                layout: s.layout || "",
+                columnContents: s.columnContents || [],
+                columnStyles: (s as any).columnStyles || [],
+                media: s.media || [],
+                contentStyles: (s as any).contentStyles || {},
+                titleStyles: (s as any).titleStyles || {},
+                texts: (s as any).texts || [],
+                shapes: s.shapes || [],
+                tables: s.tables || [],
+                images: (s as any).images || [],
+                signatureFields: s.signatureFields || [],
+              };
+
+              return sectionData;
+            }),
+            pricing: next.pricing,
+            settings: next.settings,
+            signatories: next.signatories,
+            createdBy: next.createdBy,
+            createdAt: next.createdAt,
+            updatedAt: Date.now(),
+            versions: next.versions,
+          };
+          void updateSystemTemplate(templateId, updateData).then((result) => {
+            if (result.success) {
+              toast({ title: "Template saved successfully" });
+            } else {
+              toast({ title: result.error || "Failed to save template", variant: "destructive" });
+            }
+            setSaving(false);
+          });
+        } else {
+          setSaving(false);
+        }
+      } else {
+        // For regular proposals, use the existing update logic
+        void updateProposal(next, { keepVersion, note });
+        setSaving(false);
+      }
     }, 400);
   }
 
   const handleSectionNavigate = (sectionId: string) => {
-    const sectionIndex = p?.sections.findIndex((s) => s.id === sectionId);
+    const sectionIndex = p?.sections.findIndex((s) => String(s.id) === String(sectionId));
     if (sectionIndex !== undefined && sectionIndex !== -1) {
       setCurrent(sectionIndex);
 
@@ -236,6 +417,42 @@ export default function ProposalEditor() {
     }
   }, []);
 
+  const handleDeleteTemplate = useCallback(async () => {
+    if (!isSystemTemplateEdit || !p) return;
+
+    setIsDeleting(true);
+    try {
+      const result = await deleteSystemTemplate(p.id);
+      if (result.success) {
+        toast({
+          title: "Success",
+          description: "Template deleted successfully",
+          variant: "default",
+        });
+        // Clear the localStorage for this template
+        localStorage.removeItem(`template_draft_${searchParams.get("templateId")}`);
+        // Redirect to template list
+        nav("/admin/templates/system");
+      } else {
+        toast({
+          title: "Error",
+          description: result.error || "Failed to delete template",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error deleting template:", error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred while deleting the template",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
+    }
+  }, [isSystemTemplateEdit, p, nav, searchParams]);
+
   if (!p) return null;
 
   const section = p.sections[current];
@@ -260,6 +477,7 @@ export default function ProposalEditor() {
         onOpenAI={() => setAIDialogOpen(true)}
         onSelectPanel={setActivePanel}
         activePanel={activePanel}
+        isTemplateEdit={isSystemTemplateEdit}
       />
 
       <div className="flex-1 flex flex-col ml-16">
@@ -273,39 +491,56 @@ export default function ProposalEditor() {
                 className="flex-1 max-w-md"
                 placeholder="Proposal title"
               />
+              {!isSystemTemplateEdit && (
+                <Select
+                  value={p.client}
+                  onValueChange={(value) => {
+                    const selectedClient = clients.find((c) => c.name === value);
+                    commit({ ...p, client: value, client_id: selectedClient?.id });
+                  }}
+                  disabled={isLoadingClients}
+                >
+                  <SelectTrigger className="w-64">
+                    <SelectValue placeholder="Select a client" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {clients.map((client) => (
+                      <SelectItem key={client.id} value={client.name}>
+                        {client.name} ({client.company || "No company"})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
               <Select
-                value={p.client}
-                onValueChange={(value) => {
-                  const selectedClient = clients.find((c) => c.name === value);
-                  commit({ ...p, client: value, client_id: selectedClient?.id });
+                value={isSystemTemplateEdit ? (p.status === "draft" ? "Active" : "Inactive") : p.status}
+                onValueChange={(v) => {
+                  if (isSystemTemplateEdit) {
+                    // For system templates, map Active/Inactive to proposal status
+                    const newStatus = (v === "Active" ? "draft" : "sent") as ProposalStatus;
+                    commit({ ...p, status: newStatus });
+                  } else {
+                    commit({ ...p, status: v as ProposalStatus });
+                  }
                 }}
-                disabled={isLoadingClients}
-              >
-                <SelectTrigger className="w-64">
-                  <SelectValue placeholder="Select a client" />
-                </SelectTrigger>
-                <SelectContent>
-                  {clients.map((client) => (
-                    <SelectItem key={client.id} value={client.name}>
-                      {client.name} ({client.company || "No company"})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select
-                value={p.status}
-                onValueChange={(v: ProposalStatus) =>
-                  commit({ ...p, status: v })
-                }
               >
                 <SelectTrigger className="w-40">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="draft">Draft</SelectItem>
-                  <SelectItem value="sent">Sent</SelectItem>
-                  <SelectItem value="accepted">Accepted</SelectItem>
-                  <SelectItem value="declined">Declined</SelectItem>
+                  {isSystemTemplateEdit ? (
+                    <>
+                      <SelectItem value="Active">Active</SelectItem>
+                      <SelectItem value="Inactive">Inactive</SelectItem>
+                    </>
+                  ) : (
+                    <>
+                      <SelectItem value="draft">Draft</SelectItem>
+                      <SelectItem value="sent">Sent</SelectItem>
+                      <SelectItem value="accepted">Accepted</SelectItem>
+                      <SelectItem value="declined">Declined</SelectItem>
+                    </>
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -323,6 +558,16 @@ export default function ProposalEditor() {
               >
                 Preview Proposal
               </Button>
+              {isSystemTemplateEdit && (
+                <Button
+                  onClick={() => setShowDeleteConfirm(true)}
+                  variant="destructive"
+                  size="sm"
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? "Deleting..." : "Delete Template"}
+                </Button>
+              )}
               <div className="text-xs text-muted-foreground whitespace-nowrap">
                 {saving ? "Saving..." : "Saved"}
               </div>
@@ -477,12 +722,12 @@ export default function ProposalEditor() {
                 // Handle both old format (section-title-id) and new format (section-title-id-colX if needed)
                 let sectionId = selectedElementId.replace("section-title-", "");
                 sectionId = sectionId.replace(/-col\d+$/, "");
-                const section = p.sections.find((s) => s.id === sectionId);
+                const section = p.sections.find((s) => String(s.id) === String(sectionId));
                 if (section) {
                   const updated = {
                     ...p,
                     sections: p.sections.map((s) =>
-                      s.id === sectionId
+                      String(s.id) === String(sectionId)
                         ? { ...s, titleStyles: { ...(s as any).titleStyles, [format]: value } }
                         : s
                     ),
@@ -495,12 +740,12 @@ export default function ProposalEditor() {
                 const colMatch = sectionId.match(/-col(\d+)$/);
                 const columnIndex = colMatch ? parseInt(colMatch[1]) - 1 : -1; // col1 = index 0, col2 = index 1, etc.
                 sectionId = sectionId.replace(/-col\d+$/, "");
-                const section = p.sections.find((s) => s.id === sectionId);
+                const section = p.sections.find((s) => String(s.id) === String(sectionId));
                 if (section) {
                   const updated = {
                     ...p,
                     sections: p.sections.map((s) =>
-                      s.id === sectionId
+                      String(s.id) === String(sectionId)
                         ? columnIndex >= 0
                           ? {
                               ...s,
@@ -540,7 +785,7 @@ export default function ProposalEditor() {
                 const updated = {
                   ...p,
                   sections: p.sections.map((s) =>
-                    s.id === sectionId
+                    String(s.id) === String(sectionId)
                       ? columnIndex !== undefined
                         ? {
                             ...s,
@@ -556,7 +801,7 @@ export default function ProposalEditor() {
               }}
               variables={variables}
               onAddShape={(sectionId, shapeType, x, y) => {
-                const section = p.sections.find((s) => s.id === sectionId);
+                const section = p.sections.find((s) => String(s.id) === String(sectionId));
                 if (section) {
                   const newShape = {
                     id: Math.random().toString(36).substring(2, 9),
@@ -576,7 +821,7 @@ export default function ProposalEditor() {
                   const updated = {
                     ...p,
                     sections: p.sections.map((s) =>
-                      s.id === sectionId
+                      String(s.id) === String(sectionId)
                         ? { ...s, shapes: [...(s.shapes || []), newShape] }
                         : s
                     ),
@@ -591,7 +836,7 @@ export default function ProposalEditor() {
                 const updated = {
                   ...p,
                   sections: p.sections.map((s) =>
-                    s.id === sectionId
+                    String(s.id) === String(sectionId)
                       ? {
                           ...s,
                           shapes: (s.shapes || []).map((shape, idx) =>
@@ -604,7 +849,7 @@ export default function ProposalEditor() {
                 commit(updated);
               }}
               onAddTable={(sectionId, x, y) => {
-                const section = p.sections.find((s) => s.id === sectionId);
+                const section = p.sections.find((s) => String(s.id) === String(sectionId));
                 if (section) {
                   const createTableCells = (rows: number, cols: number) => {
                     return Array.from({ length: rows }, (_, rIdx) =>
@@ -634,7 +879,7 @@ export default function ProposalEditor() {
                   const updated = {
                     ...p,
                     sections: p.sections.map((s) =>
-                      s.id === sectionId
+                      String(s.id) === String(sectionId)
                         ? { ...s, tables: [...(s.tables || []), newTable] }
                         : s
                     ),
@@ -649,7 +894,7 @@ export default function ProposalEditor() {
                 const updated = {
                   ...p,
                   sections: p.sections.map((s) =>
-                    s.id === sectionId
+                    String(s.id) === String(sectionId)
                       ? {
                           ...s,
                           tables: (s.tables || []).map((table, idx) =>
@@ -662,7 +907,7 @@ export default function ProposalEditor() {
                 commit(updated);
               }}
               onAddText={(sectionId, x, y) => {
-                const section = p.sections.find((s) => s.id === sectionId);
+                const section = p.sections.find((s) => String(s.id) === String(sectionId));
                 if (section) {
                   const newText = {
                     id: Math.random().toString(36).substring(2, 9),
@@ -686,7 +931,7 @@ export default function ProposalEditor() {
                   const updated = {
                     ...p,
                     sections: p.sections.map((s) =>
-                      s.id === sectionId
+                      String(s.id) === String(sectionId)
                         ? { ...s, texts: [...((s as any).texts || []), newText] }
                         : s
                     ),
@@ -701,7 +946,7 @@ export default function ProposalEditor() {
                 const updated = {
                   ...p,
                   sections: p.sections.map((s) =>
-                    s.id === sectionId
+                    String(s.id) === String(sectionId)
                       ? {
                           ...s,
                           texts: ((s as any).texts || []).map((text: any, idx: number) =>
@@ -714,7 +959,7 @@ export default function ProposalEditor() {
                 commit(updated);
               }}
               onAddImage={(sectionId, x, y) => {
-                const section = p.sections.find((s) => s.id === sectionId);
+                const section = p.sections.find((s) => String(s.id) === String(sectionId));
                 if (section) {
                   const newImage = {
                     id: Math.random().toString(36).substring(2, 9),
@@ -731,7 +976,7 @@ export default function ProposalEditor() {
                   const updated = {
                     ...p,
                     sections: p.sections.map((s) =>
-                      s.id === sectionId
+                      String(s.id) === String(sectionId)
                         ? { ...s, images: [...((s as any).images || []), newImage] }
                         : s
                     ),
@@ -746,7 +991,7 @@ export default function ProposalEditor() {
                 const updated = {
                   ...p,
                   sections: p.sections.map((s) =>
-                    s.id === sectionId
+                    String(s.id) === String(sectionId)
                       ? {
                           ...s,
                           images: ((s as any).images || []).map((image: any, idx: number) =>
@@ -762,7 +1007,7 @@ export default function ProposalEditor() {
                 const updated = {
                   ...p,
                   sections: p.sections.map((s) =>
-                    s.id === sectionId
+                    String(s.id) === String(sectionId)
                       ? {
                           ...s,
                           signatureFields: (s.signatureFields || []).map((field) =>
@@ -778,7 +1023,7 @@ export default function ProposalEditor() {
                 const updated = {
                   ...p,
                   sections: p.sections.map((s) =>
-                    s.id === sectionId
+                    String(s.id) === String(sectionId)
                       ? {
                           ...s,
                           signatureFields: (s.signatureFields || []).filter((field) => field.id !== fieldId),
@@ -805,7 +1050,7 @@ export default function ProposalEditor() {
                 const updated = {
                   ...p,
                   sections: p.sections.map((s) =>
-                    s.id === sectionId
+                    String(s.id) === String(sectionId)
                       ? {
                           ...s,
                           signatureFields: [...(s.signatureFields || []), newField],
@@ -914,8 +1159,15 @@ export default function ProposalEditor() {
         onOpenChange={setSectionsDialogOpen}
         proposal={p}
         currentSectionIndex={current}
+        isTemplateEdit={isSystemTemplateEdit}
         onSelectSection={(index) => {
           setCurrent(index);
+          setSectionsDialogOpen(false);
+        }}
+        onSelectElement={(elementId, elementType) => {
+          setSelectedElementId(elementId);
+          setSelectedElementType(elementType);
+          setActivePanel("properties");
           setSectionsDialogOpen(false);
         }}
         onUpdateProposal={(updated) => {
@@ -944,6 +1196,33 @@ export default function ProposalEditor() {
           onClose={() => setShowPreviewModal(false)}
         />
       )}
+
+      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Template</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this template? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowDeleteConfirm(false)}
+              disabled={isDeleting}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteTemplate}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Deleting..." : "Delete"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

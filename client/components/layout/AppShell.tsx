@@ -11,6 +11,9 @@ import {
   SidebarInset,
   SidebarRail,
   SidebarFooter,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
 } from "@/components/ui/sidebar";
 import { Fragment, ReactNode, useMemo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -28,10 +31,16 @@ import {
   LogOut,
 } from "lucide-react";
 
-interface NavItem {
+interface NavSubItem {
   href: string;
   label: string;
-  icon: React.ReactNode;
+}
+
+interface NavItem {
+  href?: string;
+  label: string;
+  icon?: React.ReactNode;
+  children?: NavSubItem[];
 }
 
 const navByRole: Record<UserRole, NavItem[]> = {
@@ -39,7 +48,14 @@ const navByRole: Record<UserRole, NavItem[]> = {
     { href: "/dashboard", label: "Dashboard", icon: <LayoutDashboard className="w-5 h-5" /> },
     { href: "/admin/users", label: "Users", icon: <Users className="w-5 h-5" /> },
     { href: "/admin/packages", label: "Packages", icon: <Box className="w-5 h-5" /> },
-    { href: "/admin/templates", label: "Templates", icon: <FileText className="w-5 h-5" /> },
+    {
+      label: "Templates",
+      icon: <FileText className="w-5 h-5" />,
+      children: [
+        { href: "/admin/templates/system", label: "System Templates" },
+        { href: "/admin/templates/clients", label: "Clients Templates" },
+      ],
+    },
     { href: "/admin/settings", label: "Settings", icon: <Settings className="w-5 h-5" /> },
   ],
   subscriber: [
@@ -87,13 +103,56 @@ export default function AppShell({ children }: { children: ReactNode }) {
               <SidebarMenu className="gap-1">
                 {navItems.map((item) => {
                   const active =
-                    location.pathname === item.href ||
-                    location.pathname.startsWith(`${item.href}/`);
+                    item.href ? (
+                      location.pathname === item.href ||
+                      location.pathname.startsWith(`${item.href}/`)
+                    ) : (
+                      item.children?.some(
+                        (child) =>
+                          location.pathname === child.href ||
+                          location.pathname.startsWith(`${child.href}/`)
+                      ) ?? false
+                    );
+
+                  if (item.children) {
+                    return (
+                      <SidebarMenuItem key={item.label}>
+                        <SidebarMenuButton className={cn(
+                          "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 cursor-pointer group",
+                          "hover:bg-slate-800 text-slate-300 hover:text-white",
+                          active && "bg-primary/20 text-white font-medium shadow-sm border border-primary/30",
+                        )}>
+                          <span className={cn(
+                            "transition-colors duration-200",
+                            active ? "text-primary" : "text-slate-400 group-hover:text-white"
+                          )}>
+                            {item.icon}
+                          </span>
+                          <span className="text-sm font-medium">{item.label}</span>
+                        </SidebarMenuButton>
+                        <SidebarMenuSub>
+                          {item.children.map((child) => {
+                            const childActive =
+                              location.pathname === child.href ||
+                              location.pathname.startsWith(`${child.href}/`);
+                            return (
+                              <SidebarMenuSubItem key={child.href}>
+                                <SidebarMenuSubButton asChild isActive={childActive} className="text-white hover:text-slate-900">
+                                  <Link to={child.href}>{child.label}</Link>
+                                </SidebarMenuSubButton>
+                              </SidebarMenuSubItem>
+                            );
+                          })}
+                        </SidebarMenuSub>
+                      </SidebarMenuItem>
+                    );
+                  }
+
                   return (
                     <SidebarMenuItem key={item.href}>
                       <SidebarMenuButton asChild>
                         <Link
-                          to={item.href}
+                          to={item.href!}
                           className={cn(
                             "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 cursor-pointer group",
                             "hover:bg-slate-800 text-slate-300 hover:text-white",
@@ -193,6 +252,7 @@ function formatSegmentLabel(segment: string, index: number) {
     packages: "Packages",
     settings: "Settings",
     templates: "Templates",
+    system: "System Templates",
     integrations: "Integrations",
     my: "My Workspace",
     edit: "Edit",

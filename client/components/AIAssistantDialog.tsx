@@ -282,7 +282,7 @@ export const AIAssistantDialog: React.FC<AIAssistantDialogProps> = ({
 
   // Only use sectionId as fallback if we couldn't extract from elementId
   if (!activeSection && sectionId) {
-    activeSection = proposal.sections.find((s) => s.id === sectionId) || null;
+    activeSection = proposal.sections.find((s) => String(s.id) === String(sectionId)) || null;
   }
 
   const getElementPreview = (): { label: string; value: string } | null => {

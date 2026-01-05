@@ -331,6 +331,8 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
   React.useEffect(() => {
     const newHeights: Record<string, number> = {};
 
+    if (!proposal || !proposal.sections) return;
+
     proposal.sections.forEach((section) => {
       if ((section.shapes && section.shapes.length > 0) ||
           (section.tables && section.tables.length > 0) ||
@@ -395,6 +397,31 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
 
     setCanvasHeights(newHeights);
   }, [proposal.sections]);
+
+  // Handle null proposal
+  if (!proposal) {
+    return (
+      <div className="bg-white rounded-lg border p-6 shadow-sm w-full">
+        <div className="text-center text-muted-foreground">
+          <p className="text-sm">Loading proposal...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Debug logging
+  console.log("ProposalPreview received proposal:", {
+    id: proposal.id,
+    title: proposal.title,
+    sectionsCount: proposal.sections?.length,
+    sections: proposal.sections?.map((s: any) => ({
+      id: s.id,
+      title: s.title,
+      textsCount: s.texts?.length,
+      imagesCount: s.images?.length,
+      shapesCount: s.shapes?.length,
+    })),
+  });
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     const data = e.dataTransfer.types.includes("application/json");

@@ -74,7 +74,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     const imageIndex = selectedElementId.substring(lastHyphenIndex + 1);
     const sectionId = selectedElementId.substring(6, lastHyphenIndex); // Skip "image-"
 
-    const section = proposal.sections.find((s) => s.id === sectionId);
+    const section = proposal.sections.find((s) => String(s.id) === String(sectionId));
     if (!section) {
       return (
         <Card className="p-4">
@@ -105,7 +105,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
       const updatedProposal = {
         ...proposal,
         sections: proposal.sections.map((s) =>
-          s.id === sectionId ? { ...s, images: newImages } : s
+          String(s.id) === String(sectionId) ? { ...s, images: newImages } : s
         ),
       };
       onUpdateProposal(updatedProposal);
@@ -378,7 +378,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             const updatedProposal = {
               ...proposal,
               sections: proposal.sections.map((s) =>
-                s.id === sectionId ? { ...s, images: newImages } : s
+                String(s.id) === String(sectionId) ? { ...s, images: newImages } : s
               ),
             };
             onUpdateProposal(updatedProposal);
@@ -760,15 +760,15 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
 
   if (selectedElementType === "section-title") {
     const sectionId = selectedElementId.replace("section-title-", "");
-    const section = proposal.sections.find((s) => s.id === sectionId);
+    // Handle both string and numeric IDs
+    const section = proposal.sections.find((s) => String(s.id) === String(sectionId));
 
-    if (!section) return null;
 
     const handleUpdateSection = (updates: Partial<ProposalSection>) => {
       const updatedProposal = {
         ...proposal,
         sections: proposal.sections.map((s) =>
-          s.id === sectionId ? { ...s, ...updates } : s
+          String(s.id) === String(sectionId) ? { ...s, ...updates } : s
         ),
       };
       onUpdateProposal(updatedProposal);
@@ -1219,7 +1219,8 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     const columnIndex = colMatch ? parseInt(colMatch[1]) - 1 : -1; // col1 = index 0, col2 = index 1, etc.
     // Remove column identifier if present (e.g., "-col1", "-col2", "-col3")
     sectionId = sectionId.replace(/-col\d+$/, "");
-    const section = proposal.sections.find((s) => s.id === sectionId);
+    // Handle both string and numeric IDs
+    const section = proposal.sections.find((s) => String(s.id) === String(sectionId));
 
     if (!section) return null;
 
@@ -1227,7 +1228,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
       const updatedProposal = {
         ...proposal,
         sections: proposal.sections.map((s) =>
-          s.id === sectionId ? { ...s, ...updates } : s
+          String(s.id) === String(sectionId) ? { ...s, ...updates } : s
         ),
       };
       onUpdateProposal(updatedProposal);
@@ -2182,7 +2183,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     const parts = selectedElementId.split("-");
     const sectionId = parts[1];
     const mediaIndex = parseInt(parts[2]);
-    const section = proposal.sections.find((s) => s.id === sectionId);
+    const section = proposal.sections.find((s) => String(s.id) === String(sectionId));
 
     if (!section || !section.media || !section.media[mediaIndex]) return null;
 
@@ -2200,7 +2201,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               const updatedProposal = {
                 ...proposal,
                 sections: proposal.sections.map((s) =>
-                  s.id === sectionId ? { ...s, media: newMedia } : s
+                  String(s.id) === String(sectionId) ? { ...s, media: newMedia } : s
                 ),
               };
               onUpdateProposal(updatedProposal);
@@ -2262,7 +2263,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     const parts = selectedElementId.split("-");
     const sectionId = parts[1];
     const shapeIndex = parseInt(parts[2]);
-    const section = proposal.sections.find((s) => s.id === sectionId);
+    const section = proposal.sections.find((s) => String(s.id) === String(sectionId));
 
     if (!section || !section.shapes || !section.shapes[shapeIndex]) {
       return (
@@ -2282,7 +2283,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
       const updatedProposal = {
         ...proposal,
         sections: proposal.sections.map((s) =>
-          s.id === sectionId ? { ...s, shapes: newShapes } : s
+          String(s.id) === String(sectionId) ? { ...s, shapes: newShapes } : s
         ),
       };
       onUpdateProposal(updatedProposal);
@@ -2537,7 +2538,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             const updatedProposal = {
               ...proposal,
               sections: proposal.sections.map((s) =>
-                s.id === sectionId ? { ...s, shapes: newShapes } : s
+                String(s.id) === String(sectionId) ? { ...s, shapes: newShapes } : s
               ),
             };
             onUpdateProposal(updatedProposal);
@@ -2554,7 +2555,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     const parts = selectedElementId.split("-");
     const sectionId = parts[1];
     const tableIndex = parseInt(parts[2]);
-    const section = proposal.sections.find((s) => s.id === sectionId);
+    const section = proposal.sections.find((s) => String(s.id) === String(sectionId));
 
     if (!section || !section.tables || !section.tables[tableIndex]) {
       return (
@@ -2574,7 +2575,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
       const updatedProposal = {
         ...proposal,
         sections: proposal.sections.map((s) =>
-          s.id === sectionId ? { ...s, tables: newTables } : s
+          String(s.id) === String(sectionId) ? { ...s, tables: newTables } : s
         ),
       };
       onUpdateProposal(updatedProposal);
@@ -2838,7 +2839,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             const updatedProposal = {
               ...proposal,
               sections: proposal.sections.map((s) =>
-                s.id === sectionId ? { ...s, tables: newTables } : s
+                String(s.id) === String(sectionId) ? { ...s, tables: newTables } : s
               ),
             };
             onUpdateProposal(updatedProposal);
@@ -2857,7 +2858,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     const parts = selectedElementId.split("-");
     const sectionId = parts[1];
     const textIndex = parseInt(parts[2]);
-    const section = proposal.sections.find((s) => s.id === sectionId);
+    const section = proposal.sections.find((s) => String(s.id) === String(sectionId));
 
     if (!section || !(section as any).texts || !(section as any).texts[textIndex]) {
       return (
@@ -2877,7 +2878,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
       const updatedProposal = {
         ...proposal,
         sections: proposal.sections.map((s) =>
-          s.id === sectionId ? { ...s, texts: newTexts } : s
+          String(s.id) === String(sectionId) ? { ...s, texts: newTexts } : s
         ),
       };
       onUpdateProposal(updatedProposal);
@@ -3309,7 +3310,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             const updatedProposal = {
               ...proposal,
               sections: proposal.sections.map((s) =>
-                s.id === sectionId ? { ...s, texts: newTexts } : s
+                String(s.id) === String(sectionId) ? { ...s, texts: newTexts } : s
               ),
             };
             onUpdateProposal(updatedProposal);
@@ -3330,7 +3331,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     const imageIndex = selectedElementId.substring(lastHyphenIndex + 1);
     const sectionId = selectedElementId.substring(6, lastHyphenIndex); // Skip "image-"
 
-    const section = proposal.sections.find((s) => s.id === sectionId);
+    const section = proposal.sections.find((s) => String(s.id) === String(sectionId));
     if (!section) {
       console.error("Section not found for sectionId:", sectionId);
       return (
@@ -3364,7 +3365,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
       const updatedProposal = {
         ...proposal,
         sections: proposal.sections.map((s) =>
-          s.id === sectionId ? { ...s, images: newImages } : s
+          String(s.id) === String(sectionId) ? { ...s, images: newImages } : s
         ),
       };
       onUpdateProposal(updatedProposal);
@@ -3518,7 +3519,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             const updatedProposal = {
               ...proposal,
               sections: proposal.sections.map((s) =>
-                s.id === sectionId ? { ...s, images: newImages } : s
+                String(s.id) === String(sectionId) ? { ...s, images: newImages } : s
               ),
             };
             onUpdateProposal(updatedProposal);

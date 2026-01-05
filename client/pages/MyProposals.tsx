@@ -27,6 +27,8 @@ import {
 import { type ClientRecord, listClients } from "@/services/clientsService";
 import { GenerateProposalDialog } from "@/components/GenerateProposalDialog";
 import { ProposalPreviewModal } from "@/components/ProposalPreviewModal";
+import { TemplateSelectionModal } from "@/components/TemplateSelectionModal";
+import { convertSystemTemplateToProposal, type SystemTemplate } from "@/services/systemTemplatesService";
 import { Wand2, MoreVertical, FileText } from "lucide-react";
 
 const statusStyles: Record<string, string> = {
@@ -55,6 +57,8 @@ export default function MyProposals() {
   const [baseProposalForGeneration, setBaseProposalForGeneration] = useState<Proposal | null>(null);
   const [previewProposal, setPreviewProposal] = useState<Proposal | null>(null);
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
+  const [newProposalId, setNewProposalId] = useState<string | null>(null);
+  const [showTemplateSelection, setShowTemplateSelection] = useState(false);
   const [formData, setFormData] = useState<CreateProposalInput>({
     title: "",
     client_id: "",
@@ -153,14 +157,49 @@ export default function MyProposals() {
     toast({ title: "Proposal created successfully" });
     setFormData({ title: "", client_id: "", status: "draft", due_date: "" });
     setIsCreateDialogOpen(false);
+    setIsCreating(false);
 
     if (result.data) {
       const proposalId = result.data.id;
-      console.log("Navigating to proposal editor with id:", proposalId);
-      nav(`/proposals/${proposalId}/edit`);
+      console.log("Proposal created with id:", proposalId);
+      setNewProposalId(proposalId);
+      setShowTemplateSelection(true);
     }
 
     await refresh();
+  }
+
+  async function handleTemplateSelected(template: SystemTemplate | null) {
+    if (!newProposalId) return;
+
+    try {
+      if (template) {
+        // Convert template to proposal and apply it
+        const templateProposal = convertSystemTemplateToProposal(template);
+        const updatedProposal: Proposal = {
+          ...templateProposal,
+          id: newProposalId,
+          title: formData.title || templateProposal.title,
+          client: formData.client_id ? formData.client_id : "",
+        };
+
+        await updateProposal(updatedProposal);
+        await persistProposal(updatedProposal);
+      }
+
+      // Navigate to editor
+      nav(`/proposals/${newProposalId}/edit`);
+      setNewProposalId(null);
+    } catch (error) {
+      console.error("Error applying template:", error);
+      toast({
+        title: "Error",
+        description: "Failed to apply template",
+        variant: "destructive",
+      });
+      nav(`/proposals/${newProposalId}/edit`);
+      setNewProposalId(null);
+    }
   }
 
   function onDeleteClick(id: string) {
@@ -530,6 +569,13 @@ export default function MyProposals() {
           onClose={() => setPreviewProposal(null)}
         />
       )}
+
+      <TemplateSelectionModal
+        open={showTemplateSelection}
+        onOpenChange={setShowTemplateSelection}
+        onSelectTemplate={handleTemplateSelected}
+        isLoading={isCreating}
+      />
     </AppShell>
   );
 }

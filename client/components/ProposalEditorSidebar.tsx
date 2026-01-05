@@ -11,6 +11,7 @@ interface ProposalEditorSidebarProps {
   onSelectPanel: (panel: PanelType) => void;
   activePanel: PanelType;
   proposalId: string;
+  isTemplateEdit?: boolean;
 }
 
 export const ProposalEditorSidebar: React.FC<ProposalEditorSidebarProps> = ({
@@ -19,14 +20,20 @@ export const ProposalEditorSidebar: React.FC<ProposalEditorSidebarProps> = ({
   onSelectPanel,
   activePanel,
   proposalId,
+  isTemplateEdit = false,
 }) => {
-  const panelButtons = [
+  const allPanelButtons = [
     // { id: "document", icon: FileText, title: "Document" },
     { id: "build", icon: Layers, title: "Build" },
     { id: "uploads", icon: Upload, title: "Uploads" },
     { id: "signatures", icon: PenTool, title: "Signatures" },
     { id: "variables", icon: Variable, title: "Variables" },
   ] as const;
+
+  // Filter out signatures and variables for template editing
+  const panelButtons = isTemplateEdit
+    ? allPanelButtons.filter((btn) => btn.id !== "signatures" && btn.id !== "variables")
+    : allPanelButtons;
 
   return (
     <div className="fixed left-0 top-0 bottom-0 w-16 bg-slate-900 flex flex-col items-center py-4 gap-4 border-r border-slate-700 z-40">
