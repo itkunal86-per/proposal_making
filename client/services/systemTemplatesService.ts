@@ -117,12 +117,15 @@ export async function listSystemTemplates(): Promise<SystemTemplate[]> {
 export async function getActiveSystemTemplates(): Promise<SystemTemplate[]> {
   const token = getStoredToken();
   if (!token) {
-    console.error("No authentication token available");
+    console.error("getActiveSystemTemplates: No authentication token available");
     return [];
   }
 
   try {
-    const response = await fetch(`${SYSTEM_TEMPLATES_ENDPOINT}/active`, {
+    const url = `${SYSTEM_TEMPLATES_ENDPOINT}/active`;
+    console.log("getActiveSystemTemplates: Fetching from", url);
+
+    const response = await fetch(url, {
       method: "GET",
       headers: {
         "Authorization": `Bearer ${token}`,
@@ -130,17 +133,22 @@ export async function getActiveSystemTemplates(): Promise<SystemTemplate[]> {
       },
     });
 
+    console.log("getActiveSystemTemplates: Response status", response.status, response.statusText);
+
     if (!response.ok) {
-      console.error(`Failed to fetch active system templates: ${response.statusText}`);
+      const errorText = await response.text();
+      console.error(`getActiveSystemTemplates: Failed to fetch: ${response.statusText}`, errorText);
       return [];
     }
 
     const data = await response.json();
+    console.log("getActiveSystemTemplates: Raw API response:", data);
 
     // The API might return templates as an array or wrapped in a data field
     const templates = Array.isArray(data) ? data : (data?.data || data?.templates || []);
+    console.log("getActiveSystemTemplates: Parsed templates count:", templates.length);
 
-    return templates.map((t: any) => ({
+    const result = templates.map((t: any) => ({
       id: t.id || t.template_id || String(Math.random()),
       title: t.title || t.name || "Untitled",
       description: t.description || "",
@@ -150,8 +158,11 @@ export async function getActiveSystemTemplates(): Promise<SystemTemplate[]> {
       updatedAt: t.updated_at ? new Date(t.updated_at).getTime() : Date.now(),
       sections: t.sections || [],
     }));
+
+    console.log("getActiveSystemTemplates: Returning templates:", result);
+    return result;
   } catch (error) {
-    console.error("Error fetching active system templates:", error);
+    console.error("getActiveSystemTemplates: Error fetching:", error);
     return [];
   }
 }
