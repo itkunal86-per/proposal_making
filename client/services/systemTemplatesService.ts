@@ -37,6 +37,7 @@ export async function getSystemTemplateDetails(templateId: string): Promise<Syst
     }
 
     const data = await response.json();
+    console.log("getSystemTemplateDetails - Raw API response:", data);
 
     const template: SystemTemplate = {
       id: data.id || String(Math.random()),
@@ -49,6 +50,20 @@ export async function getSystemTemplateDetails(templateId: string): Promise<Syst
       updatedAt: data.updatedAt || (data.updated_at ? new Date(data.updated_at).getTime() : Date.now()),
       sections: data.sections || [],
     };
+
+    console.log("getSystemTemplateDetails - Processed template:", {
+      id: template.id,
+      title: template.title,
+      status: template.status,
+      sectionsCount: template.sections?.length,
+      sections: template.sections?.map((s: any) => ({
+        id: s.id,
+        title: s.title,
+        textsCount: s.texts?.length,
+        imagesCount: s.images?.length,
+        shapesCount: s.shapes?.length,
+      })),
+    });
 
     return template;
   } catch (error) {
