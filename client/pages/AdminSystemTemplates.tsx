@@ -166,8 +166,7 @@ export default function AdminSystemTemplates() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Title</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead>Sections</TableHead>
+                    <TableHead>Status</TableHead>
                     <TableHead>Last Updated</TableHead>
                     <TableHead className="w-[1%] whitespace-nowrap text-right">Actions</TableHead>
                   </TableRow>
@@ -176,8 +175,11 @@ export default function AdminSystemTemplates() {
                   {pageRows.map((t) => (
                     <TableRow key={t.id} className="hover:bg-muted/40">
                       <TableCell className="font-medium">{t.title}</TableCell>
-                      <TableCell className="text-muted-foreground">{t.description || "—"}</TableCell>
-                      <TableCell>{t.sections?.length || 0}</TableCell>
+                      <TableCell>
+                        <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-green-100 text-green-800">
+                          Active
+                        </span>
+                      </TableCell>
                       <TableCell>{new Date(t.updatedAt || Date.now()).toLocaleString()}</TableCell>
                       <TableCell className="text-right space-x-1 whitespace-nowrap">
                         <Button variant="outline" size="sm" onClick={() => setPreview(convertSystemTemplateToProposal(t))}>
