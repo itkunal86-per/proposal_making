@@ -103,7 +103,7 @@ export async function createSystemTemplate(title: string): Promise<CreateTemplat
       title: data.title || title,
       description: data.description || "",
       content: data.content || "",
-      status: data.status || "active",
+      status: data.status || "Active",
       createdAt: data.created_at ? new Date(data.created_at).getTime() : Date.now(),
       updatedAt: data.updated_at ? new Date(data.updated_at).getTime() : Date.now(),
       sections: data.sections || [],
