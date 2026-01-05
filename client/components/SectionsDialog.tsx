@@ -106,6 +106,7 @@ export const SectionsDialog: React.FC<SectionsDialogProps> = ({
         ? addSectionLocal(proposal, title, layout)
         : await addSection(proposal, title, layout);
       onUpdateProposal(updated);
+      setTemplateDialogOpen(false);
       toast({ title: "Section added", description: `New ${layout} section has been created.` });
     } catch (error) {
       console.error("Error adding section:", error);
