@@ -760,13 +760,14 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
 
   if (selectedElementType === "section-title") {
     const sectionId = selectedElementId.replace("section-title-", "");
-    const section = proposal.sections.find((s) => s.id === sectionId);
+    // Handle both string and numeric IDs
+    const section = proposal.sections.find((s) => String(s.id) === String(sectionId));
 
     console.log("PropertiesPanel: section-title selected", {
       selectedElementId,
       extractedSectionId: sectionId,
       sectionFound: !!section,
-      availableSectionIds: proposal.sections.map(s => s.id),
+      availableSectionIds: proposal.sections.map(s => ({ id: s.id, type: typeof s.id })),
     });
 
     if (!section) {
