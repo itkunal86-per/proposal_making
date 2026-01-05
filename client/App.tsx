@@ -62,6 +62,8 @@ const App = () => (
                   <Route path="/admin/users" element={<AdminUsers />} />
                   <Route path="/admin/packages" element={<AdminPackages />} />
                   <Route path="/admin/templates" element={<AdminTemplates />} />
+                  <Route path="/admin/templates/system" element={<AdminSystemTemplates />} />
+                  <Route path="/admin/templates/clients" element={<AdminClientTemplates />} />
                   <Route path="/admin/settings" element={<AdminSettings />} />
                 </Route>
 
