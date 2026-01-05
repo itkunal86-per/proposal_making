@@ -21,6 +21,10 @@ export default function AdminSystemTemplates() {
   const [pageSize, setPageSize] = useState(10);
   const [preview, setPreview] = useState<Proposal | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [createError, setCreateError] = useState("");
+  const [templateTitle, setTemplateTitle] = useState("");
 
   useEffect(() => {
     (async () => {
