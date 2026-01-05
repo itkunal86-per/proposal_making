@@ -144,10 +144,7 @@ export const TemplatePreviewRenderer: React.FC<TemplatePreviewRendererProps> = (
             {section.content && (
               <div className="text-xs text-slate-600 line-clamp-2 leading-tight">
                 {(() => {
-                  const cleanText = section.content
-                    .replace(/<[^>]*>/g, '')  // Strip HTML tags
-                    .replace(/&[^;]+;/g, ' ') // Remove HTML entities
-                    .trim();
+                  const cleanText = extractTextFromHtml(section.content).trim();
                   return cleanText.substring(0, 120) + (cleanText.length > 120 ? '...' : '');
                 })()}
               </div>
