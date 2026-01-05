@@ -105,7 +105,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
       const updatedProposal = {
         ...proposal,
         sections: proposal.sections.map((s) =>
-          s.id === sectionId ? { ...s, images: newImages } : s
+          String(s.id) === String(sectionId) ? { ...s, images: newImages } : s
         ),
       };
       onUpdateProposal(updatedProposal);
@@ -378,7 +378,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             const updatedProposal = {
               ...proposal,
               sections: proposal.sections.map((s) =>
-                s.id === sectionId ? { ...s, images: newImages } : s
+                String(s.id) === String(sectionId) ? { ...s, images: newImages } : s
               ),
             };
             onUpdateProposal(updatedProposal);
@@ -2201,7 +2201,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               const updatedProposal = {
                 ...proposal,
                 sections: proposal.sections.map((s) =>
-                  s.id === sectionId ? { ...s, media: newMedia } : s
+                  String(s.id) === String(sectionId) ? { ...s, media: newMedia } : s
                 ),
               };
               onUpdateProposal(updatedProposal);
@@ -2283,7 +2283,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
       const updatedProposal = {
         ...proposal,
         sections: proposal.sections.map((s) =>
-          s.id === sectionId ? { ...s, shapes: newShapes } : s
+          String(s.id) === String(sectionId) ? { ...s, shapes: newShapes } : s
         ),
       };
       onUpdateProposal(updatedProposal);
@@ -2538,7 +2538,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             const updatedProposal = {
               ...proposal,
               sections: proposal.sections.map((s) =>
-                s.id === sectionId ? { ...s, shapes: newShapes } : s
+                String(s.id) === String(sectionId) ? { ...s, shapes: newShapes } : s
               ),
             };
             onUpdateProposal(updatedProposal);
@@ -2575,7 +2575,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
       const updatedProposal = {
         ...proposal,
         sections: proposal.sections.map((s) =>
-          s.id === sectionId ? { ...s, tables: newTables } : s
+          String(s.id) === String(sectionId) ? { ...s, tables: newTables } : s
         ),
       };
       onUpdateProposal(updatedProposal);
@@ -2839,7 +2839,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             const updatedProposal = {
               ...proposal,
               sections: proposal.sections.map((s) =>
-                s.id === sectionId ? { ...s, tables: newTables } : s
+                String(s.id) === String(sectionId) ? { ...s, tables: newTables } : s
               ),
             };
             onUpdateProposal(updatedProposal);
@@ -2878,7 +2878,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
       const updatedProposal = {
         ...proposal,
         sections: proposal.sections.map((s) =>
-          s.id === sectionId ? { ...s, texts: newTexts } : s
+          String(s.id) === String(sectionId) ? { ...s, texts: newTexts } : s
         ),
       };
       onUpdateProposal(updatedProposal);
@@ -3310,7 +3310,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             const updatedProposal = {
               ...proposal,
               sections: proposal.sections.map((s) =>
-                s.id === sectionId ? { ...s, texts: newTexts } : s
+                String(s.id) === String(sectionId) ? { ...s, texts: newTexts } : s
               ),
             };
             onUpdateProposal(updatedProposal);
@@ -3365,7 +3365,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
       const updatedProposal = {
         ...proposal,
         sections: proposal.sections.map((s) =>
-          s.id === sectionId ? { ...s, images: newImages } : s
+          String(s.id) === String(sectionId) ? { ...s, images: newImages } : s
         ),
       };
       onUpdateProposal(updatedProposal);
@@ -3519,7 +3519,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             const updatedProposal = {
               ...proposal,
               sections: proposal.sections.map((s) =>
-                s.id === sectionId ? { ...s, images: newImages } : s
+                String(s.id) === String(sectionId) ? { ...s, images: newImages } : s
               ),
             };
             onUpdateProposal(updatedProposal);
