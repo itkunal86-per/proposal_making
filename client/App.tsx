@@ -21,6 +21,8 @@ import ProposalPublicView from "./pages/ProposalPublicView";
 import AcceptInvite from "./pages/AcceptInvite";
 import AdminPackages from "./pages/AdminPackages";
 import AdminTemplates from "./pages/AdminTemplates";
+import AdminSystemTemplates from "./pages/AdminSystemTemplates";
+import AdminClientTemplates from "./pages/AdminClientTemplates";
 import AdminSettings from "./pages/AdminSettings";
 import AdminUsers from "./pages/AdminUsers";
 import MyProposals from "./pages/MyProposals";
