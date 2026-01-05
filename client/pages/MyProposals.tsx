@@ -57,6 +57,8 @@ export default function MyProposals() {
   const [baseProposalForGeneration, setBaseProposalForGeneration] = useState<Proposal | null>(null);
   const [previewProposal, setPreviewProposal] = useState<Proposal | null>(null);
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
+  const [newProposalId, setNewProposalId] = useState<string | null>(null);
+  const [showTemplateSelection, setShowTemplateSelection] = useState(false);
   const [formData, setFormData] = useState<CreateProposalInput>({
     title: "",
     client_id: "",
