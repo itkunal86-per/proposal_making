@@ -54,10 +54,16 @@ export default function AdminSystemTemplates() {
 
   async function onEdit(template: SystemTemplate) {
     try {
-      const proposal = convertSystemTemplateToProposal(template);
+      const details = await getSystemTemplateDetails(String(template.id));
+      if (!details) {
+        toast({ title: "Failed to load template details", variant: "destructive" });
+        return;
+      }
+
+      const proposal = convertSystemTemplateToProposal(details);
       const created = await createProposal(proposal);
       toast({ title: "Template opened for editing" });
-      nav(`/proposals/${created.id}/edit`);
+      nav(`/proposals/${created.id}/edit?templateId=${template.id}`);
     } catch (error) {
       toast({ title: "Error opening template", variant: "destructive" });
     }
