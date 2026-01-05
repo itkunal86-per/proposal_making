@@ -61,10 +61,15 @@ export default function AdminSystemTemplates() {
       }
 
       const proposal = convertSystemTemplateToProposal(details);
-      const created = await createProposal(proposal);
+      // Save to localStorage so ProposalEditor can access it
+      localStorage.setItem(`template_draft_${template.id}`, JSON.stringify(proposal));
+
       toast({ title: "Template opened for editing" });
-      nav(`/proposals/${created.id}/edit?templateId=${template.id}`);
+      // Create a unique ID for this template edit session
+      const editSessionId = `template_${template.id}_${Date.now()}`;
+      nav(`/proposals/${editSessionId}/edit?templateId=${template.id}`);
     } catch (error) {
+      console.error("Error opening template:", error);
       toast({ title: "Error opening template", variant: "destructive" });
     }
   }
