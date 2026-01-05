@@ -398,6 +398,17 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
     setCanvasHeights(newHeights);
   }, [proposal.sections]);
 
+  // Handle null proposal
+  if (!proposal) {
+    return (
+      <div className="bg-white rounded-lg border p-6 shadow-sm w-full">
+        <div className="text-center text-muted-foreground">
+          <p className="text-sm">Loading proposal...</p>
+        </div>
+      </div>
+    );
+  }
+
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     const data = e.dataTransfer.types.includes("application/json");
     if (data) {
