@@ -252,6 +252,7 @@ function formatSegmentLabel(segment: string, index: number) {
     packages: "Packages",
     settings: "Settings",
     templates: "Templates",
+    system: "System Templates",
     integrations: "Integrations",
     my: "My Workspace",
     edit: "Edit",
