@@ -164,11 +164,15 @@ export async function createSystemTemplate(title: string): Promise<CreateTemplat
 }
 
 export function convertSystemTemplateToProposal(template: SystemTemplate): Proposal {
+  // Map system template status to proposal status
+  // Active -> draft, Inactive -> sent
+  const proposalStatus: "draft" | "sent" = template.status === "Inactive" ? "sent" : "draft";
+
   return {
     id: template.id,
     title: template.title,
     client: "",
-    status: "draft" as const,
+    status: proposalStatus,
     createdBy: "System",
     createdAt: template.createdAt || Date.now(),
     updatedAt: template.updatedAt || Date.now(),
