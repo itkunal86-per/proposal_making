@@ -269,6 +269,13 @@ export default function ProposalEditor() {
     })();
   }, [id, isSystemTemplateEdit]);
 
+  // Reset activePanel to valid panel when switching to template edit mode
+  useEffect(() => {
+    if (isSystemTemplateEdit && (activePanel === "signatures" || activePanel === "variables")) {
+      setActivePanel("properties");
+    }
+  }, [isSystemTemplateEdit, activePanel]);
+
   // Fetch and sync signatories when proposal is loaded (skip for template edits)
   useEffect(() => {
     if (!p || !p.id || isSystemTemplateEdit) return;
