@@ -12,8 +12,8 @@ import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import { MoreHorizontal } from "lucide-react";
-import { listSystemTemplates, convertSystemTemplateToProposal, createSystemTemplate, getSystemTemplateDetails, type SystemTemplate } from "@/services/systemTemplatesService";
-import { createProposal, deleteProposal, type Proposal } from "@/services/proposalsService";
+import { listSystemTemplates, convertSystemTemplateToProposal, createSystemTemplate, getSystemTemplateDetails, deleteSystemTemplate, type SystemTemplate } from "@/services/systemTemplatesService";
+import { createProposal, type Proposal } from "@/services/proposalsService";
 
 export default function AdminSystemTemplates() {
   const nav = useNavigate();
