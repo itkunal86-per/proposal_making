@@ -9,7 +9,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
-import { getActiveSystemTemplates, type SystemTemplate } from "@/services/systemTemplatesService";
+import { getActiveSystemTemplates, type SystemTemplate, convertSystemTemplateToProposal } from "@/services/systemTemplatesService";
+import { TemplatePreviewRenderer } from "@/components/TemplatePreviewRenderer";
 
 interface TemplateSelectionModalProps {
   open: boolean;
