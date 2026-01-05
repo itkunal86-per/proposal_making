@@ -668,7 +668,7 @@ export default function ProposalEditor() {
                   const updated = {
                     ...p,
                     sections: p.sections.map((s) =>
-                      s.id === sectionId
+                      String(s.id) === String(sectionId)
                         ? { ...s, shapes: [...(s.shapes || []), newShape] }
                         : s
                     ),
@@ -726,7 +726,7 @@ export default function ProposalEditor() {
                   const updated = {
                     ...p,
                     sections: p.sections.map((s) =>
-                      s.id === sectionId
+                      String(s.id) === String(sectionId)
                         ? { ...s, tables: [...(s.tables || []), newTable] }
                         : s
                     ),
@@ -778,7 +778,7 @@ export default function ProposalEditor() {
                   const updated = {
                     ...p,
                     sections: p.sections.map((s) =>
-                      s.id === sectionId
+                      String(s.id) === String(sectionId)
                         ? { ...s, texts: [...((s as any).texts || []), newText] }
                         : s
                     ),
@@ -823,7 +823,7 @@ export default function ProposalEditor() {
                   const updated = {
                     ...p,
                     sections: p.sections.map((s) =>
-                      s.id === sectionId
+                      String(s.id) === String(sectionId)
                         ? { ...s, images: [...((s as any).images || []), newImage] }
                         : s
                     ),
