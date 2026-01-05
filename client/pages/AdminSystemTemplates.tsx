@@ -176,19 +176,14 @@ export default function AdminSystemTemplates() {
                     <TableRow key={t.id} className="hover:bg-muted/40">
                       <TableCell className="font-medium">{t.title}</TableCell>
                       <TableCell>
-                        {t.status === "draft" && (
-                          <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-yellow-100 text-yellow-800">
-                            Draft
-                          </span>
-                        )}
-                        {t.status === "active" && (
+                        {t.status === "Active" && (
                           <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-green-100 text-green-800">
                             Active
                           </span>
                         )}
-                        {t.status === "archived" && (
+                        {t.status === "Inactive" && (
                           <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-800">
-                            Archived
+                            Inactive
                           </span>
                         )}
                       </TableCell>
