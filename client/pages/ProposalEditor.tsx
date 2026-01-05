@@ -402,6 +402,42 @@ export default function ProposalEditor() {
     }
   }, []);
 
+  const handleDeleteTemplate = useCallback(async () => {
+    if (!isSystemTemplateEdit || !p) return;
+
+    setIsDeleting(true);
+    try {
+      const result = await deleteSystemTemplate(p.id);
+      if (result.success) {
+        toast({
+          title: "Success",
+          description: "Template deleted successfully",
+          variant: "default",
+        });
+        // Clear the localStorage for this template
+        localStorage.removeItem(`template_draft_${searchParams.get("templateId")}`);
+        // Redirect to template list
+        nav("/admin/templates/system");
+      } else {
+        toast({
+          title: "Error",
+          description: result.error || "Failed to delete template",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error deleting template:", error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred while deleting the template",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
+    }
+  }, [isSystemTemplateEdit, p, nav, searchParams]);
+
   if (!p) return null;
 
   const section = p.sections[current];
