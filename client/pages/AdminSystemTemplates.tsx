@@ -76,10 +76,14 @@ export default function AdminSystemTemplates() {
 
   async function onDelete(id: string) {
     try {
-      await deleteProposal(id);
-      toast({ title: "Template deleted successfully" });
-      setDeleteConfirmId(null);
-      await refreshTemplates();
+      const result = await deleteSystemTemplate(id);
+      if (result.success) {
+        toast({ title: "Template deleted successfully" });
+        setDeleteConfirmId(null);
+        await refreshTemplates();
+      } else {
+        toast({ title: result.error || "Error deleting template", variant: "destructive" });
+      }
     } catch (error) {
       toast({ title: "Error deleting template", variant: "destructive" });
     }
