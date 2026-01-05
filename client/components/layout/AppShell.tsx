@@ -103,13 +103,56 @@ export default function AppShell({ children }: { children: ReactNode }) {
               <SidebarMenu className="gap-1">
                 {navItems.map((item) => {
                   const active =
-                    location.pathname === item.href ||
-                    location.pathname.startsWith(`${item.href}/`);
+                    item.href ? (
+                      location.pathname === item.href ||
+                      location.pathname.startsWith(`${item.href}/`)
+                    ) : (
+                      item.children?.some(
+                        (child) =>
+                          location.pathname === child.href ||
+                          location.pathname.startsWith(`${child.href}/`)
+                      ) ?? false
+                    );
+
+                  if (item.children) {
+                    return (
+                      <SidebarMenuItem key={item.label}>
+                        <SidebarMenuButton className={cn(
+                          "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 cursor-pointer group",
+                          "hover:bg-slate-800 text-slate-300 hover:text-white",
+                          active && "bg-primary/20 text-white font-medium shadow-sm border border-primary/30",
+                        )}>
+                          <span className={cn(
+                            "transition-colors duration-200",
+                            active ? "text-primary" : "text-slate-400 group-hover:text-white"
+                          )}>
+                            {item.icon}
+                          </span>
+                          <span className="text-sm font-medium">{item.label}</span>
+                        </SidebarMenuButton>
+                        <SidebarMenuSub>
+                          {item.children.map((child) => {
+                            const childActive =
+                              location.pathname === child.href ||
+                              location.pathname.startsWith(`${child.href}/`);
+                            return (
+                              <SidebarMenuSubItem key={child.href}>
+                                <SidebarMenuSubButton asChild isActive={childActive}>
+                                  <Link to={child.href}>{child.label}</Link>
+                                </SidebarMenuSubButton>
+                              </SidebarMenuSubItem>
+                            );
+                          })}
+                        </SidebarMenuSub>
+                      </SidebarMenuItem>
+                    );
+                  }
+
                   return (
                     <SidebarMenuItem key={item.href}>
                       <SidebarMenuButton asChild>
                         <Link
-                          to={item.href}
+                          to={item.href!}
                           className={cn(
                             "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 cursor-pointer group",
                             "hover:bg-slate-800 text-slate-300 hover:text-white",
