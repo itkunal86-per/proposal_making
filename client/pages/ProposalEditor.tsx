@@ -91,6 +91,7 @@ export default function ProposalEditor() {
             // Fetch from API if not in localStorage
             console.log("Template not in localStorage, fetching from API:", templateId);
             const templateData = await getSystemTemplateDetails(templateId);
+            console.log("API Response - templateData:", templateData);
             if (templateData) {
               // Convert SystemTemplate to Proposal format
               found = {
@@ -108,7 +109,19 @@ export default function ProposalEditor() {
                 client: null,
                 client_id: null,
               };
-              console.log("Loaded system template from API:", found);
+              console.log("Converted template to Proposal format:", {
+                id: found.id,
+                title: found.title,
+                sectionsCount: found.sections?.length,
+                sections: found.sections?.map((s: any) => ({
+                  id: s.id,
+                  title: s.title,
+                  textsCount: s.texts?.length,
+                  imagesCount: s.images?.length,
+                  shapesCount: s.shapes?.length,
+                  tablesCount: s.tables?.length,
+                })),
+              });
               // Store in localStorage for future access
               localStorage.setItem(`template_draft_${templateId}`, JSON.stringify(found));
             } else {
