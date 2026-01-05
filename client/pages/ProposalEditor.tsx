@@ -275,25 +275,27 @@ export default function ProposalEditor() {
                 className="flex-1 max-w-md"
                 placeholder="Proposal title"
               />
-              <Select
-                value={p.client}
-                onValueChange={(value) => {
-                  const selectedClient = clients.find((c) => c.name === value);
-                  commit({ ...p, client: value, client_id: selectedClient?.id });
-                }}
-                disabled={isLoadingClients}
-              >
-                <SelectTrigger className="w-64">
-                  <SelectValue placeholder="Select a client" />
-                </SelectTrigger>
-                <SelectContent>
-                  {clients.map((client) => (
-                    <SelectItem key={client.id} value={client.name}>
-                      {client.name} ({client.company || "No company"})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {!isSystemTemplateEdit && (
+                <Select
+                  value={p.client}
+                  onValueChange={(value) => {
+                    const selectedClient = clients.find((c) => c.name === value);
+                    commit({ ...p, client: value, client_id: selectedClient?.id });
+                  }}
+                  disabled={isLoadingClients}
+                >
+                  <SelectTrigger className="w-64">
+                    <SelectValue placeholder="Select a client" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {clients.map((client) => (
+                      <SelectItem key={client.id} value={client.name}>
+                        {client.name} ({client.company || "No company"})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
               <Select
                 value={p.status}
                 onValueChange={(v: ProposalStatus) =>
