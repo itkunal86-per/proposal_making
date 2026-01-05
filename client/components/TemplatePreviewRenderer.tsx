@@ -1,254 +1,79 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { Proposal } from "@/services/proposalsService";
 import { SystemTemplate } from "@/services/systemTemplatesService";
+import { FileText } from "lucide-react";
 
 interface TemplatePreviewRendererProps {
   template: SystemTemplate | Proposal;
 }
 
-// Helper function to safely extract text from HTML content
-function extractTextFromHtml(html: string): string {
-  if (!html) return '';
-
-  try {
-    // Create a temporary element to parse HTML
-    const temp = document.createElement('div');
-    temp.innerHTML = html;
-    // Get the text content (which removes all HTML tags)
-    return temp.textContent || temp.innerText || '';
-  } catch (e) {
-    // Fallback: simple regex stripping if DOM parsing fails
-    return html
-      .replace(/<[^>]*>/g, '')  // Remove tags
-      .replace(/&[^;]+;/g, ' ') // Remove entities
-      .trim();
-  }
-}
-
 export const TemplatePreviewRenderer: React.FC<TemplatePreviewRendererProps> = ({
   template,
 }) => {
-  // Convert SystemTemplate to Proposal structure if needed
-  const proposal = useMemo(() => {
+  // Determine the proposal structure
+  const proposal = React.useMemo(() => {
     if ('client' in template) {
       return template as Proposal;
     }
-    // Already a SystemTemplate, use as-is (structure is compatible)
     return template as any as Proposal;
   }, [template]);
 
-  const canvasHeights = useMemo(() => {
-    const newHeights: Record<string, number> = {};
-
-    proposal.sections?.forEach((section) => {
-      if ((section.shapes && section.shapes.length > 0) ||
-          (section.tables && section.tables.length > 0) ||
-          ((section as any).texts && (section as any).texts.length > 0) ||
-          ((section as any).images && (section as any).images.length > 0) ||
-          (section.signatureFields && section.signatureFields.length > 0)) {
-        let maxHeight = 100; // minimum height for preview
-
-        if (section.shapes) {
-          section.shapes.forEach((shape) => {
-            const bottomPos = shape.top + shape.height + 20;
-            if (bottomPos > maxHeight) {
-              maxHeight = bottomPos;
-            }
-          });
-        }
-
-        if (section.tables) {
-          section.tables.forEach((table) => {
-            const bottomPos = table.top + table.height + 20;
-            if (bottomPos > maxHeight) {
-              maxHeight = bottomPos;
-            }
-          });
-        }
-
-        if ((section as any).texts) {
-          (section as any).texts.forEach((text: any) => {
-            const bottomPos = text.top + (text.height || 100) + 20;
-            if (bottomPos > maxHeight) {
-              maxHeight = bottomPos;
-            }
-          });
-        }
-
-        if ((section as any).images) {
-          (section as any).images.forEach((image: any) => {
-            const bottomPos = image.top + image.height + 20;
-            if (bottomPos > maxHeight) {
-              maxHeight = bottomPos;
-            }
-          });
-        }
-
-        if (section.signatureFields) {
-          section.signatureFields.forEach((field) => {
-            const bottomPos = field.top + field.height + 20;
-            if (bottomPos > maxHeight) {
-              maxHeight = bottomPos;
-            }
-          });
-        }
-
-        // Limit height for preview to avoid taking too much space
-        newHeights[section.id] = Math.min(maxHeight, 150);
-      }
-    });
-
-    return newHeights;
-  }, [proposal.sections]);
+  const sectionCount = proposal.sections?.length || 0;
 
   return (
-    <div className="w-full h-full bg-white rounded overflow-hidden flex flex-col text-sm">
-      {/* Title */}
-      {proposal.title && (
-        <div
-          className="px-3 py-2 border-b border-slate-200 overflow-hidden flex-shrink-0"
-          style={{
-            color: (proposal as any).titleStyles?.color || '#000000',
-            fontSize: '14px',
-            textAlign: ((proposal as any).titleStyles?.textAlign || "left") as any,
-            backgroundColor: (proposal as any).titleStyles?.backgroundColor,
-            backgroundImage: (proposal as any).titleStyles?.backgroundImage ? `url(${(proposal as any).titleStyles?.backgroundImage})` : undefined,
-            backgroundSize: (proposal as any).titleStyles?.backgroundSize || "cover",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat",
-            padding: '8px 12px',
-            borderRadius: (proposal as any).titleStyles?.borderRadius ? `${Math.max((proposal as any).titleStyles?.borderRadius / 2, 4)}px` : undefined,
-            fontWeight: (proposal as any).titleStyles?.bold ? "bold" : "normal",
-            fontStyle: (proposal as any).titleStyles?.italic ? "italic" : "normal",
-            textDecoration: (proposal as any).titleStyles?.underline ? "underline" : (proposal as any).titleStyles?.strikethrough ? "line-through" : "none",
-          }}
-        >
-          <div className="truncate font-semibold text-sm">
-            {extractTextFromHtml(proposal.title || '') || 'Untitled'}
+    <div className="w-full h-full bg-white rounded overflow-hidden flex flex-col">
+      {/* Header with template title */}
+      <div className="px-4 py-3 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white flex-shrink-0">
+        <div className="flex items-start gap-2">
+          <FileText className="h-4 w-4 text-slate-400 mt-0.5 flex-shrink-0" />
+          <div className="flex-1 min-w-0">
+            <h3 className="font-semibold text-sm text-slate-900 line-clamp-2">
+              {proposal.title || 'Untitled Template'}
+            </h3>
           </div>
         </div>
-      )}
+      </div>
 
-      {/* Sections Content */}
-      <div className="px-3 py-2 space-y-2 overflow-hidden flex-1 overflow-y-auto">
-        {proposal.sections?.slice(0, 2).map((section, sIdx) => (
-          <div key={section.id} className="space-y-1">
-            {/* Section Title */}
-            {section.title && (
-              <div className="text-xs font-semibold text-slate-900 line-clamp-1">
-                {section.title}
-              </div>
-            )}
-
-            {/* Section Content */}
-            {section.content && (
-              <div className="text-xs text-slate-600 line-clamp-2 leading-tight">
-                {(() => {
-                  const cleanText = extractTextFromHtml(section.content).trim();
-                  return cleanText.substring(0, 120) + (cleanText.length > 120 ? '...' : '');
-                })()}
-              </div>
-            )}
-
-            {/* Images Preview */}
-            {(section as any).images && (section as any).images.length > 0 && (
-              <div className="flex gap-1 pt-1">
-                {(section as any).images.slice(0, 2).map((img: any, idx: number) => (
-                  <div
-                    key={idx}
-                    className="w-6 h-6 bg-slate-100 rounded border border-slate-200 overflow-hidden flex-shrink-0"
-                  >
-                    <img
-                      src={img.url}
-                      alt="preview"
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = 'none';
-                      }}
-                    />
+      {/* Content area showing sections */}
+      <div className="px-4 py-3 flex-1 flex flex-col justify-between">
+        {/* Sections list */}
+        <div className="space-y-2 overflow-y-auto max-h-32">
+          {proposal.sections && proposal.sections.length > 0 ? (
+            <>
+              {proposal.sections.slice(0, 3).map((section, idx) => (
+                <div key={section.id || idx} className="text-xs">
+                  <div className="font-medium text-slate-700">
+                    {idx + 1}. {section.title || `Section ${idx + 1}`}
                   </div>
-                ))}
-                {(section as any).images.length > 2 && (
-                  <div className="text-xs text-muted-foreground flex items-center">
-                    +{(section as any).images.length - 2}
+                  <div className="text-slate-500 text-xs line-clamp-1 mt-0.5">
+                    {section.content ? '✓ Has content' : '• No content'}
+                    {(section as any).images?.length > 0 && ` • ${(section as any).images.length} image(s)`}
+                    {section.tables?.length > 0 && ` • ${section.tables.length} table(s)`}
                   </div>
-                )}
-              </div>
-            )}
+                </div>
+              ))}
+              {proposal.sections.length > 3 && (
+                <div className="text-xs text-slate-500 pt-1 border-t border-slate-200 mt-1">
+                  +{proposal.sections.length - 3} more section{proposal.sections.length - 3 !== 1 ? 's' : ''}
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="text-xs text-slate-500 italic">No sections yet</div>
+          )}
+        </div>
 
-            {/* Canvas Elements (Shapes, Tables, Texts) - Simplified preview */}
-            {(section.shapes?.length || 0) + (section.tables?.length || 0) + ((section as any).texts?.length || 0) > 0 && (
-              <div
-                className="relative bg-gray-50 rounded border border-slate-200 mt-1"
-                style={{
-                  height: `${canvasHeights[section.id] || 80}px`,
-                  pointerEvents: 'none',
-                  fontSize: '10px',
-                }}
-              >
-                {/* Shapes */}
-                {section.shapes && section.shapes.slice(0, 3).map((shape, shapeIdx) => {
-                  const scale = 0.25;
-                  return (
-                    <div
-                      key={`shape-${shapeIdx}`}
-                      style={{
-                        position: "absolute",
-                        left: `${shape.left * scale}px`,
-                        top: `${shape.top * scale}px`,
-                        width: `${shape.width * scale}px`,
-                        height: `${shape.height * scale}px`,
-                        backgroundColor: shape.backgroundColor,
-                        backgroundImage: shape.backgroundImage ? `url(${shape.backgroundImage})` : undefined,
-                        backgroundSize: shape.backgroundImage ? shape.backgroundSize : undefined,
-                        backgroundPosition: "center",
-                        backgroundRepeat: "no-repeat",
-                        borderWidth: shape.borderWidth ? `${Math.max(shape.borderWidth * scale, 1)}px` : "0px",
-                        borderColor: shape.borderColor,
-                        borderStyle: shape.borderWidth ? "solid" : "none",
-                        borderRadius: shape.type === 'circle' ? '50%' : shape.borderRadius ? `${shape.borderRadius * scale}px` : "0px",
-                      }}
-                    />
-                  );
-                })}
-
-                {/* Tables - Simplified */}
-                {section.tables && section.tables.slice(0, 1).map((table, tableIdx) => (
-                  <div key={`table-${tableIdx}`} className="text-xs text-slate-500 p-1">
-                    <div>Table: {table.rows || 0} rows × {table.columns || 0} cols</div>
-                  </div>
-                ))}
-
-                {/* Texts */}
-                {(section as any).texts && (section as any).texts.slice(0, 2).map((text: any, textIdx: number) => (
-                  <div
-                    key={`text-${textIdx}`}
-                    style={{
-                      position: "absolute",
-                      left: `${text.left * 0.25}px`,
-                      top: `${text.top * 0.25}px`,
-                      width: `${text.width * 0.25}px`,
-                      fontSize: `${Math.max((text.fontSize || 12) * 0.25, 8)}px`,
-                      color: text.color || '#000',
-                      overflow: 'hidden',
-                      whiteSpace: 'nowrap',
-                      textOverflow: 'ellipsis',
-                    }}
-                  >
-                    {text.content?.substring(0, 30) || ''}
-                  </div>
-                ))}
-              </div>
-            )}
+        {/* Template info footer */}
+        <div className="pt-2 border-t border-slate-200 mt-2">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-slate-600">
+              <span className="font-semibold text-slate-900">{sectionCount}</span> section{sectionCount !== 1 ? 's' : ''}
+            </span>
+            <span className="px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs font-medium">
+              Preview
+            </span>
           </div>
-        ))}
-
-        {/* Show indicator if more sections exist */}
-        {proposal.sections && proposal.sections.length > 2 && (
-          <div className="text-xs text-muted-foreground pt-1">
-            +{proposal.sections.length - 2} more section{proposal.sections.length - 2 !== 1 ? 's' : ''}
-          </div>
-        )}
+        </div>
       </div>
     </div>
   );
