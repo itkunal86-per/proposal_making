@@ -133,7 +133,7 @@ export default function ProposalEditor() {
         nav("/my/proposals");
       }
     })();
-  }, [id, nav]);
+  }, [id, nav, isSystemTemplateEdit, searchParams]);
 
   useEffect(() => {
     (async () => {
