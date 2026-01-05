@@ -1,10 +1,7 @@
 import React, { useMemo } from "react";
 import { Proposal } from "@/services/proposalsService";
 import { SystemTemplate } from "@/services/systemTemplatesService";
-import { replaceVariables, decodeHtmlEntities } from "@/lib/variableUtils";
-import { TableEditor } from "@/components/TableEditor";
-import { TextEditor } from "@/components/TextEditor";
-import { ImageEditor } from "@/components/ImageEditor";
+import { decodeHtmlEntities } from "@/lib/variableUtils";
 
 interface TemplatePreviewRendererProps {
   template: SystemTemplate | Proposal;
