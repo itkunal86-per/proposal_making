@@ -27,6 +27,7 @@ export default function AdminSystemTemplates() {
   const [isCreating, setIsCreating] = useState(false);
   const [createError, setCreateError] = useState("");
   const [templateTitle, setTemplateTitle] = useState("");
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   useEffect(() => {
     refreshTemplates();
