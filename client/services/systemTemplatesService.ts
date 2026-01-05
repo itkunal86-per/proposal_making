@@ -8,6 +8,7 @@ export interface SystemTemplate {
   title: string;
   description?: string;
   content?: string;
+  status?: "draft" | "active" | "archived";
   createdAt?: number;
   updatedAt?: number;
   sections?: Array<{
