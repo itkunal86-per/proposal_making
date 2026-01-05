@@ -31,7 +31,7 @@ export const TemplatePreviewRenderer: React.FC<TemplatePreviewRendererProps> = (
           ((section as any).texts && (section as any).texts.length > 0) ||
           ((section as any).images && (section as any).images.length > 0) ||
           (section.signatureFields && section.signatureFields.length > 0)) {
-        let maxHeight = 200; // minimum height
+        let maxHeight = 100; // minimum height for preview
 
         if (section.shapes) {
           section.shapes.forEach((shape) => {
@@ -78,12 +78,13 @@ export const TemplatePreviewRenderer: React.FC<TemplatePreviewRendererProps> = (
           });
         }
 
-        newHeights[section.id] = maxHeight * scale;
+        // Limit height for preview to avoid taking too much space
+        newHeights[section.id] = Math.min(maxHeight, 150);
       }
     });
 
     return newHeights;
-  }, [proposal.sections, scale]);
+  }, [proposal.sections]);
 
   return (
     <div
