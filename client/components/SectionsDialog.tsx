@@ -109,21 +109,11 @@ export const SectionsDialog: React.FC<SectionsDialogProps> = ({
         : await addSection(proposal, title, layout);
 
       const newSection = updated.sections[updated.sections.length - 1];
-      const newSectionIndex = updated.sections.length - 1;
-
-      console.log("✅ Section added:", {
-        newSection,
-        newSectionIndex,
-        totalSections: updated.sections.length,
-        sectionIds: updated.sections.map(s => s.id),
-        isTemplateEdit,
-      });
 
       onUpdateProposal(updated);
 
       // Auto-select the newly added section's title element in the properties panel
       if (onSelectElement && newSection) {
-        console.log("Auto-selecting section title:", `section-title-${newSection.id}`);
         onSelectElement(`section-title-${newSection.id}`, "section-title");
       }
 
