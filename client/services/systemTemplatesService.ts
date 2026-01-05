@@ -39,10 +39,10 @@ export async function listSystemTemplates(): Promise<SystemTemplate[]> {
     }
 
     const data = await response.json();
-    
+
     // The API might return templates as an array or wrapped in a data field
     const templates = Array.isArray(data) ? data : (data?.data || data?.templates || []);
-    
+
     return templates.map((t: any) => ({
       id: t.id || t.template_id || String(Math.random()),
       title: t.title || t.name || "Untitled",
@@ -55,6 +55,67 @@ export async function listSystemTemplates(): Promise<SystemTemplate[]> {
   } catch (error) {
     console.error("Error fetching system templates:", error);
     return [];
+  }
+}
+
+export interface CreateTemplateResult {
+  success: boolean;
+  data?: SystemTemplate;
+  error?: string;
+}
+
+export async function createSystemTemplate(title: string): Promise<CreateTemplateResult> {
+  const token = getStoredToken();
+  if (!token) {
+    return {
+      success: false,
+      error: "No authentication token available",
+    };
+  }
+
+  try {
+    const response = await fetch(SYSTEM_TEMPLATES_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        title: title.trim(),
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage = errorData?.message || errorData?.error || "Failed to create template";
+      return {
+        success: false,
+        error: errorMessage,
+      };
+    }
+
+    const data = await response.json();
+
+    const template: SystemTemplate = {
+      id: data.id || data.template_id || String(Math.random()),
+      title: data.title || title,
+      description: data.description || "",
+      content: data.content || "",
+      createdAt: data.created_at ? new Date(data.created_at).getTime() : Date.now(),
+      updatedAt: data.updated_at ? new Date(data.updated_at).getTime() : Date.now(),
+      sections: data.sections || [],
+    };
+
+    return {
+      success: true,
+      data: template,
+    };
+  } catch (error) {
+    console.error("Error creating system template:", error);
+    return {
+      success: false,
+      error: "Network error. Please try again.",
+    };
   }
 }
 
