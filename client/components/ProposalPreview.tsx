@@ -44,6 +44,7 @@ interface ElementProps {
   bulletList?: boolean;
   numberList?: boolean;
   code?: boolean;
+  variables?: Array<{ id: string | number; name: string; value: string }>;
 }
 
 const SelectableElement: React.FC<ElementProps> = ({
@@ -80,6 +81,7 @@ const SelectableElement: React.FC<ElementProps> = ({
   bulletList,
   numberList,
   code,
+  variables = [],
 }) => {
   const baseClasses =
     "cursor-pointer transition-all duration-200 outline-2 outline-offset-2 relative group";
@@ -184,7 +186,13 @@ const SelectableElement: React.FC<ElementProps> = ({
 
     // Check for both literal HTML tags and encoded HTML entities
     const isHtml = typeof content === "string" && (content.includes("<") || content.includes("&lt;") || content.includes("&amp;"));
-    const decodedContent = isHtml && typeof content === "string" ? decodeHtmlEntities(content) : content;
+    let decodedContent = isHtml && typeof content === "string" ? decodeHtmlEntities(content) : content;
+
+    // Apply variable replacement to the content
+    // This works for both plain text and HTML content
+    if (typeof decodedContent === "string" && variables.length > 0) {
+      decodedContent = replaceVariables(decodedContent, variables);
+    }
 
     // Prioritize HTML rendering - if content has HTML tags, render as HTML
     // This ensures rich text editor content (with ul/li, nested divs, etc.) displays correctly
@@ -314,8 +322,10 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
   isAddingSignatureMode = false,
   selectedSignatoryId = null,
 }) => {
+
   const [dragOverSectionId, setDragOverSectionId] = React.useState<string | null>(null);
   const [canvasHeights, setCanvasHeights] = React.useState<Record<string, number>>({});
+
   const sectionRefs = React.useRef<Map<string, HTMLDivElement>>(new Map());
 
   React.useEffect(() => {
@@ -459,6 +469,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
         marginRight={(proposal as any).titleStyles?.marginRight}
         marginBottom={(proposal as any).titleStyles?.marginBottom}
         marginLeft={(proposal as any).titleStyles?.marginLeft}
+        variables={variables}
       >
         {proposal.title}
       </SelectableElement>
@@ -534,6 +545,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                   bulletList={(section as any).titleStyles?.bulletList}
                   numberList={(section as any).titleStyles?.numberList}
                   code={(section as any).titleStyles?.code}
+                  variables={variables}
                 >
                   {section.title}
                 </SelectableElement>
@@ -575,6 +587,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                 bulletList={(section as any).titleStyles?.bulletList}
                 numberList={(section as any).titleStyles?.numberList}
                 code={(section as any).titleStyles?.code}
+                variables={variables}
               >
                 {section.title}
               </SelectableElement>
@@ -617,8 +630,9 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                   bulletList={(section as any).contentStyles?.bulletList}
                   numberList={(section as any).contentStyles?.numberList}
                   code={(section as any).contentStyles?.code}
+                  variables={variables}
                 >
-                  {replaceVariables(section.content || "", variables)}
+                  {section.content || ""}
                 </SelectableElement>
             )}
 
@@ -682,8 +696,9 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                         bulletList={(section as any).columnStyles?.[0]?.bulletList || (section as any).contentStyles?.bulletList}
                         numberList={(section as any).columnStyles?.[0]?.numberList || (section as any).contentStyles?.numberList}
                         code={(section as any).columnStyles?.[0]?.code || (section as any).contentStyles?.code}
+                        variables={variables}
                       >
-                        {replaceVariables((section as any).columnContents?.[0] || "", variables)}
+                        {(section as any).columnContents?.[0] || ""}
                       </SelectableElement>
                     </div>
                     <div style={{
@@ -742,8 +757,9 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                         bulletList={(section as any).columnStyles?.[1]?.bulletList || (section as any).contentStyles?.bulletList}
                         numberList={(section as any).columnStyles?.[1]?.numberList || (section as any).contentStyles?.numberList}
                         code={(section as any).columnStyles?.[1]?.code || (section as any).contentStyles?.code}
+                        variables={variables}
                       >
-                        {replaceVariables((section as any).columnContents?.[1] || "", variables)}
+                        {(section as any).columnContents?.[1] || ""}
                       </SelectableElement>
                     </div>
                   </>
@@ -806,8 +822,9 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                         bulletList={(section as any).columnStyles?.[0]?.bulletList || (section as any).contentStyles?.bulletList}
                         numberList={(section as any).columnStyles?.[0]?.numberList || (section as any).contentStyles?.numberList}
                         code={(section as any).columnStyles?.[0]?.code || (section as any).contentStyles?.code}
+                        variables={variables}
                       >
-                        {replaceVariables((section as any).columnContents?.[0] || "", variables)}
+                        {(section as any).columnContents?.[0] || ""}
                       </SelectableElement>
                     </div>
                     <div style={{
@@ -866,8 +883,9 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                         bulletList={(section as any).columnStyles?.[1]?.bulletList || (section as any).contentStyles?.bulletList}
                         numberList={(section as any).columnStyles?.[1]?.numberList || (section as any).contentStyles?.numberList}
                         code={(section as any).columnStyles?.[1]?.code || (section as any).contentStyles?.code}
+                        variables={variables}
                       >
-                        {replaceVariables((section as any).columnContents?.[1] || "", variables)}
+                        {(section as any).columnContents?.[1] || ""}
                       </SelectableElement>
                     </div>
                     <div style={{
@@ -926,8 +944,9 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                         bulletList={(section as any).columnStyles?.[2]?.bulletList || (section as any).contentStyles?.bulletList}
                         numberList={(section as any).columnStyles?.[2]?.numberList || (section as any).contentStyles?.numberList}
                         code={(section as any).columnStyles?.[2]?.code || (section as any).contentStyles?.code}
+                        variables={variables}
                       >
-                        {replaceVariables((section as any).columnContents?.[2] || "", variables)}
+                        {(section as any).columnContents?.[2] || ""}
                       </SelectableElement>
                     </div>
                   </>

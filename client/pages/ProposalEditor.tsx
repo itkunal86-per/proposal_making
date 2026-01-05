@@ -126,13 +126,16 @@ export default function ProposalEditor() {
           return;
         }
         if (data) {
-          setVariables(
-            data.map((v) => ({
-              id: v.id,
-              name: v.variable_name,
-              value: v.variable_value,
-            }))
-          );
+          const mappedVariables = data.map((v) => ({
+            id: v.id,
+            name: v.variable_name,
+            value: v.variable_value,
+          }));
+          console.log("✅ Variables loaded from API:", mappedVariables.map(v => `${v.name}=${v.value}`));
+          setVariables(mappedVariables);
+          console.log("✅ setVariables called with", mappedVariables.length, "variables");
+        } else {
+          console.log("⚠️ fetchVariables returned no data");
         }
       } catch (error) {
         console.error("Failed to fetch variables:", error);
@@ -236,6 +239,18 @@ export default function ProposalEditor() {
   if (!p) return null;
 
   const section = p.sections[current];
+
+  console.log("ProposalEditor render - variables and content:", {
+    variablesCount: variables.length,
+    variables: variables.map(v => ({ id: v.id, name: v.name, value: v.value })),
+    sectionsWithContent: p.sections.map(s => ({
+      id: s.id,
+      title: s.title,
+      contentLength: s.content?.length || 0,
+      contentSample: s.content?.substring(0, 100) || "",
+      columnContents: (s as any).columnContents?.map((c: string) => c?.substring(0, 50) || "") || [],
+    })),
+  });
 
   return (
     <div className="flex h-screen bg-slate-50">

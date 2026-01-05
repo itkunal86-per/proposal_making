@@ -43,6 +43,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     searchTerm: "",
   });
 
+
   // Initialize editor content and update when value prop changes
   useEffect(() => {
     if (editorRef.current) {

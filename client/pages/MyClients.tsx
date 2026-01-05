@@ -10,6 +10,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
+import { getStoredToken } from "@/lib/auth";
 import { MoreVertical, Users as UsersIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { type ClientRecord, type ClientStatus, type CreateClientResult, type UpdateClientResult, type DeleteClientResult, listClients, createClient, updateClient, deleteClient } from "@/services/clientsService";
@@ -21,6 +22,7 @@ export default function MyClients() {
   const [openEdit, setOpenEdit] = useState<null | ClientRecord>(null);
   const [openAdd, setOpenAdd] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; clientId: string; clientName: string }>({ open: false, clientId: "", clientName: "" });
+  const [isSyncing, setIsSyncing] = useState(false);
 
   useEffect(() => { (async () => setRows(await listClients()))(); }, []);
 
@@ -35,6 +37,44 @@ export default function MyClients() {
 
   async function refresh() {
     setRows(await listClients());
+  }
+
+  async function syncFromGHL() {
+    setIsSyncing(true);
+    try {
+      const token = getStoredToken();
+      if (!token) {
+        throw new Error("Authentication token not found. Please log in again.");
+      }
+
+      const response = await fetch("https://propai-api.hirenq.com/api/clients/sync-from-ghl", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      toast({
+        title: data.message || "Clients synced successfully",
+        description: `${data.count || 0} client(s) synced from GoHighLevel`,
+      });
+      await refresh();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to sync clients from GoHighLevel";
+      toast({
+        title: "Sync failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsSyncing(false);
+    }
   }
 
   async function onAdd(payload: { name: string; email: string; company?: string; status: ClientStatus; onError?: (errors: Record<string, string | string[]>) => void }) {
@@ -108,13 +148,23 @@ export default function MyClients() {
               <h1 className="text-3xl lg:text-4xl font-bold tracking-tight text-foreground">Clients</h1>
               <p className="text-base text-muted-foreground mt-1">Manage your client directory and keep it up to date</p>
             </div>
-            <Button
-              onClick={() => setOpenAdd(true)}
-              className="w-full sm:w-auto gap-2 bg-gradient-to-r from-primary to-accent hover:shadow-lg transition-shadow"
-            >
-              <span>+</span>
-              Add client
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+              <Button
+                onClick={() => setOpenAdd(true)}
+                className="w-full sm:w-auto gap-2 bg-gradient-to-r from-primary to-accent hover:shadow-lg transition-shadow"
+              >
+                <span>+</span>
+                Add client
+              </Button>
+              <Button
+                onClick={syncFromGHL}
+                disabled={isSyncing}
+                variant="outline"
+                className="w-full sm:w-auto gap-2"
+              >
+                {isSyncing ? "Syncing..." : "Sync From GHL"}
+              </Button>
+            </div>
           </div>
         </div>
 
