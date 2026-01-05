@@ -77,15 +77,33 @@ export default function ProposalEditor() {
   useEffect(() => {
     (async () => {
       try {
-        console.log("ProposalEditor: Loading proposal with id:", id);
-        const found = await getProposalDetails(id);
-        console.log("ProposalEditor: getProposalDetails returned:", found);
-        if (!found) {
-          console.warn("ProposalEditor: Proposal not found, redirecting to /my/proposals");
-          nav("/my/proposals");
-          return;
+        let found: Proposal | null = null;
+
+        // Check if this is a system template edit
+        const templateId = searchParams.get("templateId");
+        if (isSystemTemplateEdit && templateId) {
+          const storedData = localStorage.getItem(`template_draft_${templateId}`);
+          if (storedData) {
+            found = JSON.parse(storedData) as Proposal;
+            console.log("Loaded system template from localStorage:", found);
+          } else {
+            console.warn("Template data not found in localStorage");
+            nav("/admin/templates/system");
+            return;
+          }
+        } else {
+          // Load regular proposal from API
+          console.log("ProposalEditor: Loading proposal with id:", id);
+          found = await getProposalDetails(id);
+          console.log("ProposalEditor: getProposalDetails returned:", found);
+          if (!found) {
+            console.warn("ProposalEditor: Proposal not found, redirecting to /my/proposals");
+            nav("/my/proposals");
+            return;
+          }
         }
-        console.log("Loaded proposal from getProposalDetails:", {
+
+        console.log("Loaded proposal:", {
           id: found.id,
           sections: found.sections.map(s => ({
             id: s.id,
