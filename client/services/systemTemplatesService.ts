@@ -282,6 +282,50 @@ export async function updateSystemTemplate(
   }
 }
 
+export interface DeleteTemplateResult {
+  success: boolean;
+  error?: string;
+}
+
+export async function deleteSystemTemplate(templateId: string): Promise<DeleteTemplateResult> {
+  const token = getStoredToken();
+  if (!token) {
+    return {
+      success: false,
+      error: "No authentication token available",
+    };
+  }
+
+  try {
+    const response = await fetch(`${SYSTEM_TEMPLATES_ENDPOINT}/${templateId}`, {
+      method: "DELETE",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage = errorData?.message || errorData?.error || "Failed to delete template";
+      return {
+        success: false,
+        error: errorMessage,
+      };
+    }
+
+    return {
+      success: true,
+    };
+  } catch (error) {
+    console.error("Error deleting system template:", error);
+    return {
+      success: false,
+      error: "Network error. Please try again.",
+    };
+  }
+}
+
 export function convertSystemTemplateToProposal(template: SystemTemplate): Proposal {
   // Map system template status to proposal status
   // Active -> draft, Inactive -> sent
