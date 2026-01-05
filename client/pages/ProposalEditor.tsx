@@ -84,10 +84,28 @@ export default function ProposalEditor() {
         const templateId = searchParams.get("templateId");
         if (isSystemTemplateEdit && templateId) {
           const storedData = localStorage.getItem(`template_draft_${templateId}`);
+          let useStoredData = false;
+
           if (storedData) {
-            found = JSON.parse(storedData) as Proposal;
-            console.log("Loaded system template from localStorage:", found);
-          } else {
+            const parsed = JSON.parse(storedData) as Proposal;
+            // Validate that stored data has all required section fields
+            const hasAllFields = parsed.sections?.every((s: any) =>
+              s.texts !== undefined &&
+              s.images !== undefined &&
+              s.shapes !== undefined &&
+              s.tables !== undefined
+            );
+
+            if (hasAllFields && parsed.sections && parsed.sections.length > 0) {
+              found = parsed;
+              useStoredData = true;
+              console.log("Loaded complete system template from localStorage:", found);
+            } else {
+              console.log("Stored data incomplete, will fetch fresh from API");
+            }
+          }
+
+          if (!useStoredData) {
             // Fetch from API if not in localStorage
             console.log("Template not in localStorage, fetching from API:", templateId);
             const templateData = await getSystemTemplateDetails(templateId);
