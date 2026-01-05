@@ -785,7 +785,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
       const updatedProposal = {
         ...proposal,
         sections: proposal.sections.map((s) =>
-          s.id === sectionId ? { ...s, ...updates } : s
+          String(s.id) === String(sectionId) ? { ...s, ...updates } : s
         ),
       };
       onUpdateProposal(updatedProposal);
@@ -1236,7 +1236,8 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     const columnIndex = colMatch ? parseInt(colMatch[1]) - 1 : -1; // col1 = index 0, col2 = index 1, etc.
     // Remove column identifier if present (e.g., "-col1", "-col2", "-col3")
     sectionId = sectionId.replace(/-col\d+$/, "");
-    const section = proposal.sections.find((s) => s.id === sectionId);
+    // Handle both string and numeric IDs
+    const section = proposal.sections.find((s) => String(s.id) === String(sectionId));
 
     if (!section) return null;
 
@@ -1244,7 +1245,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
       const updatedProposal = {
         ...proposal,
         sections: proposal.sections.map((s) =>
-          s.id === sectionId ? { ...s, ...updates } : s
+          String(s.id) === String(sectionId) ? { ...s, ...updates } : s
         ),
       };
       onUpdateProposal(updatedProposal);
