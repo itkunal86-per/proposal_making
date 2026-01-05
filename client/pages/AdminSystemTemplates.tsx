@@ -75,6 +75,33 @@ export default function AdminSystemTemplates() {
     }
   }
 
+  async function handleCreateTemplate() {
+    if (!templateTitle.trim()) {
+      setCreateError("Template title is required");
+      return;
+    }
+
+    setIsCreating(true);
+    setCreateError("");
+
+    try {
+      const result = await createSystemTemplate(templateTitle);
+      if (result.success) {
+        toast({ title: "Template created successfully" });
+        setIsCreateDialogOpen(false);
+        setTemplateTitle("");
+        await refreshTemplates();
+      } else {
+        setCreateError(result.error || "Failed to create template");
+      }
+    } catch (error) {
+      setCreateError("Error creating template");
+      console.error(error);
+    } finally {
+      setIsCreating(false);
+    }
+  }
+
   if (isLoading) {
     return (
       <AppShell>
