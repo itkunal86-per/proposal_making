@@ -273,7 +273,7 @@ export default function ProposalEditor() {
   }
 
   const handleSectionNavigate = (sectionId: string) => {
-    const sectionIndex = p?.sections.findIndex((s) => s.id === sectionId);
+    const sectionIndex = p?.sections.findIndex((s) => String(s.id) === String(sectionId));
     if (sectionIndex !== undefined && sectionIndex !== -1) {
       setCurrent(sectionIndex);
 
@@ -569,12 +569,12 @@ export default function ProposalEditor() {
                 // Handle both old format (section-title-id) and new format (section-title-id-colX if needed)
                 let sectionId = selectedElementId.replace("section-title-", "");
                 sectionId = sectionId.replace(/-col\d+$/, "");
-                const section = p.sections.find((s) => s.id === sectionId);
+                const section = p.sections.find((s) => String(s.id) === String(sectionId));
                 if (section) {
                   const updated = {
                     ...p,
                     sections: p.sections.map((s) =>
-                      s.id === sectionId
+                      String(s.id) === String(sectionId)
                         ? { ...s, titleStyles: { ...(s as any).titleStyles, [format]: value } }
                         : s
                     ),
@@ -587,12 +587,12 @@ export default function ProposalEditor() {
                 const colMatch = sectionId.match(/-col(\d+)$/);
                 const columnIndex = colMatch ? parseInt(colMatch[1]) - 1 : -1; // col1 = index 0, col2 = index 1, etc.
                 sectionId = sectionId.replace(/-col\d+$/, "");
-                const section = p.sections.find((s) => s.id === sectionId);
+                const section = p.sections.find((s) => String(s.id) === String(sectionId));
                 if (section) {
                   const updated = {
                     ...p,
                     sections: p.sections.map((s) =>
-                      s.id === sectionId
+                      String(s.id) === String(sectionId)
                         ? columnIndex >= 0
                           ? {
                               ...s,
@@ -648,7 +648,7 @@ export default function ProposalEditor() {
               }}
               variables={variables}
               onAddShape={(sectionId, shapeType, x, y) => {
-                const section = p.sections.find((s) => s.id === sectionId);
+                const section = p.sections.find((s) => String(s.id) === String(sectionId));
                 if (section) {
                   const newShape = {
                     id: Math.random().toString(36).substring(2, 9),
@@ -696,7 +696,7 @@ export default function ProposalEditor() {
                 commit(updated);
               }}
               onAddTable={(sectionId, x, y) => {
-                const section = p.sections.find((s) => s.id === sectionId);
+                const section = p.sections.find((s) => String(s.id) === String(sectionId));
                 if (section) {
                   const createTableCells = (rows: number, cols: number) => {
                     return Array.from({ length: rows }, (_, rIdx) =>
@@ -754,7 +754,7 @@ export default function ProposalEditor() {
                 commit(updated);
               }}
               onAddText={(sectionId, x, y) => {
-                const section = p.sections.find((s) => s.id === sectionId);
+                const section = p.sections.find((s) => String(s.id) === String(sectionId));
                 if (section) {
                   const newText = {
                     id: Math.random().toString(36).substring(2, 9),
@@ -806,7 +806,7 @@ export default function ProposalEditor() {
                 commit(updated);
               }}
               onAddImage={(sectionId, x, y) => {
-                const section = p.sections.find((s) => s.id === sectionId);
+                const section = p.sections.find((s) => String(s.id) === String(sectionId));
                 if (section) {
                   const newImage = {
                     id: Math.random().toString(36).substring(2, 9),
