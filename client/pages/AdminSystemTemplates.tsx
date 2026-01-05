@@ -122,6 +122,7 @@ export default function AdminSystemTemplates() {
             <h1 className="text-2xl font-bold">System Templates</h1>
             <p className="text-muted-foreground">Library of reusable system proposal templates.</p>
           </div>
+          <Button onClick={() => setIsCreateDialogOpen(true)}>Add Template</Button>
         </div>
 
         <Card className="mt-4 p-4">
