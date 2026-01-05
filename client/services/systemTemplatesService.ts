@@ -18,6 +18,47 @@ export interface SystemTemplate {
   }>;
 }
 
+export async function getSystemTemplateDetails(templateId: string): Promise<SystemTemplate | null> {
+  const token = getStoredToken();
+  if (!token) {
+    console.error("No authentication token available");
+    return null;
+  }
+
+  try {
+    const response = await fetch(`${SYSTEM_TEMPLATES_ENDPOINT}/details/${templateId}`, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      console.error(`Failed to fetch template details: ${response.statusText}`);
+      return null;
+    }
+
+    const data = await response.json();
+
+    const template: SystemTemplate = {
+      id: data.id || String(Math.random()),
+      title: data.title || "Untitled",
+      description: data.description || "",
+      content: data.content || "",
+      status: data.status || "Active",
+      createdAt: data.createdAt || (data.created_at ? new Date(data.created_at).getTime() : Date.now()),
+      updatedAt: data.updatedAt || (data.updated_at ? new Date(data.updated_at).getTime() : Date.now()),
+      sections: data.sections || [],
+    };
+
+    return template;
+  } catch (error) {
+    console.error("Error fetching template details:", error);
+    return null;
+  }
+}
+
 export async function listSystemTemplates(): Promise<SystemTemplate[]> {
   const token = getStoredToken();
   if (!token) {
