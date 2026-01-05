@@ -105,10 +105,20 @@ export const SectionsDialog: React.FC<SectionsDialogProps> = ({
       const updated = isTemplateEdit
         ? addSectionLocal(proposal, title, layout)
         : await addSection(proposal, title, layout);
+
+      console.log("✅ Section added:", {
+        newSection: updated.sections[updated.sections.length - 1],
+        totalSections: updated.sections.length,
+        sectionIds: updated.sections.map(s => s.id),
+        isTemplateEdit,
+      });
+
       onUpdateProposal(updated);
 
       // Automatically select the newly added section (last one)
       const newSectionIndex = updated.sections.length - 1;
+      const newSectionId = updated.sections[newSectionIndex].id;
+      console.log("Selecting new section:", { index: newSectionIndex, id: newSectionId });
       onSelectSection(newSectionIndex);
 
       setTemplateDialogOpen(false);
