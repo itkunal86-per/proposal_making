@@ -568,6 +568,13 @@ export default function MyProposals() {
           onClose={() => setPreviewProposal(null)}
         />
       )}
+
+      <TemplateSelectionModal
+        open={showTemplateSelection}
+        onOpenChange={setShowTemplateSelection}
+        onSelectTemplate={handleTemplateSelected}
+        isLoading={isCreating}
+      />
     </AppShell>
   );
 }
