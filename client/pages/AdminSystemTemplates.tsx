@@ -27,13 +27,15 @@ export default function AdminSystemTemplates() {
   const [templateTitle, setTemplateTitle] = useState("");
 
   useEffect(() => {
-    (async () => {
-      setIsLoading(true);
-      const data = await listSystemTemplates();
-      setTemplates(data);
-      setIsLoading(false);
-    })();
+    refreshTemplates();
   }, []);
+
+  async function refreshTemplates() {
+    setIsLoading(true);
+    const data = await listSystemTemplates();
+    setTemplates(data);
+    setIsLoading(false);
+  }
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
