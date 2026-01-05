@@ -77,9 +77,18 @@ export const TemplateSelectionModal: React.FC<TemplateSelectionModalProps> = ({
           </DialogDescription>
         </DialogHeader>
 
+        {error && (
+          <div className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-800 mb-4">
+            {error}
+          </div>
+        )}
+
         {loadingTemplates || isLoading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <div className="flex flex-col items-center gap-2">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <p className="text-sm text-muted-foreground">Loading templates...</p>
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 py-4">
