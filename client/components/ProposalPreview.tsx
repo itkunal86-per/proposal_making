@@ -409,6 +409,20 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
     );
   }
 
+  // Debug logging
+  console.log("ProposalPreview received proposal:", {
+    id: proposal.id,
+    title: proposal.title,
+    sectionsCount: proposal.sections?.length,
+    sections: proposal.sections?.map((s: any) => ({
+      id: s.id,
+      title: s.title,
+      textsCount: s.texts?.length,
+      imagesCount: s.images?.length,
+      shapesCount: s.shapes?.length,
+    })),
+  });
+
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     const data = e.dataTransfer.types.includes("application/json");
     if (data) {
