@@ -169,6 +169,71 @@ export async function createSystemTemplate(title: string): Promise<CreateTemplat
   }
 }
 
+export async function updateSystemTemplate(
+  templateId: string,
+  data: {
+    title?: string;
+    status?: "Active" | "Inactive";
+    sections?: Array<{
+      id: string;
+      title: string;
+      content: string;
+    }>;
+  }
+): Promise<UpdateTemplateResult> {
+  const token = getStoredToken();
+  if (!token) {
+    return {
+      success: false,
+      error: "No authentication token available",
+    };
+  }
+
+  try {
+    const response = await fetch(`${SYSTEM_TEMPLATES_ENDPOINT}/${templateId}`, {
+      method: "PUT",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage = errorData?.message || errorData?.error || "Failed to update template";
+      return {
+        success: false,
+        error: errorMessage,
+      };
+    }
+
+    const responseData = await response.json();
+
+    const template: SystemTemplate = {
+      id: responseData.id || String(Math.random()),
+      title: responseData.title || "Untitled",
+      description: responseData.description || "",
+      content: responseData.content || "",
+      status: responseData.status || "Active",
+      createdAt: responseData.createdAt || (responseData.created_at ? new Date(responseData.created_at).getTime() : Date.now()),
+      updatedAt: responseData.updatedAt || (responseData.updated_at ? new Date(responseData.updated_at).getTime() : Date.now()),
+      sections: responseData.sections || [],
+    };
+
+    return {
+      success: true,
+      data: template,
+    };
+  } catch (error) {
+    console.error("Error updating system template:", error);
+    return {
+      success: false,
+      error: "Network error. Please try again.",
+    };
+  }
+}
+
 export function convertSystemTemplateToProposal(template: SystemTemplate): Proposal {
   // Map system template status to proposal status
   // Active -> draft, Inactive -> sent
