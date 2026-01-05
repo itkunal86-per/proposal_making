@@ -87,36 +87,28 @@ export const TemplatePreviewRenderer: React.FC<TemplatePreviewRendererProps> = (
   }, [proposal.sections]);
 
   return (
-    <div
-      className="w-full h-full bg-white rounded overflow-hidden"
-      style={{
-        transform: `scale(${scale})`,
-        transformOrigin: 'top left',
-        width: `${100 / scale}%`,
-        height: `${100 / scale}%`,
-      }}
-    >
+    <div className="w-full h-full bg-white rounded overflow-hidden flex flex-col text-sm">
       {/* Title */}
       {proposal.title && (
         <div
-          className="px-4 py-3 border-b border-slate-200 overflow-hidden"
+          className="px-3 py-2 border-b border-slate-200 overflow-hidden flex-shrink-0"
           style={{
             color: (proposal as any).titleStyles?.color || '#000000',
-            fontSize: `${((proposal as any).titleStyles?.fontSize || 24) / scale}px`,
+            fontSize: '14px',
             textAlign: ((proposal as any).titleStyles?.textAlign || "left") as any,
             backgroundColor: (proposal as any).titleStyles?.backgroundColor,
             backgroundImage: (proposal as any).titleStyles?.backgroundImage ? `url(${(proposal as any).titleStyles?.backgroundImage})` : undefined,
             backgroundSize: (proposal as any).titleStyles?.backgroundSize || "cover",
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat",
-            padding: `${((proposal as any).titleStyles?.paddingTop || 0) / scale}px ${((proposal as any).titleStyles?.paddingRight || 0) / scale}px ${((proposal as any).titleStyles?.paddingBottom || 0) / scale}px ${((proposal as any).titleStyles?.paddingLeft || 0) / scale}px`,
-            borderRadius: (proposal as any).titleStyles?.borderRadius ? `${(proposal as any).titleStyles?.borderRadius / scale}px` : undefined,
+            padding: '8px 12px',
+            borderRadius: (proposal as any).titleStyles?.borderRadius ? `${Math.max((proposal as any).titleStyles?.borderRadius / 2, 4)}px` : undefined,
             fontWeight: (proposal as any).titleStyles?.bold ? "bold" : "normal",
             fontStyle: (proposal as any).titleStyles?.italic ? "italic" : "normal",
             textDecoration: (proposal as any).titleStyles?.underline ? "underline" : (proposal as any).titleStyles?.strikethrough ? "line-through" : "none",
           }}
         >
-          <div className="truncate font-semibold">
+          <div className="truncate font-semibold text-sm">
             {decodeHtmlEntities(proposal.title)}
           </div>
         </div>
