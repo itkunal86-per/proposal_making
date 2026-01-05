@@ -683,7 +683,7 @@ export default function ProposalEditor() {
                 const updated = {
                   ...p,
                   sections: p.sections.map((s) =>
-                    s.id === sectionId
+                    String(s.id) === String(sectionId)
                       ? {
                           ...s,
                           shapes: (s.shapes || []).map((shape, idx) =>
@@ -741,7 +741,7 @@ export default function ProposalEditor() {
                 const updated = {
                   ...p,
                   sections: p.sections.map((s) =>
-                    s.id === sectionId
+                    String(s.id) === String(sectionId)
                       ? {
                           ...s,
                           tables: (s.tables || []).map((table, idx) =>
@@ -793,7 +793,7 @@ export default function ProposalEditor() {
                 const updated = {
                   ...p,
                   sections: p.sections.map((s) =>
-                    s.id === sectionId
+                    String(s.id) === String(sectionId)
                       ? {
                           ...s,
                           texts: ((s as any).texts || []).map((text: any, idx: number) =>
@@ -838,7 +838,7 @@ export default function ProposalEditor() {
                 const updated = {
                   ...p,
                   sections: p.sections.map((s) =>
-                    s.id === sectionId
+                    String(s.id) === String(sectionId)
                       ? {
                           ...s,
                           images: ((s as any).images || []).map((image: any, idx: number) =>
@@ -854,7 +854,7 @@ export default function ProposalEditor() {
                 const updated = {
                   ...p,
                   sections: p.sections.map((s) =>
-                    s.id === sectionId
+                    String(s.id) === String(sectionId)
                       ? {
                           ...s,
                           signatureFields: (s.signatureFields || []).map((field) =>
