@@ -244,10 +244,13 @@ export default function ProposalEditor() {
               return sectionData;
             }),
           };
+          console.log("Saving system template with sections:", { templateId, sectionsCount: updateData.sections.length, sections: updateData.sections });
           void updateSystemTemplate(templateId, updateData).then((result) => {
             if (result.success) {
+              console.log("✅ Template saved successfully");
               toast({ title: "Template saved successfully" });
             } else {
+              console.error("❌ Failed to save template:", result.error);
               toast({ title: result.error || "Failed to save template", variant: "destructive" });
             }
             setSaving(false);
