@@ -226,11 +226,23 @@ export default function ProposalEditor() {
           const updateData = {
             title: next.title,
             status: (next.status === "draft" ? "Active" : "Inactive") as "Active" | "Inactive",
-            sections: next.sections.map((s) => ({
-              id: s.id,
-              title: s.title,
-              content: s.content,
-            })),
+            sections: next.sections.map((s) => {
+              const sectionData: any = {
+                id: s.id,
+                title: s.title,
+                content: s.content,
+              };
+
+              // Include optional fields if they exist
+              if (s.layout) {
+                sectionData.layout = s.layout;
+              }
+              if (s.columnContents && s.columnContents.length > 0) {
+                sectionData.columnContents = s.columnContents;
+              }
+
+              return sectionData;
+            }),
           };
           void updateSystemTemplate(templateId, updateData).then((result) => {
             if (result.success) {
