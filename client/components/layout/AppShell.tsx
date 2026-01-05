@@ -48,7 +48,14 @@ const navByRole: Record<UserRole, NavItem[]> = {
     { href: "/dashboard", label: "Dashboard", icon: <LayoutDashboard className="w-5 h-5" /> },
     { href: "/admin/users", label: "Users", icon: <Users className="w-5 h-5" /> },
     { href: "/admin/packages", label: "Packages", icon: <Box className="w-5 h-5" /> },
-    { href: "/admin/templates", label: "Templates", icon: <FileText className="w-5 h-5" /> },
+    {
+      label: "Templates",
+      icon: <FileText className="w-5 h-5" />,
+      children: [
+        { href: "/admin/templates/system", label: "System Templates" },
+        { href: "/admin/templates/clients", label: "Clients Templates" },
+      ],
+    },
     { href: "/admin/settings", label: "Settings", icon: <Settings className="w-5 h-5" /> },
   ],
   subscriber: [
