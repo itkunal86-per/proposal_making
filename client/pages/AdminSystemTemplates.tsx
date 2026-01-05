@@ -233,6 +233,61 @@ export default function AdminSystemTemplates() {
             )}
           </DialogContent>
         </Dialog>
+
+        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add New Template</DialogTitle>
+              <DialogDescription>
+                Create a new system template by entering a title.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              {createError && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-800">
+                  {createError}
+                </div>
+              )}
+
+              <div>
+                <Label htmlFor="template-title" className="text-sm font-medium">
+                  Template Title <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="template-title"
+                  placeholder="e.g., Marketing Proposal"
+                  value={templateTitle}
+                  onChange={(e) => {
+                    setTemplateTitle(e.target.value);
+                    setCreateError("");
+                  }}
+                  disabled={isCreating}
+                />
+              </div>
+
+              <div className="flex gap-3 justify-end pt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setIsCreateDialogOpen(false);
+                    setTemplateTitle("");
+                    setCreateError("");
+                  }}
+                  disabled={isCreating}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleCreateTemplate}
+                  disabled={isCreating || !templateTitle.trim()}
+                >
+                  {isCreating ? "Creating..." : "Add Template"}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </section>
     </AppShell>
   );
