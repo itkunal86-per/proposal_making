@@ -6,6 +6,25 @@ interface TemplatePreviewRendererProps {
   template: SystemTemplate | Proposal;
 }
 
+// Helper function to safely extract text from HTML content
+function extractTextFromHtml(html: string): string {
+  if (!html) return '';
+
+  try {
+    // Create a temporary element to parse HTML
+    const temp = document.createElement('div');
+    temp.innerHTML = html;
+    // Get the text content (which removes all HTML tags)
+    return temp.textContent || temp.innerText || '';
+  } catch (e) {
+    // Fallback: simple regex stripping if DOM parsing fails
+    return html
+      .replace(/<[^>]*>/g, '')  // Remove tags
+      .replace(/&[^;]+;/g, ' ') // Remove entities
+      .trim();
+  }
+}
+
 export const TemplatePreviewRenderer: React.FC<TemplatePreviewRendererProps> = ({
   template,
 }) => {
