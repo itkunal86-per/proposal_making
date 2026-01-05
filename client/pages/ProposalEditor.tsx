@@ -142,16 +142,26 @@ export default function ProposalEditor() {
           }
         }
 
-        console.log("Loaded proposal:", {
+        console.log("Loaded proposal - before setP:", {
           id: found.id,
-          sections: found.sections.map(s => ({
+          title: found.title,
+          status: found.status,
+          sectionsCount: found.sections?.length,
+          sections: found.sections?.map(s => ({
             id: s.id,
             title: s.title,
             layout: s.layout,
             columnContents: (s as any).columnContents,
+            textsCount: (s as any).texts?.length,
+            shapesCount: s.shapes?.length,
           })),
         });
         setP(found);
+
+        // Log state immediately after setting (won't show updated state due to closure)
+        setTimeout(() => {
+          console.log("State updated - checking p state");
+        }, 100);
 
         try {
           setIsLoadingClients(true);
