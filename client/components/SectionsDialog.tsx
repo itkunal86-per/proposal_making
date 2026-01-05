@@ -106,6 +106,11 @@ export const SectionsDialog: React.FC<SectionsDialogProps> = ({
         ? addSectionLocal(proposal, title, layout)
         : await addSection(proposal, title, layout);
       onUpdateProposal(updated);
+
+      // Automatically select the newly added section (last one)
+      const newSectionIndex = updated.sections.length - 1;
+      onSelectSection(newSectionIndex);
+
       setTemplateDialogOpen(false);
       toast({ title: "Section added", description: `New ${layout} section has been created.` });
     } catch (error) {
