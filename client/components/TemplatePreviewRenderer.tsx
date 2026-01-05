@@ -124,7 +124,7 @@ export const TemplatePreviewRenderer: React.FC<TemplatePreviewRendererProps> = (
           }}
         >
           <div className="truncate font-semibold text-sm">
-            {proposal.title?.replace(/<[^>]*>/g, '') || 'Untitled'}
+            {extractTextFromHtml(proposal.title || '') || 'Untitled'}
           </div>
         </div>
       )}
