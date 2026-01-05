@@ -219,8 +219,35 @@ export default function ProposalEditor() {
     void persistProposal(next);
 
     saveTimer.current = window.setTimeout(() => {
-      void updateProposal(next, { keepVersion, note });
-      setSaving(false);
+      if (isSystemTemplateEdit) {
+        // For system templates, call the update template API
+        const templateId = searchParams.get("templateId");
+        if (templateId) {
+          const updateData = {
+            title: next.title,
+            status: (next.status === "draft" ? "Active" : "Inactive") as "Active" | "Inactive",
+            sections: next.sections.map((s) => ({
+              id: s.id,
+              title: s.title,
+              content: s.content,
+            })),
+          };
+          void updateSystemTemplate(templateId, updateData).then((result) => {
+            if (result.success) {
+              toast({ title: "Template saved successfully" });
+            } else {
+              toast({ title: result.error || "Failed to save template", variant: "destructive" });
+            }
+            setSaving(false);
+          });
+        } else {
+          setSaving(false);
+        }
+      } else {
+        // For regular proposals, use the existing update logic
+        void updateProposal(next, { keepVersion, note });
+        setSaving(false);
+      }
     }, 400);
   }
 
