@@ -225,10 +225,7 @@ const SelectableElement: React.FC<ElementProps> = ({
 
   return (
     <div
-      onClick={(e) => {
-        console.log("SelectableElement clicked:", { id, type, childrenExists: !!children });
-        onSelect();
-      }}
+      onClick={onSelect}
       className={`${baseClasses} ${selectedClasses} ${!children && type === "section-content" ? "min-h-[80px] border-2 border-dashed border-gray-300" : ""} group`}
       style={styleOverrides}
     >
