@@ -928,6 +928,7 @@ export default function ProposalEditor() {
 
           {/* Properties Panel */}
           <div className="w-96 overflow-y-auto p-6 border-l border-slate-200 bg-white">
+            {console.log("ProposalEditor render: activePanel=", activePanel, "selectedElementId=", selectedElementId, "selectedElementType=", selectedElementType)}
             {activePanel === "properties" ? (
               <PropertiesPanel
                 proposal={p}
