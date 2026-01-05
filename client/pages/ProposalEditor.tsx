@@ -632,7 +632,7 @@ export default function ProposalEditor() {
                 const updated = {
                   ...p,
                   sections: p.sections.map((s) =>
-                    s.id === sectionId
+                    String(s.id) === String(sectionId)
                       ? columnIndex !== undefined
                         ? {
                             ...s,
@@ -870,7 +870,7 @@ export default function ProposalEditor() {
                 const updated = {
                   ...p,
                   sections: p.sections.map((s) =>
-                    s.id === sectionId
+                    String(s.id) === String(sectionId)
                       ? {
                           ...s,
                           signatureFields: (s.signatureFields || []).filter((field) => field.id !== fieldId),
@@ -897,7 +897,7 @@ export default function ProposalEditor() {
                 const updated = {
                   ...p,
                   sections: p.sections.map((s) =>
-                    s.id === sectionId
+                    String(s.id) === String(sectionId)
                       ? {
                           ...s,
                           signatureFields: [...(s.signatureFields || []), newField],
