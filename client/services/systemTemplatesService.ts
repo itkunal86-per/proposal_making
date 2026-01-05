@@ -49,7 +49,7 @@ export async function listSystemTemplates(): Promise<SystemTemplate[]> {
       title: t.title || t.name || "Untitled",
       description: t.description || "",
       content: t.content || "",
-      status: t.status || "active",
+      status: t.status || "Active",
       createdAt: t.created_at ? new Date(t.created_at).getTime() : Date.now(),
       updatedAt: t.updated_at ? new Date(t.updated_at).getTime() : Date.now(),
       sections: t.sections || [],
