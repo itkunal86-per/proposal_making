@@ -46,6 +46,8 @@ interface DocumentSettings {
 export default function ProposalEditor() {
   const { id = "" } = useParams();
   const nav = useNavigate();
+  const [searchParams] = useSearchParams();
+  const isSystemTemplateEdit = !!searchParams.get("templateId");
   const [p, setP] = useState<Proposal | null>(null);
   const [current, setCurrent] = useState(0);
   const [saving, setSaving] = useState(false);
