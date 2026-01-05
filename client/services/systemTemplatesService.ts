@@ -423,8 +423,6 @@ export function convertSystemTemplateToProposal(template: SystemTemplate): Propo
       taxRate: 0,
     },
     settings: {
-      headerImage: undefined,
-      footerText: "",
       approvalFlow: "Single approver",
       sharing: {
         public: false,
