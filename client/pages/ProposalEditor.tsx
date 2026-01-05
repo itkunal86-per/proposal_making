@@ -202,7 +202,7 @@ export default function ProposalEditor() {
         nav("/my/proposals");
       }
     })();
-  }, [id, nav, isSystemTemplateEdit, searchParams]);
+  }, [id, nav, isSystemTemplateEdit, searchParams.get("templateId")]);
 
   useEffect(() => {
     // Skip variables fetch for system template edits
