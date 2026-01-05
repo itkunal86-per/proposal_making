@@ -331,6 +331,8 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
   React.useEffect(() => {
     const newHeights: Record<string, number> = {};
 
+    if (!proposal || !proposal.sections) return;
+
     proposal.sections.forEach((section) => {
       if ((section.shapes && section.shapes.length > 0) ||
           (section.tables && section.tables.length > 0) ||
