@@ -137,6 +137,15 @@ export default function ProposalEditor() {
   }, [id, nav, isSystemTemplateEdit, searchParams]);
 
   useEffect(() => {
+    console.log("ProposalEditor state change:", {
+      activePanel,
+      selectedElementId,
+      selectedElementType,
+      isSystemTemplateEdit,
+    });
+  }, [activePanel, selectedElementId, selectedElementType]);
+
+  useEffect(() => {
     // Skip variables fetch for system template edits
     if (isSystemTemplateEdit) {
       setVariables([]);
