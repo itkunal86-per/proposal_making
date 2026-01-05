@@ -74,7 +74,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     const imageIndex = selectedElementId.substring(lastHyphenIndex + 1);
     const sectionId = selectedElementId.substring(6, lastHyphenIndex); // Skip "image-"
 
-    const section = proposal.sections.find((s) => s.id === sectionId);
+    const section = proposal.sections.find((s) => String(s.id) === String(sectionId));
     if (!section) {
       return (
         <Card className="p-4">
@@ -2183,7 +2183,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     const parts = selectedElementId.split("-");
     const sectionId = parts[1];
     const mediaIndex = parseInt(parts[2]);
-    const section = proposal.sections.find((s) => s.id === sectionId);
+    const section = proposal.sections.find((s) => String(s.id) === String(sectionId));
 
     if (!section || !section.media || !section.media[mediaIndex]) return null;
 
@@ -2263,7 +2263,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     const parts = selectedElementId.split("-");
     const sectionId = parts[1];
     const shapeIndex = parseInt(parts[2]);
-    const section = proposal.sections.find((s) => s.id === sectionId);
+    const section = proposal.sections.find((s) => String(s.id) === String(sectionId));
 
     if (!section || !section.shapes || !section.shapes[shapeIndex]) {
       return (
@@ -2555,7 +2555,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     const parts = selectedElementId.split("-");
     const sectionId = parts[1];
     const tableIndex = parseInt(parts[2]);
-    const section = proposal.sections.find((s) => s.id === sectionId);
+    const section = proposal.sections.find((s) => String(s.id) === String(sectionId));
 
     if (!section || !section.tables || !section.tables[tableIndex]) {
       return (
@@ -2858,7 +2858,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     const parts = selectedElementId.split("-");
     const sectionId = parts[1];
     const textIndex = parseInt(parts[2]);
-    const section = proposal.sections.find((s) => s.id === sectionId);
+    const section = proposal.sections.find((s) => String(s.id) === String(sectionId));
 
     if (!section || !(section as any).texts || !(section as any).texts[textIndex]) {
       return (
@@ -3331,7 +3331,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     const imageIndex = selectedElementId.substring(lastHyphenIndex + 1);
     const sectionId = selectedElementId.substring(6, lastHyphenIndex); // Skip "image-"
 
-    const section = proposal.sections.find((s) => s.id === sectionId);
+    const section = proposal.sections.find((s) => String(s.id) === String(sectionId));
     if (!section) {
       console.error("Section not found for sectionId:", sectionId);
       return (
