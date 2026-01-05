@@ -8,12 +8,10 @@ import { ImageEditor } from "@/components/ImageEditor";
 
 interface TemplatePreviewRendererProps {
   template: SystemTemplate | Proposal;
-  scale?: number; // Scale factor for preview (0.1 to 1)
 }
 
 export const TemplatePreviewRenderer: React.FC<TemplatePreviewRendererProps> = ({
   template,
-  scale = 0.35,
 }) => {
   // Convert SystemTemplate to Proposal structure if needed
   const proposal = useMemo(() => {
