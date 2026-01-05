@@ -226,6 +226,8 @@ export default function ProposalEditor() {
           const updateData = {
             title: next.title,
             status: (next.status === "draft" ? "Active" : "Inactive") as "Active" | "Inactive",
+            client: next.client,
+            client_id: next.client_id,
             sections: next.sections.map((s) => {
               const sectionData: any = {
                 id: s.id,
@@ -243,8 +245,23 @@ export default function ProposalEditor() {
 
               return sectionData;
             }),
+            pricing: next.pricing,
+            settings: next.settings,
+            signatories: next.signatories,
+            createdBy: next.createdBy,
+            createdAt: next.createdAt,
+            updatedAt: Date.now(),
+            versions: next.versions,
           };
-          console.log("Saving system template with sections:", { templateId, sectionsCount: updateData.sections.length, sections: updateData.sections });
+          console.log("Saving system template:", {
+            templateId,
+            title: updateData.title,
+            status: updateData.status,
+            sectionsCount: updateData.sections.length,
+            client: updateData.client,
+            hasPricing: !!updateData.pricing,
+            hasSignatories: (updateData.signatories?.length || 0) > 0,
+          });
           void updateSystemTemplate(templateId, updateData).then((result) => {
             if (result.success) {
               console.log("✅ Template saved successfully");
