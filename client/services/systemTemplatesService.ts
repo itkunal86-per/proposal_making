@@ -174,11 +174,46 @@ export async function updateSystemTemplate(
   data: {
     title?: string;
     status?: "Active" | "Inactive";
+    client?: string;
+    client_id?: string;
     sections?: Array<{
       id: string;
       title: string;
       content: string;
+      layout?: string;
+      columnContents?: string[];
+      [key: string]: any;
     }>;
+    pricing?: {
+      currency?: string;
+      taxRate?: number;
+      items?: Array<{
+        id: string;
+        label: string;
+        qty: number;
+        price: number;
+      }>;
+    };
+    settings?: {
+      dueDate?: string;
+      approvalFlow?: string;
+      sharing?: {
+        public: boolean;
+        token?: string;
+        allowComments: boolean;
+      };
+    };
+    signatories?: Array<{
+      id: string;
+      name: string;
+      email: string;
+      role?: string;
+      order?: number;
+    }>;
+    createdBy?: string;
+    createdAt?: number;
+    updatedAt?: number;
+    versions?: any[];
   }
 ): Promise<UpdateTemplateResult> {
   const token = getStoredToken();
