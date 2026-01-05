@@ -11,6 +11,9 @@ import {
   SidebarInset,
   SidebarRail,
   SidebarFooter,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
 } from "@/components/ui/sidebar";
 import { Fragment, ReactNode, useMemo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -28,10 +31,16 @@ import {
   LogOut,
 } from "lucide-react";
 
-interface NavItem {
+interface NavSubItem {
   href: string;
   label: string;
-  icon: React.ReactNode;
+}
+
+interface NavItem {
+  href?: string;
+  label: string;
+  icon?: React.ReactNode;
+  children?: NavSubItem[];
 }
 
 const navByRole: Record<UserRole, NavItem[]> = {
