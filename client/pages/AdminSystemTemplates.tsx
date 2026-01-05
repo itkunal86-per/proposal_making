@@ -305,6 +305,31 @@ export default function AdminSystemTemplates() {
             </div>
           </DialogContent>
         </Dialog>
+
+        <Dialog open={deleteConfirmId !== null} onOpenChange={(open) => !open && setDeleteConfirmId(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Delete Template</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete this template? This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex gap-3 justify-end pt-4">
+              <Button
+                variant="outline"
+                onClick={() => setDeleteConfirmId(null)}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => deleteConfirmId && onDelete(deleteConfirmId)}
+              >
+                Delete
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </section>
     </AppShell>
   );
