@@ -297,19 +297,34 @@ export default function ProposalEditor() {
                 </Select>
               )}
               <Select
-                value={p.status}
-                onValueChange={(v: ProposalStatus) =>
-                  commit({ ...p, status: v })
-                }
+                value={isSystemTemplateEdit ? (p.status === "draft" ? "Active" : "Inactive") : p.status}
+                onValueChange={(v) => {
+                  if (isSystemTemplateEdit) {
+                    // For system templates, map Active/Inactive to proposal status
+                    const newStatus = (v === "Active" ? "draft" : "sent") as ProposalStatus;
+                    commit({ ...p, status: newStatus });
+                  } else {
+                    commit({ ...p, status: v as ProposalStatus });
+                  }
+                }}
               >
                 <SelectTrigger className="w-40">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="draft">Draft</SelectItem>
-                  <SelectItem value="sent">Sent</SelectItem>
-                  <SelectItem value="accepted">Accepted</SelectItem>
-                  <SelectItem value="declined">Declined</SelectItem>
+                  {isSystemTemplateEdit ? (
+                    <>
+                      <SelectItem value="Active">Active</SelectItem>
+                      <SelectItem value="Inactive">Inactive</SelectItem>
+                    </>
+                  ) : (
+                    <>
+                      <SelectItem value="draft">Draft</SelectItem>
+                      <SelectItem value="sent">Sent</SelectItem>
+                      <SelectItem value="accepted">Accepted</SelectItem>
+                      <SelectItem value="declined">Declined</SelectItem>
+                    </>
+                  )}
                 </SelectContent>
               </Select>
             </div>
