@@ -470,6 +470,7 @@ export default function ProposalEditor() {
         onOpenAI={() => setAIDialogOpen(true)}
         onSelectPanel={setActivePanel}
         activePanel={activePanel}
+        isTemplateEdit={isSystemTemplateEdit}
       />
 
       <div className="flex-1 flex flex-col ml-16">
