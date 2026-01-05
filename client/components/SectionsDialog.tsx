@@ -31,14 +31,75 @@ export const SectionsDialog: React.FC<SectionsDialogProps> = ({
   currentSectionIndex,
   onSelectSection,
   onUpdateProposal,
+  isTemplateEdit = false,
 }) => {
   const [loading, setLoading] = useState(false);
   const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
 
+  // Local-only version for template edits (no API calls)
+  const addSectionLocal = (p: Proposal, title = "New Section", layout: SectionLayout = "single"): Proposal => {
+    const columnCount = layout === "two-column" ? 2 : layout === "three-column" ? 3 : 0;
+    const columnContents = columnCount > 0 ? Array(columnCount).fill("") : undefined;
+    const columnStyles = columnCount > 0 ? Array(columnCount).fill({
+      marginTop: 0,
+      marginRight: 0,
+      marginBottom: 0,
+      marginLeft: 0,
+    }) : undefined;
+    const titleStyles = columnCount > 0 ? { columnGap: 0 } : {};
+    const contentStyles = { gapAfter: 10 };
+
+    const newSection = {
+      id: uuid(),
+      title,
+      content: "",
+      layout,
+      columnContents,
+      columnStyles,
+      titleStyles,
+      contentStyles,
+      media: [],
+      shapes: [],
+      tables: [],
+      texts: [],
+      images: [],
+      comments: []
+    };
+
+    return {
+      ...p,
+      sections: [...p.sections, newSection],
+      updatedAt: Date.now(),
+    };
+  };
+
+  // Local-only version for template edits (no API calls)
+  const removeSectionLocal = (p: Proposal, id: string): Proposal => {
+    return {
+      ...p,
+      sections: p.sections.filter((s) => s.id !== id),
+      updatedAt: Date.now(),
+    };
+  };
+
+  // Local-only version for template edits (no API calls)
+  const reorderSectionLocal = (p: Proposal, from: number, to: number): Proposal => {
+    const sections = [...p.sections];
+    const [moved] = sections.splice(from, 1);
+    sections.splice(to, 0, moved);
+    return {
+      ...p,
+      sections,
+      updatedAt: Date.now(),
+    };
+  };
+
   const handleAddSection = async (title: string, layout: SectionLayout) => {
     try {
       setLoading(true);
-      const updated = await addSection(proposal, title, layout);
+      const updated = isTemplateEdit
+        ? addSectionLocal(proposal, title, layout)
+        : await addSection(proposal, title, layout);
       onUpdateProposal(updated);
       toast({ title: "Section added", description: `New ${layout} section has been created.` });
     } catch (error) {
@@ -53,7 +114,9 @@ export const SectionsDialog: React.FC<SectionsDialogProps> = ({
     try {
       setLoading(true);
       const id = proposal.sections[index].id;
-      const updated = await removeSection(proposal, id);
+      const updated = isTemplateEdit
+        ? removeSectionLocal(proposal, id)
+        : await removeSection(proposal, id);
       onUpdateProposal(updated);
       toast({ title: "Section deleted", description: "Section has been removed." });
     } catch (error) {
@@ -67,7 +130,9 @@ export const SectionsDialog: React.FC<SectionsDialogProps> = ({
   const handleReorderSection = async (from: number, to: number) => {
     try {
       setLoading(true);
-      const updated = await reorderSection(proposal, from, to);
+      const updated = isTemplateEdit
+        ? reorderSectionLocal(proposal, from, to)
+        : await reorderSection(proposal, from, to);
       onUpdateProposal(updated);
     } catch (error) {
       console.error("Error reordering section:", error);
