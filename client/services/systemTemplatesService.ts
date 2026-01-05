@@ -11,11 +11,8 @@ export interface SystemTemplate {
   status?: "Active" | "Inactive";
   createdAt?: number;
   updatedAt?: number;
-  sections?: Array<{
-    id: string;
-    title: string;
-    content: string;
-  }>;
+  createdBy?: string;
+  sections?: Array<any>;
 }
 
 export async function getSystemTemplateDetails(templateId: string): Promise<SystemTemplate | null> {
