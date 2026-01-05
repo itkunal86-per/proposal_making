@@ -12,7 +12,12 @@ import { Proposal, addSection, removeSection, reorderSection } from "@/services/
 import { SectionTemplateDialog, type SectionLayout } from "@/components/SectionTemplateDialog";
 import { ChevronUp, ChevronDown, Trash2, Plus } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { v4 as uuid } from "uuid";
+
+// Simple UUID generator (same as in proposalsService)
+function uuid() {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
+  return Math.random().toString(36).slice(2) + Date.now().toString(36);
+}
 
 interface SectionsDialogProps {
   open: boolean;
