@@ -115,16 +115,27 @@ export const SectionsDialog: React.FC<SectionsDialogProps> = ({
         ? addSectionLocal(proposal, title, layout)
         : await addSection(proposal, title, layout);
 
+      const newSection = updated.sections[updated.sections.length - 1];
+      const newSectionIndex = updated.sections.length - 1;
+
       console.log("✅ Section added:", {
-        newSection: updated.sections[updated.sections.length - 1],
+        newSection,
+        newSectionIndex,
         totalSections: updated.sections.length,
         sectionIds: updated.sections.map(s => s.id),
         isTemplateEdit,
       });
 
       onUpdateProposal(updated);
+
+      // Auto-select the newly added section's title element in the properties panel
+      if (onSelectElement && newSection) {
+        console.log("Auto-selecting section title:", `section-title-${newSection.id}`);
+        onSelectElement(`section-title-${newSection.id}`, "section-title");
+      }
+
       setTemplateDialogOpen(false);
-      toast({ title: "Section added", description: `New ${layout} section has been created. Click on it to edit.` });
+      toast({ title: "Section added", description: `New ${layout} section "${title}" created.` });
     } catch (error) {
       console.error("Error adding section:", error);
       toast({ title: "Error", description: "Failed to add section.", variant: "destructive" });
