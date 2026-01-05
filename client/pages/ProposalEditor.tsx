@@ -1000,6 +1000,7 @@ export default function ProposalEditor() {
         onOpenChange={setSectionsDialogOpen}
         proposal={p}
         currentSectionIndex={current}
+        isTemplateEdit={isSystemTemplateEdit}
         onSelectSection={(index) => {
           setCurrent(index);
           setSectionsDialogOpen(false);
