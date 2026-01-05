@@ -106,7 +106,7 @@ export const TemplatePreviewRenderer: React.FC<TemplatePreviewRendererProps> = (
           }}
         >
           <div className="truncate font-semibold text-sm">
-            {decodeHtmlEntities(proposal.title).replace(/<[^>]*>/g, '')}
+            {proposal.title?.replace(/<[^>]*>/g, '') || 'Untitled'}
           </div>
         </div>
       )}
