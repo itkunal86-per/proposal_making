@@ -94,6 +94,25 @@ export default function ProposalEditor() {
             console.log("API Response - templateData:", templateData);
             if (templateData) {
               // Convert SystemTemplate to Proposal format
+              // Ensure all section data is preserved exactly as received from API
+              const sectionsWithDefaults = (templateData.sections || []).map((s: any) => ({
+                id: s.id,
+                title: s.title || "",
+                content: s.content || "",
+                layout: s.layout || "",
+                columnContents: s.columnContents || [],
+                columnStyles: s.columnStyles || [],
+                media: s.media || [],
+                contentStyles: s.contentStyles || {},
+                titleStyles: s.titleStyles || {},
+                texts: s.texts || [],
+                shapes: s.shapes || [],
+                tables: s.tables || [],
+                images: s.images || [],
+                signatureFields: s.signatureFields || [],
+                comments: s.comments || [],
+              }));
+
               found = {
                 id: templateData.id,
                 title: templateData.title || "Untitled Template",
@@ -101,7 +120,7 @@ export default function ProposalEditor() {
                 createdBy: templateData.createdBy,
                 createdAt: templateData.createdAt,
                 updatedAt: templateData.updatedAt,
-                sections: templateData.sections as any,
+                sections: sectionsWithDefaults,
                 pricing: [],
                 settings: {},
                 signatories: [],
