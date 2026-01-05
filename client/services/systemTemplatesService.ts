@@ -114,6 +114,48 @@ export async function listSystemTemplates(): Promise<SystemTemplate[]> {
   }
 }
 
+export async function getActiveSystemTemplates(): Promise<SystemTemplate[]> {
+  const token = getStoredToken();
+  if (!token) {
+    console.error("No authentication token available");
+    return [];
+  }
+
+  try {
+    const response = await fetch(`${SYSTEM_TEMPLATES_ENDPOINT}/active`, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      console.error(`Failed to fetch active system templates: ${response.statusText}`);
+      return [];
+    }
+
+    const data = await response.json();
+
+    // The API might return templates as an array or wrapped in a data field
+    const templates = Array.isArray(data) ? data : (data?.data || data?.templates || []);
+
+    return templates.map((t: any) => ({
+      id: t.id || t.template_id || String(Math.random()),
+      title: t.title || t.name || "Untitled",
+      description: t.description || "",
+      content: t.content || "",
+      status: t.status || "Active",
+      createdAt: t.created_at ? new Date(t.created_at).getTime() : Date.now(),
+      updatedAt: t.updated_at ? new Date(t.updated_at).getTime() : Date.now(),
+      sections: t.sections || [],
+    }));
+  } catch (error) {
+    console.error("Error fetching active system templates:", error);
+    return [];
+  }
+}
+
 export interface CreateTemplateResult {
   success: boolean;
   data?: SystemTemplate;
