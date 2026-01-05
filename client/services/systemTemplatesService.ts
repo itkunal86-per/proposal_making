@@ -335,14 +335,27 @@ export function convertSystemTemplateToProposal(template: SystemTemplate): Propo
     id: template.id,
     title: template.title,
     client: "",
+    client_id: undefined,
     status: proposalStatus,
-    createdBy: "System",
+    createdBy: template.createdBy || "System",
     createdAt: template.createdAt || Date.now(),
     updatedAt: template.updatedAt || Date.now(),
     sections: template.sections?.map((s) => ({
       id: s.id,
       title: s.title,
       content: s.content,
+      layout: s.layout,
+      columnContents: s.columnContents,
+      columnStyles: s.columnStyles,
+      media: s.media,
+      contentStyles: s.contentStyles,
+      titleStyles: s.titleStyles,
+      texts: s.texts,
+      shapes: s.shapes,
+      images: s.images,
+      tables: s.tables,
+      signatureFields: s.signatureFields,
+      comments: s.comments,
       styling: {
         fontSize: 14,
         fontFamily: "Inter",
@@ -352,9 +365,9 @@ export function convertSystemTemplateToProposal(template: SystemTemplate): Propo
       },
     })) || [],
     pricing: {
+      currency: "$",
       items: [],
-      currencySymbol: "$",
-      showPricingTable: false,
+      taxRate: 0,
     },
     settings: {
       headerImage: undefined,
@@ -366,5 +379,7 @@ export function convertSystemTemplateToProposal(template: SystemTemplate): Propo
         allowComments: true,
       },
     },
+    versions: [],
+    signatories: [],
   };
 }
