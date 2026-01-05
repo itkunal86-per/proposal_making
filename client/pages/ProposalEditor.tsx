@@ -88,9 +88,34 @@ export default function ProposalEditor() {
             found = JSON.parse(storedData) as Proposal;
             console.log("Loaded system template from localStorage:", found);
           } else {
-            console.warn("Template data not found in localStorage");
-            nav("/admin/templates/system");
-            return;
+            // Fetch from API if not in localStorage
+            console.log("Template not in localStorage, fetching from API:", templateId);
+            const templateData = await getSystemTemplateDetails(templateId);
+            if (templateData) {
+              // Convert SystemTemplate to Proposal format
+              found = {
+                id: templateData.id,
+                title: templateData.title || "Untitled Template",
+                status: templateData.status === "Active" ? "sent" : "draft",
+                createdBy: templateData.createdBy || "0",
+                createdAt: templateData.createdAt || Date.now(),
+                updatedAt: templateData.updatedAt || Date.now(),
+                sections: (templateData.sections || []) as any,
+                pricing: [],
+                settings: {},
+                signatories: [],
+                versions: [],
+                client: null,
+                client_id: null,
+              };
+              console.log("Loaded system template from API:", found);
+              // Store in localStorage for future access
+              localStorage.setItem(`template_draft_${templateId}`, JSON.stringify(found));
+            } else {
+              console.warn("Failed to fetch template from API");
+              nav("/admin/templates/system");
+              return;
+            }
           }
         } else {
           // Load regular proposal from API
