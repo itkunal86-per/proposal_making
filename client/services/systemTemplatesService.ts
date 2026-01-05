@@ -107,6 +107,12 @@ export interface CreateTemplateResult {
   error?: string;
 }
 
+export interface UpdateTemplateResult {
+  success: boolean;
+  data?: SystemTemplate;
+  error?: string;
+}
+
 export async function createSystemTemplate(title: string): Promise<CreateTemplateResult> {
   const token = getStoredToken();
   if (!token) {
