@@ -4,13 +4,13 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
-import { listSystemTemplates, convertSystemTemplateToProposal, type SystemTemplate } from "@/services/systemTemplatesService";
+import { listSystemTemplates, convertSystemTemplateToProposal, createSystemTemplate, type SystemTemplate } from "@/services/systemTemplatesService";
 import { duplicateProposal, toggleShare, type Proposal } from "@/services/proposalsService";
 
 export default function AdminSystemTemplates() {
