@@ -122,13 +122,19 @@ export const SectionsDialog: React.FC<SectionsDialogProps> = ({
 
       onUpdateProposal(updated);
 
-      // Automatically select the newly added section (last one)
+      // Close the template dialog first (let the section list update)
+      setTemplateDialogOpen(false);
+
+      // Automatically select the newly added section (last one) after a brief delay to allow state to update
       const newSectionIndex = updated.sections.length - 1;
       const newSectionId = updated.sections[newSectionIndex].id;
       console.log("Selecting new section:", { index: newSectionIndex, id: newSectionId });
-      onSelectSection(newSectionIndex);
 
-      setTemplateDialogOpen(false);
+      // Use a small delay to ensure the state has updated before closing the dialog
+      setTimeout(() => {
+        onSelectSection(newSectionIndex);
+      }, 100);
+
       toast({ title: "Section added", description: `New ${layout} section has been created.` });
     } catch (error) {
       console.error("Error adding section:", error);
