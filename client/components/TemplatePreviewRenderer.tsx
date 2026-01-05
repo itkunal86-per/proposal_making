@@ -114,10 +114,10 @@ export const TemplatePreviewRenderer: React.FC<TemplatePreviewRendererProps> = (
         </div>
       )}
 
-      {/* Sections */}
-      <div className="px-4 py-3 space-y-3 overflow-hidden">
+      {/* Sections Content */}
+      <div className="px-3 py-2 space-y-2 overflow-hidden flex-1 overflow-y-auto">
         {proposal.sections?.slice(0, 2).map((section, sIdx) => (
-          <div key={section.id} className="space-y-2">
+          <div key={section.id} className="space-y-1">
             {/* Section Title */}
             {section.title && (
               <div className="text-xs font-semibold text-slate-900 line-clamp-1">
@@ -127,16 +127,10 @@ export const TemplatePreviewRenderer: React.FC<TemplatePreviewRendererProps> = (
 
             {/* Section Content */}
             {section.content && (
-              <div
-                className="text-xs text-slate-600 line-clamp-2"
-                style={{
-                  color: (section as any).contentStyles?.color || '#666',
-                  fontSize: `${((section as any).contentStyles?.fontSize || 14) / scale}px`,
-                }}
-              >
+              <div className="text-xs text-slate-600 line-clamp-2 leading-tight">
                 <div
                   dangerouslySetInnerHTML={{
-                    __html: decodeHtmlEntities(section.content).substring(0, 150) + '...',
+                    __html: decodeHtmlEntities(section.content).substring(0, 120) + '...',
                   }}
                 />
               </div>
@@ -144,11 +138,11 @@ export const TemplatePreviewRenderer: React.FC<TemplatePreviewRendererProps> = (
 
             {/* Images Preview */}
             {(section as any).images && (section as any).images.length > 0 && (
-              <div className="flex gap-1 pt-2">
+              <div className="flex gap-1 pt-1">
                 {(section as any).images.slice(0, 2).map((img: any, idx: number) => (
                   <div
                     key={idx}
-                    className="w-8 h-8 bg-slate-100 rounded border border-slate-200 overflow-hidden flex-shrink-0"
+                    className="w-6 h-6 bg-slate-100 rounded border border-slate-200 overflow-hidden flex-shrink-0"
                   >
                     <img
                       src={img.url}
@@ -168,19 +162,19 @@ export const TemplatePreviewRenderer: React.FC<TemplatePreviewRendererProps> = (
               </div>
             )}
 
-            {/* Canvas Elements (Shapes, Tables, Texts) */}
+            {/* Canvas Elements (Shapes, Tables, Texts) - Simplified preview */}
             {(section.shapes?.length || 0) + (section.tables?.length || 0) + ((section as any).texts?.length || 0) > 0 && (
               <div
-                className="relative bg-gray-50 rounded border border-slate-200 mt-2"
+                className="relative bg-gray-50 rounded border border-slate-200 mt-1"
                 style={{
-                  minHeight: `${canvasHeights[section.id] || 100}px`,
+                  height: `${canvasHeights[section.id] || 80}px`,
                   pointerEvents: 'none',
+                  fontSize: '10px',
                 }}
               >
                 {/* Shapes */}
-                {section.shapes && section.shapes.map((shape, shapeIdx) => {
-                  const backgroundOverlayOpacity = shape.backgroundImage && shape.backgroundOpacity ? (100 - parseInt(shape.backgroundOpacity || "100")) / 100 : 0;
-
+                {section.shapes && section.shapes.slice(0, 3).map((shape, shapeIdx) => {
+                  const scale = 0.25;
                   return (
                     <div
                       key={`shape-${shapeIdx}`}
@@ -195,7 +189,7 @@ export const TemplatePreviewRenderer: React.FC<TemplatePreviewRendererProps> = (
                         backgroundSize: shape.backgroundImage ? shape.backgroundSize : undefined,
                         backgroundPosition: "center",
                         backgroundRepeat: "no-repeat",
-                        borderWidth: shape.borderWidth ? `${shape.borderWidth * scale}px` : "0px",
+                        borderWidth: shape.borderWidth ? `${Math.max(shape.borderWidth * scale, 1)}px` : "0px",
                         borderColor: shape.borderColor,
                         borderStyle: shape.borderWidth ? "solid" : "none",
                         borderRadius: shape.type === 'circle' ? '50%' : shape.borderRadius ? `${shape.borderRadius * scale}px` : "0px",
@@ -204,76 +198,30 @@ export const TemplatePreviewRenderer: React.FC<TemplatePreviewRendererProps> = (
                   );
                 })}
 
-                {/* Tables */}
-                {section.tables && section.tables.map((table, tableIdx) => (
-                  <div
-                    key={`table-${tableIdx}`}
-                    style={{
-                      position: "absolute",
-                      left: `${table.left * scale}px`,
-                      top: `${table.top * scale}px`,
-                      transform: `scale(${scale})`,
-                      transformOrigin: 'top left',
-                      pointerEvents: 'auto',
-                    }}
-                  >
-                    <TableEditor
-                      id={`preview-table-${section.id}-${tableIdx}`}
-                      rows={table.rows}
-                      columns={table.columns}
-                      cells={table.cells}
-                      borderWidth={table.borderWidth}
-                      borderColor={table.borderColor}
-                      headerBackground={table.headerBackground}
-                      cellBackground={table.cellBackground}
-                      textColor={table.textColor}
-                      padding={table.padding}
-                      width={table.width}
-                      height={table.height}
-                      top={0}
-                      left={0}
-                      selected={false}
-                      onSelect={() => {}}
-                      onUpdate={() => {}}
-                    />
+                {/* Tables - Simplified */}
+                {section.tables && section.tables.slice(0, 1).map((table, tableIdx) => (
+                  <div key={`table-${tableIdx}`} className="text-xs text-slate-500 p-1">
+                    <div>Table: {table.rows || 0} rows × {table.columns || 0} cols</div>
                   </div>
                 ))}
 
                 {/* Texts */}
-                {(section as any).texts && (section as any).texts.map((text: any, textIdx: number) => (
+                {(section as any).texts && (section as any).texts.slice(0, 2).map((text: any, textIdx: number) => (
                   <div
                     key={`text-${textIdx}`}
                     style={{
                       position: "absolute",
-                      left: `${text.left * scale}px`,
-                      top: `${text.top * scale}px`,
-                      transform: `scale(${scale})`,
-                      transformOrigin: 'top left',
-                      pointerEvents: 'auto',
+                      left: `${text.left * 0.25}px`,
+                      top: `${text.top * 0.25}px`,
+                      width: `${text.width * 0.25}px`,
+                      fontSize: `${Math.max((text.fontSize || 12) * 0.25, 8)}px`,
+                      color: text.color || '#000',
+                      overflow: 'hidden',
+                      whiteSpace: 'nowrap',
+                      textOverflow: 'ellipsis',
                     }}
                   >
-                    <TextEditor
-                      id={`preview-text-${section.id}-${textIdx}`}
-                      content={text.content}
-                      top={0}
-                      left={0}
-                      width={text.width}
-                      fontSize={text.fontSize}
-                      color={text.color}
-                      fontWeight={text.fontWeight}
-                      backgroundColor={text.backgroundColor}
-                      backgroundOpacity={text.backgroundOpacity}
-                      borderColor={text.borderColor}
-                      borderWidth={text.borderWidth}
-                      borderRadius={text.borderRadius}
-                      paddingTop={text.paddingTop}
-                      paddingRight={text.paddingRight}
-                      paddingBottom={text.paddingBottom}
-                      paddingLeft={text.paddingLeft}
-                      selected={false}
-                      onSelect={() => {}}
-                      onUpdate={() => {}}
-                    />
+                    {text.content?.substring(0, 30) || ''}
                   </div>
                 ))}
               </div>
@@ -283,7 +231,7 @@ export const TemplatePreviewRenderer: React.FC<TemplatePreviewRendererProps> = (
 
         {/* Show indicator if more sections exist */}
         {proposal.sections && proposal.sections.length > 2 && (
-          <div className="text-xs text-muted-foreground pt-2">
+          <div className="text-xs text-muted-foreground pt-1">
             +{proposal.sections.length - 2} more section{proposal.sections.length - 2 !== 1 ? 's' : ''}
           </div>
         )}
