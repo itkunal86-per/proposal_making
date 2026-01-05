@@ -136,6 +136,12 @@ export default function ProposalEditor() {
   }, [id, nav, isSystemTemplateEdit, searchParams]);
 
   useEffect(() => {
+    // Skip variables fetch for system template edits
+    if (isSystemTemplateEdit) {
+      setVariables([]);
+      return;
+    }
+
     (async () => {
       setIsLoadingVariables(true);
       try {
@@ -164,7 +170,7 @@ export default function ProposalEditor() {
         setIsLoadingVariables(false);
       }
     })();
-  }, [id]);
+  }, [id, isSystemTemplateEdit]);
 
   // Fetch and sync signatories when proposal is loaded
   useEffect(() => {
