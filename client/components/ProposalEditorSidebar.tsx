@@ -11,6 +11,7 @@ interface ProposalEditorSidebarProps {
   onSelectPanel: (panel: PanelType) => void;
   activePanel: PanelType;
   proposalId: string;
+  isTemplateEdit?: boolean;
 }
 
 export const ProposalEditorSidebar: React.FC<ProposalEditorSidebarProps> = ({
