@@ -137,7 +137,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
                               location.pathname.startsWith(`${child.href}/`);
                             return (
                               <SidebarMenuSubItem key={child.href}>
-                                <SidebarMenuSubButton asChild isActive={childActive} className="text-white hover:text-white">
+                                <SidebarMenuSubButton asChild isActive={childActive} className="text-white hover:text-slate-900">
                                   <Link to={child.href}>{child.label}</Link>
                                 </SidebarMenuSubButton>
                               </SidebarMenuSubItem>
