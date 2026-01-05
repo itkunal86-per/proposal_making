@@ -253,21 +253,10 @@ export default function ProposalEditor() {
             updatedAt: Date.now(),
             versions: next.versions,
           };
-          console.log("Saving system template:", {
-            templateId,
-            title: updateData.title,
-            status: updateData.status,
-            sectionsCount: updateData.sections.length,
-            client: updateData.client,
-            hasPricing: !!updateData.pricing,
-            hasSignatories: (updateData.signatories?.length || 0) > 0,
-          });
           void updateSystemTemplate(templateId, updateData).then((result) => {
             if (result.success) {
-              console.log("✅ Template saved successfully");
               toast({ title: "Template saved successfully" });
             } else {
-              console.error("❌ Failed to save template:", result.error);
               toast({ title: result.error || "Failed to save template", variant: "destructive" });
             }
             setSaving(false);
