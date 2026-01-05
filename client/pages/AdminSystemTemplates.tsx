@@ -52,29 +52,25 @@ export default function AdminSystemTemplates() {
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const pageRows = filtered.slice((page - 1) * pageSize, page * pageSize);
 
-  async function onDuplicate(template: SystemTemplate) {
+  async function onEdit(template: SystemTemplate) {
     try {
       const proposal = convertSystemTemplateToProposal(template);
-      const duplicated = await duplicateProposal(proposal.id);
-      if (duplicated) {
-        toast({ title: "Template duplicated successfully" });
-        nav(`/proposals/${duplicated.id}/edit`);
-      } else {
-        toast({ title: "Failed to duplicate template", variant: "destructive" });
-      }
+      const created = await createProposal(proposal);
+      toast({ title: "Template opened for editing" });
+      nav(`/proposals/${created.id}/edit`);
     } catch (error) {
-      toast({ title: "Error duplicating template", variant: "destructive" });
+      toast({ title: "Error opening template", variant: "destructive" });
     }
   }
 
-  async function onExportPDF(template: SystemTemplate) {
+  async function onDelete(id: string) {
     try {
-      const proposal = convertSystemTemplateToProposal(template);
-      const shared = await toggleShare(proposal, true);
-      const url = `${window.location.origin}/p/${shared.settings.sharing.token}?print=1`;
-      window.open(url, "_blank");
+      await deleteProposal(id);
+      toast({ title: "Template deleted successfully" });
+      setDeleteConfirmId(null);
+      await refreshTemplates();
     } catch (error) {
-      toast({ title: "Error exporting PDF", variant: "destructive" });
+      toast({ title: "Error deleting template", variant: "destructive" });
     }
   }
 
