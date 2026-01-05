@@ -486,6 +486,13 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
 
       <div className="border-t">
         {proposal.sections.map((section, index) => {
+          console.log("Rendering section:", {
+            index,
+            id: section.id,
+            title: section.title,
+            layout: section.layout,
+            hasTitle: !!section.title,
+          });
           const isMultiColumn = section.layout === "two-column" || section.layout === "three-column";
           const columnGapValue = typeof (section as any).titleStyles?.columnGap === "number" && (section as any).titleStyles.columnGap !== 24 ? (section as any).titleStyles.columnGap : 0;
           const gapAfterValue = typeof (section as any).contentStyles?.gapAfter === "number" ? (section as any).contentStyles.gapAfter : 10;
