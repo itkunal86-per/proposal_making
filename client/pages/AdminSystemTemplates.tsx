@@ -187,16 +187,25 @@ export default function AdminSystemTemplates() {
                         )}
                       </TableCell>
                       <TableCell>{new Date(t.updatedAt || Date.now()).toLocaleString()}</TableCell>
-                      <TableCell className="text-right space-x-1 whitespace-nowrap">
-                        <Button variant="outline" size="sm" onClick={() => setPreview(convertSystemTemplateToProposal(t))}>
-                          Preview
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={() => onDuplicate(t)}>
-                          Duplicate
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={() => onExportPDF(t)}>
-                          Export PDF
-                        </Button>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => onEdit(t)}>
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setPreview(convertSystemTemplateToProposal(t))}>
+                              Preview
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setDeleteConfirmId(t.id)} className="text-red-600">
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </TableCell>
                     </TableRow>
                   ))}
