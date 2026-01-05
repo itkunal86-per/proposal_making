@@ -20,6 +20,7 @@ import {
   persistProposal,
   valueTotal,
 } from "@/services/proposalsService";
+import { updateSystemTemplate, type SystemTemplate } from "@/services/systemTemplatesService";
 import { type ClientRecord, listClients } from "@/services/clientsService";
 import { ProposalPreview } from "@/components/ProposalPreview";
 import { ProposalPreviewModal } from "@/components/ProposalPreviewModal";
