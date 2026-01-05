@@ -26,20 +26,31 @@ export const TemplateSelectionModal: React.FC<TemplateSelectionModalProps> = ({
 }) => {
   const [templates, setTemplates] = useState<SystemTemplate[]>([]);
   const [loadingTemplates, setLoadingTemplates] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (open) {
+      setLoadingTemplates(true);
+      setError(null);
+      setTemplates([]);
       loadTemplates();
     }
   }, [open]);
 
   async function loadTemplates() {
     setLoadingTemplates(true);
+    setError(null);
     try {
+      console.log("Loading active system templates...");
       const activeTemplates = await getActiveSystemTemplates();
+      console.log("Loaded templates:", activeTemplates);
       setTemplates(activeTemplates);
+      if (activeTemplates.length === 0) {
+        console.warn("No active templates returned from API");
+      }
     } catch (error) {
       console.error("Error loading templates:", error);
+      setError(error instanceof Error ? error.message : "Failed to load templates");
       setTemplates([]);
     } finally {
       setLoadingTemplates(false);
