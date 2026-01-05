@@ -71,6 +71,13 @@ export const SectionsDialog: React.FC<SectionsDialogProps> = ({
       comments: []
     };
 
+    console.log("addSectionLocal: Creating new section:", {
+      sectionId: newSection.id,
+      title,
+      layout,
+      columnCount
+    });
+
     return {
       ...p,
       sections: [...p.sections, newSection],
