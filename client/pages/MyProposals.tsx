@@ -638,6 +638,48 @@ export default function MyProposals() {
         onSelectTemplate={handleTemplateSelected}
         isLoading={isCreating}
       />
+
+      <Dialog open={saveTemplateDialogOpen} onOpenChange={setSaveTemplateDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Save as Template</DialogTitle>
+            <DialogDescription>
+              Enter a name for this template.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="template-name" className="text-sm font-medium">
+                Template Name <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="template-name"
+                placeholder="e.g., Standard Proposal Template"
+                value={templateName}
+                onChange={(e) => setTemplateName(e.target.value)}
+                disabled={isSavingTemplate}
+              />
+            </div>
+
+            <div className="flex gap-3 justify-end pt-4">
+              <Button
+                variant="outline"
+                onClick={() => setSaveTemplateDialogOpen(false)}
+                disabled={isSavingTemplate}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={confirmSaveTemplate}
+                disabled={isSavingTemplate || !templateName.trim()}
+              >
+                {isSavingTemplate ? "Saving..." : "Save Template"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </AppShell>
   );
 }
