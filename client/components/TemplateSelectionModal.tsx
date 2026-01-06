@@ -120,9 +120,17 @@ export const TemplateSelectionModal: React.FC<TemplateSelectionModalProps> = ({
                   >
                     {/* Template Preview Area */}
                     <div className="bg-white border-b overflow-hidden flex-shrink-0" style={{ height: "250px" }}>
-                      <TemplatePreviewRenderer
-                        template={proposalForPreview}
-                      />
+                      {template.preview_image ? (
+                        <img
+                          src={template.preview_image}
+                          alt={`${template.title} preview`}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <TemplatePreviewRenderer
+                          template={proposalForPreview}
+                        />
+                      )}
                     </div>
 
                     {/* Template Info Footer */}
