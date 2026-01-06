@@ -17,6 +17,7 @@ import { createProposal, type Proposal } from "@/services/proposalsService";
 
 export default function AdminSystemTemplates() {
   const nav = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [templates, setTemplates] = useState<SystemTemplate[]>([]);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -28,6 +29,9 @@ export default function AdminSystemTemplates() {
   const [createError, setCreateError] = useState("");
   const [templateTitle, setTemplateTitle] = useState("");
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [previewImageTemplateId, setPreviewImageTemplateId] = useState<string | null>(null);
+  const [previewImageUpload, setPreviewImageUpload] = useState<File | null>(null);
+  const [isUploadingPreviewImage, setIsUploadingPreviewImage] = useState(false);
 
   useEffect(() => {
     refreshTemplates();
