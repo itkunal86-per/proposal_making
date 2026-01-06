@@ -385,6 +385,76 @@ export async function deleteSystemTemplate(templateId: string): Promise<DeleteTe
   }
 }
 
+export async function copyProposalFromTemplate(templateId: string, proposalId: string): Promise<Proposal | null> {
+  const token = getStoredToken();
+  if (!token) {
+    console.error("No authentication token available");
+    return null;
+  }
+
+  try {
+    const response = await fetch("https://propai-api.hirenq.com/api/proposal/copy-from-template", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        template_id: templateId,
+        proposal_id: proposalId,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error(`Failed to copy proposal from template: ${response.statusText}`, errorData);
+      return null;
+    }
+
+    const data = await response.json();
+    console.log("copyProposalFromTemplate - API response:", data);
+
+    // The response should contain proposal details
+    // Map the response to our Proposal type
+    if (!data.id) {
+      console.error("Invalid response from copy-from-template API", data);
+      return null;
+    }
+
+    const proposal: Proposal = {
+      id: data.id,
+      title: data.title || "Untitled",
+      client: data.client || "",
+      client_id: data.client_id,
+      status: data.status || "draft",
+      createdBy: data.createdBy || data.created_by || "System",
+      createdAt: data.createdAt || (data.created_at ? new Date(data.created_at).getTime() : Date.now()),
+      updatedAt: data.updatedAt || (data.updated_at ? new Date(data.updated_at).getTime() : Date.now()),
+      sections: data.sections || [],
+      pricing: data.pricing || {
+        currency: "$",
+        items: [],
+        taxRate: 0,
+      },
+      settings: data.settings || {
+        approvalFlow: "Single approver",
+        sharing: {
+          public: false,
+          token: undefined,
+          allowComments: true,
+        },
+      },
+      versions: data.versions || [],
+      signatories: data.signatories || [],
+    };
+
+    return proposal;
+  } catch (error) {
+    console.error("Error copying proposal from template:", error);
+    return null;
+  }
+}
+
 export function convertSystemTemplateToProposal(template: SystemTemplate): Proposal {
   // Map system template status to proposal status
   // Active -> draft, Inactive -> sent
