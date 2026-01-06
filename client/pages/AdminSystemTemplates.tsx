@@ -275,6 +275,7 @@ export default function AdminSystemTemplates() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-16">Preview</TableHead>
                     <TableHead>Title</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Last Updated</TableHead>
@@ -284,6 +285,19 @@ export default function AdminSystemTemplates() {
                 <TableBody>
                   {pageRows.map((t) => (
                     <TableRow key={t.id} className="hover:bg-muted/40">
+                      <TableCell>
+                        {t.preview_image ? (
+                          <img
+                            src={t.preview_image}
+                            alt={`${t.title} preview`}
+                            className="h-10 w-10 object-cover rounded"
+                          />
+                        ) : (
+                          <div className="h-10 w-10 bg-muted rounded flex items-center justify-center text-xs text-muted-foreground">
+                            —
+                          </div>
+                        )}
+                      </TableCell>
                       <TableCell className="font-medium">{t.title}</TableCell>
                       <TableCell>
                         {t.status === "Active" && (
