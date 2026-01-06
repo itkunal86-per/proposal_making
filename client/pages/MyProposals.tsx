@@ -262,6 +262,52 @@ export default function MyProposals() {
     }
   }
 
+  async function onSaveAsTemplate(proposalId: string) {
+    try {
+      const proposal = rows.find((p) => p.id === proposalId);
+      if (!proposal) {
+        toast({ title: "Proposal not found", variant: "destructive" });
+        return;
+      }
+      setProposalToSave(proposal);
+      setTemplateName(proposal.title);
+      setSaveTemplateDialogOpen(true);
+    } catch (error) {
+      toast({ title: "Error preparing template", variant: "destructive" });
+    }
+  }
+
+  async function confirmSaveTemplate() {
+    if (!proposalToSave || !templateName.trim()) {
+      toast({ title: "Please enter a template name", variant: "destructive" });
+      return;
+    }
+
+    try {
+      setIsSavingTemplate(true);
+      const template = await saveProposalAsTemplate(proposalToSave, templateName);
+      if (template) {
+        toast({
+          title: "Success",
+          description: "Proposal saved as template successfully",
+        });
+        setSaveTemplateDialogOpen(false);
+        setProposalToSave(null);
+        setTemplateName("");
+      } else {
+        toast({ title: "Failed to save template", variant: "destructive" });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to save template",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSavingTemplate(false);
+    }
+  }
+
   return (
     <AppShell>
       <section className="container py-8 px-4 lg:px-8">
