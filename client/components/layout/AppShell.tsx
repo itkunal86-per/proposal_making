@@ -260,6 +260,7 @@ function formatSegmentLabel(segment: string, index: number) {
     view: "View",
     invite: "Invite",
     p: "Proposal",
+    t: "Template",
   };
 
   const normalized = segment.toLowerCase();
