@@ -28,7 +28,7 @@ import { type ClientRecord, listClients } from "@/services/clientsService";
 import { GenerateProposalDialog } from "@/components/GenerateProposalDialog";
 import { ProposalPreviewModal } from "@/components/ProposalPreviewModal";
 import { TemplateSelectionModal } from "@/components/TemplateSelectionModal";
-import { convertSystemTemplateToProposal, type SystemTemplate, copyProposalFromTemplate } from "@/services/systemTemplatesService";
+import { convertSystemTemplateToProposal, type SystemTemplate, copyProposalFromTemplate, saveProposalAsTemplate } from "@/services/systemTemplatesService";
 import { Wand2, MoreVertical, FileText } from "lucide-react";
 
 const statusStyles: Record<string, string> = {
@@ -59,6 +59,10 @@ export default function MyProposals() {
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
   const [newProposalId, setNewProposalId] = useState<string | null>(null);
   const [showTemplateSelection, setShowTemplateSelection] = useState(false);
+  const [saveTemplateDialogOpen, setSaveTemplateDialogOpen] = useState(false);
+  const [templateName, setTemplateName] = useState("");
+  const [proposalToSave, setProposalToSave] = useState<Proposal | null>(null);
+  const [isSavingTemplate, setIsSavingTemplate] = useState(false);
   const [formData, setFormData] = useState<CreateProposalInput>({
     title: "",
     client_id: "",
@@ -258,6 +262,52 @@ export default function MyProposals() {
     }
   }
 
+  async function onSaveAsTemplate(proposalId: string) {
+    try {
+      const proposal = rows.find((p) => p.id === proposalId);
+      if (!proposal) {
+        toast({ title: "Proposal not found", variant: "destructive" });
+        return;
+      }
+      setProposalToSave(proposal);
+      setTemplateName(proposal.title);
+      setSaveTemplateDialogOpen(true);
+    } catch (error) {
+      toast({ title: "Error preparing template", variant: "destructive" });
+    }
+  }
+
+  async function confirmSaveTemplate() {
+    if (!proposalToSave || !templateName.trim()) {
+      toast({ title: "Please enter a template name", variant: "destructive" });
+      return;
+    }
+
+    try {
+      setIsSavingTemplate(true);
+      const template = await saveProposalAsTemplate(proposalToSave, templateName);
+      if (template) {
+        toast({
+          title: "Success",
+          description: "Proposal saved as template successfully",
+        });
+        setSaveTemplateDialogOpen(false);
+        setProposalToSave(null);
+        setTemplateName("");
+      } else {
+        toast({ title: "Failed to save template", variant: "destructive" });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to save template",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSavingTemplate(false);
+    }
+  }
+
   return (
     <AppShell>
       <section className="container py-8 px-4 lg:px-8">
@@ -380,6 +430,12 @@ export default function MyProposals() {
                               className="cursor-pointer"
                             >
                               Duplicate
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => onSaveAsTemplate(proposal.id)}
+                              className="cursor-pointer"
+                            >
+                              Save as Template
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
@@ -582,6 +638,48 @@ export default function MyProposals() {
         onSelectTemplate={handleTemplateSelected}
         isLoading={isCreating}
       />
+
+      <Dialog open={saveTemplateDialogOpen} onOpenChange={setSaveTemplateDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Save as Template</DialogTitle>
+            <DialogDescription>
+              Enter a name for this template.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="template-name" className="text-sm font-medium">
+                Template Name <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="template-name"
+                placeholder="e.g., Standard Proposal Template"
+                value={templateName}
+                onChange={(e) => setTemplateName(e.target.value)}
+                disabled={isSavingTemplate}
+              />
+            </div>
+
+            <div className="flex gap-3 justify-end pt-4">
+              <Button
+                variant="outline"
+                onClick={() => setSaveTemplateDialogOpen(false)}
+                disabled={isSavingTemplate}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={confirmSaveTemplate}
+                disabled={isSavingTemplate || !templateName.trim()}
+              >
+                {isSavingTemplate ? "Saving..." : "Save Template"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </AppShell>
   );
 }

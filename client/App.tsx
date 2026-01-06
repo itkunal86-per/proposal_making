@@ -26,6 +26,7 @@ import AdminClientTemplates from "./pages/AdminClientTemplates";
 import AdminSettings from "./pages/AdminSettings";
 import AdminUsers from "./pages/AdminUsers";
 import MyProposals from "./pages/MyProposals";
+import MyTemplates from "./pages/MyTemplates";
 import MyClients from "./pages/MyClients";
 import Integrations from "./pages/Integrations";
 import SubscriberSettings from "./pages/SubscriberSettings";
@@ -69,6 +70,7 @@ const App = () => (
 
                 <Route element={<RequireRole roles={["subscriber"]} />}>
                   <Route path="/my/proposals" element={<MyProposals />} />
+                  <Route path="/my/templates" element={<MyTemplates />} />
                   <Route path="/my/clients" element={<MyClients />} />
                   <Route path="/integrations" element={<Integrations />} />
                   <Route path="/my/settings" element={<SubscriberSettings />} />

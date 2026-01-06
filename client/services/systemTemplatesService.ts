@@ -510,3 +510,53 @@ export function convertSystemTemplateToProposal(template: SystemTemplate): Propo
     signatories: [],
   };
 }
+
+export async function saveProposalAsTemplate(proposalData: any, templateTitle: string): Promise<SystemTemplate | null> {
+  const token = getStoredToken();
+  if (!token) {
+    console.error("No authentication token available");
+    return null;
+  }
+
+  try {
+    const response = await fetch(SYSTEM_TEMPLATES_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        title: templateTitle.trim(),
+        sections: proposalData.sections || [],
+        pricing: proposalData.pricing || {},
+        settings: proposalData.settings || {},
+        signatories: proposalData.signatories || [],
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error(`Failed to save template: ${response.statusText}`, errorData);
+      return null;
+    }
+
+    const data = await response.json();
+
+    const template: SystemTemplate = {
+      id: data.id || String(Math.random()),
+      title: data.title || templateTitle,
+      description: data.description || "",
+      content: data.content || "",
+      status: data.status || "Active",
+      createdAt: data.created_at ? new Date(data.created_at).getTime() : Date.now(),
+      updatedAt: data.updated_at ? new Date(data.updated_at).getTime() : Date.now(),
+      sections: data.sections || [],
+      preview_image: data.preview_image,
+    };
+
+    return template;
+  } catch (error) {
+    console.error("Error saving proposal as template:", error);
+    return null;
+  }
+}
