@@ -13,6 +13,7 @@ export interface SystemTemplate {
   updatedAt?: number;
   createdBy?: string;
   sections?: Array<any>;
+  preview_image?: string;
 }
 
 export async function getSystemTemplateDetails(templateId: string): Promise<SystemTemplate | null> {
@@ -49,6 +50,7 @@ export async function getSystemTemplateDetails(templateId: string): Promise<Syst
       createdAt: data.createdAt || (data.created_at ? new Date(data.created_at).getTime() : Date.now()),
       updatedAt: data.updatedAt || (data.updated_at ? new Date(data.updated_at).getTime() : Date.now()),
       sections: data.sections || [],
+      preview_image: data.preview_image,
     };
 
     console.log("getSystemTemplateDetails - Processed template:", {
@@ -107,6 +109,7 @@ export async function listSystemTemplates(): Promise<SystemTemplate[]> {
       createdAt: t.created_at ? new Date(t.created_at).getTime() : Date.now(),
       updatedAt: t.updated_at ? new Date(t.updated_at).getTime() : Date.now(),
       sections: t.sections || [],
+      preview_image: t.preview_image,
     }));
   } catch (error) {
     console.error("Error fetching system templates:", error);
@@ -157,6 +160,7 @@ export async function getActiveSystemTemplates(): Promise<SystemTemplate[]> {
       createdAt: t.created_at ? new Date(t.created_at).getTime() : Date.now(),
       updatedAt: t.updated_at ? new Date(t.updated_at).getTime() : Date.now(),
       sections: t.sections || [],
+      preview_image: t.preview_image,
     }));
 
     console.log("getActiveSystemTemplates: Returning templates:", result);
@@ -220,6 +224,7 @@ export async function createSystemTemplate(title: string): Promise<CreateTemplat
       createdAt: data.created_at ? new Date(data.created_at).getTime() : Date.now(),
       updatedAt: data.updated_at ? new Date(data.updated_at).getTime() : Date.now(),
       sections: data.sections || [],
+      preview_image: data.preview_image,
     };
 
     return {
@@ -320,6 +325,7 @@ export async function updateSystemTemplate(
       createdAt: responseData.createdAt || (responseData.created_at ? new Date(responseData.created_at).getTime() : Date.now()),
       updatedAt: responseData.updatedAt || (responseData.updated_at ? new Date(responseData.updated_at).getTime() : Date.now()),
       sections: responseData.sections || [],
+      preview_image: responseData.preview_image,
     };
 
     return {
@@ -376,6 +382,76 @@ export async function deleteSystemTemplate(templateId: string): Promise<DeleteTe
       success: false,
       error: "Network error. Please try again.",
     };
+  }
+}
+
+export async function copyProposalFromTemplate(templateId: string, proposalId: string): Promise<Proposal | null> {
+  const token = getStoredToken();
+  if (!token) {
+    console.error("No authentication token available");
+    return null;
+  }
+
+  try {
+    const response = await fetch("https://propai-api.hirenq.com/api/proposal/copy-from-template", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        template_id: templateId,
+        proposal_id: proposalId,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error(`Failed to copy proposal from template: ${response.statusText}`, errorData);
+      return null;
+    }
+
+    const data = await response.json();
+    console.log("copyProposalFromTemplate - API response:", data);
+
+    // The response should contain proposal details
+    // Map the response to our Proposal type
+    if (!data.id) {
+      console.error("Invalid response from copy-from-template API", data);
+      return null;
+    }
+
+    const proposal: Proposal = {
+      id: data.id,
+      title: data.title || "Untitled",
+      client: data.client || "",
+      client_id: data.client_id,
+      status: data.status || "draft",
+      createdBy: data.createdBy || data.created_by || "System",
+      createdAt: data.createdAt || (data.created_at ? new Date(data.created_at).getTime() : Date.now()),
+      updatedAt: data.updatedAt || (data.updated_at ? new Date(data.updated_at).getTime() : Date.now()),
+      sections: data.sections || [],
+      pricing: data.pricing || {
+        currency: "$",
+        items: [],
+        taxRate: 0,
+      },
+      settings: data.settings || {
+        approvalFlow: "Single approver",
+        sharing: {
+          public: false,
+          token: undefined,
+          allowComments: true,
+        },
+      },
+      versions: data.versions || [],
+      signatories: data.signatories || [],
+    };
+
+    return proposal;
+  } catch (error) {
+    console.error("Error copying proposal from template:", error);
+    return null;
   }
 }
 

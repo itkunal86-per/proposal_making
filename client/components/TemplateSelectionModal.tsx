@@ -9,7 +9,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
-import { getActiveSystemTemplates, type SystemTemplate } from "@/services/systemTemplatesService";
+import { getActiveSystemTemplates, type SystemTemplate, convertSystemTemplateToProposal } from "@/services/systemTemplatesService";
+import { TemplatePreviewRenderer } from "@/components/TemplatePreviewRenderer";
 
 interface TemplateSelectionModalProps {
   open: boolean;
@@ -109,11 +110,7 @@ export const TemplateSelectionModal: React.FC<TemplateSelectionModalProps> = ({
             {/* Template Cards */}
             {templates.length > 0 ? (
               templates.map((template) => {
-                const firstSection = template.sections?.[0];
-                const previewText = firstSection?.content ||
-                  (firstSection?.texts?.[0]?.content ?
-                    firstSection.texts[0].content.replace(/<[^>]*>/g, '') :
-                    "");
+                const proposalForPreview = convertSystemTemplateToProposal(template);
 
                 return (
                   <Card
@@ -122,46 +119,18 @@ export const TemplateSelectionModal: React.FC<TemplateSelectionModalProps> = ({
                     onClick={() => handleSelectTemplate(template)}
                   >
                     {/* Template Preview Area */}
-                    <div className="bg-white border-b p-4 min-h-[200px] flex flex-col relative">
-                      {/* White background for proposal-like preview */}
-                      <div className="absolute inset-0 bg-white"></div>
-
-                      <div className="relative z-10 flex flex-col h-full">
-                        {/* Section Title */}
-                        {firstSection?.title && (
-                          <h4 className="font-semibold text-sm text-slate-900 mb-2">
-                            {firstSection.title}
-                          </h4>
-                        )}
-
-                        {/* Preview Content */}
-                        <div className="text-xs text-slate-600 line-clamp-4 flex-1 leading-relaxed">
-                          {previewText ? (
-                            <p>{previewText.substring(0, 200)}{previewText.length > 200 ? '...' : ''}</p>
-                          ) : (
-                            <p className="text-muted-foreground italic">No content preview</p>
-                          )}
-                        </div>
-
-                        {/* Images Preview */}
-                        {firstSection?.images && firstSection.images.length > 0 && (
-                          <div className="mt-2 flex gap-1">
-                            {firstSection.images.slice(0, 2).map((img: any, idx: number) => (
-                              <div
-                                key={idx}
-                                className="w-12 h-12 bg-slate-100 rounded border border-slate-200 overflow-hidden text-xs flex items-center justify-center"
-                              >
-                                <span className="text-slate-400">🖼️</span>
-                              </div>
-                            ))}
-                            {firstSection.images.length > 2 && (
-                              <div className="text-xs text-muted-foreground flex items-center">
-                                +{firstSection.images.length - 2} more
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
+                    <div className="bg-white border-b overflow-hidden flex-shrink-0" style={{ height: "250px" }}>
+                      {template.preview_image ? (
+                        <img
+                          src={template.preview_image}
+                          alt={`${template.title} preview`}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <TemplatePreviewRenderer
+                          template={proposalForPreview}
+                        />
+                      )}
                     </div>
 
                     {/* Template Info Footer */}

@@ -28,7 +28,7 @@ import { type ClientRecord, listClients } from "@/services/clientsService";
 import { GenerateProposalDialog } from "@/components/GenerateProposalDialog";
 import { ProposalPreviewModal } from "@/components/ProposalPreviewModal";
 import { TemplateSelectionModal } from "@/components/TemplateSelectionModal";
-import { convertSystemTemplateToProposal, type SystemTemplate } from "@/services/systemTemplatesService";
+import { convertSystemTemplateToProposal, type SystemTemplate, copyProposalFromTemplate } from "@/services/systemTemplatesService";
 import { Wand2, MoreVertical, FileText } from "lucide-react";
 
 const statusStyles: Record<string, string> = {
@@ -174,17 +174,23 @@ export default function MyProposals() {
 
     try {
       if (template) {
-        // Convert template to proposal and apply it
-        const templateProposal = convertSystemTemplateToProposal(template);
-        const updatedProposal: Proposal = {
-          ...templateProposal,
-          id: newProposalId,
-          title: formData.title || templateProposal.title,
-          client: formData.client_id ? formData.client_id : "",
-        };
+        // Call API to copy proposal from template
+        const copiedProposal = await copyProposalFromTemplate(String(template.id), newProposalId);
 
-        await updateProposal(updatedProposal);
-        await persistProposal(updatedProposal);
+        if (!copiedProposal) {
+          throw new Error("Failed to copy proposal from template");
+        }
+
+        toast({
+          title: "Success",
+          description: "Template applied successfully",
+        });
+      } else {
+        // Custom design - no template applied
+        toast({
+          title: "Ready to create",
+          description: "Start designing your proposal",
+        });
       }
 
       // Navigate to editor
@@ -194,7 +200,7 @@ export default function MyProposals() {
       console.error("Error applying template:", error);
       toast({
         title: "Error",
-        description: "Failed to apply template",
+        description: error instanceof Error ? error.message : "Failed to apply template",
         variant: "destructive",
       });
       nav(`/proposals/${newProposalId}/edit`);
