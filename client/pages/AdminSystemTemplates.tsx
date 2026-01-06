@@ -276,6 +276,10 @@ export default function AdminSystemTemplates() {
                             <DropdownMenuItem onClick={() => setPreview(convertSystemTemplateToProposal(t))}>
                               Preview
                             </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => onAddPreviewImage(t.id)}>
+                              <Upload className="h-4 w-4 mr-2" />
+                              Add Preview Image
+                            </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => setDeleteConfirmId(t.id)} className="text-red-600">
                               Delete
                             </DropdownMenuItem>
