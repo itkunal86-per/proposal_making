@@ -28,7 +28,7 @@ import { type ClientRecord, listClients } from "@/services/clientsService";
 import { GenerateProposalDialog } from "@/components/GenerateProposalDialog";
 import { ProposalPreviewModal } from "@/components/ProposalPreviewModal";
 import { TemplateSelectionModal } from "@/components/TemplateSelectionModal";
-import { convertSystemTemplateToProposal, type SystemTemplate, copyProposalFromTemplate } from "@/services/systemTemplatesService";
+import { convertSystemTemplateToProposal, type SystemTemplate, copyProposalFromTemplate, saveProposalAsTemplate } from "@/services/systemTemplatesService";
 import { Wand2, MoreVertical, FileText } from "lucide-react";
 
 const statusStyles: Record<string, string> = {
