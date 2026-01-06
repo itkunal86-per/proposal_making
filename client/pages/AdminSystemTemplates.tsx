@@ -10,8 +10,8 @@ import { Separator } from "@/components/ui/separator";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useMemo, useState } from "react";
-import { MoreHorizontal } from "lucide-react";
+import { useEffect, useMemo, useState, useRef } from "react";
+import { MoreHorizontal, Upload } from "lucide-react";
 import { listSystemTemplates, convertSystemTemplateToProposal, createSystemTemplate, getSystemTemplateDetails, deleteSystemTemplate, type SystemTemplate } from "@/services/systemTemplatesService";
 import { createProposal, type Proposal } from "@/services/proposalsService";
 
