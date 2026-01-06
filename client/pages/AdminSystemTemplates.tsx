@@ -120,6 +120,62 @@ export default function AdminSystemTemplates() {
     }
   }
 
+  function onAddPreviewImage(templateId: string) {
+    setPreviewImageTemplateId(templateId);
+    setPreviewImageUpload(null);
+  }
+
+  function handlePreviewImageSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast({ title: "Please select an image file", variant: "destructive" });
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({ title: "Image must be less than 5MB", variant: "destructive" });
+        return;
+      }
+
+      setPreviewImageUpload(file);
+    }
+  }
+
+  async function handleUploadPreviewImage() {
+    if (!previewImageUpload || !previewImageTemplateId) {
+      toast({ title: "Please select an image", variant: "destructive" });
+      return;
+    }
+
+    setIsUploadingPreviewImage(true);
+
+    try {
+      // TODO: Replace with actual API endpoint for uploading preview image
+      // For now, we'll show a placeholder implementation
+      const formData = new FormData();
+      formData.append('file', previewImageUpload);
+      formData.append('templateId', previewImageTemplateId);
+
+      // Mock upload - replace with actual API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      toast({ title: "Preview image uploaded successfully" });
+      setPreviewImageTemplateId(null);
+      setPreviewImageUpload(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    } catch (error) {
+      console.error("Error uploading preview image:", error);
+      toast({ title: "Failed to upload preview image", variant: "destructive" });
+    } finally {
+      setIsUploadingPreviewImage(false);
+    }
+  }
+
   if (isLoading) {
     return (
       <AppShell>
