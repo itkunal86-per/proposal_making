@@ -431,6 +431,12 @@ export default function MyProposals() {
                             >
                               Duplicate
                             </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => onSaveAsTemplate(proposal.id)}
+                              className="cursor-pointer"
+                            >
+                              Save as Template
+                            </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
                               onClick={() => onDeleteClick(proposal.id)}
