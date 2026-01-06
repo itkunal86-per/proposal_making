@@ -14,6 +14,7 @@ import { useEffect, useMemo, useState, useRef } from "react";
 import { MoreHorizontal, Upload } from "lucide-react";
 import { listSystemTemplates, convertSystemTemplateToProposal, createSystemTemplate, getSystemTemplateDetails, deleteSystemTemplate, type SystemTemplate } from "@/services/systemTemplatesService";
 import { createProposal, type Proposal } from "@/services/proposalsService";
+import { getStoredToken } from "@/lib/auth";
 
 export default function AdminSystemTemplates() {
   const nav = useNavigate();
