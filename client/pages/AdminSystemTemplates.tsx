@@ -154,24 +154,59 @@ export default function AdminSystemTemplates() {
     setIsUploadingPreviewImage(true);
 
     try {
-      // TODO: Replace with actual API endpoint for uploading preview image
-      // For now, we'll show a placeholder implementation
+      const token = getStoredToken();
+      if (!token) {
+        toast({ title: "Authentication required", variant: "destructive" });
+        setIsUploadingPreviewImage(false);
+        return;
+      }
+
       const formData = new FormData();
       formData.append('file', previewImageUpload);
-      formData.append('templateId', previewImageTemplateId);
+      formData.append('template_id', previewImageTemplateId);
 
-      // Mock upload - replace with actual API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const response = await fetch('https://propai-api.hirenq.com/api/templates/system/preview-image', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      });
 
-      toast({ title: "Preview image uploaded successfully" });
-      setPreviewImageTemplateId(null);
-      setPreviewImageUpload(null);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      // Success response
+      if (data.external_response?.success && data.template) {
+        toast({
+          title: "Success",
+          description: "Preview image uploaded successfully",
+        });
+
+        // Refresh templates to show updated preview image
+        await refreshTemplates();
+
+        // Close dialog and reset state
+        setPreviewImageTemplateId(null);
+        setPreviewImageUpload(null);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+      } else {
+        throw new Error(data.message || "Upload failed");
       }
     } catch (error) {
       console.error("Error uploading preview image:", error);
-      toast({ title: "Failed to upload preview image", variant: "destructive" });
+      const errorMessage = error instanceof Error ? error.message : "Failed to upload preview image";
+      toast({
+        title: "Upload failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
     } finally {
       setIsUploadingPreviewImage(false);
     }
