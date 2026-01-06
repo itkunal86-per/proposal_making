@@ -13,6 +13,7 @@ export interface SystemTemplate {
   updatedAt?: number;
   createdBy?: string;
   sections?: Array<any>;
+  preview_image?: string;
 }
 
 export async function getSystemTemplateDetails(templateId: string): Promise<SystemTemplate | null> {
@@ -49,6 +50,7 @@ export async function getSystemTemplateDetails(templateId: string): Promise<Syst
       createdAt: data.createdAt || (data.created_at ? new Date(data.created_at).getTime() : Date.now()),
       updatedAt: data.updatedAt || (data.updated_at ? new Date(data.updated_at).getTime() : Date.now()),
       sections: data.sections || [],
+      preview_image: data.preview_image,
     };
 
     console.log("getSystemTemplateDetails - Processed template:", {
@@ -107,6 +109,7 @@ export async function listSystemTemplates(): Promise<SystemTemplate[]> {
       createdAt: t.created_at ? new Date(t.created_at).getTime() : Date.now(),
       updatedAt: t.updated_at ? new Date(t.updated_at).getTime() : Date.now(),
       sections: t.sections || [],
+      preview_image: t.preview_image,
     }));
   } catch (error) {
     console.error("Error fetching system templates:", error);
@@ -157,6 +160,7 @@ export async function getActiveSystemTemplates(): Promise<SystemTemplate[]> {
       createdAt: t.created_at ? new Date(t.created_at).getTime() : Date.now(),
       updatedAt: t.updated_at ? new Date(t.updated_at).getTime() : Date.now(),
       sections: t.sections || [],
+      preview_image: t.preview_image,
     }));
 
     console.log("getActiveSystemTemplates: Returning templates:", result);
@@ -220,6 +224,7 @@ export async function createSystemTemplate(title: string): Promise<CreateTemplat
       createdAt: data.created_at ? new Date(data.created_at).getTime() : Date.now(),
       updatedAt: data.updated_at ? new Date(data.updated_at).getTime() : Date.now(),
       sections: data.sections || [],
+      preview_image: data.preview_image,
     };
 
     return {
@@ -320,6 +325,7 @@ export async function updateSystemTemplate(
       createdAt: responseData.createdAt || (responseData.created_at ? new Date(responseData.created_at).getTime() : Date.now()),
       updatedAt: responseData.updatedAt || (responseData.updated_at ? new Date(responseData.updated_at).getTime() : Date.now()),
       sections: responseData.sections || [],
+      preview_image: responseData.preview_image,
     };
 
     return {
