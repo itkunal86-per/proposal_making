@@ -59,6 +59,10 @@ export default function MyProposals() {
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
   const [newProposalId, setNewProposalId] = useState<string | null>(null);
   const [showTemplateSelection, setShowTemplateSelection] = useState(false);
+  const [saveTemplateDialogOpen, setSaveTemplateDialogOpen] = useState(false);
+  const [templateName, setTemplateName] = useState("");
+  const [proposalToSave, setProposalToSave] = useState<Proposal | null>(null);
+  const [isSavingTemplate, setIsSavingTemplate] = useState(false);
   const [formData, setFormData] = useState<CreateProposalInput>({
     title: "",
     client_id: "",
