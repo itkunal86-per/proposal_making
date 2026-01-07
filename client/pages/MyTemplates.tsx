@@ -92,13 +92,47 @@ export default function MyTemplates() {
     }
   }
 
-  function handleViewTemplate(template: SystemTemplate) {
-    // Store template preview data and navigate to a view page if needed
-    // For now, we could open a preview modal or navigate to editor
-    toast({
-      title: template.title,
-      description: `Status: ${template.status || "Unknown"}`,
-    });
+  function handlePreviewTemplate(template: SystemTemplate) {
+    setPreviewTemplate(template);
+  }
+
+  async function handleCreateProposal(template: SystemTemplate) {
+    try {
+      setIsCreatingProposal(true);
+
+      // Create a new proposal first
+      const newProposal = await createProposal({
+        title: `Proposal from ${template.title}`,
+        client: "",
+      });
+
+      if (!newProposal || !newProposal.id) {
+        throw new Error("Failed to create proposal");
+      }
+
+      // Copy template content to the proposal
+      const copiedProposal = await copyProposalFromTemplate(String(template.id), newProposal.id);
+
+      if (!copiedProposal) {
+        throw new Error("Failed to apply template to proposal");
+      }
+
+      toast({
+        title: "Success",
+        description: "Proposal created from template successfully",
+      });
+
+      // Navigate to the proposal editor
+      nav(`/proposals/${newProposal.id}/edit`);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to create proposal",
+        variant: "destructive",
+      });
+    } finally {
+      setIsCreatingProposal(false);
+    }
   }
 
   return (
