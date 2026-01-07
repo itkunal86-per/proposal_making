@@ -34,6 +34,7 @@ export default function MyTemplates() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [previewTemplate, setPreviewTemplate] = useState<SystemTemplate | null>(null);
   const [isCreatingProposal, setIsCreatingProposal] = useState(false);
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
 
   useEffect(() => {
     loadTemplates();
