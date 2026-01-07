@@ -10,7 +10,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
-import { listSystemTemplates, type SystemTemplate, deleteSystemTemplate } from "@/services/systemTemplatesService";
+import { listSystemTemplates, type SystemTemplate, deleteSystemTemplate, copyProposalFromTemplate, convertSystemTemplateToProposal, getSystemTemplateDetails, createProposalFromTemplate } from "@/services/systemTemplatesService";
+import { createProposal } from "@/services/proposalsService";
+import { Label } from "@/components/ui/label";
+import { ProposalPreviewModal } from "@/components/ProposalPreviewModal";
 import { MoreVertical, FileText } from "lucide-react";
 
 const statusStyles: Record<string, string> = {
@@ -30,6 +33,12 @@ export default function MyTemplates() {
   const [isLoading, setIsLoading] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [previewTemplate, setPreviewTemplate] = useState<SystemTemplate | null>(null);
+  const [isCreatingProposal, setIsCreatingProposal] = useState(false);
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
+  const [createProposalDialogOpen, setCreateProposalDialogOpen] = useState(false);
+  const [proposalTitle, setProposalTitle] = useState("");
+  const [selectedTemplate, setSelectedTemplate] = useState<SystemTemplate | null>(null);
 
   useEffect(() => {
     loadTemplates();
@@ -89,13 +98,72 @@ export default function MyTemplates() {
     }
   }
 
-  function handleViewTemplate(template: SystemTemplate) {
-    // Store template preview data and navigate to a view page if needed
-    // For now, we could open a preview modal or navigate to editor
-    toast({
-      title: template.title,
-      description: `Status: ${template.status || "Unknown"}`,
-    });
+  async function handlePreviewTemplate(template: SystemTemplate) {
+    try {
+      setIsLoadingPreview(true);
+
+      // If template doesn't have sections, fetch full details
+      if (!template.sections || template.sections.length === 0) {
+        const fullTemplate = await getSystemTemplateDetails(template.id);
+        if (fullTemplate) {
+          setPreviewTemplate(fullTemplate);
+          return;
+        }
+      }
+
+      // Use template as-is if it already has sections
+      setPreviewTemplate(template);
+    } catch (error) {
+      console.error("Error loading template:", error);
+      toast({ title: "Error loading template", variant: "destructive" });
+    } finally {
+      setIsLoadingPreview(false);
+    }
+  }
+
+  function handleCreateProposal(template: SystemTemplate) {
+    setSelectedTemplate(template);
+    setProposalTitle(template.title);
+    setCreateProposalDialogOpen(true);
+  }
+
+  async function confirmCreateProposal() {
+    if (!selectedTemplate || !proposalTitle.trim()) {
+      toast({ title: "Please enter a proposal title", variant: "destructive" });
+      return;
+    }
+
+    try {
+      setIsCreatingProposal(true);
+
+      // Call the new API to create proposal from template
+      const newProposal = await createProposalFromTemplate(String(selectedTemplate.id), proposalTitle);
+
+      if (!newProposal || !newProposal.id) {
+        throw new Error("Failed to create proposal from template");
+      }
+
+      toast({
+        title: "Success",
+        description: "Proposal created from template successfully",
+      });
+
+      // Close dialog and reset state
+      setCreateProposalDialogOpen(false);
+      setProposalTitle("");
+      setSelectedTemplate(null);
+
+      // Navigate to the proposal editor
+      nav(`/proposals/${newProposal.id}/edit`);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to create proposal",
+        variant: "destructive",
+      });
+    } finally {
+      setIsCreatingProposal(false);
+    }
   }
 
   return (
@@ -150,7 +218,7 @@ export default function MyTemplates() {
                     >
                       <TableCell className="font-medium text-foreground">
                         <button
-                          onClick={() => handleViewTemplate(template)}
+                          onClick={() => handlePreviewTemplate(template)}
                           className="text-primary hover:underline truncate max-w-xs"
                         >
                           {template.title}
@@ -191,12 +259,19 @@ export default function MyTemplates() {
                               <MoreVertical className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-40">
+                          <DropdownMenuContent align="end" className="w-48">
                             <DropdownMenuItem
-                              onClick={() => handleViewTemplate(template)}
+                              onClick={() => handlePreviewTemplate(template)}
                               className="cursor-pointer"
                             >
-                              View
+                              Preview
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => handleCreateProposal(template)}
+                              disabled={isCreatingProposal}
+                              className="cursor-pointer"
+                            >
+                              Create Proposal
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
@@ -279,6 +354,55 @@ export default function MyTemplates() {
             >
               {isDeleting ? "Deleting..." : "Delete"}
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {previewTemplate && (
+        <ProposalPreviewModal
+          proposal={convertSystemTemplateToProposal(previewTemplate)}
+          onClose={() => setPreviewTemplate(null)}
+        />
+      )}
+
+      <Dialog open={createProposalDialogOpen} onOpenChange={setCreateProposalDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create Proposal from Template</DialogTitle>
+            <DialogDescription>
+              Enter a title for your new proposal
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="proposal-title" className="text-sm font-medium">
+                Proposal Title <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="proposal-title"
+                placeholder="e.g., Website Redesign Proposal"
+                value={proposalTitle}
+                onChange={(e) => setProposalTitle(e.target.value)}
+                disabled={isCreatingProposal}
+              />
+            </div>
+
+            <div className="flex gap-3 justify-end pt-4">
+              <Button
+                variant="outline"
+                onClick={() => setCreateProposalDialogOpen(false)}
+                disabled={isCreatingProposal}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={confirmCreateProposal}
+                disabled={isCreatingProposal || !proposalTitle.trim()}
+              >
+                {isCreatingProposal ? "Creating..." : "Create Proposal"}
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

@@ -46,10 +46,10 @@ export async function getSystemTemplateDetails(templateId: string): Promise<Syst
       description: data.description || "",
       content: data.content || "",
       status: data.status || "Active",
-      createdBy: data.createdBy || "0",
+      createdBy: data.createdBy || data.created_by || "0",
       createdAt: data.createdAt || (data.created_at ? new Date(data.created_at).getTime() : Date.now()),
       updatedAt: data.updatedAt || (data.updated_at ? new Date(data.updated_at).getTime() : Date.now()),
-      sections: data.sections || [],
+      sections: data.sections || data.content?.sections || [],
       preview_image: data.preview_image,
     };
 
@@ -469,22 +469,22 @@ export function convertSystemTemplateToProposal(template: SystemTemplate): Propo
     createdBy: template.createdBy || "System",
     createdAt: template.createdAt || Date.now(),
     updatedAt: template.updatedAt || Date.now(),
-    sections: template.sections?.map((s) => ({
-      id: s.id,
-      title: s.title,
-      content: s.content,
+    sections: (template.sections || []).map((s: any) => ({
+      id: s.id || "",
+      title: s.title || "",
+      content: s.content || "",
       layout: s.layout,
-      columnContents: s.columnContents,
-      columnStyles: s.columnStyles,
-      media: s.media,
-      contentStyles: s.contentStyles,
-      titleStyles: s.titleStyles,
-      texts: s.texts,
-      shapes: s.shapes,
-      images: s.images,
-      tables: s.tables,
-      signatureFields: s.signatureFields,
-      comments: s.comments,
+      columnContents: s.columnContents || [],
+      columnStyles: s.columnStyles || [],
+      media: s.media || [],
+      contentStyles: s.contentStyles || {},
+      titleStyles: s.titleStyles || {},
+      texts: Array.isArray(s.texts) ? s.texts : [],
+      shapes: Array.isArray(s.shapes) ? s.shapes : [],
+      images: Array.isArray(s.images) ? s.images : [],
+      tables: Array.isArray(s.tables) ? s.tables : [],
+      signatureFields: Array.isArray(s.signatureFields) ? s.signatureFields : [],
+      comments: s.comments || [],
       styling: {
         fontSize: 14,
         fontFamily: "Inter",
@@ -492,7 +492,7 @@ export function convertSystemTemplateToProposal(template: SystemTemplate): Propo
         textColor: "#000000",
         backgroundColor: "#ffffff",
       },
-    })) || [],
+    })),
     pricing: {
       currency: "$",
       items: [],
@@ -511,6 +511,74 @@ export function convertSystemTemplateToProposal(template: SystemTemplate): Propo
   };
 }
 
+export async function createProposalFromTemplate(templateId: string, proposalTitle: string): Promise<Proposal | null> {
+  const token = getStoredToken();
+  if (!token) {
+    console.error("No authentication token available");
+    return null;
+  }
+
+  try {
+    const response = await fetch("https://propai-api.hirenq.com/api/proposal/create-from-template", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        title: proposalTitle.trim(),
+        template_id: parseInt(templateId),
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error(`Failed to create proposal from template: ${response.statusText}`, errorData);
+      return null;
+    }
+
+    const data = await response.json();
+    console.log("createProposalFromTemplate - API response:", data);
+
+    if (!data.id) {
+      console.error("Invalid response from create-from-template API", data);
+      return null;
+    }
+
+    const proposal: Proposal = {
+      id: data.id,
+      title: data.title || proposalTitle,
+      client: "",
+      client_id: data.client_id,
+      status: data.status || "draft",
+      createdBy: data.created_by || "System",
+      createdAt: data.created_at ? new Date(data.created_at).getTime() : Date.now(),
+      updatedAt: data.updated_at ? new Date(data.updated_at).getTime() : Date.now(),
+      sections: data.sections || [],
+      pricing: {
+        currency: data.currency || "$",
+        items: data.pricing?.items || [],
+        taxRate: parseFloat(data.tax_rate || "0"),
+      },
+      settings: {
+        approvalFlow: "Single approver",
+        sharing: {
+          public: data.sharing_token ? true : false,
+          token: data.sharing_token,
+          allowComments: true,
+        },
+      },
+      versions: [],
+      signatories: data.signatories || [],
+    };
+
+    return proposal;
+  } catch (error) {
+    console.error("Error creating proposal from template:", error);
+    return null;
+  }
+}
+
 export async function saveProposalAsTemplate(proposalData: any, templateTitle: string): Promise<SystemTemplate | null> {
   const token = getStoredToken();
   if (!token) {
@@ -519,18 +587,15 @@ export async function saveProposalAsTemplate(proposalData: any, templateTitle: s
   }
 
   try {
-    const response = await fetch(SYSTEM_TEMPLATES_ENDPOINT, {
+    const response = await fetch("https://propai-api.hirenq.com/api/templates/create-from-proposal", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${token}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
+        proposal_id: proposalData.id,
         title: templateTitle.trim(),
-        sections: proposalData.sections || [],
-        pricing: proposalData.pricing || {},
-        settings: proposalData.settings || {},
-        signatories: proposalData.signatories || [],
       }),
     });
 
