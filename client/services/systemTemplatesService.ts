@@ -511,6 +511,25 @@ export function convertSystemTemplateToProposal(template: SystemTemplate): Propo
   };
 }
 
+export async function getSystemTemplateDetails(templateId: string): Promise<Proposal | null> {
+  const token = getStoredToken();
+  if (!token) {
+    console.error("No authentication token available");
+    return null;
+  }
+
+  try {
+    const template = await getSystemTemplateDetails(templateId);
+    if (!template) {
+      return null;
+    }
+    return convertSystemTemplateToProposal(template);
+  } catch (error) {
+    console.error("Error fetching template for preview:", error);
+    return null;
+  }
+}
+
 export async function saveProposalAsTemplate(proposalData: any, templateTitle: string): Promise<SystemTemplate | null> {
   const token = getStoredToken();
   if (!token) {
