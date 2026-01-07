@@ -511,6 +511,74 @@ export function convertSystemTemplateToProposal(template: SystemTemplate): Propo
   };
 }
 
+export async function createProposalFromTemplate(templateId: string, proposalTitle: string): Promise<Proposal | null> {
+  const token = getStoredToken();
+  if (!token) {
+    console.error("No authentication token available");
+    return null;
+  }
+
+  try {
+    const response = await fetch("https://propai-api.hirenq.com/api/proposal/create-from-template", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        title: proposalTitle.trim(),
+        template_id: parseInt(templateId),
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error(`Failed to create proposal from template: ${response.statusText}`, errorData);
+      return null;
+    }
+
+    const data = await response.json();
+    console.log("createProposalFromTemplate - API response:", data);
+
+    if (!data.id) {
+      console.error("Invalid response from create-from-template API", data);
+      return null;
+    }
+
+    const proposal: Proposal = {
+      id: data.id,
+      title: data.title || proposalTitle,
+      client: "",
+      client_id: data.client_id,
+      status: data.status || "draft",
+      createdBy: data.created_by || "System",
+      createdAt: data.created_at ? new Date(data.created_at).getTime() : Date.now(),
+      updatedAt: data.updated_at ? new Date(data.updated_at).getTime() : Date.now(),
+      sections: data.sections || [],
+      pricing: {
+        currency: data.currency || "$",
+        items: data.pricing?.items || [],
+        taxRate: parseFloat(data.tax_rate || "0"),
+      },
+      settings: {
+        approvalFlow: "Single approver",
+        sharing: {
+          public: data.sharing_token ? true : false,
+          token: data.sharing_token,
+          allowComments: true,
+        },
+      },
+      versions: [],
+      signatories: data.signatories || [],
+    };
+
+    return proposal;
+  } catch (error) {
+    console.error("Error creating proposal from template:", error);
+    return null;
+  }
+}
+
 export async function saveProposalAsTemplate(proposalData: any, templateTitle: string): Promise<SystemTemplate | null> {
   const token = getStoredToken();
   if (!token) {
