@@ -97,15 +97,9 @@ export default function MyTemplates() {
   async function handlePreviewTemplate(template: SystemTemplate) {
     try {
       setIsLoadingPreview(true);
-      // Fetch full template details with all sections
-      const fullTemplate = await getSystemTemplateDetails(template.id);
-      console.log("Full template loaded:", fullTemplate);
-      if (fullTemplate) {
-        setPreviewTemplate(fullTemplate);
-      } else {
-        console.error("No template returned from getSystemTemplateDetails");
-        toast({ title: "Error loading template", variant: "destructive" });
-      }
+      // Convert template directly to proposal for preview
+      // The template already contains all sections from listSystemTemplates()
+      setPreviewTemplate(template);
     } catch (error) {
       console.error("Error loading template:", error);
       toast({ title: "Error loading template", variant: "destructive" });
