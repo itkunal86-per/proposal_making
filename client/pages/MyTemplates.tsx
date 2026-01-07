@@ -10,7 +10,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
-import { listSystemTemplates, type SystemTemplate, deleteSystemTemplate } from "@/services/systemTemplatesService";
+import { listSystemTemplates, type SystemTemplate, deleteSystemTemplate, copyProposalFromTemplate } from "@/services/systemTemplatesService";
+import { createProposal } from "@/services/proposalsService";
 import { MoreVertical, FileText } from "lucide-react";
 
 const statusStyles: Record<string, string> = {
