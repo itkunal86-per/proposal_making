@@ -326,6 +326,80 @@ export default function MyTemplates() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={previewTemplate !== null} onOpenChange={(open) => !open && setPreviewTemplate(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{previewTemplate?.title}</DialogTitle>
+            <DialogDescription>
+              Template preview
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 max-h-96 overflow-y-auto">
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <p className="font-medium text-foreground">Status</p>
+                <p className="text-muted-foreground">{previewTemplate?.status || "Active"}</p>
+              </div>
+              <div>
+                <p className="font-medium text-foreground">Created By</p>
+                <p className="text-muted-foreground">{previewTemplate?.createdBy || "—"}</p>
+              </div>
+              <div>
+                <p className="font-medium text-foreground">Created</p>
+                <p className="text-muted-foreground">
+                  {previewTemplate?.createdAt
+                    ? new Date(previewTemplate.createdAt).toLocaleDateString()
+                    : "—"}
+                </p>
+              </div>
+              <div>
+                <p className="font-medium text-foreground">Updated</p>
+                <p className="text-muted-foreground">
+                  {previewTemplate?.updatedAt
+                    ? new Date(previewTemplate.updatedAt).toLocaleDateString()
+                    : "—"}
+                </p>
+              </div>
+            </div>
+            {previewTemplate?.description && (
+              <div>
+                <p className="font-medium text-foreground mb-2">Description</p>
+                <p className="text-muted-foreground">{previewTemplate.description}</p>
+              </div>
+            )}
+            {previewTemplate?.sections && previewTemplate.sections.length > 0 && (
+              <div>
+                <p className="font-medium text-foreground mb-2">Sections ({previewTemplate.sections.length})</p>
+                <div className="space-y-2">
+                  {previewTemplate.sections.map((section: any, index: number) => (
+                    <div key={index} className="p-2 bg-muted/50 rounded text-sm">
+                      <p className="font-medium">{section.title || `Section ${index + 1}`}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="flex gap-3 justify-end pt-4">
+            <Button
+              variant="outline"
+              onClick={() => setPreviewTemplate(null)}
+            >
+              Close
+            </Button>
+            <Button
+              onClick={() => {
+                setPreviewTemplate(null);
+                handleCreateProposal(previewTemplate!);
+              }}
+              disabled={isCreatingProposal}
+            >
+              {isCreatingProposal ? "Creating..." : "Create Proposal"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </AppShell>
   );
 }
