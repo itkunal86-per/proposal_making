@@ -364,6 +364,48 @@ export default function MyTemplates() {
           onClose={() => setPreviewTemplate(null)}
         />
       )}
+
+      <Dialog open={createProposalDialogOpen} onOpenChange={setCreateProposalDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create Proposal from Template</DialogTitle>
+            <DialogDescription>
+              Enter a title for your new proposal
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="proposal-title" className="text-sm font-medium">
+                Proposal Title <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="proposal-title"
+                placeholder="e.g., Website Redesign Proposal"
+                value={proposalTitle}
+                onChange={(e) => setProposalTitle(e.target.value)}
+                disabled={isCreatingProposal}
+              />
+            </div>
+
+            <div className="flex gap-3 justify-end pt-4">
+              <Button
+                variant="outline"
+                onClick={() => setCreateProposalDialogOpen(false)}
+                disabled={isCreatingProposal}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={confirmCreateProposal}
+                disabled={isCreatingProposal || !proposalTitle.trim()}
+              >
+                {isCreatingProposal ? "Creating..." : "Create Proposal"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </AppShell>
   );
 }
