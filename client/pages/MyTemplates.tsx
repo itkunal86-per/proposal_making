@@ -31,6 +31,8 @@ export default function MyTemplates() {
   const [isLoading, setIsLoading] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [previewTemplate, setPreviewTemplate] = useState<SystemTemplate | null>(null);
+  const [isCreatingProposal, setIsCreatingProposal] = useState(false);
 
   useEffect(() => {
     loadTemplates();
