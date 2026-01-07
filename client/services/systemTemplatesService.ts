@@ -519,18 +519,15 @@ export async function saveProposalAsTemplate(proposalData: any, templateTitle: s
   }
 
   try {
-    const response = await fetch(SYSTEM_TEMPLATES_ENDPOINT, {
+    const response = await fetch("https://propai-api.hirenq.com/api/templates/create-from-proposal", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${token}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
+        proposal_id: proposalData.id,
         title: templateTitle.trim(),
-        sections: proposalData.sections || [],
-        pricing: proposalData.pricing || {},
-        settings: proposalData.settings || {},
-        signatories: proposalData.signatories || [],
       }),
     });
 
