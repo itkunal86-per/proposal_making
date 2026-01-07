@@ -99,9 +99,11 @@ export default function MyTemplates() {
       setIsLoadingPreview(true);
       // Fetch full template details with all sections
       const fullTemplate = await getSystemTemplateDetails(template.id);
+      console.log("Full template loaded:", fullTemplate);
       if (fullTemplate) {
         setPreviewTemplate(fullTemplate);
       } else {
+        console.error("No template returned from getSystemTemplateDetails");
         toast({ title: "Error loading template", variant: "destructive" });
       }
     } catch (error) {
