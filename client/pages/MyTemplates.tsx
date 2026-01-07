@@ -187,7 +187,7 @@ export default function MyTemplates() {
                     >
                       <TableCell className="font-medium text-foreground">
                         <button
-                          onClick={() => handleViewTemplate(template)}
+                          onClick={() => handlePreviewTemplate(template)}
                           className="text-primary hover:underline truncate max-w-xs"
                         >
                           {template.title}
