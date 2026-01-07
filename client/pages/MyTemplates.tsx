@@ -94,8 +94,16 @@ export default function MyTemplates() {
     }
   }
 
-  function handlePreviewTemplate(template: SystemTemplate) {
-    setPreviewTemplate(template);
+  async function handlePreviewTemplate(template: SystemTemplate) {
+    try {
+      setIsLoadingPreview(true);
+      // Template is already loaded with sections, so we can just set it
+      setPreviewTemplate(template);
+    } catch (error) {
+      toast({ title: "Error loading template", variant: "destructive" });
+    } finally {
+      setIsLoadingPreview(false);
+    }
   }
 
   async function handleCreateProposal(template: SystemTemplate) {
