@@ -339,16 +339,12 @@ export default function MyTemplates() {
         </DialogContent>
       </Dialog>
 
-      {previewTemplate && (() => {
-        const proposal = convertSystemTemplateToProposal(previewTemplate);
-        console.log("Converted proposal for preview:", proposal);
-        return (
-          <ProposalPreviewModal
-            proposal={proposal}
-            onClose={() => setPreviewTemplate(null)}
-          />
-        );
-      })()}
+      {previewTemplate && (
+        <ProposalPreviewModal
+          proposal={convertSystemTemplateToProposal(previewTemplate)}
+          onClose={() => setPreviewTemplate(null)}
+        />
+      )}
     </AppShell>
   );
 }
