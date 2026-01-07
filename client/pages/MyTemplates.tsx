@@ -228,12 +228,19 @@ export default function MyTemplates() {
                               <MoreVertical className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-40">
+                          <DropdownMenuContent align="end" className="w-48">
                             <DropdownMenuItem
-                              onClick={() => handleViewTemplate(template)}
+                              onClick={() => handlePreviewTemplate(template)}
                               className="cursor-pointer"
                             >
-                              View
+                              Preview
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => handleCreateProposal(template)}
+                              disabled={isCreatingProposal}
+                              className="cursor-pointer"
+                            >
+                              Create Proposal
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
