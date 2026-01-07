@@ -121,31 +121,37 @@ export default function MyTemplates() {
     }
   }
 
-  async function handleCreateProposal(template: SystemTemplate) {
+  function handleCreateProposal(template: SystemTemplate) {
+    setSelectedTemplate(template);
+    setProposalTitle(template.title);
+    setCreateProposalDialogOpen(true);
+  }
+
+  async function confirmCreateProposal() {
+    if (!selectedTemplate || !proposalTitle.trim()) {
+      toast({ title: "Please enter a proposal title", variant: "destructive" });
+      return;
+    }
+
     try {
       setIsCreatingProposal(true);
 
-      // Create a new proposal first
-      const newProposal = await createProposal({
-        title: `Proposal from ${template.title}`,
-        client: "",
-      });
+      // Call the new API to create proposal from template
+      const newProposal = await createProposalFromTemplate(String(selectedTemplate.id), proposalTitle);
 
       if (!newProposal || !newProposal.id) {
-        throw new Error("Failed to create proposal");
-      }
-
-      // Copy template content to the proposal
-      const copiedProposal = await copyProposalFromTemplate(String(template.id), newProposal.id);
-
-      if (!copiedProposal) {
-        throw new Error("Failed to apply template to proposal");
+        throw new Error("Failed to create proposal from template");
       }
 
       toast({
         title: "Success",
         description: "Proposal created from template successfully",
       });
+
+      // Close dialog and reset state
+      setCreateProposalDialogOpen(false);
+      setProposalTitle("");
+      setSelectedTemplate(null);
 
       // Navigate to the proposal editor
       nav(`/proposals/${newProposal.id}/edit`);
