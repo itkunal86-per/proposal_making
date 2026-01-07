@@ -97,9 +97,15 @@ export default function MyTemplates() {
   async function handlePreviewTemplate(template: SystemTemplate) {
     try {
       setIsLoadingPreview(true);
-      // Template is already loaded with sections, so we can just set it
-      setPreviewTemplate(template);
+      // Fetch full template details with all sections
+      const fullTemplate = await getSystemTemplateDetails(template.id);
+      if (fullTemplate) {
+        setPreviewTemplate(fullTemplate);
+      } else {
+        toast({ title: "Error loading template", variant: "destructive" });
+      }
     } catch (error) {
+      console.error("Error loading template:", error);
       toast({ title: "Error loading template", variant: "destructive" });
     } finally {
       setIsLoadingPreview(false);
