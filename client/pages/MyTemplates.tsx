@@ -10,8 +10,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
-import { listSystemTemplates, type SystemTemplate, deleteSystemTemplate, copyProposalFromTemplate, convertSystemTemplateToProposal, getSystemTemplateDetails } from "@/services/systemTemplatesService";
+import { listSystemTemplates, type SystemTemplate, deleteSystemTemplate, copyProposalFromTemplate, convertSystemTemplateToProposal, getSystemTemplateDetails, createProposalFromTemplate } from "@/services/systemTemplatesService";
 import { createProposal } from "@/services/proposalsService";
+import { Label } from "@/components/ui/label";
 import { ProposalPreviewModal } from "@/components/ProposalPreviewModal";
 import { MoreVertical, FileText } from "lucide-react";
 
