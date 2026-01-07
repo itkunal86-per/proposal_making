@@ -36,6 +36,9 @@ export default function MyTemplates() {
   const [previewTemplate, setPreviewTemplate] = useState<SystemTemplate | null>(null);
   const [isCreatingProposal, setIsCreatingProposal] = useState(false);
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
+  const [createProposalDialogOpen, setCreateProposalDialogOpen] = useState(false);
+  const [proposalTitle, setProposalTitle] = useState("");
+  const [selectedTemplate, setSelectedTemplate] = useState<SystemTemplate | null>(null);
 
   useEffect(() => {
     loadTemplates();
