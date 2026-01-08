@@ -384,26 +384,12 @@ export default function AdminSystemTemplates() {
           )}
         </Card>
 
-        <Dialog open={!!preview} onOpenChange={(o) => !o && setPreview(null)}>
-          <DialogContent className="max-w-3xl">
-            <DialogHeader>
-              <DialogTitle>Quick preview</DialogTitle>
-            </DialogHeader>
-            {preview && (
-              <div className="space-y-4">
-                <h2 className="text-xl font-semibold">{preview.title}</h2>
-                <div className="text-sm text-muted-foreground">Sections: {preview.sections.length}</div>
-                <Separator />
-                {preview.sections.map((s) => (
-                  <div key={s.id} className="space-y-1">
-                    <h3 className="font-medium">{s.title}</h3>
-                    <p className="whitespace-pre-wrap text-sm text-muted-foreground">{s.content}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </DialogContent>
-        </Dialog>
+        {previewTemplate && (
+          <ProposalPreviewModal
+            proposal={convertSystemTemplateToProposal(previewTemplate)}
+            onClose={() => setPreviewTemplate(null)}
+          />
+        )}
 
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogContent>
