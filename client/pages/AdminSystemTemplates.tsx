@@ -24,7 +24,8 @@ export default function AdminSystemTemplates() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [preview, setPreview] = useState<Proposal | null>(null);
+  const [previewTemplate, setPreviewTemplate] = useState<SystemTemplate | null>(null);
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
