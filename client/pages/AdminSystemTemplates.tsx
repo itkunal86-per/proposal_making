@@ -345,11 +345,11 @@ export default function AdminSystemTemplates() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handlePreviewTemplate(t)} disabled={isLoadingPreview}>
+                              Preview
+                            </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => onEdit(t)}>
                               Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setPreview(convertSystemTemplateToProposal(t))}>
-                              Preview
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => onAddPreviewImage(t.id)}>
                               <Upload className="h-4 w-4 mr-2" />
