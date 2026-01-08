@@ -1,17 +1,9 @@
 import React, { useRef, useState } from "react";
-import { X, Share2, Download, Mail, Link as LinkIcon } from "lucide-react";
+import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
 import { toast } from "@/hooks/use-toast";
 import { Proposal } from "@/services/proposalsService";
 import { replaceVariables, decodeHtmlEntities } from "@/lib/variableUtils";
-import { ShareLinkDialog } from "@/components/ShareLinkDialog";
 import { ShapeEditor } from "@/components/ShapeEditor";
 import { TableEditor } from "@/components/TableEditor";
 import { TextEditor } from "@/components/TextEditor";
@@ -29,7 +21,6 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
   onClose,
 }) => {
   const contentRef = useRef<HTMLDivElement>(null);
-  const [showShareDialog, setShowShareDialog] = useState(false);
   const [canvasHeights, setCanvasHeights] = useState<Record<string, number>>({});
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const sectionRefs = useRef<Map<string, HTMLDivElement>>(new Map());
@@ -216,14 +207,6 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
     }
   };
 
-  const handleShareLink = () => {
-    setShowShareDialog(true);
-  };
-
-  const handleSendEmail = () => {
-    toast({ title: "Coming soon", description: "Send email feature will be available soon" });
-  };
-
   const scrollToSection = (sectionId: string) => {
     const element = sectionRefs.current.get(sectionId);
     if (element) {
@@ -240,43 +223,14 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
         {/* Header */}
         <div className="border-b border-slate-200 px-6 py-4 flex items-center justify-between">
           <h1 className="text-2xl font-bold">{proposal.title}</h1>
-          <div className="flex items-center gap-2">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center gap-2"
-                >
-                  <Share2 className="w-4 h-4" />
-                  Share
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuItem onClick={handleShareLink}>
-                  <LinkIcon className="w-4 h-4 mr-2" />
-                  Share Link
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleExportPDF}>
-                  <Download className="w-4 h-4 mr-2" />
-                  Export PDF
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleSendEmail}>
-                  <Mail className="w-4 h-4 mr-2" />
-                  Send Email
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <Button
-              onClick={onClose}
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0"
-            >
-              <X className="w-5 h-5" />
-            </Button>
-          </div>
+          <Button
+            onClick={onClose}
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0"
+          >
+            <X className="w-5 h-5" />
+          </Button>
         </div>
 
         {/* Content */}
@@ -725,13 +679,6 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
           </div>
         </div>
       </div>
-
-      <ShareLinkDialog
-        open={showShareDialog}
-        onOpenChange={setShowShareDialog}
-        proposalId={proposal.id}
-        proposalTitle={proposal.title}
-      />
     </div>
   );
 };

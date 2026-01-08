@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { Separator } from "@/components/ui/separator";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { ProposalPreviewModal } from "@/components/ProposalPreviewModal";
 import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useState, useRef } from "react";
@@ -23,7 +24,8 @@ export default function AdminSystemTemplates() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [preview, setPreview] = useState<Proposal | null>(null);
+  const [previewTemplate, setPreviewTemplate] = useState<SystemTemplate | null>(null);
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
@@ -56,6 +58,29 @@ export default function AdminSystemTemplates() {
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const pageRows = filtered.slice((page - 1) * pageSize, page * pageSize);
+
+  async function handlePreviewTemplate(template: SystemTemplate) {
+    try {
+      setIsLoadingPreview(true);
+
+      // If template doesn't have sections, fetch full details
+      if (!template.sections || template.sections.length === 0) {
+        const fullTemplate = await getSystemTemplateDetails(String(template.id));
+        if (fullTemplate) {
+          setPreviewTemplate(fullTemplate);
+          return;
+        }
+      }
+
+      // Use template as-is if it already has sections
+      setPreviewTemplate(template);
+    } catch (error) {
+      console.error("Error loading template:", error);
+      toast({ title: "Error loading template", variant: "destructive" });
+    } finally {
+      setIsLoadingPreview(false);
+    }
+  }
 
   async function onEdit(template: SystemTemplate) {
     try {
@@ -320,11 +345,11 @@ export default function AdminSystemTemplates() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handlePreviewTemplate(t)} disabled={isLoadingPreview}>
+                              Preview
+                            </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => onEdit(t)}>
                               Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setPreview(convertSystemTemplateToProposal(t))}>
-                              Preview
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => onAddPreviewImage(t.id)}>
                               <Upload className="h-4 w-4 mr-2" />
@@ -359,26 +384,12 @@ export default function AdminSystemTemplates() {
           )}
         </Card>
 
-        <Dialog open={!!preview} onOpenChange={(o) => !o && setPreview(null)}>
-          <DialogContent className="max-w-3xl">
-            <DialogHeader>
-              <DialogTitle>Quick preview</DialogTitle>
-            </DialogHeader>
-            {preview && (
-              <div className="space-y-4">
-                <h2 className="text-xl font-semibold">{preview.title}</h2>
-                <div className="text-sm text-muted-foreground">Sections: {preview.sections.length}</div>
-                <Separator />
-                {preview.sections.map((s) => (
-                  <div key={s.id} className="space-y-1">
-                    <h3 className="font-medium">{s.title}</h3>
-                    <p className="whitespace-pre-wrap text-sm text-muted-foreground">{s.content}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </DialogContent>
-        </Dialog>
+        {previewTemplate && (
+          <ProposalPreviewModal
+            proposal={convertSystemTemplateToProposal(previewTemplate)}
+            onClose={() => setPreviewTemplate(null)}
+          />
+        )}
 
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogContent>
