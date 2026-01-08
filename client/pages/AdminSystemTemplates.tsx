@@ -59,6 +59,29 @@ export default function AdminSystemTemplates() {
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const pageRows = filtered.slice((page - 1) * pageSize, page * pageSize);
 
+  async function handlePreviewTemplate(template: SystemTemplate) {
+    try {
+      setIsLoadingPreview(true);
+
+      // If template doesn't have sections, fetch full details
+      if (!template.sections || template.sections.length === 0) {
+        const fullTemplate = await getSystemTemplateDetails(String(template.id));
+        if (fullTemplate) {
+          setPreviewTemplate(fullTemplate);
+          return;
+        }
+      }
+
+      // Use template as-is if it already has sections
+      setPreviewTemplate(template);
+    } catch (error) {
+      console.error("Error loading template:", error);
+      toast({ title: "Error loading template", variant: "destructive" });
+    } finally {
+      setIsLoadingPreview(false);
+    }
+  }
+
   async function onEdit(template: SystemTemplate) {
     try {
       const details = await getSystemTemplateDetails(String(template.id));
