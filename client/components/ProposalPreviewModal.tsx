@@ -207,14 +207,6 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
     }
   };
 
-  const handleShareLink = () => {
-    setShowShareDialog(true);
-  };
-
-  const handleSendEmail = () => {
-    toast({ title: "Coming soon", description: "Send email feature will be available soon" });
-  };
-
   const scrollToSection = (sectionId: string) => {
     const element = sectionRefs.current.get(sectionId);
     if (element) {
