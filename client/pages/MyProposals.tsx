@@ -62,6 +62,9 @@ export default function MyProposals() {
   const [newProposalId, setNewProposalId] = useState<string | null>(null);
   const [showTemplateSelection, setShowTemplateSelection] = useState(false);
   const [chatSessionId, setChatSessionId] = useState<number | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<SystemTemplate | null>(null);
+  const [showTitleDialog, setShowTitleDialog] = useState(false);
+  const [isGeneratingProposal, setIsGeneratingProposal] = useState(false);
   const [saveTemplateDialogOpen, setSaveTemplateDialogOpen] = useState(false);
   const [templateName, setTemplateName] = useState("");
   const [proposalToSave, setProposalToSave] = useState<Proposal | null>(null);
