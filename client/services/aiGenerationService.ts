@@ -54,6 +54,17 @@ interface ChatInitResponse {
   };
 }
 
+interface GenerateFromTemplateRequest {
+  session_id: number;
+  template_id: string | number;
+  title: string;
+}
+
+interface GenerateFromTemplateResponse {
+  proposal_id: number;
+  version: number;
+}
+
 export async function generateProposalFromPrompt(
   request: GenerateProposalRequest
 ): Promise<GenerateProposalResponse> {
