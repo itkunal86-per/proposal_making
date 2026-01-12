@@ -22,6 +22,38 @@ interface ProposalAIResponse {
   data: string;
 }
 
+interface ChatInitRequest {
+  message: string;
+  input_type: "website" | "document" | "text";
+  url?: string;
+  file?: File | null;
+}
+
+interface ProposalIntent {
+  Description: string;
+  Goals: string[];
+}
+
+interface ProposalRequirements {
+  [key: string]: string;
+}
+
+interface ProposalIntentData {
+  ProposalIntent: ProposalIntent;
+  Requirements: ProposalRequirements;
+  ProposalType: string;
+}
+
+interface ChatInitResponse {
+  status: boolean;
+  session_id: number;
+  proposal_intent: {
+    ProposalIntent: ProposalIntent;
+    Requirements: ProposalRequirements;
+    ProposalType: string;
+  };
+}
+
 export async function generateProposalFromPrompt(
   request: GenerateProposalRequest
 ): Promise<GenerateProposalResponse> {
