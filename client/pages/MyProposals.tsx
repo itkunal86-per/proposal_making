@@ -688,6 +688,13 @@ export default function MyProposals() {
         isLoading={isCreating}
       />
 
+      <ProposalTitleDialog
+        open={showTitleDialog}
+        onOpenChange={setShowTitleDialog}
+        onSubmit={handleProposalTitleSubmit}
+        isLoading={isGeneratingProposal}
+      />
+
       <Dialog open={saveTemplateDialogOpen} onOpenChange={setSaveTemplateDialogOpen}>
         <DialogContent>
           <DialogHeader>
