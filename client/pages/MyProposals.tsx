@@ -102,16 +102,19 @@ export default function MyProposals() {
     setIsGenerateDialogOpen(true);
   };
 
-  const handleProposalGenerated = async (generated: Proposal) => {
+  const handleProposalGenerated = async (generated: Proposal, sessionId?: number) => {
     try {
-      await persistProposal(generated);
-      await updateProposal(generated);
-      await refresh();
-      nav(`/proposals/${generated.id}/edit`);
+      // Store the session ID for later use
+      if (sessionId) {
+        setChatSessionId(sessionId);
+      }
+
+      // Open template selection modal
+      setShowTemplateSelection(true);
     } catch (error) {
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to save generated proposal",
+        description: error instanceof Error ? error.message : "Failed to process proposal",
         variant: "destructive",
       });
     }
