@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
-import { generateProposalContent } from "@/services/aiGenerationService";
+import { initializeProposalChat } from "@/services/aiGenerationService";
 import { Proposal } from "@/services/proposalsService";
 import { Loader2, Send, FileUp, Link as LinkIcon, X } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -26,13 +26,14 @@ interface AttachedFile {
   name: string;
   type: "rfp" | "url";
   content: string;
+  file?: File;
 }
 
 interface GenerateProposalDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   baseProposal: Proposal;
-  onProposalGenerated: (proposal: Proposal) => void;
+  onProposalGenerated: (proposal: Proposal, sessionId?: number) => void;
 }
 
 export const GenerateProposalDialog: React.FC<GenerateProposalDialogProps> = ({
@@ -91,30 +92,24 @@ export const GenerateProposalDialog: React.FC<GenerateProposalDialogProps> = ({
     }
 
     try {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const content = e.target?.result as string;
-        const fileName = file.name;
-        
-        setAttachedFiles([
-          ...attachedFiles,
-          {
-            name: fileName,
-            type: "rfp",
-            content: content,
-          },
-        ]);
+      setAttachedFiles([
+        ...attachedFiles,
+        {
+          name: file.name,
+          type: "rfp",
+          content: "",
+          file: file,
+        },
+      ]);
 
-        toast({
-          title: "File attached",
-          description: `${fileName} has been attached successfully`,
-        });
-      };
-      reader.readAsDataURL(file);
+      toast({
+        title: "File attached",
+        description: `${file.name} has been attached successfully`,
+      });
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to read the file",
+        description: "Failed to attach the file",
         variant: "destructive",
       });
     }
@@ -184,53 +179,64 @@ export const GenerateProposalDialog: React.FC<GenerateProposalDialogProps> = ({
     setIsLoading(true);
 
     try {
-      // Prepare the prompt with attachments information
-      let enhancedPrompt = inputMessage;
+      // Determine input type based on attachments
+      let inputType: "website" | "document" | "text" = "text";
+      let urlToSend: string | undefined;
+      let fileToSend: File | undefined;
 
       if (attachedFiles.length > 0) {
-        enhancedPrompt += "\n\nAttached resources:\n";
-        attachedFiles.forEach((file) => {
-          if (file.type === "rfp") {
-            enhancedPrompt += `- RFP Document: ${file.name}\n`;
-          } else if (file.type === "url") {
-            enhancedPrompt += `- URL to crawl: ${file.content}\n`;
-          }
-        });
+        const rfpFile = attachedFiles.find((f) => f.type === "rfp");
+        const urlFile = attachedFiles.find((f) => f.type === "url");
+
+        if (rfpFile) {
+          inputType = "document";
+          fileToSend = rfpFile.file;
+        } else if (urlFile) {
+          inputType = "website";
+          urlToSend = urlFile.content;
+        }
       }
 
-      const updated = await generateProposalContent(
-        { ...baseProposal, client: baseProposal.client },
-        enhancedPrompt
-      );
+      // Call the chat init API
+      const response = await initializeProposalChat({
+        message: inputMessage,
+        input_type: inputType,
+        url: urlToSend,
+        file: fileToSend || null,
+      });
 
-      // Add assistant response
-      const assistantMessage: ChatMessage = {
-        id: Date.now().toString() + "a",
-        type: "assistant",
-        content: "Your proposal has been generated successfully! Redirecting you to the editor...",
-        timestamp: new Date(),
-      };
+      if (response.status && response.session_id) {
+        // Add assistant response
+        const assistantMessage: ChatMessage = {
+          id: Date.now().toString() + "a",
+          type: "assistant",
+          content: `Great! I've analyzed your request. Here's the proposal intent:\n\n${response.proposal_intent.ProposalIntent.Description}\n\nThis proposal will help you achieve:\n${response.proposal_intent.ProposalIntent.Goals.map((g) => `• ${g}`).join("\n")}`,
+          timestamp: new Date(),
+        };
 
-      setMessages((prev) => [...prev, assistantMessage]);
+        setMessages((prev) => [...prev, assistantMessage]);
 
-      // Small delay before closing to show the success message
-      setTimeout(() => {
-        onProposalGenerated(updated);
-        onOpenChange(false);
-        setMessages([]);
-        setAttachedFiles([]);
-        toast({
-          title: "Success",
-          description: "Proposal generated successfully!",
-        });
-      }, 1000);
+        // Small delay before opening template selection
+        setTimeout(() => {
+          onProposalGenerated(baseProposal, response.session_id);
+          onOpenChange(false);
+          setMessages([]);
+          setAttachedFiles([]);
+          toast({
+            title: "Success",
+            description: "Proposal analysis complete! Select a template to continue.",
+          });
+        }, 1500);
+      } else {
+        throw new Error("Failed to initialize proposal chat");
+      }
     } catch (error) {
-      console.error("Generation error:", error);
+      console.error("Chat initialization error:", error);
       const errorMessage: ChatMessage = {
         id: Date.now().toString() + "e",
         type: "assistant",
         content: `I encountered an error: ${
-          error instanceof Error ? error.message : "Failed to generate proposal"
+          error instanceof Error ? error.message : "Failed to process your request"
         }. Please try again or adjust your request.`,
         timestamp: new Date(),
       };
@@ -239,7 +245,7 @@ export const GenerateProposalDialog: React.FC<GenerateProposalDialogProps> = ({
       toast({
         title: "Error",
         description:
-          error instanceof Error ? error.message : "Failed to generate proposal",
+          error instanceof Error ? error.message : "Failed to process your request",
         variant: "destructive",
       });
     } finally {
@@ -297,7 +303,7 @@ export const GenerateProposalDialog: React.FC<GenerateProposalDialogProps> = ({
               <div className="flex justify-start">
                 <div className="bg-muted text-muted-foreground px-4 py-3 rounded-lg rounded-bl-none flex items-center gap-2">
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  <span className="text-sm">Generating your proposal...</span>
+                  <span className="text-sm">Processing your request...</span>
                 </div>
               </div>
             )}
