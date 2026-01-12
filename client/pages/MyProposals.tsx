@@ -93,13 +93,22 @@ export default function MyProposals() {
   };
 
   const handleOpenGenerateDialog = async () => {
-    await loadClients();
-    const newProposal = await createProposal({
-      title: "New Proposal",
-      client: "",
-    });
-    setBaseProposalForGeneration(newProposal);
-    setIsGenerateDialogOpen(true);
+    try {
+      await loadClients();
+      const newProposal = await createProposal({
+        title: "New Proposal",
+        client: "",
+      });
+      setBaseProposalForGeneration(newProposal);
+      setNewProposalId(newProposal.id);
+      setIsGenerateDialogOpen(true);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to open AI Generator",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleProposalGenerated = async (generated: Proposal, sessionId?: number) => {
