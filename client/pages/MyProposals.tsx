@@ -210,9 +210,14 @@ export default function MyProposals() {
         });
       }
 
-      // Navigate to editor
-      nav(`/proposals/${newProposalId}/edit`);
+      // Navigate to editor with sessionId if available
+      const editorUrl = chatSessionId
+        ? `/proposals/${newProposalId}/edit?sessionId=${chatSessionId}`
+        : `/proposals/${newProposalId}/edit`;
+
+      nav(editorUrl);
       setNewProposalId(null);
+      setChatSessionId(null);
     } catch (error) {
       console.error("Error applying template:", error);
       toast({
@@ -222,6 +227,7 @@ export default function MyProposals() {
       });
       nav(`/proposals/${newProposalId}/edit`);
       setNewProposalId(null);
+      setChatSessionId(null);
     }
   }
 
