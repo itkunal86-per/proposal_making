@@ -194,45 +194,70 @@ export default function MyProposals() {
   async function handleTemplateSelected(template: SystemTemplate | null) {
     if (!newProposalId) return;
 
-    try {
-      if (template) {
-        // Call API to copy proposal from template
-        const copiedProposal = await copyProposalFromTemplate(String(template.id), newProposalId);
+    // Store the template and show title dialog
+    setSelectedTemplate(template);
+    setShowTemplateSelection(false);
+    setShowTitleDialog(true);
+  }
 
-        if (!copiedProposal) {
-          throw new Error("Failed to copy proposal from template");
+  async function handleProposalTitleSubmit(title: string) {
+    if (!newProposalId || !chatSessionId) {
+      // Fallback to old flow if no session ID (manual template selection)
+      try {
+        if (selectedTemplate) {
+          const copiedProposal = await copyProposalFromTemplate(String(selectedTemplate.id), newProposalId);
+          if (!copiedProposal) {
+            throw new Error("Failed to copy proposal from template");
+          }
         }
 
+        const editorUrl = `/proposals/${newProposalId}/edit`;
+        nav(editorUrl);
+        setNewProposalId(null);
+        setSelectedTemplate(null);
+      } catch (error) {
+        console.error("Error applying template:", error);
+        throw error;
+      }
+      return;
+    }
+
+    // AI-generated flow with API call
+    try {
+      setIsGeneratingProposal(true);
+
+      const templateId = selectedTemplate?.id || 0;
+
+      const response = await generateProposalFromTemplate({
+        session_id: chatSessionId,
+        template_id: templateId,
+        title: title,
+      });
+
+      if (response.proposal_id) {
         toast({
           title: "Success",
-          description: "Template applied successfully",
+          description: "Proposal created successfully!",
         });
+
+        // Navigate to editor with the new proposal ID
+        nav(`/proposals/${response.proposal_id}/edit?sessionId=${chatSessionId}`);
+        setNewProposalId(null);
+        setChatSessionId(null);
+        setSelectedTemplate(null);
       } else {
-        // Custom design - no template applied
-        toast({
-          title: "Ready to create",
-          description: "Start designing your proposal",
-        });
+        throw new Error("No proposal ID returned");
       }
-
-      // Navigate to editor with sessionId if available
-      const editorUrl = chatSessionId
-        ? `/proposals/${newProposalId}/edit?sessionId=${chatSessionId}`
-        : `/proposals/${newProposalId}/edit`;
-
-      nav(editorUrl);
-      setNewProposalId(null);
-      setChatSessionId(null);
     } catch (error) {
-      console.error("Error applying template:", error);
+      console.error("Error creating proposal from template:", error);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to apply template",
+        description: error instanceof Error ? error.message : "Failed to create proposal",
         variant: "destructive",
       });
-      nav(`/proposals/${newProposalId}/edit`);
-      setNewProposalId(null);
-      setChatSessionId(null);
+      throw error;
+    } finally {
+      setIsGeneratingProposal(false);
     }
   }
 
