@@ -22,6 +22,49 @@ interface ProposalAIResponse {
   data: string;
 }
 
+interface ChatInitRequest {
+  message: string;
+  input_type: "website" | "document" | "text";
+  url?: string;
+  file?: File | null;
+}
+
+interface ProposalIntent {
+  Description: string;
+  Goals: string[];
+}
+
+interface ProposalRequirements {
+  [key: string]: string;
+}
+
+interface ProposalIntentData {
+  ProposalIntent: ProposalIntent;
+  Requirements: ProposalRequirements;
+  ProposalType: string;
+}
+
+interface ChatInitResponse {
+  status: boolean;
+  session_id: number;
+  proposal_intent: {
+    ProposalIntent: ProposalIntent;
+    Requirements: ProposalRequirements;
+    ProposalType: string;
+  };
+}
+
+interface GenerateFromTemplateRequest {
+  session_id: number;
+  template_id: string | number;
+  title: string;
+}
+
+interface GenerateFromTemplateResponse {
+  proposal_id: number;
+  version: number;
+}
+
 export async function generateProposalFromPrompt(
   request: GenerateProposalRequest
 ): Promise<GenerateProposalResponse> {
@@ -189,5 +232,104 @@ export async function generateAIContent(prompt: string): Promise<string> {
       throw new Error(`Failed to generate AI content: ${error.message}`);
     }
     throw new Error("Failed to generate AI content: Unknown error");
+  }
+}
+
+export async function initializeProposalChat(
+  request: ChatInitRequest
+): Promise<ChatInitResponse> {
+  const token = getStoredToken();
+
+  if (!token) {
+    throw new Error("Authentication token not found. Please log in again.");
+  }
+
+  try {
+    const formData = new FormData();
+    formData.append("message", request.message);
+    formData.append("input_type", request.input_type);
+
+    if (request.url) {
+      formData.append("url", request.url);
+    }
+
+    if (request.file) {
+      formData.append("file", request.file);
+    } else {
+      formData.append("file", "");
+    }
+
+    const response = await fetch("https://propai-api.hirenq.com/api/chat/init", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(
+        error.message || error.error || `Chat initialization failed with status ${response.status}`
+      );
+    }
+
+    const data: ChatInitResponse = await response.json();
+
+    if (!data.status) {
+      throw new Error(data.message || "Chat initialization failed");
+    }
+
+    return data;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`Failed to initialize proposal chat: ${error.message}`);
+    }
+    throw new Error("Failed to initialize proposal chat: Unknown error");
+  }
+}
+
+export async function generateProposalFromTemplate(
+  request: GenerateFromTemplateRequest
+): Promise<GenerateFromTemplateResponse> {
+  const token = getStoredToken();
+
+  if (!token) {
+    throw new Error("Authentication token not found. Please log in again.");
+  }
+
+  try {
+    const response = await fetch("https://propai-api.hirenq.com/api/chat/proposal/generate-from-template", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        session_id: request.session_id,
+        template_id: request.template_id,
+        title: request.title,
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(
+        error.message || error.error || `Failed to generate proposal with status ${response.status}`
+      );
+    }
+
+    const data: GenerateFromTemplateResponse = await response.json();
+
+    if (!data.proposal_id) {
+      throw new Error("No proposal ID returned from API");
+    }
+
+    return data;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`Failed to generate proposal from template: ${error.message}`);
+    }
+    throw new Error("Failed to generate proposal from template: Unknown error");
   }
 }

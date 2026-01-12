@@ -28,7 +28,9 @@ import { type ClientRecord, listClients } from "@/services/clientsService";
 import { GenerateProposalDialog } from "@/components/GenerateProposalDialog";
 import { ProposalPreviewModal } from "@/components/ProposalPreviewModal";
 import { TemplateSelectionModal } from "@/components/TemplateSelectionModal";
+import { ProposalTitleDialog } from "@/components/ProposalTitleDialog";
 import { convertSystemTemplateToProposal, type SystemTemplate, copyProposalFromTemplate, saveProposalAsTemplate } from "@/services/systemTemplatesService";
+import { generateProposalFromTemplate } from "@/services/aiGenerationService";
 import { Wand2, MoreVertical, FileText } from "lucide-react";
 
 const statusStyles: Record<string, string> = {
@@ -59,6 +61,10 @@ export default function MyProposals() {
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
   const [newProposalId, setNewProposalId] = useState<string | null>(null);
   const [showTemplateSelection, setShowTemplateSelection] = useState(false);
+  const [chatSessionId, setChatSessionId] = useState<number | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<SystemTemplate | null>(null);
+  const [showTitleDialog, setShowTitleDialog] = useState(false);
+  const [isGeneratingProposal, setIsGeneratingProposal] = useState(false);
   const [saveTemplateDialogOpen, setSaveTemplateDialogOpen] = useState(false);
   const [templateName, setTemplateName] = useState("");
   const [proposalToSave, setProposalToSave] = useState<Proposal | null>(null);
@@ -92,25 +98,37 @@ export default function MyProposals() {
   };
 
   const handleOpenGenerateDialog = async () => {
-    await loadClients();
-    const newProposal = await createProposal({
-      title: "New Proposal",
-      client: "",
-    });
-    setBaseProposalForGeneration(newProposal);
-    setIsGenerateDialogOpen(true);
-  };
-
-  const handleProposalGenerated = async (generated: Proposal) => {
     try {
-      await persistProposal(generated);
-      await updateProposal(generated);
-      await refresh();
-      nav(`/proposals/${generated.id}/edit`);
+      await loadClients();
+      const newProposal = await createProposal({
+        title: "New Proposal",
+        client: "",
+      });
+      setBaseProposalForGeneration(newProposal);
+      setNewProposalId(newProposal.id);
+      setIsGenerateDialogOpen(true);
     } catch (error) {
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to save generated proposal",
+        description: error instanceof Error ? error.message : "Failed to open AI Generator",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleProposalGenerated = async (generated: Proposal, sessionId?: number) => {
+    try {
+      // Store the session ID for later use
+      if (sessionId) {
+        setChatSessionId(sessionId);
+      }
+
+      // Open template selection modal
+      setShowTemplateSelection(true);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to process proposal",
         variant: "destructive",
       });
     }
@@ -176,39 +194,70 @@ export default function MyProposals() {
   async function handleTemplateSelected(template: SystemTemplate | null) {
     if (!newProposalId) return;
 
-    try {
-      if (template) {
-        // Call API to copy proposal from template
-        const copiedProposal = await copyProposalFromTemplate(String(template.id), newProposalId);
+    // Store the template and show title dialog
+    setSelectedTemplate(template);
+    setShowTemplateSelection(false);
+    setShowTitleDialog(true);
+  }
 
-        if (!copiedProposal) {
-          throw new Error("Failed to copy proposal from template");
+  async function handleProposalTitleSubmit(title: string) {
+    if (!newProposalId || !chatSessionId) {
+      // Fallback to old flow if no session ID (manual template selection)
+      try {
+        if (selectedTemplate) {
+          const copiedProposal = await copyProposalFromTemplate(String(selectedTemplate.id), newProposalId);
+          if (!copiedProposal) {
+            throw new Error("Failed to copy proposal from template");
+          }
         }
 
+        const editorUrl = `/proposals/${newProposalId}/edit`;
+        nav(editorUrl);
+        setNewProposalId(null);
+        setSelectedTemplate(null);
+      } catch (error) {
+        console.error("Error applying template:", error);
+        throw error;
+      }
+      return;
+    }
+
+    // AI-generated flow with API call
+    try {
+      setIsGeneratingProposal(true);
+
+      const templateId = selectedTemplate?.id || 0;
+
+      const response = await generateProposalFromTemplate({
+        session_id: chatSessionId,
+        template_id: templateId,
+        title: title,
+      });
+
+      if (response.proposal_id) {
         toast({
           title: "Success",
-          description: "Template applied successfully",
+          description: "Proposal created successfully!",
         });
-      } else {
-        // Custom design - no template applied
-        toast({
-          title: "Ready to create",
-          description: "Start designing your proposal",
-        });
-      }
 
-      // Navigate to editor
-      nav(`/proposals/${newProposalId}/edit`);
-      setNewProposalId(null);
+        // Navigate to editor with the new proposal ID
+        nav(`/proposals/${response.proposal_id}/edit?sessionId=${chatSessionId}`);
+        setNewProposalId(null);
+        setChatSessionId(null);
+        setSelectedTemplate(null);
+      } else {
+        throw new Error("No proposal ID returned");
+      }
     } catch (error) {
-      console.error("Error applying template:", error);
+      console.error("Error creating proposal from template:", error);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to apply template",
+        description: error instanceof Error ? error.message : "Failed to create proposal",
         variant: "destructive",
       });
-      nav(`/proposals/${newProposalId}/edit`);
-      setNewProposalId(null);
+      throw error;
+    } finally {
+      setIsGeneratingProposal(false);
     }
   }
 
@@ -637,6 +686,13 @@ export default function MyProposals() {
         onOpenChange={setShowTemplateSelection}
         onSelectTemplate={handleTemplateSelected}
         isLoading={isCreating}
+      />
+
+      <ProposalTitleDialog
+        open={showTitleDialog}
+        onOpenChange={setShowTitleDialog}
+        onSubmit={handleProposalTitleSubmit}
+        isLoading={isGeneratingProposal}
       />
 
       <Dialog open={saveTemplateDialogOpen} onOpenChange={setSaveTemplateDialogOpen}>
