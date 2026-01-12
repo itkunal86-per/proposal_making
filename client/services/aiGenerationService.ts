@@ -288,3 +288,48 @@ export async function initializeProposalChat(
     throw new Error("Failed to initialize proposal chat: Unknown error");
   }
 }
+
+export async function generateProposalFromTemplate(
+  request: GenerateFromTemplateRequest
+): Promise<GenerateFromTemplateResponse> {
+  const token = getStoredToken();
+
+  if (!token) {
+    throw new Error("Authentication token not found. Please log in again.");
+  }
+
+  try {
+    const response = await fetch("https://propai-api.hirenq.com/api/chat/proposal/generate-from-template", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        session_id: request.session_id,
+        template_id: request.template_id,
+        title: request.title,
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(
+        error.message || error.error || `Failed to generate proposal with status ${response.status}`
+      );
+    }
+
+    const data: GenerateFromTemplateResponse = await response.json();
+
+    if (!data.proposal_id) {
+      throw new Error("No proposal ID returned from API");
+    }
+
+    return data;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`Failed to generate proposal from template: ${error.message}`);
+    }
+    throw new Error("Failed to generate proposal from template: Unknown error");
+  }
+}
