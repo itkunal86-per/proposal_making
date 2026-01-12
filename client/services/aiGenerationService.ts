@@ -277,7 +277,7 @@ export async function initializeProposalChat(
     const data: ChatInitResponse = await response.json();
 
     if (!data.status) {
-      throw new Error(data.message || "Chat initialization failed");
+      throw new Error("Chat initialization failed");
     }
 
     return data;

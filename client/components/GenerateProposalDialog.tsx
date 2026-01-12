@@ -214,7 +214,7 @@ export const GenerateProposalDialog: React.FC<GenerateProposalDialogProps> = ({
 
         if (proposalIntent) {
           // Handle the nested structure
-          const intentData = proposalIntent.ProposalIntent || proposalIntent;
+          const intentData = proposalIntent.ProposalIntent;
           const description = intentData?.Description;
           const goals = intentData?.Goals || [];
           const requirements = proposalIntent.Requirements;
