@@ -206,11 +206,45 @@ export const GenerateProposalDialog: React.FC<GenerateProposalDialogProps> = ({
       });
 
       if (response.status && response.session_id) {
-        // Add assistant response
+        // Extract proposal intent details from response
+        const proposalIntent = response.proposal_intent;
+
+        // Build the assistant message content with dynamic data
+        let messageContent = "Great! I've analyzed your request.";
+
+        if (proposalIntent) {
+          // Handle the nested structure
+          const intentData = proposalIntent.ProposalIntent || proposalIntent;
+          const description = intentData?.Description;
+          const goals = intentData?.Goals || [];
+          const requirements = proposalIntent.Requirements;
+          const proposalType = proposalIntent.ProposalType;
+
+          if (description) {
+            messageContent += `\n\n**Proposal Intent:**\n${description}`;
+          }
+
+          if (goals && goals.length > 0) {
+            messageContent += `\n\n**Goals:**\n${goals.map((g: string) => `• ${g}`).join("\n")}`;
+          }
+
+          if (proposalType) {
+            messageContent += `\n\n**Proposal Type:**\n${proposalType}`;
+          }
+
+          if (requirements && Object.keys(requirements).length > 0) {
+            messageContent += `\n\n**Key Requirements:**\n${Object.entries(requirements)
+              .map(([key, value]: [string, any]) => `• ${key}: ${value}`)
+              .join("\n")}`;
+          }
+        }
+
+        messageContent += "\n\nNow, let's choose a template to get started!";
+
         const assistantMessage: ChatMessage = {
           id: Date.now().toString() + "a",
           type: "assistant",
-          content: `Great! I've analyzed your request. Here's the proposal intent:\n\n${response.proposal_intent.ProposalIntent.Description}\n\nThis proposal will help you achieve:\n${response.proposal_intent.ProposalIntent.Goals.map((g) => `• ${g}`).join("\n")}`,
+          content: messageContent,
           timestamp: new Date(),
         };
 
