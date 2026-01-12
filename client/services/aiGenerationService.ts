@@ -223,3 +223,57 @@ export async function generateAIContent(prompt: string): Promise<string> {
     throw new Error("Failed to generate AI content: Unknown error");
   }
 }
+
+export async function initializeProposalChat(
+  request: ChatInitRequest
+): Promise<ChatInitResponse> {
+  const token = getStoredToken();
+
+  if (!token) {
+    throw new Error("Authentication token not found. Please log in again.");
+  }
+
+  try {
+    const formData = new FormData();
+    formData.append("message", request.message);
+    formData.append("input_type", request.input_type);
+
+    if (request.url) {
+      formData.append("url", request.url);
+    }
+
+    if (request.file) {
+      formData.append("file", request.file);
+    } else {
+      formData.append("file", "");
+    }
+
+    const response = await fetch("https://propai-api.hirenq.com/api/chat/init", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(
+        error.message || error.error || `Chat initialization failed with status ${response.status}`
+      );
+    }
+
+    const data: ChatInitResponse = await response.json();
+
+    if (!data.status) {
+      throw new Error(data.message || "Chat initialization failed");
+    }
+
+    return data;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`Failed to initialize proposal chat: ${error.message}`);
+    }
+    throw new Error("Failed to initialize proposal chat: Unknown error");
+  }
+}
