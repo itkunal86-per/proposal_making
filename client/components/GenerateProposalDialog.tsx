@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 import { initializeProposalChat } from "@/services/aiGenerationService";
 import { Proposal } from "@/services/proposalsService";
-import { Loader2, Send, FileUp, Link as LinkIcon, X } from "lucide-react";
+import { Loader2, Send, FileUp, Link as LinkIcon, X, Mail } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface ChatMessage {
@@ -24,7 +24,7 @@ interface ChatMessage {
 
 interface AttachedFile {
   name: string;
-  type: "rfp" | "url";
+  type: "rfp" | "url" | "email";
   content: string;
   file?: File;
 }
