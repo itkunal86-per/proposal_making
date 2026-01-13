@@ -336,7 +336,7 @@ export const GenerateProposalDialog: React.FC<GenerateProposalDialogProps> = ({
         <DialogHeader className="border-b border-border px-6 py-4 flex-shrink-0">
           <DialogTitle>AI Proposal Generator</DialogTitle>
           <DialogDescription>
-            Describe your proposal needs, attach documents, or provide URLs for AI to analyze
+            Describe your proposal needs, attach documents, provide URLs, or paste email content for AI to analyze
           </DialogDescription>
         </DialogHeader>
 
