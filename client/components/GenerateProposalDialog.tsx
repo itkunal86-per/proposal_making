@@ -507,6 +507,17 @@ export const GenerateProposalDialog: React.FC<GenerateProposalDialogProps> = ({
               <LinkIcon className="h-4 w-4" />
               <span className="hidden sm:inline">URL</span>
             </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setShowEmailInput(!showEmailInput)}
+              disabled={isLoading}
+              className="gap-2"
+              title="Add email content"
+            >
+              <Mail className="h-4 w-4" />
+              <span className="hidden sm:inline">Email Content</span>
+            </Button>
           </div>
 
           <div className="flex gap-2 items-end">
