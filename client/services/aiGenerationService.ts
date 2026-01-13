@@ -254,6 +254,10 @@ export async function initializeProposalChat(
       formData.append("url", request.url);
     }
 
+    if (request.email) {
+      formData.append("email", request.email);
+    }
+
     if (request.file) {
       formData.append("file", request.file);
     } else {
