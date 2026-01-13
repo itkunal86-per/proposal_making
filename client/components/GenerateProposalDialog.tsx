@@ -391,7 +391,7 @@ export const GenerateProposalDialog: React.FC<GenerateProposalDialogProps> = ({
                   className="flex items-center gap-2 bg-secondary/50 border border-border rounded-full px-3 py-1.5 text-sm"
                 >
                   <span className="text-xs font-medium">
-                    {file.type === "rfp" ? "📄" : "🔗"} {file.name}
+                    {file.type === "rfp" ? "📄" : file.type === "url" ? "🔗" : "📧"} {file.name}
                   </span>
                   <button
                     onClick={() => removeAttachment(index)}
