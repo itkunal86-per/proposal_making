@@ -160,6 +160,34 @@ export const GenerateProposalDialog: React.FC<GenerateProposalDialogProps> = ({
     setShowUrlInput(false);
   };
 
+  const handleAddEmail = () => {
+    if (!emailInput.trim()) {
+      toast({
+        title: "Invalid email content",
+        description: "Please enter email content",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setAttachedFiles([
+      ...attachedFiles,
+      {
+        name: "Email Content",
+        type: "email",
+        content: emailInput,
+      },
+    ]);
+
+    toast({
+      title: "Email content added",
+      description: "Email content has been attached for analysis",
+    });
+
+    setEmailInput("");
+    setShowEmailInput(false);
+  };
+
   const removeAttachment = (index: number) => {
     setAttachedFiles(attachedFiles.filter((_, i) => i !== index));
   };
