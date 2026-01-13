@@ -237,6 +237,7 @@ export const GenerateProposalDialog: React.FC<GenerateProposalDialogProps> = ({
         message: inputMessage,
         input_type: inputType,
         url: urlToSend,
+        email: emailToSend,
         file: fileToSend || null,
       });
 
