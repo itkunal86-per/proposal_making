@@ -440,6 +440,40 @@ export const GenerateProposalDialog: React.FC<GenerateProposalDialogProps> = ({
           </div>
         )}
 
+        {/* Email Input Field */}
+        {showEmailInput && (
+          <div className="border-t border-border px-6 py-3 flex-shrink-0 space-y-2">
+            <textarea
+              placeholder="Paste your email content here..."
+              value={emailInput}
+              onChange={(e) => setEmailInput(e.target.value)}
+              disabled={isLoading}
+              rows={4}
+              className="w-full resize-none rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            />
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                onClick={handleAddEmail}
+                disabled={isLoading || !emailInput.trim()}
+              >
+                Add
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  setShowEmailInput(false);
+                  setEmailInput("");
+                }}
+                disabled={isLoading}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* Input Area */}
         <div className="border-t border-border px-6 py-4 flex-shrink-0 space-y-3">
           <div className="flex gap-2">
