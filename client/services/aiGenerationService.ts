@@ -24,8 +24,9 @@ interface ProposalAIResponse {
 
 interface ChatInitRequest {
   message: string;
-  input_type: "website" | "document" | "text";
+  input_type: "website" | "document" | "text" | "email";
   url?: string;
+  email?: string;
   file?: File | null;
 }
 
