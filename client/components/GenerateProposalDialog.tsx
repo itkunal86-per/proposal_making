@@ -61,7 +61,7 @@ export const GenerateProposalDialog: React.FC<GenerateProposalDialogProps> = ({
         {
           id: "welcome",
           type: "assistant",
-          content: "Hi! I'm here to help you generate a proposal. You can describe what you need, attach an RFP document, or provide a URL to crawl. What would you like to create?",
+          content: "Hi! I'm here to help you generate a proposal. You can describe what you need, attach an RFP document, provide a URL to crawl, or paste email content. What would you like to create?",
           timestamp: new Date(),
         },
       ]);
