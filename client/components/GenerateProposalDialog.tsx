@@ -210,13 +210,15 @@ export const GenerateProposalDialog: React.FC<GenerateProposalDialogProps> = ({
 
     try {
       // Determine input type based on attachments
-      let inputType: "website" | "document" | "text" = "text";
+      let inputType: "website" | "document" | "text" | "email" = "text";
       let urlToSend: string | undefined;
       let fileToSend: File | undefined;
+      let emailToSend: string | undefined;
 
       if (attachedFiles.length > 0) {
         const rfpFile = attachedFiles.find((f) => f.type === "rfp");
         const urlFile = attachedFiles.find((f) => f.type === "url");
+        const emailFile = attachedFiles.find((f) => f.type === "email");
 
         if (rfpFile) {
           inputType = "document";
@@ -224,6 +226,9 @@ export const GenerateProposalDialog: React.FC<GenerateProposalDialogProps> = ({
         } else if (urlFile) {
           inputType = "website";
           urlToSend = urlFile.content;
+        } else if (emailFile) {
+          inputType = "email";
+          emailToSend = emailFile.content;
         }
       }
 
