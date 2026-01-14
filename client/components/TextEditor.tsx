@@ -312,9 +312,6 @@ export const TextEditor: React.FC<TextEditorProps> = ({
           outlineOffset: "-2px",
           whiteSpace: "pre-wrap",
           overflowWrap: "break-word",
-          display: "flex",
-          alignItems: "flex-start",
-          justifyContent: "flex-start",
         }}
       >
         {!content && !isEditing && "Click to edit..."}
