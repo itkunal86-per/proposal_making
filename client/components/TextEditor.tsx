@@ -252,6 +252,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({
         height: `${height}px`,
         cursor: isDragging ? "grabbing" : "grab",
         pointerEvents: "auto",
+        zIndex: selected ? 20 : 1,
       }}
       onMouseDown={(e) => handleMouseDown(e, null)}
       onDoubleClick={handleDoubleClick}
