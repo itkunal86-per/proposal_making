@@ -54,6 +54,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({
   top,
   left,
   width,
+  height = 100,
   fontSize = "16",
   color = "#000000",
   fontWeight = false,
@@ -75,7 +76,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [initialPos, setInitialPos] = useState({ top, left });
-  const [initialSize, setInitialSize] = useState({ width });
+  const [initialSize, setInitialSize] = useState({ width, height });
   const containerRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<HTMLDivElement>(null);
   const isInitializedRef = useRef(false);
