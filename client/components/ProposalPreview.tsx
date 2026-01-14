@@ -600,46 +600,59 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
             )}
 
             {!isMultiColumn && (
-              <SelectableElement
-                  id={`section-content-${section.id}`}
-                  type="section-content"
-                  selected={selectedElementId === `section-content-${section.id}`}
-                  onSelect={() =>
-                    onSelectElement(`section-content-${section.id}`, "section-content")
-                  }
-                  onAI={() => onAIElement?.(`section-content-${section.id}`, "section-content")}
-                  onDelete={() => onDeleteContent?.(section.id)}
-                  value={section.content}
-                  color={(section as any).contentStyles?.color}
-                  fontSize={(section as any).contentStyles?.fontSize}
-                  textAlign={(section as any).contentStyles?.textAlign}
-                  backgroundColor={(section as any).contentStyles?.backgroundColor}
-                  backgroundImage={(section as any).contentStyles?.backgroundImage}
-                  backgroundSize={(section as any).contentStyles?.backgroundSize}
-                  backgroundOpacity={(section as any).contentStyles?.backgroundOpacity}
-                  borderColor={(section as any).contentStyles?.borderColor}
-                  borderWidth={(section as any).contentStyles?.borderWidth}
-                  borderRadius={(section as any).contentStyles?.borderRadius}
-                  borderStyle={(section as any).contentStyles?.borderStyle}
-                  paddingTop={(section as any).contentStyles?.paddingTop}
-                  paddingRight={(section as any).contentStyles?.paddingRight}
-                  paddingBottom={(section as any).contentStyles?.paddingBottom}
-                  paddingLeft={(section as any).contentStyles?.paddingLeft}
-                  marginTop={(section as any).contentStyles?.marginTop}
-                  marginRight={(section as any).contentStyles?.marginRight}
-                  marginBottom={(section as any).contentStyles?.marginBottom}
-                  marginLeft={(section as any).contentStyles?.marginLeft}
-                  bold={(section as any).contentStyles?.bold}
-                  italic={(section as any).contentStyles?.italic}
-                  underline={(section as any).contentStyles?.underline}
-                  strikethrough={(section as any).contentStyles?.strikethrough}
-                  bulletList={(section as any).contentStyles?.bulletList}
-                  numberList={(section as any).contentStyles?.numberList}
-                  code={(section as any).contentStyles?.code}
-                  variables={variables}
-                >
-                  {section.content || ""}
-                </SelectableElement>
+              <div
+                data-content-id={`section-content-${section.id}`}
+                style={{
+                  minHeight: customContentHeights[`section-content-${section.id}`] ? `${customContentHeights[`section-content-${section.id}`]}px` : "auto",
+                  position: "relative",
+                }}
+              >
+                <SelectableElement
+                    id={`section-content-${section.id}`}
+                    type="section-content"
+                    selected={selectedElementId === `section-content-${section.id}`}
+                    onSelect={() =>
+                      onSelectElement(`section-content-${section.id}`, "section-content")
+                    }
+                    onAI={() => onAIElement?.(`section-content-${section.id}`, "section-content")}
+                    onDelete={() => onDeleteContent?.(section.id)}
+                    value={section.content}
+                    color={(section as any).contentStyles?.color}
+                    fontSize={(section as any).contentStyles?.fontSize}
+                    textAlign={(section as any).contentStyles?.textAlign}
+                    backgroundColor={(section as any).contentStyles?.backgroundColor}
+                    backgroundImage={(section as any).contentStyles?.backgroundImage}
+                    backgroundSize={(section as any).contentStyles?.backgroundSize}
+                    backgroundOpacity={(section as any).contentStyles?.backgroundOpacity}
+                    borderColor={(section as any).contentStyles?.borderColor}
+                    borderWidth={(section as any).contentStyles?.borderWidth}
+                    borderRadius={(section as any).contentStyles?.borderRadius}
+                    borderStyle={(section as any).contentStyles?.borderStyle}
+                    paddingTop={(section as any).contentStyles?.paddingTop}
+                    paddingRight={(section as any).contentStyles?.paddingRight}
+                    paddingBottom={(section as any).contentStyles?.paddingBottom}
+                    paddingLeft={(section as any).contentStyles?.paddingLeft}
+                    marginTop={(section as any).contentStyles?.marginTop}
+                    marginRight={(section as any).contentStyles?.marginRight}
+                    marginBottom={(section as any).contentStyles?.marginBottom}
+                    marginLeft={(section as any).contentStyles?.marginLeft}
+                    bold={(section as any).contentStyles?.bold}
+                    italic={(section as any).contentStyles?.italic}
+                    underline={(section as any).contentStyles?.underline}
+                    strikethrough={(section as any).contentStyles?.strikethrough}
+                    bulletList={(section as any).contentStyles?.bulletList}
+                    numberList={(section as any).contentStyles?.numberList}
+                    code={(section as any).contentStyles?.code}
+                    variables={variables}
+                  >
+                    {section.content || ""}
+                  </SelectableElement>
+                  <div
+                    onMouseDown={() => setResizingContentId(`section-content-${section.id}`)}
+                    className="w-full h-1 bg-gradient-to-r from-transparent via-blue-300 to-transparent hover:via-blue-500 cursor-row-resize mt-2 rounded transition-colors"
+                    title="Drag to resize section height"
+                  />
+              </div>
             )}
 
             {isMultiColumn && (
