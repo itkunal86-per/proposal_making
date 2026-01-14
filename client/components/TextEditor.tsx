@@ -164,9 +164,13 @@ export const TextEditor: React.FC<TextEditorProps> = ({
         });
       } else if (isResizing) {
         const deltaX = e.clientX - dragStart.x;
+        const deltaY = e.clientY - dragStart.y;
         let newWidth = initialSize.width;
+        let newHeight = initialSize.height;
         let newLeft = initialPos.left;
+        let newTop = initialPos.top;
 
+        // Handle horizontal resizing
         if (isResizing.includes("e")) {
           newWidth = Math.max(50, initialSize.width + deltaX);
         }
@@ -175,9 +179,20 @@ export const TextEditor: React.FC<TextEditorProps> = ({
           newLeft = initialPos.left + deltaX;
         }
 
+        // Handle vertical resizing
+        if (isResizing.includes("s")) {
+          newHeight = Math.max(40, initialSize.height + deltaY);
+        }
+        if (isResizing.includes("n")) {
+          newHeight = Math.max(40, initialSize.height - deltaY);
+          newTop = initialPos.top + deltaY;
+        }
+
         onUpdate({
           width: newWidth,
+          height: newHeight,
           left: newLeft,
+          top: newTop,
         });
       }
     };
