@@ -26,6 +26,14 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
   const sectionRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
   React.useEffect(() => {
+    // Disable body scroll when modal is open
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, []);
+
+  React.useEffect(() => {
     const newHeights: Record<string, number> = {};
 
     proposal.sections.forEach((section) => {
