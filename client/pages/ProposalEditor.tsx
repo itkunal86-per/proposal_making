@@ -766,8 +766,8 @@ export default function ProposalEditor() {
 
         {/* Main content area */}
         <div className="flex-1 flex gap-4 overflow-hidden">
-          {/* Editor Preview - auto height, scrollable */}
-          <div ref={previewContainerRef} className="flex-1 overflow-y-auto p-6 h-auto">
+          {/* Editor Preview - scrollable with auto-expanding content */}
+          <div ref={previewContainerRef} className="flex-1 overflow-y-auto p-6">
             <ProposalPreview
               proposal={p}
               selectedElementId={selectedElementId}
@@ -1068,7 +1068,7 @@ export default function ProposalEditor() {
           </div>
 
           {/* Properties Panel */}
-          <div className="w-96 overflow-y-auto p-6 border-l border-slate-200 bg-white">
+          <div className="w-96 flex-shrink-0 overflow-y-auto p-6 border-l border-slate-200 bg-white">
             {activePanel === "properties" ? (
               <PropertiesPanel
                 proposal={p}
