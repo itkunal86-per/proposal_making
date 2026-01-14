@@ -158,7 +158,7 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
         height: `${height}px`,
         cursor: isDragging ? "grabbing" : "grab",
         userSelect: "none",
-        zIndex: selected ? 20 : 1,
+        zIndex: selected ? 1000 : 10,
       }}
     >
       <ImageElement
