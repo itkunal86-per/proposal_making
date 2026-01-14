@@ -400,6 +400,37 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
     setCanvasHeights(newHeights);
   }, [proposal.sections]);
 
+  // Handle content resize
+  React.useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!resizingContentId) return;
+
+      const contentElement = document.querySelector(`[data-content-id="${resizingContentId}"]`) as HTMLElement;
+      if (!contentElement) return;
+
+      const rect = contentElement.getBoundingClientRect();
+      const newHeight = Math.max(80, e.clientY - rect.top);
+
+      setCustomContentHeights((prev) => ({
+        ...prev,
+        [resizingContentId]: newHeight,
+      }));
+    };
+
+    const handleMouseUp = () => {
+      setResizingContentId(null);
+    };
+
+    if (resizingContentId) {
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
+      return () => {
+        document.removeEventListener("mousemove", handleMouseMove);
+        document.removeEventListener("mouseup", handleMouseUp);
+      };
+    }
+  }, [resizingContentId]);
+
   // Handle null proposal
   if (!proposal) {
     return (
