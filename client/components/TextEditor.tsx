@@ -249,6 +249,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({
         left: `${left}px`,
         top: `${top}px`,
         width: `${width}px`,
+        height: `${height}px`,
         cursor: isDragging ? "grabbing" : "grab",
         pointerEvents: "auto",
       }}
