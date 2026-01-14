@@ -325,6 +325,8 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
 
   const [dragOverSectionId, setDragOverSectionId] = React.useState<string | null>(null);
   const [canvasHeights, setCanvasHeights] = React.useState<Record<string, number>>({});
+  const [customContentHeights, setCustomContentHeights] = React.useState<Record<string, number>>({});
+  const [resizingContentId, setResizingContentId] = React.useState<string | null>(null);
 
   const sectionRefs = React.useRef<Map<string, HTMLDivElement>>(new Map());
 
