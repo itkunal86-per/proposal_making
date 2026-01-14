@@ -42,7 +42,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
           ((section as any).texts && (section as any).texts.length > 0) ||
           ((section as any).images && (section as any).images.length > 0) ||
           (section.signatureFields && section.signatureFields.length > 0)) {
-        let maxHeight = 400; // minimum height
+        let maxHeight = 100; // flexible minimum height
 
         // Calculate max height needed for shapes
         if (section.shapes) {
