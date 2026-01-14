@@ -301,7 +301,9 @@ export const TextEditor: React.FC<TextEditorProps> = ({
           backgroundColor: backgroundColor,
           opacity: parseInt(backgroundOpacity || "100") / 100,
           cursor: isEditing ? "text" : "grab",
-          minHeight: "40px",
+          height: "100%",
+          width: "100%",
+          boxSizing: "border-box",
           wordWrap: "break-word",
           fontSize: `${fontSize}px`,
           color: color,
@@ -310,8 +312,9 @@ export const TextEditor: React.FC<TextEditorProps> = ({
           outlineOffset: "-2px",
           whiteSpace: "pre-wrap",
           overflowWrap: "break-word",
-          width: "100%",
-          boxSizing: "border-box",
+          display: "flex",
+          alignItems: "flex-start",
+          justifyContent: "flex-start",
         }}
       >
         {!content && !isEditing && "Click to edit..."}
