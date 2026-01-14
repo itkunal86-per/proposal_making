@@ -218,8 +218,8 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-9999" style={{ zIndex: 9998 }}>
-      <div className="fixed inset-0 flex flex-col bg-white" style={{ zIndex: 9999 }}>
+    <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0, 0, 0, 0.5)", zIndex: 9998 }}>
+      <div style={{ position: "fixed", inset: 0, display: "flex", flexDirection: "column", backgroundColor: "white", zIndex: 9999 }}>
         {/* Header */}
         <div className="border-b border-slate-200 px-6 py-4 flex items-center justify-between">
           <h1 className="text-2xl font-bold">{proposal.title}</h1>
