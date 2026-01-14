@@ -93,7 +93,8 @@ export const TextEditor: React.FC<TextEditorProps> = ({
     if (handle) {
       setIsResizing(handle);
       setDragStart({ x: e.clientX, y: e.clientY });
-      setInitialSize({ width });
+      setInitialSize({ width, height });
+      setInitialPos({ top, left });
     } else {
       setIsDragging(true);
       setDragStart({ x: e.clientX, y: e.clientY });
