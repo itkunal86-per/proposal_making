@@ -318,8 +318,14 @@ export const TextEditor: React.FC<TextEditorProps> = ({
 
       {selected && !isEditing && (
         <>
+          <ResizeHandle handle="nw" position={{ left: "-5px", top: "-5px" }} />
+          <ResizeHandle handle="n" position={{ left: "50%", top: "-5px", transform: "translateX(-50%)" }} />
+          <ResizeHandle handle="ne" position={{ right: "-5px", top: "-5px" }} />
           <ResizeHandle handle="w" position={{ left: "-5px", top: "50%", transform: "translateY(-50%)" }} />
           <ResizeHandle handle="e" position={{ right: "-5px", top: "50%", transform: "translateY(-50%)" }} />
+          <ResizeHandle handle="sw" position={{ left: "-5px", bottom: "-5px" }} />
+          <ResizeHandle handle="s" position={{ left: "50%", bottom: "-5px", transform: "translateX(-50%)" }} />
+          <ResizeHandle handle="se" position={{ right: "-5px", bottom: "-5px" }} />
         </>
       )}
     </div>
