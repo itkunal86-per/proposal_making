@@ -552,7 +552,10 @@ export default function ProposalEditor() {
                 </div>
               )}
               <Button
-                onClick={() => setShowPreviewModal(true)}
+                onClick={() => {
+                  setShowPreviewModal(true);
+                  setSelectedElementId(null);
+                }}
                 variant="outline"
                 size="sm"
               >
