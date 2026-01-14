@@ -529,7 +529,11 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
             style={{
               gap: isMultiColumn ? `${columnGapValue}px` : undefined,
               marginBottom: `${gapAfterValue}px`,
-              position: "relative"
+              position: "relative",
+              border: `2px solid #e5e7eb`,
+              borderRadius: "8px",
+              padding: "12px",
+              backgroundColor: selectedElementId?.includes(`section-title-${section.id}`) ? "#f9fafb" : "transparent"
             }}
             onDragOver={handleDragOver}
             onDragLeave={() => setDragOverSectionId(null)}
