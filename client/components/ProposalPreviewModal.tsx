@@ -598,6 +598,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                           top={text.top}
                           left={text.left}
                           width={text.width}
+                          height={text.height}
                           fontSize={text.fontSize}
                           color={text.color}
                           fontWeight={text.fontWeight}
