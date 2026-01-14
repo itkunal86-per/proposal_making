@@ -6,6 +6,7 @@ interface TextEditorProps {
   top: number;
   left: number;
   width: number;
+  height?: number;
   fontSize?: string;
   color?: string;
   fontWeight?: boolean;
@@ -25,6 +26,7 @@ interface TextEditorProps {
     top?: number;
     left?: number;
     width?: number;
+    height?: number;
     fontSize?: string;
     color?: string;
     fontWeight?: boolean;
@@ -52,6 +54,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({
   top,
   left,
   width,
+  height = 100,
   fontSize = "16",
   color = "#000000",
   fontWeight = false,
@@ -73,7 +76,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [initialPos, setInitialPos] = useState({ top, left });
-  const [initialSize, setInitialSize] = useState({ width });
+  const [initialSize, setInitialSize] = useState({ width, height });
   const containerRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<HTMLDivElement>(null);
   const isInitializedRef = useRef(false);
@@ -90,7 +93,8 @@ export const TextEditor: React.FC<TextEditorProps> = ({
     if (handle) {
       setIsResizing(handle);
       setDragStart({ x: e.clientX, y: e.clientY });
-      setInitialSize({ width });
+      setInitialSize({ width, height });
+      setInitialPos({ top, left });
     } else {
       setIsDragging(true);
       setDragStart({ x: e.clientX, y: e.clientY });
@@ -160,9 +164,13 @@ export const TextEditor: React.FC<TextEditorProps> = ({
         });
       } else if (isResizing) {
         const deltaX = e.clientX - dragStart.x;
+        const deltaY = e.clientY - dragStart.y;
         let newWidth = initialSize.width;
+        let newHeight = initialSize.height;
         let newLeft = initialPos.left;
+        let newTop = initialPos.top;
 
+        // Handle horizontal resizing
         if (isResizing.includes("e")) {
           newWidth = Math.max(50, initialSize.width + deltaX);
         }
@@ -171,9 +179,20 @@ export const TextEditor: React.FC<TextEditorProps> = ({
           newLeft = initialPos.left + deltaX;
         }
 
+        // Handle vertical resizing
+        if (isResizing.includes("s")) {
+          newHeight = Math.max(40, initialSize.height + deltaY);
+        }
+        if (isResizing.includes("n")) {
+          newHeight = Math.max(40, initialSize.height - deltaY);
+          newTop = initialPos.top + deltaY;
+        }
+
         onUpdate({
           width: newWidth,
+          height: newHeight,
           left: newLeft,
+          top: newTop,
         });
       }
     };
@@ -230,8 +249,10 @@ export const TextEditor: React.FC<TextEditorProps> = ({
         left: `${left}px`,
         top: `${top}px`,
         width: `${width}px`,
+        height: `${height}px`,
         cursor: isDragging ? "grabbing" : "grab",
         pointerEvents: "auto",
+        zIndex: selected ? 1000 : 10,
       }}
       onMouseDown={(e) => handleMouseDown(e, null)}
       onDoubleClick={handleDoubleClick}
@@ -281,7 +302,9 @@ export const TextEditor: React.FC<TextEditorProps> = ({
           backgroundColor: backgroundColor,
           opacity: parseInt(backgroundOpacity || "100") / 100,
           cursor: isEditing ? "text" : "grab",
-          minHeight: "40px",
+          height: "100%",
+          width: "100%",
+          boxSizing: "border-box",
           wordWrap: "break-word",
           fontSize: `${fontSize}px`,
           color: color,
@@ -297,8 +320,14 @@ export const TextEditor: React.FC<TextEditorProps> = ({
 
       {selected && !isEditing && (
         <>
+          <ResizeHandle handle="nw" position={{ left: "-5px", top: "-5px" }} />
+          <ResizeHandle handle="n" position={{ left: "50%", top: "-5px", transform: "translateX(-50%)" }} />
+          <ResizeHandle handle="ne" position={{ right: "-5px", top: "-5px" }} />
           <ResizeHandle handle="w" position={{ left: "-5px", top: "50%", transform: "translateY(-50%)" }} />
           <ResizeHandle handle="e" position={{ right: "-5px", top: "50%", transform: "translateY(-50%)" }} />
+          <ResizeHandle handle="sw" position={{ left: "-5px", bottom: "-5px" }} />
+          <ResizeHandle handle="s" position={{ left: "50%", bottom: "-5px", transform: "translateX(-50%)" }} />
+          <ResizeHandle handle="se" position={{ right: "-5px", bottom: "-5px" }} />
         </>
       )}
     </div>

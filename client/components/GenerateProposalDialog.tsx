@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 import { initializeProposalChat } from "@/services/aiGenerationService";
 import { Proposal } from "@/services/proposalsService";
-import { Loader2, Send, FileUp, Link as LinkIcon, X } from "lucide-react";
+import { Loader2, Send, FileUp, Link as LinkIcon, X, Mail } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface ChatMessage {
@@ -24,7 +24,7 @@ interface ChatMessage {
 
 interface AttachedFile {
   name: string;
-  type: "rfp" | "url";
+  type: "rfp" | "url" | "email";
   content: string;
   file?: File;
 }
@@ -48,6 +48,8 @@ export const GenerateProposalDialog: React.FC<GenerateProposalDialogProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [urlInput, setUrlInput] = useState("");
   const [showUrlInput, setShowUrlInput] = useState(false);
+  const [emailInput, setEmailInput] = useState("");
+  const [showEmailInput, setShowEmailInput] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -59,7 +61,7 @@ export const GenerateProposalDialog: React.FC<GenerateProposalDialogProps> = ({
         {
           id: "welcome",
           type: "assistant",
-          content: "Hi! I'm here to help you generate a proposal. You can describe what you need, attach an RFP document, or provide a URL to crawl. What would you like to create?",
+          content: "Hi! I'm here to help you generate a proposal. You can describe what you need, attach an RFP document, provide a URL to crawl, or paste email content. What would you like to create?",
           timestamp: new Date(),
         },
       ]);
@@ -158,6 +160,34 @@ export const GenerateProposalDialog: React.FC<GenerateProposalDialogProps> = ({
     setShowUrlInput(false);
   };
 
+  const handleAddEmail = () => {
+    if (!emailInput.trim()) {
+      toast({
+        title: "Invalid email content",
+        description: "Please enter email content",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setAttachedFiles([
+      ...attachedFiles,
+      {
+        name: "Email Content",
+        type: "email",
+        content: emailInput,
+      },
+    ]);
+
+    toast({
+      title: "Email content added",
+      description: "Email content has been attached for analysis",
+    });
+
+    setEmailInput("");
+    setShowEmailInput(false);
+  };
+
   const removeAttachment = (index: number) => {
     setAttachedFiles(attachedFiles.filter((_, i) => i !== index));
   };
@@ -180,13 +210,15 @@ export const GenerateProposalDialog: React.FC<GenerateProposalDialogProps> = ({
 
     try {
       // Determine input type based on attachments
-      let inputType: "website" | "document" | "text" = "text";
+      let inputType: "website" | "document" | "text" | "email" = "text";
       let urlToSend: string | undefined;
       let fileToSend: File | undefined;
+      let emailToSend: string | undefined;
 
       if (attachedFiles.length > 0) {
         const rfpFile = attachedFiles.find((f) => f.type === "rfp");
         const urlFile = attachedFiles.find((f) => f.type === "url");
+        const emailFile = attachedFiles.find((f) => f.type === "email");
 
         if (rfpFile) {
           inputType = "document";
@@ -194,6 +226,9 @@ export const GenerateProposalDialog: React.FC<GenerateProposalDialogProps> = ({
         } else if (urlFile) {
           inputType = "website";
           urlToSend = urlFile.content;
+        } else if (emailFile) {
+          inputType = "email";
+          emailToSend = emailFile.content;
         }
       }
 
@@ -202,6 +237,7 @@ export const GenerateProposalDialog: React.FC<GenerateProposalDialogProps> = ({
         message: inputMessage,
         input_type: inputType,
         url: urlToSend,
+        email: emailToSend,
         file: fileToSend || null,
       });
 
@@ -300,7 +336,7 @@ export const GenerateProposalDialog: React.FC<GenerateProposalDialogProps> = ({
         <DialogHeader className="border-b border-border px-6 py-4 flex-shrink-0">
           <DialogTitle>AI Proposal Generator</DialogTitle>
           <DialogDescription>
-            Describe your proposal needs, attach documents, or provide URLs for AI to analyze
+            Describe your proposal needs, attach documents, provide URLs, or paste email content for AI to analyze
           </DialogDescription>
         </DialogHeader>
 
@@ -355,7 +391,7 @@ export const GenerateProposalDialog: React.FC<GenerateProposalDialogProps> = ({
                   className="flex items-center gap-2 bg-secondary/50 border border-border rounded-full px-3 py-1.5 text-sm"
                 >
                   <span className="text-xs font-medium">
-                    {file.type === "rfp" ? "📄" : "🔗"} {file.name}
+                    {file.type === "rfp" ? "📄" : file.type === "url" ? "🔗" : "📧"} {file.name}
                   </span>
                   <button
                     onClick={() => removeAttachment(index)}
@@ -404,6 +440,40 @@ export const GenerateProposalDialog: React.FC<GenerateProposalDialogProps> = ({
           </div>
         )}
 
+        {/* Email Input Field */}
+        {showEmailInput && (
+          <div className="border-t border-border px-6 py-3 flex-shrink-0 space-y-2">
+            <textarea
+              placeholder="Paste your email content here..."
+              value={emailInput}
+              onChange={(e) => setEmailInput(e.target.value)}
+              disabled={isLoading}
+              rows={4}
+              className="w-full resize-none rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            />
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                onClick={handleAddEmail}
+                disabled={isLoading || !emailInput.trim()}
+              >
+                Add
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  setShowEmailInput(false);
+                  setEmailInput("");
+                }}
+                disabled={isLoading}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* Input Area */}
         <div className="border-t border-border px-6 py-4 flex-shrink-0 space-y-3">
           <div className="flex gap-2">
@@ -436,6 +506,17 @@ export const GenerateProposalDialog: React.FC<GenerateProposalDialogProps> = ({
             >
               <LinkIcon className="h-4 w-4" />
               <span className="hidden sm:inline">URL</span>
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setShowEmailInput(!showEmailInput)}
+              disabled={isLoading}
+              className="gap-2"
+              title="Add email content"
+            >
+              <Mail className="h-4 w-4" />
+              <span className="hidden sm:inline">Email Content</span>
             </Button>
           </div>
 

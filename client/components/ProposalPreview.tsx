@@ -325,6 +325,8 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
 
   const [dragOverSectionId, setDragOverSectionId] = React.useState<string | null>(null);
   const [canvasHeights, setCanvasHeights] = React.useState<Record<string, number>>({});
+  const [customContentHeights, setCustomContentHeights] = React.useState<Record<string, number>>({});
+  const [resizingContentId, setResizingContentId] = React.useState<string | null>(null);
 
   const sectionRefs = React.useRef<Map<string, HTMLDivElement>>(new Map());
 
@@ -339,7 +341,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
           ((section as any).texts && (section as any).texts.length > 0) ||
           ((section as any).images && (section as any).images.length > 0) ||
           (section.signatureFields && section.signatureFields.length > 0)) {
-        let maxHeight = 400; // minimum height
+        let maxHeight = 100; // flexible minimum height
 
         // Calculate max height needed for shapes
         if (section.shapes) {
@@ -397,6 +399,37 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
 
     setCanvasHeights(newHeights);
   }, [proposal.sections]);
+
+  // Handle content resize
+  React.useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!resizingContentId) return;
+
+      const contentElement = document.querySelector(`[data-content-id="${resizingContentId}"]`) as HTMLElement;
+      if (!contentElement) return;
+
+      const rect = contentElement.getBoundingClientRect();
+      const newHeight = Math.max(80, e.clientY - rect.top);
+
+      setCustomContentHeights((prev) => ({
+        ...prev,
+        [resizingContentId]: newHeight,
+      }));
+    };
+
+    const handleMouseUp = () => {
+      setResizingContentId(null);
+    };
+
+    if (resizingContentId) {
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
+      return () => {
+        document.removeEventListener("mousemove", handleMouseMove);
+        document.removeEventListener("mouseup", handleMouseUp);
+      };
+    }
+  }, [resizingContentId]);
 
   // Handle null proposal
   if (!proposal) {
@@ -529,138 +562,97 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
             style={{
               gap: isMultiColumn ? `${columnGapValue}px` : undefined,
               marginBottom: `${gapAfterValue}px`,
-              position: "relative"
+              position: "relative",
+              border: `2px solid #e5e7eb`,
+              borderRadius: "8px",
+              padding: "12px",
+              backgroundColor: selectedElementId?.includes(`section-title-${section.id}`) ? "#f9fafb" : "transparent"
             }}
             onDragOver={handleDragOver}
             onDragLeave={() => setDragOverSectionId(null)}
             onDrop={(e) => handleDrop(e, section.id)}
           >
             {isMultiColumn && (
-              <div className="col-span-full">
-                <SelectableElement
-                  id={`section-title-${section.id}`}
-                  type="section-title"
-                  selected={selectedElementId === `section-title-${section.id}`}
-                  onSelect={() =>
+              <div className="col-span-full mb-2">
+                <div
+                  className="text-sm font-semibold text-gray-600 px-3 py-1 rounded bg-gray-100 hover:bg-gray-200 cursor-pointer transition-colors"
+                  onClick={() =>
                     onSelectElement(`section-title-${section.id}`, "section-title")
                   }
-                  onAI={() => onAIElement?.(`section-title-${section.id}`, "section-title")}
-                  value={section.title}
-                  color={(section as any).titleStyles?.color}
-                  fontSize={(section as any).titleStyles?.fontSize}
-                  textAlign={(section as any).titleStyles?.textAlign}
-                  backgroundColor={(section as any).titleStyles?.backgroundColor}
-                  backgroundImage={(section as any).titleStyles?.backgroundImage}
-                  backgroundSize={(section as any).titleStyles?.backgroundSize}
-                  backgroundOpacity={(section as any).titleStyles?.backgroundOpacity}
-                  borderColor={(section as any).titleStyles?.borderColor}
-                  borderWidth={(section as any).titleStyles?.borderWidth}
-                  borderRadius={(section as any).titleStyles?.borderRadius}
-                  borderStyle={(section as any).titleStyles?.borderStyle}
-                  paddingTop={(section as any).titleStyles?.paddingTop}
-                  paddingRight={(section as any).titleStyles?.paddingRight}
-                  paddingBottom={(section as any).titleStyles?.paddingBottom}
-                  paddingLeft={(section as any).titleStyles?.paddingLeft}
-                  marginTop={(section as any).titleStyles?.marginTop}
-                  marginRight={(section as any).titleStyles?.marginRight}
-                  marginBottom={(section as any).titleStyles?.marginBottom}
-                  marginLeft={(section as any).titleStyles?.marginLeft}
-                  bold={(section as any).titleStyles?.bold}
-                  italic={(section as any).titleStyles?.italic}
-                  underline={(section as any).titleStyles?.underline}
-                  strikethrough={(section as any).titleStyles?.strikethrough}
-                  bulletList={(section as any).titleStyles?.bulletList}
-                  numberList={(section as any).titleStyles?.numberList}
-                  code={(section as any).titleStyles?.code}
-                  variables={variables}
+                  title={`Click to edit section: ${section.title}`}
                 >
                   {section.title}
-                </SelectableElement>
+                </div>
               </div>
             )}
             {!isMultiColumn && (
-              <SelectableElement
-                id={`section-title-${section.id}`}
-                type="section-title"
-                selected={selectedElementId === `section-title-${section.id}`}
-                onSelect={() =>
-                  onSelectElement(`section-title-${section.id}`, "section-title")
-                }
-                onAI={() => onAIElement?.(`section-title-${section.id}`, "section-title")}
-                value={section.title}
-                color={(section as any).titleStyles?.color}
-                fontSize={(section as any).titleStyles?.fontSize}
-                textAlign={(section as any).titleStyles?.textAlign}
-                backgroundColor={(section as any).titleStyles?.backgroundColor}
-                backgroundImage={(section as any).titleStyles?.backgroundImage}
-                backgroundSize={(section as any).titleStyles?.backgroundSize}
-                backgroundOpacity={(section as any).titleStyles?.backgroundOpacity}
-                borderColor={(section as any).titleStyles?.borderColor}
-                borderWidth={(section as any).titleStyles?.borderWidth}
-                borderRadius={(section as any).titleStyles?.borderRadius}
-                borderStyle={(section as any).titleStyles?.borderStyle}
-                paddingTop={(section as any).titleStyles?.paddingTop}
-                paddingRight={(section as any).titleStyles?.paddingRight}
-                paddingBottom={(section as any).titleStyles?.paddingBottom}
-                paddingLeft={(section as any).titleStyles?.paddingLeft}
-                marginTop={(section as any).titleStyles?.marginTop}
-                marginRight={(section as any).titleStyles?.marginRight}
-                marginBottom={(section as any).titleStyles?.marginBottom}
-                marginLeft={(section as any).titleStyles?.marginLeft}
-                bold={(section as any).titleStyles?.bold}
-                italic={(section as any).titleStyles?.italic}
-                underline={(section as any).titleStyles?.underline}
-                strikethrough={(section as any).titleStyles?.strikethrough}
-                bulletList={(section as any).titleStyles?.bulletList}
-                numberList={(section as any).titleStyles?.numberList}
-                code={(section as any).titleStyles?.code}
-                variables={variables}
-              >
-                {section.title}
-              </SelectableElement>
+              <div className="mb-2">
+                <div
+                  className="text-sm font-semibold text-gray-600 px-3 py-1 rounded bg-gray-100 hover:bg-gray-200 cursor-pointer transition-colors"
+                  onClick={() =>
+                    onSelectElement(`section-title-${section.id}`, "section-title")
+                  }
+                  title={`Click to edit section: ${section.title}`}
+                >
+                  {section.title}
+                </div>
+              </div>
             )}
 
             {!isMultiColumn && (
-              <SelectableElement
-                  id={`section-content-${section.id}`}
-                  type="section-content"
-                  selected={selectedElementId === `section-content-${section.id}`}
-                  onSelect={() =>
-                    onSelectElement(`section-content-${section.id}`, "section-content")
-                  }
-                  onAI={() => onAIElement?.(`section-content-${section.id}`, "section-content")}
-                  onDelete={() => onDeleteContent?.(section.id)}
-                  value={section.content}
-                  color={(section as any).contentStyles?.color}
-                  fontSize={(section as any).contentStyles?.fontSize}
-                  textAlign={(section as any).contentStyles?.textAlign}
-                  backgroundColor={(section as any).contentStyles?.backgroundColor}
-                  backgroundImage={(section as any).contentStyles?.backgroundImage}
-                  backgroundSize={(section as any).contentStyles?.backgroundSize}
-                  backgroundOpacity={(section as any).contentStyles?.backgroundOpacity}
-                  borderColor={(section as any).contentStyles?.borderColor}
-                  borderWidth={(section as any).contentStyles?.borderWidth}
-                  borderRadius={(section as any).contentStyles?.borderRadius}
-                  borderStyle={(section as any).contentStyles?.borderStyle}
-                  paddingTop={(section as any).contentStyles?.paddingTop}
-                  paddingRight={(section as any).contentStyles?.paddingRight}
-                  paddingBottom={(section as any).contentStyles?.paddingBottom}
-                  paddingLeft={(section as any).contentStyles?.paddingLeft}
-                  marginTop={(section as any).contentStyles?.marginTop}
-                  marginRight={(section as any).contentStyles?.marginRight}
-                  marginBottom={(section as any).contentStyles?.marginBottom}
-                  marginLeft={(section as any).contentStyles?.marginLeft}
-                  bold={(section as any).contentStyles?.bold}
-                  italic={(section as any).contentStyles?.italic}
-                  underline={(section as any).contentStyles?.underline}
-                  strikethrough={(section as any).contentStyles?.strikethrough}
-                  bulletList={(section as any).contentStyles?.bulletList}
-                  numberList={(section as any).contentStyles?.numberList}
-                  code={(section as any).contentStyles?.code}
-                  variables={variables}
-                >
-                  {section.content || ""}
-                </SelectableElement>
+              <div
+                data-content-id={`section-content-${section.id}`}
+                style={{
+                  minHeight: customContentHeights[`section-content-${section.id}`] ? `${customContentHeights[`section-content-${section.id}`]}px` : "auto",
+                  position: "relative",
+                }}
+              >
+                <SelectableElement
+                    id={`section-content-${section.id}`}
+                    type="section-content"
+                    selected={selectedElementId === `section-content-${section.id}`}
+                    onSelect={() =>
+                      onSelectElement(`section-content-${section.id}`, "section-content")
+                    }
+                    onAI={() => onAIElement?.(`section-content-${section.id}`, "section-content")}
+                    onDelete={() => onDeleteContent?.(section.id)}
+                    value={section.content}
+                    color={(section as any).contentStyles?.color}
+                    fontSize={(section as any).contentStyles?.fontSize}
+                    textAlign={(section as any).contentStyles?.textAlign}
+                    backgroundColor={(section as any).contentStyles?.backgroundColor}
+                    backgroundImage={(section as any).contentStyles?.backgroundImage}
+                    backgroundSize={(section as any).contentStyles?.backgroundSize}
+                    backgroundOpacity={(section as any).contentStyles?.backgroundOpacity}
+                    borderColor={(section as any).contentStyles?.borderColor}
+                    borderWidth={(section as any).contentStyles?.borderWidth}
+                    borderRadius={(section as any).contentStyles?.borderRadius}
+                    borderStyle={(section as any).contentStyles?.borderStyle}
+                    paddingTop={(section as any).contentStyles?.paddingTop}
+                    paddingRight={(section as any).contentStyles?.paddingRight}
+                    paddingBottom={(section as any).contentStyles?.paddingBottom}
+                    paddingLeft={(section as any).contentStyles?.paddingLeft}
+                    marginTop={(section as any).contentStyles?.marginTop}
+                    marginRight={(section as any).contentStyles?.marginRight}
+                    marginBottom={(section as any).contentStyles?.marginBottom}
+                    marginLeft={(section as any).contentStyles?.marginLeft}
+                    bold={(section as any).contentStyles?.bold}
+                    italic={(section as any).contentStyles?.italic}
+                    underline={(section as any).contentStyles?.underline}
+                    strikethrough={(section as any).contentStyles?.strikethrough}
+                    bulletList={(section as any).contentStyles?.bulletList}
+                    numberList={(section as any).contentStyles?.numberList}
+                    code={(section as any).contentStyles?.code}
+                    variables={variables}
+                  >
+                    {section.content || ""}
+                  </SelectableElement>
+                  <div
+                    onMouseDown={() => setResizingContentId(`section-content-${section.id}`)}
+                    className="w-full h-1 bg-gradient-to-r from-transparent via-blue-300 to-transparent hover:via-blue-500 cursor-row-resize mt-2 rounded transition-colors"
+                    title="Drag to resize section height"
+                  />
+              </div>
             )}
 
             {isMultiColumn && (
@@ -1015,7 +1007,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
             {(section.shapes && section.shapes.length > 0) || (section.tables && section.tables.length > 0) || ((section as any).texts && (section as any).texts.length > 0) || ((section as any).images && (section as any).images.length > 0) || (section.signatureFields && section.signatureFields.length > 0) || isAddingSignatureMode ? (
               <div
                 className={isMultiColumn ? "col-span-full relative mt-4 bg-gray-50 rounded" : "relative mt-4 bg-gray-50 rounded"}
-                style={{ position: "relative", minHeight: `${canvasHeights[section.id] || 400}px`, cursor: isAddingSignatureMode ? "crosshair" : "default" }}
+                style={{ position: "relative", minHeight: `${canvasHeights[section.id] || 100}px`, height: "auto", cursor: isAddingSignatureMode ? "crosshair" : "default" }}
                 onClick={(e) => {
                   if (isAddingSignatureMode && selectedSignatoryId && onAddSignatureField) {
                     const rect = e.currentTarget.getBoundingClientRect();
@@ -1083,6 +1075,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                     top={text.top}
                     left={text.left}
                     width={text.width}
+                    height={text.height}
                     fontSize={text.fontSize}
                     color={text.color}
                     fontWeight={text.fontWeight}

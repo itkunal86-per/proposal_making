@@ -124,6 +124,7 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
           borderWidth: field.borderWidth ? `${field.borderWidth}px` : "2px",
           borderStyle: "dashed",
           cursor: isDragging ? "grabbing" : "grab",
+          zIndex: selected ? 1000 : 10,
         }}
         onMouseDown={handleMouseDown}
       >

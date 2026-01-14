@@ -178,6 +178,7 @@ export const TableEditor: React.FC<TableEditorProps> = ({
         height: `${height}px`,
         cursor: isDragging ? "grabbing" : "grab",
         pointerEvents: "auto",
+        zIndex: selected ? 1000 : 10,
       }}
       onMouseDown={(e) => handleMouseDown(e, null)}
     >

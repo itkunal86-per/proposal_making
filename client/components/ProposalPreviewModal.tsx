@@ -26,6 +26,14 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
   const sectionRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
   React.useEffect(() => {
+    // Disable body scroll when modal is open
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, []);
+
+  React.useEffect(() => {
     const newHeights: Record<string, number> = {};
 
     proposal.sections.forEach((section) => {
@@ -34,7 +42,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
           ((section as any).texts && (section as any).texts.length > 0) ||
           ((section as any).images && (section as any).images.length > 0) ||
           (section.signatureFields && section.signatureFields.length > 0)) {
-        let maxHeight = 400; // minimum height
+        let maxHeight = 100; // flexible minimum height
 
         // Calculate max height needed for shapes
         if (section.shapes) {
@@ -218,8 +226,8 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-40">
-      <div className="fixed inset-0 z-50 flex flex-col bg-white">
+    <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0, 0, 0, 0.5)", zIndex: 9998 }}>
+      <div style={{ position: "fixed", inset: 0, display: "flex", flexDirection: "column", backgroundColor: "white", zIndex: 9999 }}>
         {/* Header */}
         <div className="border-b border-slate-200 px-6 py-4 flex items-center justify-between">
           <h1 className="text-2xl font-bold">{proposal.title}</h1>
@@ -484,7 +492,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
 
                 {/* Shapes, Tables, Texts, Images, and Signature Fields */}
                 {(section.shapes && section.shapes.length > 0) || (section.tables && section.tables.length > 0) || ((section as any).texts && (section as any).texts.length > 0) || ((section as any).images && (section as any).images.length > 0) || (section.signatureFields && section.signatureFields.length > 0) ? (
-                  <div className="relative mt-4 bg-gray-50 rounded" style={{ position: "relative", minHeight: `${canvasHeights[section.id] || 400}px`, pointerEvents: "none" }}>
+                  <div className="relative mt-4 bg-gray-50 rounded" style={{ position: "relative", minHeight: `${canvasHeights[section.id] || 100}px`, height: "auto", pointerEvents: "none" }}>
                     {section.shapes && section.shapes.map((shape, sIndex) => {
                       const backgroundOverlayOpacity = shape.backgroundImage && shape.backgroundOpacity ? (100 - parseInt(shape.backgroundOpacity || "100")) / 100 : 0;
                       const commonShapeStyle: React.CSSProperties = {
@@ -598,6 +606,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                           top={text.top}
                           left={text.left}
                           width={text.width}
+                          height={text.height}
                           fontSize={text.fontSize}
                           color={text.color}
                           fontWeight={text.fontWeight}
