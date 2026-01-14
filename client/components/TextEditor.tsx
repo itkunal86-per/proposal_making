@@ -6,6 +6,7 @@ interface TextEditorProps {
   top: number;
   left: number;
   width: number;
+  height?: number;
   fontSize?: string;
   color?: string;
   fontWeight?: boolean;
@@ -25,6 +26,7 @@ interface TextEditorProps {
     top?: number;
     left?: number;
     width?: number;
+    height?: number;
     fontSize?: string;
     color?: string;
     fontWeight?: boolean;
