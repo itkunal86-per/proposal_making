@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { X } from "lucide-react";
+import { X, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { Proposal } from "@/services/proposalsService";
@@ -8,21 +8,25 @@ import { ShapeEditor } from "@/components/ShapeEditor";
 import { TableEditor } from "@/components/TableEditor";
 import { TextEditor } from "@/components/TextEditor";
 import { ImageEditor } from "@/components/ImageEditor";
+import { ShareLinkDialog } from "@/components/ShareLinkDialog";
 
 interface ProposalPreviewModalProps {
   proposal: Proposal;
   variables?: Array<{ id: string | number; name: string; value: string }>;
   onClose: () => void;
+  isTemplate?: boolean;
 }
 
 export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
   proposal,
   variables = [],
   onClose,
+  isTemplate = false,
 }) => {
   const contentRef = useRef<HTMLDivElement>(null);
   const [canvasHeights, setCanvasHeights] = useState<Record<string, number>>({});
   const [activeSection, setActiveSection] = useState<string | null>(null);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const sectionRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
   React.useEffect(() => {
@@ -231,14 +235,27 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
         {/* Header */}
         <div className="border-b border-slate-200 px-6 py-4 flex items-center justify-between">
           <h1 className="text-2xl font-bold">{proposal.title}</h1>
-          <Button
-            onClick={onClose}
-            variant="ghost"
-            size="sm"
-            className="h-8 w-8 p-0"
-          >
-            <X className="w-5 h-5" />
-          </Button>
+          <div className="flex items-center gap-2">
+            {!isTemplate && (
+              <Button
+                onClick={() => setShareDialogOpen(true)}
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <Share2 className="w-4 h-4" />
+                Share
+              </Button>
+            )}
+            <Button
+              onClick={onClose}
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0"
+            >
+              <X className="w-5 h-5" />
+            </Button>
+          </div>
         </div>
 
         {/* Content */}
@@ -688,6 +705,13 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
           </div>
         </div>
       </div>
+
+      <ShareLinkDialog
+        open={shareDialogOpen}
+        onOpenChange={setShareDialogOpen}
+        proposalId={proposal.id}
+        proposalTitle={proposal.title}
+      />
     </div>
   );
 };
