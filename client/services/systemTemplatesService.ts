@@ -107,9 +107,16 @@ export async function listSystemTemplates(): Promise<SystemTemplate[]> {
     const templates = Array.isArray(data) ? data : (data?.data || data?.templates || []);
 
     return templates.map((t: any) => {
-      const createdBy = t.created_by !== undefined && t.created_by !== null
-        ? (typeof t.created_by === 'string' ? parseInt(t.created_by, 10) : t.created_by)
-        : 0;
+      // Parse created_by, handling different formats
+      let createdBy = 0;
+      if (t.created_by !== undefined && t.created_by !== null) {
+        if (typeof t.created_by === 'string') {
+          createdBy = parseInt(t.created_by, 10);
+        } else if (typeof t.created_by === 'number') {
+          createdBy = t.created_by;
+        }
+      }
+      if (isNaN(createdBy)) createdBy = 0;
 
       return {
         id: t.id || t.template_id || String(Math.random()),
