@@ -235,14 +235,27 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
         {/* Header */}
         <div className="border-b border-slate-200 px-6 py-4 flex items-center justify-between">
           <h1 className="text-2xl font-bold">{proposal.title}</h1>
-          <Button
-            onClick={onClose}
-            variant="ghost"
-            size="sm"
-            className="h-8 w-8 p-0"
-          >
-            <X className="w-5 h-5" />
-          </Button>
+          <div className="flex items-center gap-2">
+            {!isTemplate && (
+              <Button
+                onClick={() => setShareDialogOpen(true)}
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <Share2 className="w-4 h-4" />
+                Share
+              </Button>
+            )}
+            <Button
+              onClick={onClose}
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0"
+            >
+              <X className="w-5 h-5" />
+            </Button>
+          </div>
         </div>
 
         {/* Content */}
