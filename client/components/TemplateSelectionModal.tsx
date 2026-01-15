@@ -92,14 +92,12 @@ export const TemplateSelectionModal: React.FC<TemplateSelectionModalProps> = ({
   console.log("TemplateSelectionModal - System templates:", systemTemplates.length);
   console.log("TemplateSelectionModal - Saved templates:", savedTemplates.length);
 
-  // Auto-switch tab if current tab has no templates
+  // Auto-switch from saved tab if no saved templates (back to system tab)
   useEffect(() => {
-    if (activeTab === "system" && systemTemplates.length === 0 && savedTemplates.length > 0) {
-      setActiveTab("saved");
-    } else if (activeTab === "saved" && savedTemplates.length === 0 && systemTemplates.length > 0) {
+    if (activeTab === "saved" && savedTemplates.length === 0) {
       setActiveTab("system");
     }
-  }, [systemTemplates.length, savedTemplates.length, activeTab]);
+  }, [savedTemplates.length, activeTab]);
 
   // Determine which templates to show based on active tab
   const displayedTemplates = activeTab === "system" ? systemTemplates : savedTemplates;
