@@ -35,6 +35,7 @@ export const TemplateSelectionModal: React.FC<TemplateSelectionModalProps> = ({
       setLoadingTemplates(true);
       setError(null);
       setTemplates([]);
+      setActiveTab("system");
       loadTemplates();
     }
   }, [open]);
