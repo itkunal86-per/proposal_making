@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { X } from "lucide-react";
+import { X, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { Proposal } from "@/services/proposalsService";
@@ -8,11 +8,13 @@ import { ShapeEditor } from "@/components/ShapeEditor";
 import { TableEditor } from "@/components/TableEditor";
 import { TextEditor } from "@/components/TextEditor";
 import { ImageEditor } from "@/components/ImageEditor";
+import { ShareLinkDialog } from "@/components/ShareLinkDialog";
 
 interface ProposalPreviewModalProps {
   proposal: Proposal;
   variables?: Array<{ id: string | number; name: string; value: string }>;
   onClose: () => void;
+  isTemplate?: boolean;
 }
 
 export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
