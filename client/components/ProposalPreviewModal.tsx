@@ -21,10 +21,12 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
   proposal,
   variables = [],
   onClose,
+  isTemplate = false,
 }) => {
   const contentRef = useRef<HTMLDivElement>(null);
   const [canvasHeights, setCanvasHeights] = useState<Record<string, number>>({});
   const [activeSection, setActiveSection] = useState<string | null>(null);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const sectionRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
   React.useEffect(() => {
