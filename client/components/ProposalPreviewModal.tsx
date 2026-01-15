@@ -705,6 +705,13 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
           </div>
         </div>
       </div>
+
+      <ShareLinkDialog
+        open={shareDialogOpen}
+        onOpenChange={setShareDialogOpen}
+        proposalId={proposal.id}
+        proposalTitle={proposal.title}
+      />
     </div>
   );
 };
