@@ -165,9 +165,16 @@ export async function getActiveSystemTemplates(): Promise<SystemTemplate[]> {
     console.log("getActiveSystemTemplates: Parsed templates count:", templates.length);
 
     const result = templates.map((t: any) => {
-      const createdBy = t.created_by !== undefined && t.created_by !== null
-        ? (typeof t.created_by === 'string' ? parseInt(t.created_by, 10) : t.created_by)
-        : 0;
+      // Parse created_by, handling different formats
+      let createdBy = 0;
+      if (t.created_by !== undefined && t.created_by !== null) {
+        if (typeof t.created_by === 'string') {
+          createdBy = parseInt(t.created_by, 10);
+        } else if (typeof t.created_by === 'number') {
+          createdBy = t.created_by;
+        }
+      }
+      if (isNaN(createdBy)) createdBy = 0;
 
       return {
         id: t.id || t.template_id || String(Math.random()),
@@ -184,8 +191,11 @@ export async function getActiveSystemTemplates(): Promise<SystemTemplate[]> {
     });
 
     console.log("getActiveSystemTemplates: Returning templates:", result);
-    console.log("getActiveSystemTemplates: System templates:", result.filter(t => t.created_by === 0).length);
-    console.log("getActiveSystemTemplates: Saved templates:", result.filter(t => t.created_by > 0).length);
+    result.forEach(t => {
+      console.log(`  - "${t.title}": created_by=${t.created_by} (system: ${t.created_by === 0}, saved: ${t.created_by > 0})`);
+    });
+    console.log("getActiveSystemTemplates: System templates count:", result.filter(t => t.created_by === 0).length);
+    console.log("getActiveSystemTemplates: Saved templates count:", result.filter(t => t.created_by > 0).length);
     return result;
   } catch (error) {
     console.error("getActiveSystemTemplates: Error fetching:", error);
