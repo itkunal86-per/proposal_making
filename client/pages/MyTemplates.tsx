@@ -313,6 +313,19 @@ export default function MyTemplates() {
                       key={template.id}
                       className="border-b border-border/50 hover:bg-muted/50 transition-colors"
                     >
+                      <TableCell>
+                        {template.preview_image ? (
+                          <img
+                            src={template.preview_image}
+                            alt={`${template.title} preview`}
+                            className="h-10 w-10 object-cover rounded"
+                          />
+                        ) : (
+                          <div className="h-10 w-10 bg-muted rounded flex items-center justify-center text-xs text-muted-foreground">
+                            —
+                          </div>
+                        )}
+                      </TableCell>
                       <TableCell className="font-medium text-foreground">
                         <button
                           onClick={() => handlePreviewTemplate(template)}
