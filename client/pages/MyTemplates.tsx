@@ -171,6 +171,97 @@ export default function MyTemplates() {
     }
   }
 
+  function onAddPreviewImage(templateId: string) {
+    setPreviewImageTemplateId(templateId);
+    setPreviewImageUpload(null);
+  }
+
+  function handlePreviewImageSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast({ title: "Please select an image file", variant: "destructive" });
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({ title: "Image must be less than 5MB", variant: "destructive" });
+        return;
+      }
+
+      setPreviewImageUpload(file);
+    }
+  }
+
+  async function handleUploadPreviewImage() {
+    if (!previewImageUpload || !previewImageTemplateId) {
+      toast({ title: "Please select an image", variant: "destructive" });
+      return;
+    }
+
+    setIsUploadingPreviewImage(true);
+
+    try {
+      const token = getStoredToken();
+      if (!token) {
+        toast({ title: "Authentication required", variant: "destructive" });
+        setIsUploadingPreviewImage(false);
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('file', previewImageUpload);
+      formData.append('template_id', previewImageTemplateId);
+
+      const response = await fetch('https://propai-api.hirenq.com/api/templates/system/preview-image', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      // Success response
+      if (data.external_response?.success && data.template) {
+        toast({
+          title: "Success",
+          description: "Preview image uploaded successfully",
+        });
+
+        // Refresh templates to show updated preview image
+        await loadTemplates();
+
+        // Close dialog and reset state
+        setPreviewImageTemplateId(null);
+        setPreviewImageUpload(null);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+      } else {
+        throw new Error(data.message || "Upload failed");
+      }
+    } catch (error) {
+      console.error("Error uploading preview image:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to upload preview image";
+      toast({
+        title: "Upload failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploadingPreviewImage(false);
+    }
+  }
+
   return (
     <AppShell>
       <section className="container py-8 px-4 lg:px-8">
