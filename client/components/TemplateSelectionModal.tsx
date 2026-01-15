@@ -129,21 +129,19 @@ export const TemplateSelectionModal: React.FC<TemplateSelectionModalProps> = ({
           </div>
         ) : (
           <>
-            {/* Tabs */}
-            {(systemTemplates.length > 0 || savedTemplates.length > 0) && (
+            {/* Tabs - Always show System Templates tab, optionally show Saved Templates */}
+            {(systemTemplates.length > 0 || true) && (
               <div className="flex gap-2 mb-4 border-b">
-                {systemTemplates.length > 0 && (
-                  <button
-                    onClick={() => setActiveTab("system")}
-                    className={`px-4 py-2 font-medium border-b-2 transition-colors ${
-                      activeTab === "system"
-                        ? "border-primary text-primary"
-                        : "border-transparent text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    System Templates ({systemTemplates.length})
-                  </button>
-                )}
+                <button
+                  onClick={() => setActiveTab("system")}
+                  className={`px-4 py-2 font-medium border-b-2 transition-colors ${
+                    activeTab === "system"
+                      ? "border-primary text-primary"
+                      : "border-transparent text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  System Templates {systemTemplates.length > 0 && `(${systemTemplates.length})`}
+                </button>
                 {savedTemplates.length > 0 && (
                   <button
                     onClick={() => setActiveTab("saved")}
