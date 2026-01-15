@@ -160,6 +160,7 @@ export async function getActiveSystemTemplates(): Promise<SystemTemplate[]> {
       status: t.status || "Active",
       createdAt: t.created_at ? new Date(t.created_at).getTime() : Date.now(),
       updatedAt: t.updated_at ? new Date(t.updated_at).getTime() : Date.now(),
+      created_by: t.created_by || 0,
       sections: t.sections || [],
       preview_image: t.preview_image,
     }));
