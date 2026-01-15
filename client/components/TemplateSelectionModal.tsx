@@ -70,8 +70,19 @@ export const TemplateSelectionModal: React.FC<TemplateSelectionModalProps> = ({
   };
 
   // Separate templates into system and saved
-  const systemTemplates = templates.filter((t) => (t.created_by || 0) === 0);
-  const savedTemplates = templates.filter((t) => (t.created_by || 0) !== 0);
+  const systemTemplates = templates.filter((t) => {
+    const createdBy = t.created_by !== undefined && t.created_by !== null ? t.created_by : 0;
+    console.log(`Template "${t.title}" - created_by:`, createdBy, "is system:", createdBy === 0);
+    return createdBy === 0;
+  });
+  const savedTemplates = templates.filter((t) => {
+    const createdBy = t.created_by !== undefined && t.created_by !== null ? t.created_by : 0;
+    return createdBy > 0;
+  });
+
+  console.log("TemplateSelectionModal - Total templates:", templates.length);
+  console.log("TemplateSelectionModal - System templates:", systemTemplates.length);
+  console.log("TemplateSelectionModal - Saved templates:", savedTemplates.length);
 
   // Determine which templates to show based on active tab
   const displayedTemplates = activeTab === "system" ? systemTemplates : savedTemplates;
