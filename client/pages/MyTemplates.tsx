@@ -14,7 +14,9 @@ import { listSystemTemplates, type SystemTemplate, deleteSystemTemplate, copyPro
 import { createProposal } from "@/services/proposalsService";
 import { Label } from "@/components/ui/label";
 import { ProposalPreviewModal } from "@/components/ProposalPreviewModal";
-import { MoreVertical, FileText } from "lucide-react";
+import { MoreVertical, FileText, Upload } from "lucide-react";
+import { useRef } from "react";
+import { getStoredToken } from "@/lib/auth";
 
 const statusStyles: Record<string, string> = {
   active: "bg-green-100 text-green-700 border border-green-200",
