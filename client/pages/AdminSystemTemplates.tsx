@@ -388,6 +388,7 @@ export default function AdminSystemTemplates() {
           <ProposalPreviewModal
             proposal={convertSystemTemplateToProposal(previewTemplate)}
             onClose={() => setPreviewTemplate(null)}
+            isTemplate={true}
           />
         )}
 
