@@ -158,8 +158,8 @@ export const TemplateSelectionModal: React.FC<TemplateSelectionModalProps> = ({
             )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 py-4">
-              {/* Custom Design Card - show on system templates tab or if no system templates exist */}
-              {(activeTab === "system" || systemTemplates.length === 0) && (
+              {/* Custom Design Card - show on system templates tab */}
+              {activeTab === "system" && (
                 <Card
                   className="cursor-pointer hover:shadow-lg transition-shadow p-4 flex flex-col items-center justify-center min-h-[160px] border-2 border-dashed border-slate-300 hover:border-primary"
                   onClick={handleCustomDesign}
