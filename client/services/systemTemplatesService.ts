@@ -41,6 +41,10 @@ export async function getSystemTemplateDetails(templateId: string): Promise<Syst
     const data = await response.json();
     console.log("getSystemTemplateDetails - Raw API response:", data);
 
+    const createdBy = data.created_by !== undefined && data.created_by !== null
+      ? (typeof data.created_by === 'string' ? parseInt(data.created_by, 10) : data.created_by)
+      : 0;
+
     const template: SystemTemplate = {
       id: data.id || String(Math.random()),
       title: data.title || "Untitled",
@@ -48,7 +52,7 @@ export async function getSystemTemplateDetails(templateId: string): Promise<Syst
       content: data.content || "",
       status: data.status || "Active",
       createdBy: data.createdBy || data.created_by || "0",
-      created_by: data.created_by || 0,
+      created_by: createdBy,
       createdAt: data.createdAt || (data.created_at ? new Date(data.created_at).getTime() : Date.now()),
       updatedAt: data.updatedAt || (data.updated_at ? new Date(data.updated_at).getTime() : Date.now()),
       sections: data.sections || data.content?.sections || [],
