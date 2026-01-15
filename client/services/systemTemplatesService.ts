@@ -102,18 +102,24 @@ export async function listSystemTemplates(): Promise<SystemTemplate[]> {
     // The API might return templates as an array or wrapped in a data field
     const templates = Array.isArray(data) ? data : (data?.data || data?.templates || []);
 
-    return templates.map((t: any) => ({
-      id: t.id || t.template_id || String(Math.random()),
-      title: t.title || t.name || "Untitled",
-      description: t.description || "",
-      content: t.content || "",
-      status: t.status || "Active",
-      createdAt: t.created_at ? new Date(t.created_at).getTime() : Date.now(),
-      updatedAt: t.updated_at ? new Date(t.updated_at).getTime() : Date.now(),
-      created_by: t.created_by || 0,
-      sections: t.sections || [],
-      preview_image: t.preview_image,
-    }));
+    return templates.map((t: any) => {
+      const createdBy = t.created_by !== undefined && t.created_by !== null
+        ? (typeof t.created_by === 'string' ? parseInt(t.created_by, 10) : t.created_by)
+        : 0;
+
+      return {
+        id: t.id || t.template_id || String(Math.random()),
+        title: t.title || t.name || "Untitled",
+        description: t.description || "",
+        content: t.content || "",
+        status: t.status || "Active",
+        createdAt: t.created_at ? new Date(t.created_at).getTime() : Date.now(),
+        updatedAt: t.updated_at ? new Date(t.updated_at).getTime() : Date.now(),
+        created_by: createdBy,
+        sections: t.sections || [],
+        preview_image: t.preview_image,
+      };
+    });
   } catch (error) {
     console.error("Error fetching system templates:", error);
     return [];
