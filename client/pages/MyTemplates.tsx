@@ -510,6 +510,71 @@ export default function MyTemplates() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={previewImageTemplateId !== null} onOpenChange={(open) => !open && setPreviewImageTemplateId(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Preview Image</DialogTitle>
+            <DialogDescription>
+              Upload a preview image for this template. The image will be displayed in the template selection interface.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="preview-image" className="text-sm font-medium">
+                Select Image <span className="text-red-500">*</span>
+              </Label>
+              <div className="mt-2 flex items-center justify-center w-full">
+                <label htmlFor="preview-image" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-slate-300 rounded-lg cursor-pointer bg-slate-50 hover:bg-slate-100 transition">
+                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                    <Upload className="h-8 w-8 text-slate-400 mb-2" />
+                    <p className="text-xs text-slate-500">Click to upload or drag and drop</p>
+                    <p className="text-xs text-slate-400">PNG, JPG, GIF (Max 5MB)</p>
+                  </div>
+                  <input
+                    ref={fileInputRef}
+                    id="preview-image"
+                    type="file"
+                    accept="image/*"
+                    onChange={handlePreviewImageSelect}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+
+              {previewImageUpload && (
+                <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded flex items-center gap-2">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-blue-900">{previewImageUpload.name}</p>
+                    <p className="text-xs text-blue-700">{(previewImageUpload.size / 1024 / 1024).toFixed(2)}MB</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex gap-3 justify-end pt-4">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setPreviewImageTemplateId(null);
+                  setPreviewImageUpload(null);
+                  if (fileInputRef.current) fileInputRef.current.value = '';
+                }}
+                disabled={isUploadingPreviewImage}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleUploadPreviewImage}
+                disabled={!previewImageUpload || isUploadingPreviewImage}
+              >
+                {isUploadingPreviewImage ? "Uploading..." : "Upload Image"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </AppShell>
   );
 }
