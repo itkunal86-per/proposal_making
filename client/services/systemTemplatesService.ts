@@ -154,20 +154,28 @@ export async function getActiveSystemTemplates(): Promise<SystemTemplate[]> {
     const templates = Array.isArray(data) ? data : (data?.data || data?.templates || []);
     console.log("getActiveSystemTemplates: Parsed templates count:", templates.length);
 
-    const result = templates.map((t: any) => ({
-      id: t.id || t.template_id || String(Math.random()),
-      title: t.title || t.name || "Untitled",
-      description: t.description || "",
-      content: t.content || "",
-      status: t.status || "Active",
-      createdAt: t.created_at ? new Date(t.created_at).getTime() : Date.now(),
-      updatedAt: t.updated_at ? new Date(t.updated_at).getTime() : Date.now(),
-      created_by: t.created_by || 0,
-      sections: t.sections || [],
-      preview_image: t.preview_image,
-    }));
+    const result = templates.map((t: any) => {
+      const createdBy = t.created_by !== undefined && t.created_by !== null
+        ? (typeof t.created_by === 'string' ? parseInt(t.created_by, 10) : t.created_by)
+        : 0;
+
+      return {
+        id: t.id || t.template_id || String(Math.random()),
+        title: t.title || t.name || "Untitled",
+        description: t.description || "",
+        content: t.content || "",
+        status: t.status || "Active",
+        createdAt: t.created_at ? new Date(t.created_at).getTime() : Date.now(),
+        updatedAt: t.updated_at ? new Date(t.updated_at).getTime() : Date.now(),
+        created_by: createdBy,
+        sections: t.sections || [],
+        preview_image: t.preview_image,
+      };
+    });
 
     console.log("getActiveSystemTemplates: Returning templates:", result);
+    console.log("getActiveSystemTemplates: System templates:", result.filter(t => t.created_by === 0).length);
+    console.log("getActiveSystemTemplates: Saved templates:", result.filter(t => t.created_by > 0).length);
     return result;
   } catch (error) {
     console.error("getActiveSystemTemplates: Error fetching:", error);
