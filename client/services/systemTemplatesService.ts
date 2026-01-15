@@ -48,6 +48,7 @@ export async function getSystemTemplateDetails(templateId: string): Promise<Syst
       content: data.content || "",
       status: data.status || "Active",
       createdBy: data.createdBy || data.created_by || "0",
+      created_by: data.created_by || 0,
       createdAt: data.createdAt || (data.created_at ? new Date(data.created_at).getTime() : Date.now()),
       updatedAt: data.updatedAt || (data.updated_at ? new Date(data.updated_at).getTime() : Date.now()),
       sections: data.sections || data.content?.sections || [],
