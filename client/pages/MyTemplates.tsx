@@ -27,6 +27,7 @@ const statusStyles: Record<string, string> = {
 export default function MyTemplates() {
   const { user } = useAuth();
   const nav = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [templates, setTemplates] = useState<SystemTemplate[]>([]);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -40,6 +41,9 @@ export default function MyTemplates() {
   const [createProposalDialogOpen, setCreateProposalDialogOpen] = useState(false);
   const [proposalTitle, setProposalTitle] = useState("");
   const [selectedTemplate, setSelectedTemplate] = useState<SystemTemplate | null>(null);
+  const [previewImageTemplateId, setPreviewImageTemplateId] = useState<string | null>(null);
+  const [previewImageUpload, setPreviewImageUpload] = useState<File | null>(null);
+  const [isUploadingPreviewImage, setIsUploadingPreviewImage] = useState(false);
 
   useEffect(() => {
     loadTemplates();
