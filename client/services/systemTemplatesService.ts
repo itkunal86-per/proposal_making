@@ -12,6 +12,7 @@ export interface SystemTemplate {
   createdAt?: number;
   updatedAt?: number;
   createdBy?: string;
+  created_by?: number;
   sections?: Array<any>;
   preview_image?: string;
 }
