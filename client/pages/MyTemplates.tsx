@@ -298,6 +298,7 @@ export default function MyTemplates() {
               <Table>
                 <TableHeader>
                   <TableRow className="border-b border-border/50 hover:bg-transparent bg-muted/30">
+                    <TableHead className="w-16 font-semibold text-foreground">Preview</TableHead>
                     <TableHead className="font-semibold text-foreground">Title</TableHead>
                     <TableHead className="font-semibold text-foreground">Status</TableHead>
                     <TableHead className="font-semibold text-foreground">Created By</TableHead>
