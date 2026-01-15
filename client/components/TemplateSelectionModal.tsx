@@ -28,6 +28,7 @@ export const TemplateSelectionModal: React.FC<TemplateSelectionModalProps> = ({
   const [templates, setTemplates] = useState<SystemTemplate[]>([]);
   const [loadingTemplates, setLoadingTemplates] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"system" | "saved">("system");
 
   useEffect(() => {
     if (open) {
