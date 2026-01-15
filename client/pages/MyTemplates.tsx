@@ -369,6 +369,13 @@ export default function MyTemplates() {
                             >
                               Create Proposal
                             </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => onAddPreviewImage(template.id)}
+                              className="cursor-pointer"
+                            >
+                              <Upload className="h-4 w-4 mr-2" />
+                              Add Preview Image
+                            </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
                               onClick={() => onDeleteClick(template.id)}
