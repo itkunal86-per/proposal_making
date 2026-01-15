@@ -72,12 +72,19 @@ export const TemplateSelectionModal: React.FC<TemplateSelectionModalProps> = ({
 
   // Separate templates into system and saved
   const systemTemplates = templates.filter((t) => {
-    const createdBy = t.created_by !== undefined && t.created_by !== null ? t.created_by : 0;
-    console.log(`Template "${t.title}" - created_by:`, createdBy, "is system:", createdBy === 0);
+    // Convert to number, handling string values
+    let createdBy = typeof t.created_by === 'string' ? parseInt(t.created_by, 10) : (t.created_by ?? 0);
+    if (isNaN(createdBy)) createdBy = 0;
+
+    console.log(`Template "${t.title}" - raw created_by:`, t.created_by, "parsed createdBy:", createdBy, "is system:", createdBy === 0);
     return createdBy === 0;
   });
+
   const savedTemplates = templates.filter((t) => {
-    const createdBy = t.created_by !== undefined && t.created_by !== null ? t.created_by : 0;
+    // Convert to number, handling string values
+    let createdBy = typeof t.created_by === 'string' ? parseInt(t.created_by, 10) : (t.created_by ?? 0);
+    if (isNaN(createdBy)) createdBy = 0;
+
     return createdBy > 0;
   });
 
