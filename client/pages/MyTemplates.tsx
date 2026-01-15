@@ -15,7 +15,6 @@ import { createProposal } from "@/services/proposalsService";
 import { Label } from "@/components/ui/label";
 import { ProposalPreviewModal } from "@/components/ProposalPreviewModal";
 import { MoreVertical, FileText, Upload } from "lucide-react";
-import { useRef } from "react";
 import { getStoredToken } from "@/lib/auth";
 
 const statusStyles: Record<string, string> = {
