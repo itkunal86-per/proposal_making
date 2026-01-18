@@ -871,6 +871,15 @@ export async function getProposalDetails(id: string): Promise<Proposal | undefin
               contentStyles: localSection.contentStyles || apiSection.contentStyles,
             };
 
+            console.log("Merged section contentStyles:", {
+              sectionId: mergedSection.id,
+              sectionTitle: mergedSection.title,
+              hasBackgroundImage: !!mergedSection.contentStyles?.backgroundImage,
+              backgroundImage: mergedSection.contentStyles?.backgroundImage,
+              localHasContentStyles: !!localSection.contentStyles,
+              apiHasContentStyles: !!apiSection.contentStyles,
+            });
+
             if (mergedSection.layout !== "single") {
               console.log("Merged section with multi-column layout:", {
                 id: mergedSection.id,
