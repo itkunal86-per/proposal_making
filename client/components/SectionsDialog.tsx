@@ -112,9 +112,9 @@ export const SectionsDialog: React.FC<SectionsDialogProps> = ({
 
       onUpdateProposal(updated);
 
-      // Auto-select the newly added section's title element in the properties panel
+      // Auto-select the newly added section in the properties panel
       if (onSelectElement && newSection) {
-        onSelectElement(`section-title-${newSection.id}`, "section-title");
+        onSelectElement(`section-${newSection.id}`, "section");
       }
 
       setTemplateDialogOpen(false);
