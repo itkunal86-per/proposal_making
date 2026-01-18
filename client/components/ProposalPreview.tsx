@@ -568,7 +568,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
               padding: (section as any).contentStyles?.paddingTop || (section as any).contentStyles?.paddingRight || (section as any).contentStyles?.paddingBottom || (section as any).contentStyles?.paddingLeft
                 ? `${(section as any).contentStyles?.paddingTop || 12}px ${(section as any).contentStyles?.paddingRight || 12}px ${(section as any).contentStyles?.paddingBottom || 12}px ${(section as any).contentStyles?.paddingLeft || 12}px`
                 : "12px",
-              backgroundColor: (section as any).contentStyles?.backgroundColor || (selectedElementId?.includes(`section-title-${section.id}`) || selectedElementId === `section-${section.id}` ? "#f9fafb" : "transparent"),
+              backgroundColor: (section as any).contentStyles?.backgroundColor || (selectedElementId === `section-${section.id}` ? "#f9fafb" : "transparent"),
               backgroundImage: (section as any).contentStyles?.backgroundImage ? `url(${(section as any).contentStyles.backgroundImage})` : undefined,
               backgroundSize: (section as any).contentStyles?.backgroundSize || "cover",
               backgroundPosition: "center",
