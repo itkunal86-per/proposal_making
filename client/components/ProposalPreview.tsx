@@ -1103,36 +1103,44 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                     }
                   />
                 ))}
-                {(section as any).texts && (section as any).texts.map((text: any, tIndex: number) => (
-                  <TextEditor
-                    key={`text-${tIndex}`}
-                    id={`text-${section.id}-${tIndex}`}
-                    content={text.content}
-                    top={text.top}
-                    left={text.left}
-                    width={text.width}
-                    height={text.height}
-                    fontSize={text.fontSize}
-                    color={text.color}
-                    fontWeight={text.fontWeight}
-                    backgroundColor={text.backgroundColor}
-                    backgroundOpacity={text.backgroundOpacity}
-                    borderColor={text.borderColor}
-                    borderWidth={text.borderWidth}
-                    borderRadius={text.borderRadius}
-                    paddingTop={text.paddingTop}
-                    paddingRight={text.paddingRight}
-                    paddingBottom={text.paddingBottom}
-                    paddingLeft={text.paddingLeft}
-                    selected={selectedElementId === `text-${section.id}-${tIndex}`}
-                    onSelect={() =>
-                      onSelectElement(`text-${section.id}-${tIndex}`, "text")
-                    }
-                    onUpdate={(updates) =>
-                      onUpdateText?.(section.id, tIndex, updates)
-                    }
-                  />
-                ))}
+                {(section as any).texts && (section as any).texts.map((text: any, tIndex: number) => {
+                  const sectionPadLeft = parseInt((section as any).contentStyles?.paddingLeft || "12");
+                  const sectionPadRight = parseInt((section as any).contentStyles?.paddingRight || "12");
+                  return (
+                    <TextEditor
+                      key={`text-${tIndex}`}
+                      id={`text-${section.id}-${tIndex}`}
+                      content={text.content}
+                      top={text.top}
+                      left={text.left}
+                      width={text.width}
+                      height={text.height}
+                      fontSize={text.fontSize}
+                      color={text.color}
+                      fontWeight={text.fontWeight}
+                      backgroundColor={text.backgroundColor}
+                      backgroundOpacity={text.backgroundOpacity}
+                      borderColor={text.borderColor}
+                      borderWidth={text.borderWidth}
+                      borderRadius={text.borderRadius}
+                      paddingTop={text.paddingTop}
+                      paddingRight={text.paddingRight}
+                      paddingBottom={text.paddingBottom}
+                      paddingLeft={text.paddingLeft}
+                      selected={selectedElementId === `text-${section.id}-${tIndex}`}
+                      onSelect={() =>
+                        onSelectElement(`text-${section.id}-${tIndex}`, "text")
+                      }
+                      onUpdate={(updates) =>
+                        onUpdateText?.(section.id, tIndex, updates)
+                      }
+                      fullWidth={text.fullWidth}
+                      parentWidth={sectionWidths[section.id]}
+                      sectionPaddingLeft={sectionPadLeft}
+                      sectionPaddingRight={sectionPadRight}
+                    />
+                  );
+                })}
                 {(section as any).images && (section as any).images.map((image: any, iIndex: number) => (
                   <ImageEditor
                     key={`image-${iIndex}`}
