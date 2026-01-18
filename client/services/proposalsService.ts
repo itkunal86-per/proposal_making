@@ -885,7 +885,24 @@ export async function getProposalDetails(id: string): Promise<Proposal | undefin
 
             return mergedSection;
           }
-          return apiSection;
+          // Ensure API sections have contentStyles
+          return {
+            ...apiSection,
+            contentStyles: apiSection.contentStyles || {
+              gapAfter: 10,
+              paddingTop: "12",
+              paddingRight: "12",
+              paddingBottom: "12",
+              paddingLeft: "12",
+              marginTop: "0",
+              marginRight: "0",
+              marginBottom: "0",
+              marginLeft: "0",
+              borderWidth: "1",
+              borderColor: "#e5e7eb",
+              borderRadius: "8",
+            },
+          };
         }),
       };
     }
