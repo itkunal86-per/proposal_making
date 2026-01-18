@@ -68,8 +68,6 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
   };
 
   React.useEffect(() => {
-    if (!selected) return;
-
     const handleMouseMove = (e: MouseEvent) => {
       if (isDragging) {
         const deltaX = e.clientX - dragStart.x;
@@ -125,7 +123,7 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
         window.removeEventListener("mouseup", handleMouseUp);
       };
     }
-  }, [selected, isDragging, isResizing, dragStart, initialPos, initialSize, onUpdate]);
+  }, [isDragging, isResizing, dragStart, initialPos, initialSize, onUpdate]);
 
   if (!selected) {
     return (
