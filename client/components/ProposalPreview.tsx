@@ -590,6 +590,20 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
             onDragLeave={() => setDragOverSectionId(null)}
             onDrop={(e) => handleDrop(e, section.id)}
           >
+            {(section as any).contentStyles?.backgroundImage && (section as any).contentStyles?.backgroundOpacity && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundColor: "rgba(255, 255, 255, " + ((100 - parseInt((section as any).contentStyles.backgroundOpacity || "100")) / 100) + ")",
+                  borderRadius: (section as any).contentStyles?.borderRadius ? `${(section as any).contentStyles.borderRadius}px` : "8px",
+                  pointerEvents: "none",
+                }}
+              />
+            )}
             {isMultiColumn && (
               <div className="col-span-full mb-2">
                 <SelectableElement
