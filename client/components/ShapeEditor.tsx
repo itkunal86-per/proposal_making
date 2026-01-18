@@ -74,8 +74,6 @@ export const ShapeEditor: React.FC<ShapeEditorProps> = ({
   };
 
   React.useEffect(() => {
-    if (!selected) return;
-
     const handleMouseMove = (e: MouseEvent) => {
       if (isDragging) {
         const deltaX = e.clientX - dragStart.x;
@@ -132,7 +130,7 @@ export const ShapeEditor: React.FC<ShapeEditorProps> = ({
         document.removeEventListener("mouseup", handleMouseUp);
       };
     }
-  }, [isDragging, isResizing, dragStart, initialPos, initialSize, selected, onUpdate]);
+  }, [isDragging, isResizing, dragStart, initialPos, initialSize, onUpdate]);
 
   const getCursorForHandle = (handle: ResizeHandle): string => {
     if (!handle) return "grab";
