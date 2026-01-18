@@ -552,7 +552,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
             "space-y-3";
 
           return (
-            <div key={section.id} style={{ marginBottom: `${gapAfterValue}px` }}>
+            <div key={section.id} style={{ marginBottom: `${parseInt((section as any).contentStyles?.gapAfter || "10")}px` }}>
               {/* Section Title - Outside the panel */}
               <div className="mb-2">
                 <div className="text-sm font-semibold text-gray-600 px-3 py-1 rounded bg-gray-100">
