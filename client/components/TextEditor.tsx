@@ -80,6 +80,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({
   parentWidth,
   sectionPaddingLeft = 12,
   sectionPaddingRight = 12,
+  lineHeight = "1.5",
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState<ResizeHandle>(null);
