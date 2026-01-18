@@ -370,7 +370,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                       />
                     ) : null}
                     <div
-                      style={{ position: "relative", zIndex: 1 }}
+                      style={{ position: "relative", zIndex: 1, width: "100%", height: "100%" }}
                       dangerouslySetInnerHTML={{
                         __html: decodeHtmlEntities(replaceVariables(section.content, variables)),
                       }}
