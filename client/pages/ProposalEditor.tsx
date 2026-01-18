@@ -939,6 +939,7 @@ export default function ProposalEditor() {
                     width: 200,
                     left: Math.round(x),
                     top: Math.round(y),
+                    fullWidth: false,
                   };
                   const updated = {
                     ...p,
