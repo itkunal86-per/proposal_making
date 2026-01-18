@@ -563,12 +563,22 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
               gap: isMultiColumn ? `${columnGapValue}px` : undefined,
               marginBottom: `${gapAfterValue}px`,
               position: "relative",
-              border: selectedElementId === `section-${section.id}` ? "2px solid #3b82f6" : "2px solid #e5e7eb",
-              borderRadius: "8px",
-              padding: "12px",
-              backgroundColor: selectedElementId?.includes(`section-title-${section.id}`) || selectedElementId === `section-${section.id}` ? "#f9fafb" : "transparent",
+              border: selectedElementId === `section-${section.id}` ? "2px solid #3b82f6" : ((section as any).contentStyles?.borderWidth ? `${(section as any).contentStyles.borderWidth}px solid ${(section as any).contentStyles.borderColor || "#000000"}` : "2px solid #e5e7eb"),
+              borderRadius: (section as any).contentStyles?.borderRadius ? `${(section as any).contentStyles.borderRadius}px` : "8px",
+              padding: (section as any).contentStyles?.paddingTop || (section as any).contentStyles?.paddingRight || (section as any).contentStyles?.paddingBottom || (section as any).contentStyles?.paddingLeft
+                ? `${(section as any).contentStyles?.paddingTop || 12}px ${(section as any).contentStyles?.paddingRight || 12}px ${(section as any).contentStyles?.paddingBottom || 12}px ${(section as any).contentStyles?.paddingLeft || 12}px`
+                : "12px",
+              backgroundColor: (section as any).contentStyles?.backgroundColor || (selectedElementId?.includes(`section-title-${section.id}`) || selectedElementId === `section-${section.id}` ? "#f9fafb" : "transparent"),
+              backgroundImage: (section as any).contentStyles?.backgroundImage ? `url(${(section as any).contentStyles.backgroundImage})` : undefined,
+              backgroundSize: (section as any).contentStyles?.backgroundSize || "cover",
+              backgroundPosition: "center",
+              backgroundRepeat: "no-repeat",
               cursor: "pointer",
-              transition: "border-color 0.2s"
+              transition: "border-color 0.2s",
+              marginTop: (section as any).contentStyles?.marginTop ? `${(section as any).contentStyles.marginTop}px` : undefined,
+              marginRight: (section as any).contentStyles?.marginRight ? `${(section as any).contentStyles.marginRight}px` : undefined,
+              marginBottom: (section as any).contentStyles?.marginBottom ? `${(section as any).contentStyles.marginBottom}px` : undefined,
+              marginLeft: (section as any).contentStyles?.marginLeft ? `${(section as any).contentStyles.marginLeft}px` : undefined,
             }}
             onClick={(e) => {
               // Only select section if clicking on the border area, not on child elements
