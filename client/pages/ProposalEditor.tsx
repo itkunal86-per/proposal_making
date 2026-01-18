@@ -453,6 +453,12 @@ export default function ProposalEditor() {
     }
   }, [isSystemTemplateEdit, p, nav, searchParams]);
 
+  const handleSelectElement = useCallback((elementId: string, elementType: string) => {
+    setSelectedElementId(elementId);
+    setSelectedElementType(elementType);
+    setActivePanel("properties");
+  }, []);
+
   if (!p) return null;
 
   const section = p.sections[current];
