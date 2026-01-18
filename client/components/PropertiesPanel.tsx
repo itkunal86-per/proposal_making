@@ -3195,23 +3195,25 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             </div>
           </div>
 
-          <div>
-            <Label className="text-xs font-semibold">Width</Label>
-            <div className="flex gap-2 mt-2">
-              <Input
-                type="number"
-                min="50"
-                value={text.width}
-                onChange={(e) =>
-                  handleUpdateText({ width: parseInt(e.target.value) || 200 })
-                }
-                className="flex-1"
-              />
-              <span className="text-sm text-muted-foreground self-center">
-                px
-              </span>
+          {!text.fullWidth && (
+            <div>
+              <Label className="text-xs font-semibold">Width</Label>
+              <div className="flex gap-2 mt-2">
+                <Input
+                  type="number"
+                  min="50"
+                  value={text.width}
+                  onChange={(e) =>
+                    handleUpdateText({ width: parseInt(e.target.value) || 200 })
+                  }
+                  className="flex-1"
+                />
+                <span className="text-sm text-muted-foreground self-center">
+                  px
+                </span>
+              </div>
             </div>
-          </div>
+          )}
 
           <div>
             <Button
@@ -3222,6 +3224,11 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             >
               {text.fullWidth ? "✓ Full Width" : "Make Full Width"}
             </Button>
+            {text.fullWidth && (
+              <p className="text-xs text-muted-foreground mt-2">
+                Width is determined by the section bounds
+              </p>
+            )}
           </div>
         </div>
 
