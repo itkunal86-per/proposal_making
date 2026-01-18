@@ -172,6 +172,9 @@ export const ShapeEditor: React.FC<ShapeEditorProps> = ({
         cursor: isDragging ? "grabbing" : "grab",
         pointerEvents: "auto",
         zIndex: selected ? 1000 : 10,
+        userSelect: "none",
+        WebkitUserSelect: "none",
+        WebkitUserDrag: "none",
       }}
       onMouseDown={(e) => handleMouseDown(e, null)}
     >
