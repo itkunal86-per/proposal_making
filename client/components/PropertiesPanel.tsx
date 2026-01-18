@@ -3210,6 +3210,17 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               </span>
             </div>
           </div>
+
+          <div>
+            <Button
+              onClick={() => handleUpdateText({ fullWidth: !text.fullWidth })}
+              variant={text.fullWidth ? "default" : "outline"}
+              size="sm"
+              className="w-full mt-2"
+            >
+              {text.fullWidth ? "✓ Full Width" : "Make Full Width"}
+            </Button>
+          </div>
         </div>
 
         <Separator />
