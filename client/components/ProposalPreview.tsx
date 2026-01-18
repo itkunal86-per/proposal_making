@@ -606,80 +606,20 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
             )}
             {isMultiColumn && (
               <div className="col-span-full mb-2">
-                <SelectableElement
-                  id={`section-title-${section.id}`}
-                  type="section-title"
-                  selected={selectedElementId === `section-title-${section.id}`}
-                  onSelect={() =>
-                    onSelectElement(`section-title-${section.id}`, "section-title")
-                  }
-                  color={(section as any).titleStyles?.color}
-                  fontSize={(section as any).titleStyles?.fontSize}
-                  textAlign={(section as any).titleStyles?.textAlign}
-                  backgroundColor={(section as any).titleStyles?.backgroundColor}
-                  backgroundImage={(section as any).titleStyles?.backgroundImage}
-                  backgroundSize={(section as any).titleStyles?.backgroundSize}
-                  backgroundOpacity={(section as any).titleStyles?.backgroundOpacity}
-                  borderColor={(section as any).titleStyles?.borderColor}
-                  borderWidth={(section as any).titleStyles?.borderWidth}
-                  borderRadius={(section as any).titleStyles?.borderRadius}
-                  borderStyle={(section as any).titleStyles?.borderStyle}
-                  paddingTop={(section as any).titleStyles?.paddingTop}
-                  paddingRight={(section as any).titleStyles?.paddingRight}
-                  paddingBottom={(section as any).titleStyles?.paddingBottom}
-                  paddingLeft={(section as any).titleStyles?.paddingLeft}
-                  marginTop={(section as any).titleStyles?.marginTop}
-                  marginRight={(section as any).titleStyles?.marginRight}
-                  marginBottom={(section as any).titleStyles?.marginBottom}
-                  marginLeft={(section as any).titleStyles?.marginLeft}
-                  bold={(section as any).titleStyles?.bold}
-                  italic={(section as any).titleStyles?.italic}
-                  underline={(section as any).titleStyles?.underline}
-                  strikethrough={(section as any).titleStyles?.strikethrough}
-                  code={(section as any).titleStyles?.code}
-                  variables={variables}
+                <div
+                  className="text-sm font-semibold text-gray-600 px-3 py-1 rounded bg-gray-100"
                 >
                   {section.title}
-                </SelectableElement>
+                </div>
               </div>
             )}
             {!isMultiColumn && (
               <div className="mb-2">
-                <SelectableElement
-                  id={`section-title-${section.id}`}
-                  type="section-title"
-                  selected={selectedElementId === `section-title-${section.id}`}
-                  onSelect={() =>
-                    onSelectElement(`section-title-${section.id}`, "section-title")
-                  }
-                  color={(section as any).titleStyles?.color}
-                  fontSize={(section as any).titleStyles?.fontSize}
-                  textAlign={(section as any).titleStyles?.textAlign}
-                  backgroundColor={(section as any).titleStyles?.backgroundColor}
-                  backgroundImage={(section as any).titleStyles?.backgroundImage}
-                  backgroundSize={(section as any).titleStyles?.backgroundSize}
-                  backgroundOpacity={(section as any).titleStyles?.backgroundOpacity}
-                  borderColor={(section as any).titleStyles?.borderColor}
-                  borderWidth={(section as any).titleStyles?.borderWidth}
-                  borderRadius={(section as any).titleStyles?.borderRadius}
-                  borderStyle={(section as any).titleStyles?.borderStyle}
-                  paddingTop={(section as any).titleStyles?.paddingTop}
-                  paddingRight={(section as any).titleStyles?.paddingRight}
-                  paddingBottom={(section as any).titleStyles?.paddingBottom}
-                  paddingLeft={(section as any).titleStyles?.paddingLeft}
-                  marginTop={(section as any).titleStyles?.marginTop}
-                  marginRight={(section as any).titleStyles?.marginRight}
-                  marginBottom={(section as any).titleStyles?.marginBottom}
-                  marginLeft={(section as any).titleStyles?.marginLeft}
-                  bold={(section as any).titleStyles?.bold}
-                  italic={(section as any).titleStyles?.italic}
-                  underline={(section as any).titleStyles?.underline}
-                  strikethrough={(section as any).titleStyles?.strikethrough}
-                  code={(section as any).titleStyles?.code}
-                  variables={variables}
+                <div
+                  className="text-sm font-semibold text-gray-600 px-3 py-1 rounded bg-gray-100"
                 >
                   {section.title}
-                </SelectableElement>
+                </div>
               </div>
             )}
 
