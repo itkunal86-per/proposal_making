@@ -239,9 +239,16 @@ export const TextEditor: React.FC<TextEditorProps> = ({
     />
   );
 
+  const handleDragStart = (e: React.DragEvent) => {
+    const img = new Image();
+    img.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+    e.dataTransfer.setDragImage(img, 0, 0);
+  };
+
   return (
     <div
       ref={containerRef}
+      draggable="false"
       style={{
         position: "absolute",
         left: `${left}px`,
@@ -256,6 +263,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({
         WebkitUserDrag: "none",
       }}
       onMouseDown={(e) => handleMouseDown(e, null)}
+      onDragStart={handleDragStart}
       onDoubleClick={handleDoubleClick}
     >
 
