@@ -332,6 +332,30 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
   const sectionRefs = React.useRef<Map<string, HTMLDivElement>>(new Map());
 
   React.useEffect(() => {
+    const resizeObserver = new ResizeObserver(() => {
+      const newWidths: Record<string, number> = {};
+      proposal.sections.forEach((section) => {
+        const element = sectionRefs.current.get(section.id);
+        if (element) {
+          newWidths[section.id] = element.getBoundingClientRect().width;
+        }
+      });
+      setSectionWidths(newWidths);
+    });
+
+    proposal.sections.forEach((section) => {
+      const element = sectionRefs.current.get(section.id);
+      if (element) {
+        resizeObserver.observe(element);
+      }
+    });
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [proposal.sections]);
+
+  React.useEffect(() => {
     const newHeights: Record<string, number> = {};
 
     if (!proposal || !proposal.sections) return;
