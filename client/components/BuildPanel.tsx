@@ -17,6 +17,13 @@ export const BuildPanel: React.FC<BuildPanelProps> = ({ onAddContent, onShapeDra
   const [isDraggingText, setIsDraggingText] = useState(false);
   const [isDraggingImage, setIsDraggingImage] = useState(false);
 
+  // Create a transparent drag image to hide the default white container
+  const createTransparentDragImage = () => {
+    const img = new Image();
+    img.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+    return img;
+  };
+
   const contentTypes = [
     {
       id: "text",
