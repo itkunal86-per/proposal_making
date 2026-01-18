@@ -780,11 +780,7 @@ export default function ProposalEditor() {
             <ProposalPreview
               proposal={p}
               selectedElementId={selectedElementId}
-              onSelectElement={(elementId, elementType) => {
-                setSelectedElementId(elementId);
-                setSelectedElementType(elementType);
-                setActivePanel("properties");
-              }}
+              onSelectElement={handleSelectElement}
               onAIElement={(id, type) => {
                 setAIElementId(id);
                 setAIElementType(type);
