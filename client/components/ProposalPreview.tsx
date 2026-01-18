@@ -327,6 +327,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
   const [canvasHeights, setCanvasHeights] = React.useState<Record<string, number>>({});
   const [customContentHeights, setCustomContentHeights] = React.useState<Record<string, number>>({});
   const [resizingContentId, setResizingContentId] = React.useState<string | null>(null);
+  const [sectionWidths, setSectionWidths] = React.useState<Record<string, number>>({});
 
   const sectionRefs = React.useRef<Map<string, HTMLDivElement>>(new Map());
 
