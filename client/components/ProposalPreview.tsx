@@ -552,77 +552,65 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
             "space-y-3";
 
           return (
-          <div
-            key={section.id}
-            data-section-id={section.id}
-            ref={(el) => {
-              if (el) sectionRefs.current.set(section.id, el);
-            }}
-            className={containerClassName}
-            style={{
-              gap: isMultiColumn ? `${columnGapValue}px` : undefined,
-              marginBottom: `${gapAfterValue}px`,
-              position: "relative",
-              border: selectedElementId === `section-${section.id}` ? "2px solid #3b82f6" : ((section as any).contentStyles?.borderWidth ? `${(section as any).contentStyles.borderWidth}px solid ${(section as any).contentStyles.borderColor || "#000000"}` : "2px solid #e5e7eb"),
-              borderRadius: (section as any).contentStyles?.borderRadius ? `${(section as any).contentStyles.borderRadius}px` : "8px",
-              padding: (section as any).contentStyles?.paddingTop || (section as any).contentStyles?.paddingRight || (section as any).contentStyles?.paddingBottom || (section as any).contentStyles?.paddingLeft
-                ? `${(section as any).contentStyles?.paddingTop || 12}px ${(section as any).contentStyles?.paddingRight || 12}px ${(section as any).contentStyles?.paddingBottom || 12}px ${(section as any).contentStyles?.paddingLeft || 12}px`
-                : "12px",
-              backgroundColor: (section as any).contentStyles?.backgroundColor || (selectedElementId === `section-${section.id}` ? "#f9fafb" : "transparent"),
-              backgroundImage: (section as any).contentStyles?.backgroundImage ? `url(${(section as any).contentStyles.backgroundImage})` : undefined,
-              backgroundSize: (section as any).contentStyles?.backgroundSize || "cover",
-              backgroundPosition: "center",
-              backgroundRepeat: "no-repeat",
-              cursor: "pointer",
-              transition: "border-color 0.2s",
-              marginTop: (section as any).contentStyles?.marginTop ? `${(section as any).contentStyles.marginTop}px` : undefined,
-              marginRight: (section as any).contentStyles?.marginRight ? `${(section as any).contentStyles.marginRight}px` : undefined,
-              marginLeft: (section as any).contentStyles?.marginLeft ? `${(section as any).contentStyles.marginLeft}px` : undefined,
-            }}
-            onClick={(e) => {
-              // Only select section if clicking on the border area, not on child elements
-              if (e.target === e.currentTarget) {
-                onSelectElement(`section-${section.id}`, "section");
-              }
-            }}
-            onDragOver={handleDragOver}
-            onDragLeave={() => setDragOverSectionId(null)}
-            onDrop={(e) => handleDrop(e, section.id)}
-          >
-            {(section as any).contentStyles?.backgroundImage && (section as any).contentStyles?.backgroundOpacity && (
-              <div
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  backgroundColor: "rgba(255, 255, 255, " + ((100 - parseInt((section as any).contentStyles.backgroundOpacity || "100")) / 100) + ")",
-                  borderRadius: (section as any).contentStyles?.borderRadius ? `${(section as any).contentStyles.borderRadius}px` : "8px",
-                  pointerEvents: "none",
-                }}
-              />
-            )}
-            {isMultiColumn && (
-              <div className="col-span-full mb-2" style={{ position: "relative", zIndex: 1 }}>
-                <div
-                  className="text-sm font-semibold text-gray-600 px-3 py-1 rounded bg-gray-100"
-                >
+            <div key={section.id} style={{ marginBottom: `${gapAfterValue}px` }}>
+              {/* Section Title - Outside the panel */}
+              <div className="mb-2">
+                <div className="text-sm font-semibold text-gray-600 px-3 py-1 rounded bg-gray-100">
                   {section.title}
                 </div>
               </div>
-            )}
-            {!isMultiColumn && (
-              <div className="mb-2" style={{ position: "relative", zIndex: 1 }}>
-                <div
-                  className="text-sm font-semibold text-gray-600 px-3 py-1 rounded bg-gray-100"
-                >
-                  {section.title}
-                </div>
-              </div>
-            )}
 
-            {!isMultiColumn && (
+              {/* Section Content Panel */}
+              <div
+                data-section-id={section.id}
+                ref={(el) => {
+                  if (el) sectionRefs.current.set(section.id, el);
+                }}
+                className={containerClassName}
+                style={{
+                  gap: isMultiColumn ? `${columnGapValue}px` : undefined,
+                  position: "relative",
+                  border: selectedElementId === `section-${section.id}` ? "2px solid #3b82f6" : ((section as any).contentStyles?.borderWidth ? `${(section as any).contentStyles.borderWidth}px solid ${(section as any).contentStyles.borderColor || "#000000"}` : "2px solid #e5e7eb"),
+                  borderRadius: (section as any).contentStyles?.borderRadius ? `${(section as any).contentStyles.borderRadius}px` : "8px",
+                  padding: (section as any).contentStyles?.paddingTop || (section as any).contentStyles?.paddingRight || (section as any).contentStyles?.paddingBottom || (section as any).contentStyles?.paddingLeft
+                    ? `${(section as any).contentStyles?.paddingTop || 12}px ${(section as any).contentStyles?.paddingRight || 12}px ${(section as any).contentStyles?.paddingBottom || 12}px ${(section as any).contentStyles?.paddingLeft || 12}px`
+                    : "12px",
+                  backgroundColor: (section as any).contentStyles?.backgroundColor || (selectedElementId === `section-${section.id}` ? "#f9fafb" : "transparent"),
+                  backgroundImage: (section as any).contentStyles?.backgroundImage ? `url(${(section as any).contentStyles.backgroundImage})` : undefined,
+                  backgroundSize: (section as any).contentStyles?.backgroundSize || "cover",
+                  backgroundPosition: "center",
+                  backgroundRepeat: "no-repeat",
+                  cursor: "pointer",
+                  transition: "border-color 0.2s",
+                  marginTop: (section as any).contentStyles?.marginTop ? `${(section as any).contentStyles.marginTop}px` : undefined,
+                  marginRight: (section as any).contentStyles?.marginRight ? `${(section as any).contentStyles.marginRight}px` : undefined,
+                  marginLeft: (section as any).contentStyles?.marginLeft ? `${(section as any).contentStyles.marginLeft}px` : undefined,
+                }}
+                onClick={(e) => {
+                  // Only select section if clicking on the border area, not on child elements
+                  if (e.target === e.currentTarget) {
+                    onSelectElement(`section-${section.id}`, "section");
+                  }
+                }}
+                onDragOver={handleDragOver}
+                onDragLeave={() => setDragOverSectionId(null)}
+                onDrop={(e) => handleDrop(e, section.id)}
+              >
+              {(section as any).contentStyles?.backgroundImage && (section as any).contentStyles?.backgroundOpacity && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: "rgba(255, 255, 255, " + ((100 - parseInt((section as any).contentStyles.backgroundOpacity || "100")) / 100) + ")",
+                    borderRadius: (section as any).contentStyles?.borderRadius ? `${(section as any).contentStyles.borderRadius}px` : "8px",
+                    pointerEvents: "none",
+                  }}
+                />
+              )}
+              {!isMultiColumn && (
               <div
                 data-content-id={`section-content-${section.id}`}
                 style={{
@@ -677,11 +665,11 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                     title="Drag to resize section height"
                   />
               </div>
-            )}
+              )}
 
-            {isMultiColumn && (
-              <>
-                {section.layout === "two-column" && (
+              {isMultiColumn && (
+                <>
+                  {section.layout === "two-column" && (
                   <>
                     <div style={{
                       backgroundColor: (section as any).columnStyles?.[0]?.backgroundColor || "transparent",
@@ -1165,9 +1153,10 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                   );
                 })}
               </div>
-            ) : null}
-          </div>
-        );
+              ) : null}
+              </div>
+            </div>
+          );
         })}
       </div>
 
