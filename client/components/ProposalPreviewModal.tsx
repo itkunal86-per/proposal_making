@@ -341,16 +341,17 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                       color: (section as any).contentStyles?.color,
                       fontSize: `${(section as any).contentStyles?.fontSize || 16}px`,
                       textAlign: ((section as any).contentStyles?.textAlign || "left") as any,
-                      backgroundColor: (section as any).contentStyles?.backgroundColor,
+                      backgroundColor: (section as any).contentStyles?.backgroundColor || undefined,
                       backgroundImage: (section as any).contentStyles?.backgroundImage ? `url(${(section as any).contentStyles?.backgroundImage})` : undefined,
-                      backgroundSize: (section as any).contentStyles?.backgroundSize || "cover",
+                      backgroundSize: ((section as any).contentStyles?.backgroundImage ? (section as any).contentStyles?.backgroundSize || "cover" : undefined),
                       backgroundPosition: "center",
                       backgroundRepeat: "no-repeat",
-                      padding: `${(section as any).contentStyles?.paddingTop || 0}px ${(section as any).contentStyles?.paddingRight || 0}px ${(section as any).contentStyles?.paddingBottom || 0}px ${(section as any).contentStyles?.paddingLeft || 0}px`,
+                      padding: `${parseInt((section as any).contentStyles?.paddingTop || "0")}px ${parseInt((section as any).contentStyles?.paddingRight || "0")}px ${parseInt((section as any).contentStyles?.paddingBottom || "0")}px ${parseInt((section as any).contentStyles?.paddingLeft || "0")}px`,
                       borderRadius: (section as any).contentStyles?.borderRadius ? `${(section as any).contentStyles?.borderRadius}px` : undefined,
                       fontWeight: (section as any).contentStyles?.bold ? "bold" : "normal",
                       fontStyle: (section as any).contentStyles?.italic ? "italic" : "normal",
                       textDecoration: (section as any).contentStyles?.underline ? "underline" : (section as any).contentStyles?.strikethrough ? "line-through" : "none",
+                      position: (section as any).contentStyles?.backgroundImage ? "relative" : undefined,
                     }}
                   >
                     {(section as any).contentStyles?.backgroundImage && (section as any).contentStyles?.backgroundOpacity && (
