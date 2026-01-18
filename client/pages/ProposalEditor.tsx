@@ -940,6 +940,7 @@ export default function ProposalEditor() {
                     left: Math.round(x),
                     top: Math.round(y),
                     fullWidth: false,
+                    lineHeight: "1.5",
                   };
                   const updated = {
                     ...p,
