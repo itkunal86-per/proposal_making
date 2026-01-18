@@ -378,7 +378,7 @@ export default function ProposalEditor() {
     }, 400);
   }
 
-  const handleSectionNavigate = (sectionId: string) => {
+  const handleSectionNavigate = useCallback((sectionId: string) => {
     const sectionIndex = p?.sections.findIndex((s) => String(s.id) === String(sectionId));
     if (sectionIndex !== undefined && sectionIndex !== -1) {
       setCurrent(sectionIndex);
@@ -393,7 +393,7 @@ export default function ProposalEditor() {
         }
       }, 100);
     }
-  };
+  }, [p?.sections]);
 
   const handleMediaUploaded = useCallback((media: { id: string; url: string; type: "image" | "video"; name: string }, destination: "document" | "library") => {
     if (destination === "document") {
