@@ -79,6 +79,7 @@ export const BuildPanel: React.FC<BuildPanelProps> = ({ onAddContent, onShapeDra
   const handleTextDragStart = (e: React.DragEvent<HTMLDivElement>) => {
     e.dataTransfer.effectAllowed = "copy";
     e.dataTransfer.setData("application/json", JSON.stringify({ type: "text" }));
+    e.dataTransfer.setDragImage(createTransparentDragImage(), 0, 0);
     setIsDraggingText(true);
     onTextDragStart?.(e);
   };
