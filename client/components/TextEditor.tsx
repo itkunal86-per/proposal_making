@@ -323,7 +323,8 @@ export const TextEditor: React.FC<TextEditorProps> = ({
           border: `${borderWidth}px solid ${borderColor}`,
           borderRadius: `${borderRadius}px`,
           backgroundColor: backgroundColor,
-          opacity: parseInt(backgroundOpacity || "100") / 100,
+          backgroundImage: backgroundColor === "transparent" || backgroundColor === "rgba(0, 0, 0, 0)" ? "none" : undefined,
+          opacity: 1,
           cursor: isEditing ? "text" : "grab",
           height: "100%",
           width: "100%",
@@ -336,9 +337,33 @@ export const TextEditor: React.FC<TextEditorProps> = ({
           outlineOffset: "-2px",
           whiteSpace: "pre-wrap",
           overflowWrap: "break-word",
+          position: "relative",
         }}
       >
-        {!content && !isEditing && "Click to edit..."}
+        {backgroundColor && backgroundColor !== "transparent" && backgroundColor !== "rgba(0, 0, 0, 0)" && (
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: backgroundColor,
+              opacity: parseInt(backgroundOpacity || "100") / 100,
+              borderRadius: `${borderRadius}px`,
+              zIndex: 0,
+              pointerEvents: "none",
+            }}
+          />
+        )}
+        <div
+          style={{
+            position: "relative",
+            zIndex: 1,
+          }}
+        >
+          {!content && !isEditing && "Click to edit..."}
+        </div>
       </div>
 
       {selected && !isEditing && (
