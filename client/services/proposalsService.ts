@@ -60,6 +60,7 @@ export interface TextElement {
   height?: number;
   top: number;
   left: number;
+  fullWidth?: boolean;
 }
 
 export interface ImageElement {
