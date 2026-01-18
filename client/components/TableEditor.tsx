@@ -80,8 +80,6 @@ export const TableEditor: React.FC<TableEditorProps> = ({
   };
 
   React.useEffect(() => {
-    if (!selected) return;
-
     const handleMouseMove = (e: MouseEvent) => {
       if (isDragging) {
         const deltaX = e.clientX - dragStart.x;
@@ -137,7 +135,7 @@ export const TableEditor: React.FC<TableEditorProps> = ({
         document.removeEventListener("mouseup", handleMouseUp);
       };
     }
-  }, [isDragging, isResizing, dragStart, initialPos, initialSize, selected, onUpdate]);
+  }, [isDragging, isResizing, dragStart, initialPos, initialSize, onUpdate]);
 
   const getCursorForHandle = (handle: ResizeHandle): string => {
     if (!handle) return "grab";
