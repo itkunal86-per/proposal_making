@@ -54,7 +54,20 @@ export const SectionsDialog: React.FC<SectionsDialogProps> = ({
       marginLeft: 0,
     }) : undefined;
     const titleStyles = columnCount > 0 ? { columnGap: 0 } : {};
-    const contentStyles = { gapAfter: 10 };
+    const contentStyles = {
+      gapAfter: 10,
+      paddingTop: "12",
+      paddingRight: "12",
+      paddingBottom: "12",
+      paddingLeft: "12",
+      marginTop: "0",
+      marginRight: "0",
+      marginBottom: "0",
+      marginLeft: "0",
+      borderWidth: "1",
+      borderColor: "#e5e7eb",
+      borderRadius: "8",
+    };
 
     const newSection = {
       id: uuid(),
