@@ -61,6 +61,7 @@ export interface TextElement {
   top: number;
   left: number;
   fullWidth?: boolean;
+  lineHeight?: string;
 }
 
 export interface ImageElement {
