@@ -390,6 +390,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                       const borderWidth = columnStyle?.borderWidth || contentStyle?.borderWidth || 0;
                       const borderColor = columnStyle?.borderColor || contentStyle?.borderColor || "#000000";
                       const borderStyle = borderWidth > 0 ? "solid" : "none";
+                      const hasBackgroundImage = columnStyle?.backgroundImage || contentStyle?.backgroundImage;
 
                       return (
                         <div
@@ -401,7 +402,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                             textAlign: ((columnStyle?.textAlign || contentStyle?.textAlign || "left") as any),
                             backgroundColor: columnStyle?.backgroundColor || contentStyle?.backgroundColor,
                             backgroundImage: columnStyle?.backgroundImage ? `url(${columnStyle.backgroundImage})` : undefined,
-                            backgroundSize: columnStyle?.backgroundSize || contentStyle?.backgroundSize || "cover",
+                            backgroundSize: hasBackgroundImage ? (columnStyle?.backgroundSize || contentStyle?.backgroundSize || "cover") : undefined,
                             backgroundPosition: "center",
                             backgroundRepeat: "no-repeat",
                             paddingTop: `${columnStyle?.paddingTop || contentStyle?.paddingTop || 0}px`,
@@ -419,6 +420,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                             fontWeight: columnStyle?.bold || contentStyle?.bold ? "bold" : "normal",
                             fontStyle: columnStyle?.italic || contentStyle?.italic ? "italic" : "normal",
                             textDecoration: columnStyle?.underline || contentStyle?.underline ? "underline" : columnStyle?.strikethrough || contentStyle?.strikethrough ? "line-through" : "none",
+                            position: hasBackgroundImage ? "relative" : undefined,
                           }}
                         >
                           <div
@@ -436,6 +438,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                       const borderWidth = columnStyle?.borderWidth || contentStyle?.borderWidth || 0;
                       const borderColor = columnStyle?.borderColor || contentStyle?.borderColor || "#000000";
                       const borderStyle = borderWidth > 0 ? "solid" : "none";
+                      const hasBackgroundImage = columnStyle?.backgroundImage || contentStyle?.backgroundImage;
 
                       return (
                         <div
@@ -447,7 +450,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                             textAlign: ((columnStyle?.textAlign || contentStyle?.textAlign || "left") as any),
                             backgroundColor: columnStyle?.backgroundColor || contentStyle?.backgroundColor,
                             backgroundImage: columnStyle?.backgroundImage ? `url(${columnStyle.backgroundImage})` : undefined,
-                            backgroundSize: columnStyle?.backgroundSize || contentStyle?.backgroundSize || "cover",
+                            backgroundSize: hasBackgroundImage ? (columnStyle?.backgroundSize || contentStyle?.backgroundSize || "cover") : undefined,
                             backgroundPosition: "center",
                             backgroundRepeat: "no-repeat",
                             paddingTop: `${columnStyle?.paddingTop || contentStyle?.paddingTop || 0}px`,
@@ -465,6 +468,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                             fontWeight: columnStyle?.bold || contentStyle?.bold ? "bold" : "normal",
                             fontStyle: columnStyle?.italic || contentStyle?.italic ? "italic" : "normal",
                             textDecoration: columnStyle?.underline || contentStyle?.underline ? "underline" : columnStyle?.strikethrough || contentStyle?.strikethrough ? "line-through" : "none",
+                            position: hasBackgroundImage ? "relative" : undefined,
                           }}
                         >
                           <div
