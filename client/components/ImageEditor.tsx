@@ -144,10 +144,18 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
     );
   }
 
+  const handleDragStart = (e: React.DragEvent) => {
+    const img = new Image();
+    img.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+    e.dataTransfer.setDragImage(img, 0, 0);
+  };
+
   return (
     <div
       ref={containerRef}
+      draggable="false"
       onMouseDown={(e) => handleMouseDown(e, null)}
+      onDragStart={handleDragStart}
       style={{
         position: "absolute",
         top: `${top}px`,
