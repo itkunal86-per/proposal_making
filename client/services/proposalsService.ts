@@ -271,6 +271,7 @@ const textElementSchema = z.object({
   top: z.number(),
   left: z.number(),
   fullWidth: z.boolean().optional(),
+  lineHeight: z.string().optional(),
 }).passthrough();
 
 const imageElementSchema = z.object({
