@@ -269,6 +269,7 @@ const textElementSchema = z.object({
   height: z.number().optional(),
   top: z.number(),
   left: z.number(),
+  fullWidth: z.boolean().optional(),
 }).passthrough();
 
 const imageElementSchema = z.object({
