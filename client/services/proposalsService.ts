@@ -888,7 +888,7 @@ export async function getProposalDetails(id: string): Promise<Proposal | undefin
 
             return mergedSection;
           }
-          // Ensure API sections have contentStyles
+          // Ensure API sections have contentStyles with defaults
           return {
             ...apiSection,
             contentStyles: apiSection.contentStyles || {
@@ -904,6 +904,10 @@ export async function getProposalDetails(id: string): Promise<Proposal | undefin
               borderWidth: "1",
               borderColor: "#e5e7eb",
               borderRadius: "8",
+              backgroundColor: undefined,
+              backgroundImage: undefined,
+              backgroundSize: "cover",
+              backgroundOpacity: "100",
             },
           };
         }),
