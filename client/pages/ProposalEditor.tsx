@@ -459,6 +459,13 @@ export default function ProposalEditor() {
     setActivePanel("properties");
   }, []);
 
+  const handleSelectElementInDialog = useCallback((elementId: string, elementType: string) => {
+    setSelectedElementId(elementId);
+    setSelectedElementType(elementType);
+    setActivePanel("properties");
+    setSectionsDialogOpen(false);
+  }, []);
+
   if (!p) return null;
 
   const section = p.sections[current];
