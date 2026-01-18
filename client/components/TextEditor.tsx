@@ -39,11 +39,13 @@ interface TextEditorProps {
     paddingRight?: string;
     paddingBottom?: string;
     paddingLeft?: string;
+    lineHeight?: string;
   }) => void;
   fullWidth?: boolean;
   parentWidth?: number;
   sectionPaddingLeft?: number;
   sectionPaddingRight?: number;
+  lineHeight?: string;
 }
 
 type ResizeHandle =
