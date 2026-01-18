@@ -3157,23 +3157,25 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
 
         <div className="space-y-3">
           <h3 className="text-xs font-semibold">Position & Size</h3>
-          <div>
-            <Label className="text-xs font-semibold">Position - X</Label>
-            <div className="flex gap-2 mt-2">
-              <Input
-                type="number"
-                min="0"
-                value={text.left}
-                onChange={(e) =>
-                  handleUpdateText({ left: parseInt(e.target.value) || 0 })
-                }
-                className="flex-1"
-              />
-              <span className="text-sm text-muted-foreground self-center">
-                px
-              </span>
+          {!text.fullWidth && (
+            <div>
+              <Label className="text-xs font-semibold">Position - X</Label>
+              <div className="flex gap-2 mt-2">
+                <Input
+                  type="number"
+                  min="0"
+                  value={text.left}
+                  onChange={(e) =>
+                    handleUpdateText({ left: parseInt(e.target.value) || 0 })
+                  }
+                  className="flex-1"
+                />
+                <span className="text-sm text-muted-foreground self-center">
+                  px
+                </span>
+              </div>
             </div>
-          </div>
+          )}
 
           <div>
             <Label className="text-xs font-semibold">Position - Y</Label>
