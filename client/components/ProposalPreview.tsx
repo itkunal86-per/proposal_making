@@ -628,6 +628,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                 style={{
                   minHeight: customContentHeights[`section-content-${section.id}`] ? `${customContentHeights[`section-content-${section.id}`]}px` : "auto",
                   position: "relative",
+                  zIndex: 1,
                 }}
               >
                 <SelectableElement
