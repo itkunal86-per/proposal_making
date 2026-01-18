@@ -540,6 +540,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                                 parentWidth={sectionWidths[section.id]}
                                 sectionPaddingLeft={sectionPadLeft}
                                 sectionPaddingRight={sectionPadRight}
+                                lineHeight={text.lineHeight}
                               />
                             </div>
                           );
