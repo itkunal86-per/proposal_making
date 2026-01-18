@@ -306,38 +306,12 @@ export const TextEditor: React.FC<TextEditorProps> = ({
         }
       `}</style>
       <div
-        ref={editorRef}
-        contentEditable={isEditing}
-        suppressContentEditableWarning
-        onInput={handleInput}
-        onBlur={handleBlur}
-        onMouseDown={(e) => {
-          if (isEditing) {
-            e.stopPropagation();
-          }
-        }}
-        dir="ltr"
-        data-text-editor="true"
         style={{
-          padding: `${paddingTop}px ${paddingRight}px ${paddingBottom}px ${paddingLeft}px`,
-          border: `${borderWidth}px solid ${borderColor}`,
-          borderRadius: `${borderRadius}px`,
-          backgroundColor: backgroundColor,
-          backgroundImage: backgroundColor === "transparent" || backgroundColor === "rgba(0, 0, 0, 0)" ? "none" : undefined,
-          opacity: 1,
-          cursor: isEditing ? "text" : "grab",
+          position: "relative",
           height: "100%",
           width: "100%",
-          boxSizing: "border-box",
-          wordWrap: "break-word",
-          fontSize: `${fontSize}px`,
-          color: color,
-          fontWeight: fontWeight ? "bold" : "normal",
-          outline: isEditing ? "2px solid #3b82f6" : "none",
-          outlineOffset: "-2px",
-          whiteSpace: "pre-wrap",
-          overflowWrap: "break-word",
-          position: "relative",
+          borderRadius: `${borderRadius}px`,
+          overflow: "hidden",
         }}
       >
         {backgroundColor && backgroundColor !== "transparent" && backgroundColor !== "rgba(0, 0, 0, 0)" && (
@@ -357,7 +331,36 @@ export const TextEditor: React.FC<TextEditorProps> = ({
           />
         )}
         <div
+          ref={editorRef}
+          contentEditable={isEditing}
+          suppressContentEditableWarning
+          onInput={handleInput}
+          onBlur={handleBlur}
+          onMouseDown={(e) => {
+            if (isEditing) {
+              e.stopPropagation();
+            }
+          }}
+          dir="ltr"
+          data-text-editor="true"
           style={{
+            padding: `${paddingTop}px ${paddingRight}px ${paddingBottom}px ${paddingLeft}px`,
+            border: `${borderWidth}px solid ${borderColor}`,
+            borderRadius: `${borderRadius}px`,
+            backgroundColor: "transparent",
+            opacity: 1,
+            cursor: isEditing ? "text" : "grab",
+            height: "100%",
+            width: "100%",
+            boxSizing: "border-box",
+            wordWrap: "break-word",
+            fontSize: `${fontSize}px`,
+            color: color,
+            fontWeight: fontWeight ? "bold" : "normal",
+            outline: isEditing ? "2px solid #3b82f6" : "none",
+            outlineOffset: "-2px",
+            whiteSpace: "pre-wrap",
+            overflowWrap: "break-word",
             position: "relative",
             zIndex: 1,
           }}
