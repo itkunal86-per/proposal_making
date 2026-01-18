@@ -284,8 +284,8 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
           </div>
 
           {/* Main Content */}
-          <div className="flex-1 overflow-y-auto">
-            <div ref={contentRef} className="bg-white p-8 shadow-sm">
+          <div className="flex-1 overflow-y-auto flex justify-center">
+            <div ref={contentRef} className="bg-white p-8 shadow-sm max-w-4xl w-full">
             {/* Title */}
             <div
               className="mb-8 relative"
