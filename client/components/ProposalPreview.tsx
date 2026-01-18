@@ -1016,17 +1016,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
             )}
 
             {(section.shapes && section.shapes.length > 0) || (section.tables && section.tables.length > 0) || ((section as any).texts && (section as any).texts.length > 0) || ((section as any).images && (section as any).images.length > 0) || (section.signatureFields && section.signatureFields.length > 0) || isAddingSignatureMode ? (
-              <div
-                className={isMultiColumn ? "col-span-full relative mt-4 bg-gray-50 rounded" : "relative mt-4 bg-gray-50 rounded"}
-                style={{ position: "relative", minHeight: `${canvasHeights[section.id] || 100}px`, height: "auto", cursor: isAddingSignatureMode ? "crosshair" : "default" }}
-                onClick={(e) => {
-                  if (isAddingSignatureMode && selectedSignatoryId && onAddSignatureField) {
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const y = e.clientY - rect.top;
-                    onAddSignatureField(section.id, selectedSignatoryId, x, y);
-                  }
-                }}>
+              <>
                 {section.shapes && section.shapes.map((shape, sIndex) => (
                   <ShapeEditor
                     key={`shape-${sIndex}`}
@@ -1151,7 +1141,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                     />
                   );
                 })}
-              </div>
+              </>
               ) : null}
               </div>
             </div>
