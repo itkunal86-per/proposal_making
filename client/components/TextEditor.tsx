@@ -74,6 +74,10 @@ export const TextEditor: React.FC<TextEditorProps> = ({
   selected,
   onSelect,
   onUpdate,
+  fullWidth = false,
+  parentWidth,
+  sectionPaddingLeft = 12,
+  sectionPaddingRight = 12,
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState<ResizeHandle>(null);
@@ -84,6 +88,12 @@ export const TextEditor: React.FC<TextEditorProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<HTMLDivElement>(null);
   const isInitializedRef = useRef(false);
+
+  // Calculate actual width based on fullWidth mode
+  const actualWidth = fullWidth && parentWidth
+    ? parentWidth - sectionPaddingLeft - sectionPaddingRight
+    : width;
+  const actualLeft = fullWidth ? sectionPaddingLeft : left;
 
   const handleMouseDown = (e: React.MouseEvent, handle: ResizeHandle = null) => {
     const target = e.target as HTMLElement;
