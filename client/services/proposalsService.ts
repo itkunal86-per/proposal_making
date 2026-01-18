@@ -832,7 +832,7 @@ export async function getProposalDetails(id: string): Promise<Proposal | undefin
     // Convert API response directly (handles all structure variations)
     let normalized = convertApiProposalToProposal(json);
     const list = readStored() ?? [];
-    const idx = list.findIndex((x) => x.id === normalized.id);
+    const idx = list.findIndex((x) => String(x.id) === String(normalized.id));
     const localProposal = idx !== -1 ? list[idx] : null;
 
     // Merge with local storage to preserve layout and column data
@@ -927,7 +927,7 @@ export async function getProposalDetails(id: string): Promise<Proposal | undefin
       };
     }
 
-    persist([normalized, ...list.filter(x => x.id !== normalized.id)]);
+    persist([normalized, ...list.filter(x => String(x.id) !== String(normalized.id))]);
     return normalized;
   } catch (err) {
     console.warn("Error fetching proposal details, falling back to local storage:", err);
@@ -1134,7 +1134,7 @@ export async function deleteProposal(id: string) {
   }
 
   const list = await getAll();
-  persist(list.filter((p) => p.id !== id));
+  persist(list.filter((p) => String(p.id) !== String(id)));
 }
 
 export async function duplicateProposal(id: string): Promise<Proposal | undefined> {
