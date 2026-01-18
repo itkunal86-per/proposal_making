@@ -2966,6 +2966,26 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
           </div>
 
           <div>
+            <Label className="text-xs font-semibold">Line Height</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="0.5"
+                max="3"
+                step="0.1"
+                value={parseFloat(text.lineHeight || "1.5")}
+                onChange={(e) =>
+                  handleUpdateText({ lineHeight: e.target.value })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">
+                em
+              </span>
+            </div>
+          </div>
+
+          <div>
             <Label className="text-xs font-semibold">Font Weight</Label>
             <Button
               variant={text.fontWeight ? "default" : "outline"}
