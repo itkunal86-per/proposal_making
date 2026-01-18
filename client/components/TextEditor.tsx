@@ -265,9 +265,9 @@ export const TextEditor: React.FC<TextEditorProps> = ({
       draggable="false"
       style={{
         position: "absolute",
-        left: `${left}px`,
+        left: `${actualLeft}px`,
         top: `${top}px`,
-        width: `${width}px`,
+        width: `${actualWidth}px`,
         height: `${height}px`,
         cursor: isDragging ? "grabbing" : "grab",
         pointerEvents: "auto",
