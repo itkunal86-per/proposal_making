@@ -604,7 +604,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
               />
             )}
             {isMultiColumn && (
-              <div className="col-span-full mb-2">
+              <div className="col-span-full mb-2" style={{ position: "relative", zIndex: 1 }}>
                 <div
                   className="text-sm font-semibold text-gray-600 px-3 py-1 rounded bg-gray-100"
                 >
@@ -613,7 +613,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
               </div>
             )}
             {!isMultiColumn && (
-              <div className="mb-2">
+              <div className="mb-2" style={{ position: "relative", zIndex: 1 }}>
                 <div
                   className="text-sm font-semibold text-gray-600 px-3 py-1 rounded bg-gray-100"
                 >
