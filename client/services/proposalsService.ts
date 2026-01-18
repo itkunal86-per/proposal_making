@@ -868,7 +868,8 @@ export async function getProposalDetails(id: string): Promise<Proposal | undefin
               titleStyles: apiSection.titleStyles || localSection.titleStyles,
               // For contentStyles, always prefer local styles to preserve backgrounds
               // Only use API if local is completely missing
-              contentStyles: localSection.contentStyles || apiSection.contentStyles,
+              // Ensure we have contentStyles (even if empty, since the UI relies on it)
+              contentStyles: localSection.contentStyles || apiSection.contentStyles || {},
             };
 
             console.log("Merged section contentStyles:", {
