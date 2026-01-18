@@ -354,7 +354,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                       position: (section as any).contentStyles?.backgroundImage ? "relative" : undefined,
                     }}
                   >
-                    {(section as any).contentStyles?.backgroundImage && (section as any).contentStyles?.backgroundOpacity && (
+                    {(section as any).contentStyles?.backgroundImage && (section as any).contentStyles?.backgroundOpacity ? (
                       <div
                         style={{
                           position: "absolute",
@@ -365,9 +365,10 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                           backgroundColor: `rgba(255, 255, 255, ${(100 - parseInt((section as any).contentStyles?.backgroundOpacity || "100")) / 100})`,
                           borderRadius: (section as any).contentStyles?.borderRadius ? `${(section as any).contentStyles?.borderRadius}px` : undefined,
                           pointerEvents: "none",
+                          zIndex: 0,
                         }}
                       />
-                    )}
+                    ) : null}
                     <div
                       style={{ position: "relative", zIndex: 1 }}
                       dangerouslySetInnerHTML={{
