@@ -1138,6 +1138,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                       parentWidth={sectionWidths[section.id]}
                       sectionPaddingLeft={sectionPadLeft}
                       sectionPaddingRight={sectionPadRight}
+                      lineHeight={text.lineHeight}
                     />
                   );
                 })}
