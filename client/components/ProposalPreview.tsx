@@ -563,10 +563,18 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
               gap: isMultiColumn ? `${columnGapValue}px` : undefined,
               marginBottom: `${gapAfterValue}px`,
               position: "relative",
-              border: `2px solid #e5e7eb`,
+              border: selectedElementId === `section-${section.id}` ? "2px solid #3b82f6" : "2px solid #e5e7eb",
               borderRadius: "8px",
               padding: "12px",
-              backgroundColor: selectedElementId?.includes(`section-title-${section.id}`) ? "#f9fafb" : "transparent"
+              backgroundColor: selectedElementId?.includes(`section-title-${section.id}`) || selectedElementId === `section-${section.id}` ? "#f9fafb" : "transparent",
+              cursor: "pointer",
+              transition: "border-color 0.2s"
+            }}
+            onClick={(e) => {
+              // Only select section if clicking on the border area, not on child elements
+              if (e.target === e.currentTarget) {
+                onSelectElement(`section-${section.id}`, "section");
+              }
             }}
             onDragOver={handleDragOver}
             onDragLeave={() => setDragOverSectionId(null)}
