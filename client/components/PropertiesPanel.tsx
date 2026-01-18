@@ -222,7 +222,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                     })
                   }
                   className="mt-1"
-                  placeholder="0"
+                  placeholder="12"
                 />
               </div>
               <div>
@@ -237,7 +237,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                     })
                   }
                   className="mt-1"
-                  placeholder="0"
+                  placeholder="12"
                 />
               </div>
               <div>
@@ -252,7 +252,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                     })
                   }
                   className="mt-1"
-                  placeholder="0"
+                  placeholder="12"
                 />
               </div>
               <div>
@@ -267,7 +267,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                     })
                   }
                   className="mt-1"
-                  placeholder="0"
+                  placeholder="12"
                 />
               </div>
             </div>
