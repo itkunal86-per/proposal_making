@@ -506,7 +506,7 @@ function persist(list: Proposal[]) {
 export async function persistProposal(p: Proposal) {
   if (!isBrowser()) return;
   const list = readStored() ?? [];
-  const idx = list.findIndex((x) => x.id === p.id);
+  const idx = list.findIndex((x) => String(x.id) === String(p.id));
   if (idx === -1) {
     persist([p, ...list]);
   } else {
