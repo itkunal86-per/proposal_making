@@ -577,7 +577,6 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
               transition: "border-color 0.2s",
               marginTop: (section as any).contentStyles?.marginTop ? `${(section as any).contentStyles.marginTop}px` : undefined,
               marginRight: (section as any).contentStyles?.marginRight ? `${(section as any).contentStyles.marginRight}px` : undefined,
-              marginBottom: (section as any).contentStyles?.marginBottom ? `${(section as any).contentStyles.marginBottom}px` : undefined,
               marginLeft: (section as any).contentStyles?.marginLeft ? `${(section as any).contentStyles.marginLeft}px` : undefined,
             }}
             onClick={(e) => {
