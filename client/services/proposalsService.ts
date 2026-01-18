@@ -866,7 +866,10 @@ export async function getProposalDetails(id: string): Promise<Proposal | undefin
                 : localSection.columnStyles,
               // Use local styles if API didn't return them
               titleStyles: apiSection.titleStyles || localSection.titleStyles,
-              contentStyles: apiSection.contentStyles || localSection.contentStyles,
+              // For contentStyles, prefer local if it has styling (especially background), otherwise API
+              contentStyles: (localSection.contentStyles && (localSection.contentStyles.backgroundImage || localSection.contentStyles.backgroundColor))
+                ? localSection.contentStyles
+                : apiSection.contentStyles || localSection.contentStyles,
             };
 
             if (mergedSection.layout !== "single") {
