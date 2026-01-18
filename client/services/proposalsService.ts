@@ -665,20 +665,7 @@ function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmai
           })) : [],
           comments: Array.isArray(s.comments) ? s.comments : [],
           titleStyles: normalizeStyles(s.titleStyles),
-          contentStyles: normalizeStyles(s.contentStyles) || {
-            gapAfter: 10,
-            paddingTop: "12",
-            paddingRight: "12",
-            paddingBottom: "12",
-            paddingLeft: "12",
-            marginTop: "0",
-            marginRight: "0",
-            marginBottom: "0",
-            marginLeft: "0",
-            borderWidth: "1",
-            borderColor: "#e5e7eb",
-            borderRadius: "8",
-          },
+          contentStyles: normalizeStyles(s.contentStyles),
         };
       })
     : [
