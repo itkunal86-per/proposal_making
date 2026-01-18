@@ -570,11 +570,9 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                 style={{
                   gap: isMultiColumn ? `${columnGapValue}px` : undefined,
                   position: "relative",
-                  border: selectedElementId === `section-${section.id}` ? "2px solid #3b82f6" : ((section as any).contentStyles?.borderWidth ? `${(section as any).contentStyles.borderWidth}px solid ${(section as any).contentStyles.borderColor || "#000000"}` : "2px solid #e5e7eb"),
-                  borderRadius: (section as any).contentStyles?.borderRadius ? `${(section as any).contentStyles.borderRadius}px` : "8px",
-                  padding: (section as any).contentStyles?.paddingTop || (section as any).contentStyles?.paddingRight || (section as any).contentStyles?.paddingBottom || (section as any).contentStyles?.paddingLeft
-                    ? `${(section as any).contentStyles?.paddingTop || 12}px ${(section as any).contentStyles?.paddingRight || 12}px ${(section as any).contentStyles?.paddingBottom || 12}px ${(section as any).contentStyles?.paddingLeft || 12}px`
-                    : "12px",
+                  border: selectedElementId === `section-${section.id}` ? "2px solid #3b82f6" : `${parseInt((section as any).contentStyles?.borderWidth || "1")}px solid ${(section as any).contentStyles?.borderColor || "#e5e7eb"}`,
+                  borderRadius: `${parseInt((section as any).contentStyles?.borderRadius || "8")}px`,
+                  padding: `${parseInt((section as any).contentStyles?.paddingTop || "12")}px ${parseInt((section as any).contentStyles?.paddingRight || "12")}px ${parseInt((section as any).contentStyles?.paddingBottom || "12")}px ${parseInt((section as any).contentStyles?.paddingLeft || "12")}px`,
                   backgroundColor: (section as any).contentStyles?.backgroundColor || (selectedElementId === `section-${section.id}` ? "#f9fafb" : "transparent"),
                   backgroundImage: (section as any).contentStyles?.backgroundImage ? `url(${(section as any).contentStyles.backgroundImage})` : undefined,
                   backgroundSize: (section as any).contentStyles?.backgroundSize || "cover",
@@ -582,9 +580,10 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                   backgroundRepeat: "no-repeat",
                   cursor: "pointer",
                   transition: "border-color 0.2s",
-                  marginTop: (section as any).contentStyles?.marginTop ? `${(section as any).contentStyles.marginTop}px` : undefined,
-                  marginRight: (section as any).contentStyles?.marginRight ? `${(section as any).contentStyles.marginRight}px` : undefined,
-                  marginLeft: (section as any).contentStyles?.marginLeft ? `${(section as any).contentStyles.marginLeft}px` : undefined,
+                  marginTop: `${parseInt((section as any).contentStyles?.marginTop || "0")}px`,
+                  marginRight: `${parseInt((section as any).contentStyles?.marginRight || "0")}px`,
+                  marginBottom: `${parseInt((section as any).contentStyles?.marginBottom || "0")}px`,
+                  marginLeft: `${parseInt((section as any).contentStyles?.marginLeft || "0")}px`,
                 }}
                 onClick={(e) => {
                   // Only select section if clicking on the border area, not on child elements
@@ -611,7 +610,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                 />
               )}
               {!isMultiColumn && (
-              <div
+                <div
                 data-content-id={`section-content-${section.id}`}
                 style={{
                   minHeight: customContentHeights[`section-content-${section.id}`] ? `${customContentHeights[`section-content-${section.id}`]}px` : "auto",
