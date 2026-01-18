@@ -366,6 +366,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({
             overflowWrap: "break-word",
             position: "relative",
             zIndex: 1,
+            lineHeight: lineHeight,
           }}
         >
           {!content && !isEditing && "Click to edit..."}
