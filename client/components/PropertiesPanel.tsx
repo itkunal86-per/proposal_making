@@ -215,7 +215,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                 <Input
                   type="number"
                   min="0"
-                  value={parseInt(sectionStyles.paddingTop || "0")}
+                  value={parseInt(sectionStyles.paddingTop || "12")}
                   onChange={(e) =>
                     handleUpdateSection({
                       contentStyles: { ...sectionStyles, paddingTop: e.target.value }
@@ -230,7 +230,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                 <Input
                   type="number"
                   min="0"
-                  value={parseInt(sectionStyles.paddingRight || "0")}
+                  value={parseInt(sectionStyles.paddingRight || "12")}
                   onChange={(e) =>
                     handleUpdateSection({
                       contentStyles: { ...sectionStyles, paddingRight: e.target.value }
@@ -245,7 +245,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                 <Input
                   type="number"
                   min="0"
-                  value={parseInt(sectionStyles.paddingBottom || "0")}
+                  value={parseInt(sectionStyles.paddingBottom || "12")}
                   onChange={(e) =>
                     handleUpdateSection({
                       contentStyles: { ...sectionStyles, paddingBottom: e.target.value }
@@ -260,7 +260,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                 <Input
                   type="number"
                   min="0"
-                  value={parseInt(sectionStyles.paddingLeft || "0")}
+                  value={parseInt(sectionStyles.paddingLeft || "12")}
                   onChange={(e) =>
                     handleUpdateSection({
                       contentStyles: { ...sectionStyles, paddingLeft: e.target.value }
