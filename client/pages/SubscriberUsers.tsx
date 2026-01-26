@@ -106,6 +106,12 @@ export default function SubscriberUsers() {
             )}
           </div>
         </Card>
+
+        <AddUserDialog
+          open={dialogOpen}
+          onOpenChange={setDialogOpen}
+          onUserCreated={fetchUsers}
+        />
       </section>
     </AppShell>
   );
