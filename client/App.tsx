@@ -73,6 +73,7 @@ const App = () => (
                   <Route path="/my/proposals" element={<MyProposals />} />
                   <Route path="/my/templates" element={<MyTemplates />} />
                   <Route path="/my/clients" element={<MyClients />} />
+                  <Route path="/my/users" element={<SubscriberUsers />} />
                   <Route path="/integrations" element={<Integrations />} />
                   <Route path="/my/settings" element={<SubscriberSettings />} />
                 </Route>
