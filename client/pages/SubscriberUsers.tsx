@@ -6,9 +6,11 @@ import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { listSubscriberUsers, type SubscriberUserRecord } from "@/services/subscriberUsersService";
 import AddUserDialog from "@/components/AddUserDialog";
+import EditUserDialog from "@/components/EditUserDialog";
+import DeleteUserDialog from "@/components/DeleteUserDialog";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, Edit2, Trash2 } from "lucide-react";
 
 export default function SubscriberUsers() {
   const [query, setQuery] = useState("");
