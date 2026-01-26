@@ -136,7 +136,7 @@ export default function MyProposals() {
 
   const mine = useMemo(() => {
     const email = user?.email?.toLowerCase();
-    const list = rows.filter((p) => (email ? p.createdBy.toLowerCase() === email : true));
+    const list = rows.filter((p) => (email ? (p.createdByEmail?.toLowerCase() === email || p.createdBy.toLowerCase() === email) : true));
     const q = search.trim().toLowerCase();
     const filtered = !q
       ? list
