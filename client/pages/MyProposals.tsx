@@ -136,7 +136,10 @@ export default function MyProposals() {
 
   const mine = useMemo(() => {
     const email = user?.email?.toLowerCase();
-    const list = rows.filter((p) => (email ? (p.createdByEmail?.toLowerCase() === email || p.createdBy.toLowerCase() === email) : true));
+    // For "user" role, show all proposals. For "subscriber" role, filter by creator.
+    const list = user?.role === "user"
+      ? rows
+      : rows.filter((p) => (email ? (p.createdByEmail?.toLowerCase() === email || p.createdBy.toLowerCase() === email) : true));
     const q = search.trim().toLowerCase();
     const filtered = !q
       ? list
