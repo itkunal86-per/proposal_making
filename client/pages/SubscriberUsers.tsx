@@ -17,6 +17,10 @@ export default function SubscriberUsers() {
   const [rows, setRows] = useState<SubscriberUserRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+  const [selectedUserName, setSelectedUserName] = useState("");
 
   useEffect(() => {
     fetchUsers();
