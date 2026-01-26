@@ -103,6 +103,34 @@ export async function listSubscriberUsers(): Promise<SubscriberUserRecord[]> {
   }
 }
 
+export async function fetchRoles(): Promise<RoleOption[]> {
+  const token = getStoredToken();
+  if (!token) {
+    throw new Error("No authentication token available");
+  }
+
+  try {
+    const res = await fetch(ROLES_ENDPOINT, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+      cache: "no-store",
+    });
+
+    if (!res.ok) {
+      throw new Error(`Failed to fetch roles: ${res.statusText}`);
+    }
+
+    const json = await res.json();
+    const list = roleListSchema.parse(json);
+    return list;
+  } catch (err) {
+    throw new Error("Failed to fetch roles. Please try again.");
+  }
+}
+
 export async function createSubscriberUser(input: CreateUserInput): Promise<CreateUserResult> {
   const token = getStoredToken();
   if (!token) {
