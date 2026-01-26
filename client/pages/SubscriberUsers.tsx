@@ -153,6 +153,21 @@ export default function SubscriberUsers() {
           onOpenChange={setDialogOpen}
           onUserCreated={fetchUsers}
         />
+
+        <EditUserDialog
+          open={editDialogOpen}
+          onOpenChange={setEditDialogOpen}
+          userId={selectedUserId}
+          onUserUpdated={fetchUsers}
+        />
+
+        <DeleteUserDialog
+          open={deleteDialogOpen}
+          onOpenChange={setDeleteDialogOpen}
+          userId={selectedUserId}
+          userName={selectedUserName}
+          onUserDeleted={fetchUsers}
+        />
       </section>
     </AppShell>
   );
