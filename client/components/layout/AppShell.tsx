@@ -66,6 +66,14 @@ const navByRole: Record<UserRole, NavItem[]> = {
     { href: "/integrations", label: "Integrations", icon: <Zap className="w-5 h-5" /> },
     { href: "/my/settings", label: "Settings", icon: <Settings className="w-5 h-5" /> },
   ],
+  user: [
+    { href: "/my/proposals", label: "My Proposals", icon: <FileText className="w-5 h-5" /> },
+    { href: "/my/templates", label: "My Templates", icon: <FileText className="w-5 h-5" /> },
+    { href: "/my/clients", label: "My Clients", icon: <Users className="w-5 h-5" /> },
+    { href: "/my/users", label: "Users", icon: <Users className="w-5 h-5" /> },
+    { href: "/integrations", label: "Integrations", icon: <Zap className="w-5 h-5" /> },
+    { href: "/my/settings", label: "Settings", icon: <Settings className="w-5 h-5" /> },
+  ],
 };
 
 export default function AppShell({ children }: { children: ReactNode }) {
