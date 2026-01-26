@@ -261,7 +261,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
         <div className="border-b border-slate-200 px-6 py-4 flex items-center justify-between">
           <h1 className="text-2xl font-bold">{proposal.title}</h1>
           <div className="flex items-center gap-2">
-            {!isTemplate && (
+            {!isTemplate && proposal.status === "accepted" && (
               <Button
                 onClick={() => setShareDialogOpen(true)}
                 variant="outline"
