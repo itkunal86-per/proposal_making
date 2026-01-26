@@ -68,6 +68,373 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     );
   }
 
+  if (selectedElementType === "section") {
+    const sectionId = selectedElementId.replace("section-", "");
+    const section = proposal.sections.find((s) => String(s.id) === String(sectionId));
+
+    if (!section) {
+      return (
+        <Card className="p-4">
+          <div className="text-center text-muted-foreground">
+            <p className="text-sm">Section not found</p>
+          </div>
+        </Card>
+      );
+    }
+
+    const handleUpdateSection = (updates: Partial<ProposalSection>) => {
+      const updatedProposal = {
+        ...proposal,
+        sections: proposal.sections.map((s) =>
+          String(s.id) === String(sectionId) ? { ...s, ...updates } : s
+        ),
+      };
+      onUpdateProposal(updatedProposal);
+    };
+
+    const sectionStyles = (section as any).contentStyles || {};
+
+    return (
+      <Card className="p-4 space-y-4 overflow-y-auto max-h-[90vh]">
+        <h3 className="text-sm font-semibold">Section Properties</h3>
+
+        <Separator />
+
+        <div className="space-y-3">
+          <div>
+            <Label className="text-xs font-semibold">Layout</Label>
+            <select
+              value={section.layout || "single"}
+              onChange={(e) =>
+                handleUpdateSection({
+                  layout: e.target.value as "single" | "two-column" | "three-column",
+                })
+              }
+              className="w-full mt-2 px-3 py-2 border rounded-md text-sm"
+            >
+              <option value="single">Single Column</option>
+              <option value="two-column">Two Columns</option>
+              <option value="three-column">Three Columns</option>
+            </select>
+          </div>
+        </div>
+
+        <Separator />
+
+        <div className="space-y-3">
+          <h3 className="text-xs font-semibold">Background</h3>
+          <div>
+            <Label className="text-xs font-semibold">Color</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="color"
+                value={sectionStyles.backgroundColor || "#ffffff"}
+                onChange={(e) =>
+                  handleUpdateSection({
+                    contentStyles: { ...sectionStyles, backgroundColor: e.target.value }
+                  })
+                }
+                className="w-16 h-10 p-1 cursor-pointer"
+              />
+              <Input
+                value={sectionStyles.backgroundColor || ""}
+                onChange={(e) =>
+                  handleUpdateSection({
+                    contentStyles: { ...sectionStyles, backgroundColor: e.target.value }
+                  })
+                }
+                placeholder="transparent"
+                className="flex-1"
+              />
+            </div>
+          </div>
+          <div>
+            <Label className="text-xs font-semibold">Image URL</Label>
+            <Input
+              value={sectionStyles.backgroundImage || ""}
+              onChange={(e) =>
+                handleUpdateSection({
+                  contentStyles: { ...sectionStyles, backgroundImage: e.target.value }
+                })
+              }
+              placeholder="https://example.com/image.jpg"
+              className="mt-2"
+            />
+          </div>
+          {sectionStyles.backgroundImage && (
+            <>
+              <div>
+                <Label className="text-xs font-semibold">Background Size</Label>
+                <select
+                  value={sectionStyles.backgroundSize || "cover"}
+                  onChange={(e) =>
+                    handleUpdateSection({
+                      contentStyles: { ...sectionStyles, backgroundSize: e.target.value }
+                    })
+                  }
+                  className="w-full mt-2 px-3 py-2 border rounded-md text-sm"
+                >
+                  <option value="cover">Cover</option>
+                  <option value="contain">Contain</option>
+                  <option value="stretch">Stretch</option>
+                </select>
+              </div>
+              <div>
+                <Label className="text-xs font-semibold">Background Opacity</Label>
+                <div className="flex gap-2 mt-2 items-center">
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={parseInt(sectionStyles.backgroundOpacity || "100")}
+                    onChange={(e) =>
+                      handleUpdateSection({
+                        contentStyles: { ...sectionStyles, backgroundOpacity: e.target.value }
+                      })
+                    }
+                    className="flex-1"
+                  />
+                  <span className="text-sm font-medium w-12 text-center">
+                    {parseInt(sectionStyles.backgroundOpacity || "100")}%
+                  </span>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+
+        <Separator />
+
+        <div className="space-y-3">
+          <h3 className="text-xs font-semibold">Spacing</h3>
+          <div>
+            <Label className="text-xs font-semibold">Padding</Label>
+            <div className="grid grid-cols-2 gap-2 mt-2">
+              <div>
+                <Label className="text-xs text-muted-foreground">Top</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={parseInt(sectionStyles.paddingTop || "12")}
+                  onChange={(e) =>
+                    handleUpdateSection({
+                      contentStyles: { ...sectionStyles, paddingTop: e.target.value }
+                    })
+                  }
+                  className="mt-1"
+                  placeholder="12"
+                />
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Right</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={parseInt(sectionStyles.paddingRight || "12")}
+                  onChange={(e) =>
+                    handleUpdateSection({
+                      contentStyles: { ...sectionStyles, paddingRight: e.target.value }
+                    })
+                  }
+                  className="mt-1"
+                  placeholder="12"
+                />
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Bottom</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={parseInt(sectionStyles.paddingBottom || "12")}
+                  onChange={(e) =>
+                    handleUpdateSection({
+                      contentStyles: { ...sectionStyles, paddingBottom: e.target.value }
+                    })
+                  }
+                  className="mt-1"
+                  placeholder="12"
+                />
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Left</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={parseInt(sectionStyles.paddingLeft || "12")}
+                  onChange={(e) =>
+                    handleUpdateSection({
+                      contentStyles: { ...sectionStyles, paddingLeft: e.target.value }
+                    })
+                  }
+                  className="mt-1"
+                  placeholder="12"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Margin</Label>
+            <div className="grid grid-cols-2 gap-2 mt-2">
+              <div>
+                <Label className="text-xs text-muted-foreground">Top</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={parseInt(sectionStyles.marginTop || "0")}
+                  onChange={(e) =>
+                    handleUpdateSection({
+                      contentStyles: { ...sectionStyles, marginTop: e.target.value }
+                    })
+                  }
+                  className="mt-1"
+                  placeholder="0"
+                />
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Right</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={parseInt(sectionStyles.marginRight || "0")}
+                  onChange={(e) =>
+                    handleUpdateSection({
+                      contentStyles: { ...sectionStyles, marginRight: e.target.value }
+                    })
+                  }
+                  className="mt-1"
+                  placeholder="0"
+                />
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Bottom</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={parseInt(sectionStyles.marginBottom || "0")}
+                  onChange={(e) =>
+                    handleUpdateSection({
+                      contentStyles: { ...sectionStyles, marginBottom: e.target.value }
+                    })
+                  }
+                  className="mt-1"
+                  placeholder="0"
+                />
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Left</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={parseInt(sectionStyles.marginLeft || "0")}
+                  onChange={(e) =>
+                    handleUpdateSection({
+                      contentStyles: { ...sectionStyles, marginLeft: e.target.value }
+                    })
+                  }
+                  className="mt-1"
+                  placeholder="0"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Gap After Section</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="0"
+                max="100"
+                value={String(typeof sectionStyles.gapAfter === "number" ? sectionStyles.gapAfter : 24)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  const numValue = value === "" ? 24 : parseInt(value, 10);
+                  handleUpdateSection({
+                    contentStyles: { ...sectionStyles, gapAfter: isNaN(numValue) ? 24 : numValue }
+                  });
+                }}
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">px</span>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              Spacing between this section and the next one (default: 24px)
+            </p>
+          </div>
+        </div>
+
+        <Separator />
+
+        <div className="space-y-3">
+          <h3 className="text-xs font-semibold">Borders</h3>
+          <div>
+            <Label className="text-xs font-semibold">Color</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="color"
+                value={sectionStyles.borderColor || "#000000"}
+                onChange={(e) =>
+                  handleUpdateSection({
+                    contentStyles: { ...sectionStyles, borderColor: e.target.value }
+                  })
+                }
+                className="w-16 h-10 p-1 cursor-pointer"
+              />
+              <Input
+                value={sectionStyles.borderColor || "#000000"}
+                onChange={(e) =>
+                  handleUpdateSection({
+                    contentStyles: { ...sectionStyles, borderColor: e.target.value }
+                  })
+                }
+                className="flex-1"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Border Width</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="0"
+                max="10"
+                value={parseInt(sectionStyles.borderWidth || "0")}
+                onChange={(e) =>
+                  handleUpdateSection({
+                    contentStyles: { ...sectionStyles, borderWidth: e.target.value }
+                  })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">px</span>
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Border Radius</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="0"
+                max="50"
+                value={parseInt(sectionStyles.borderRadius || "0")}
+                onChange={(e) =>
+                  handleUpdateSection({
+                    contentStyles: { ...sectionStyles, borderRadius: e.target.value }
+                  })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">px</span>
+            </div>
+          </div>
+        </div>
+      </Card>
+    );
+  }
+
   if (selectedElementType === "image") {
     // Parse ID format: "image-{sectionId}-{imageIndex}"
     const lastHyphenIndex = selectedElementId.lastIndexOf("-");
@@ -758,459 +1125,6 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     );
   }
 
-  if (selectedElementType === "section-title") {
-    const sectionId = selectedElementId.replace("section-title-", "");
-    // Handle both string and numeric IDs
-    const section = proposal.sections.find((s) => String(s.id) === String(sectionId));
-
-
-    const handleUpdateSection = (updates: Partial<ProposalSection>) => {
-      const updatedProposal = {
-        ...proposal,
-        sections: proposal.sections.map((s) =>
-          String(s.id) === String(sectionId) ? { ...s, ...updates } : s
-        ),
-      };
-      onUpdateProposal(updatedProposal);
-    };
-
-    const sectionTitleStyles = (section as any).titleStyles || {};
-    const isMultiColumn = section.layout === "two-column" || section.layout === "three-column";
-
-    return (
-      <Card className="p-4 space-y-4">
-        <div>
-          <Label className="text-xs font-semibold">Section Title</Label>
-          <Input
-            value={section.title}
-            onChange={(e) => handleUpdateSection({ title: e.target.value })}
-            className="mt-2"
-            placeholder="e.g., Section {{project name}}"
-          />
-          {variables && variables.length > 0 && (
-            <p className="text-xs text-blue-600 mt-2">
-              💡 Use variables like {"{{"}
-              {variables[0]?.name || "variable_name"}
-              {"}}"}
-            </p>
-          )}
-        </div>
-
-        <Separator />
-
-        <div className="space-y-3">
-          <div>
-            <Label className="text-xs font-semibold">Title Color</Label>
-            <div className="flex gap-2 mt-2">
-              <Input
-                type="color"
-                value={sectionTitleStyles.color || "#000000"}
-                onChange={(e) =>
-                  handleUpdateSection({
-                    titleStyles: { ...sectionTitleStyles, color: e.target.value }
-                  })
-                }
-                className="w-16 h-10 p-1 cursor-pointer"
-              />
-              <Input
-                value={sectionTitleStyles.color || "#000000"}
-                onChange={(e) =>
-                  handleUpdateSection({
-                    titleStyles: { ...sectionTitleStyles, color: e.target.value }
-                  })
-                }
-                className="flex-1"
-              />
-            </div>
-          </div>
-
-          <div>
-            <Label className="text-xs font-semibold">Font Size</Label>
-            <div className="flex gap-2 mt-2">
-              <Input
-                type="number"
-                min="12"
-                max="72"
-                value={parseInt(sectionTitleStyles.fontSize || "24")}
-                onChange={(e) =>
-                  handleUpdateSection({
-                    titleStyles: { ...sectionTitleStyles, fontSize: e.target.value }
-                  })
-                }
-                className="flex-1"
-              />
-              <span className="text-sm text-muted-foreground self-center">
-                px
-              </span>
-            </div>
-          </div>
-
-          <div>
-            <Label className="text-xs font-semibold">Text Alignment</Label>
-            <div className="flex gap-2 mt-2">
-              {(["left", "center", "right"] as const).map((align) => (
-                <Button
-                  key={align}
-                  variant={
-                    sectionTitleStyles.textAlign === align ? "default" : "outline"
-                  }
-                  size="sm"
-                  onClick={() =>
-                    handleUpdateSection({
-                      titleStyles: { ...sectionTitleStyles, textAlign: align }
-                    })
-                  }
-                  className="capitalize flex-1"
-                >
-                  {align}
-                </Button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <Separator />
-
-        <div className="space-y-3">
-          <h3 className="text-xs font-semibold">Background</h3>
-          <div>
-            <Label className="text-xs font-semibold">Color</Label>
-            <div className="flex gap-2 mt-2">
-              <Input
-                type="color"
-                value={sectionTitleStyles.backgroundColor || "#f0f0f0"}
-                onChange={(e) =>
-                  handleUpdateSection({
-                    titleStyles: { ...sectionTitleStyles, backgroundColor: e.target.value }
-                  })
-                }
-                className="w-16 h-10 p-1 cursor-pointer"
-              />
-              <Input
-                value={sectionTitleStyles.backgroundColor || ""}
-                onChange={(e) =>
-                  handleUpdateSection({
-                    titleStyles: { ...sectionTitleStyles, backgroundColor: e.target.value }
-                  })
-                }
-                placeholder="transparent"
-                className="flex-1"
-              />
-            </div>
-          </div>
-          <div>
-            <Label className="text-xs font-semibold">Image URL</Label>
-            <Input
-              value={sectionTitleStyles.backgroundImage || ""}
-              onChange={(e) =>
-                handleUpdateSection({
-                  titleStyles: { ...sectionTitleStyles, backgroundImage: e.target.value }
-                })
-              }
-              placeholder="https://example.com/image.jpg"
-              className="mt-2"
-            />
-          </div>
-          {sectionTitleStyles.backgroundImage && (
-            <>
-              <div>
-                <Label className="text-xs font-semibold">Background Size</Label>
-                <select
-                  value={sectionTitleStyles.backgroundSize || "cover"}
-                  onChange={(e) =>
-                    handleUpdateSection({
-                      titleStyles: { ...sectionTitleStyles, backgroundSize: e.target.value }
-                    })
-                  }
-                  className="w-full mt-2 px-3 py-2 border rounded-md text-sm"
-                >
-                  <option value="cover">Cover</option>
-                  <option value="contain">Contain</option>
-                  <option value="stretch">Stretch</option>
-                </select>
-              </div>
-              <div>
-                <Label className="text-xs font-semibold">Background Opacity</Label>
-                <div className="flex gap-2 mt-2 items-center">
-                  <input
-                    type="range"
-                    min="0"
-                    max="100"
-                    value={parseInt(sectionTitleStyles.backgroundOpacity || "100")}
-                    onChange={(e) =>
-                      handleUpdateSection({
-                        titleStyles: { ...sectionTitleStyles, backgroundOpacity: e.target.value }
-                      })
-                    }
-                    className="flex-1"
-                  />
-                  <span className="text-sm font-medium w-12 text-center">
-                    {parseInt(sectionTitleStyles.backgroundOpacity || "100")}%
-                  </span>
-                </div>
-              </div>
-            </>
-          )}
-        </div>
-
-        <Separator />
-
-        <div className="space-y-3">
-          <h3 className="text-xs font-semibold">Borders</h3>
-          <div>
-            <Label className="text-xs font-semibold">Color</Label>
-            <div className="flex gap-2 mt-2">
-              <Input
-                type="color"
-                value={sectionTitleStyles.borderColor || "#000000"}
-                onChange={(e) =>
-                  handleUpdateSection({
-                    titleStyles: { ...sectionTitleStyles, borderColor: e.target.value }
-                  })
-                }
-                className="w-16 h-10 p-1 cursor-pointer"
-              />
-              <Input
-                value={sectionTitleStyles.borderColor || "#000000"}
-                onChange={(e) =>
-                  handleUpdateSection({
-                    titleStyles: { ...sectionTitleStyles, borderColor: e.target.value }
-                  })
-                }
-                className="flex-1"
-              />
-            </div>
-          </div>
-
-          <div>
-            <Label className="text-xs font-semibold">Borders</Label>
-            <select
-              value={sectionTitleStyles.borderStyle || "all"}
-              onChange={(e) =>
-                handleUpdateSection({
-                  titleStyles: { ...sectionTitleStyles, borderStyle: e.target.value }
-                })
-              }
-              className="w-full mt-2 px-3 py-2 border rounded-md text-sm"
-            >
-              <option value="all">All sides</option>
-              <option value="top">Top</option>
-              <option value="right">Right</option>
-              <option value="bottom">Bottom</option>
-              <option value="left">Left</option>
-            </select>
-          </div>
-
-          <div>
-            <Label className="text-xs font-semibold">Border width</Label>
-            <div className="flex gap-2 mt-2">
-              <Input
-                type="number"
-                min="0"
-                max="10"
-                value={parseInt(sectionTitleStyles.borderWidth || "0")}
-                onChange={(e) =>
-                  handleUpdateSection({
-                    titleStyles: { ...sectionTitleStyles, borderWidth: e.target.value }
-                  })
-                }
-                className="flex-1"
-              />
-              <span className="text-sm text-muted-foreground self-center">
-                px
-              </span>
-            </div>
-          </div>
-
-          <div>
-            <Label className="text-xs font-semibold">Border radius</Label>
-            <div className="flex gap-2 mt-2">
-              <Input
-                type="number"
-                min="0"
-                max="50"
-                value={parseInt(sectionTitleStyles.borderRadius || "0")}
-                onChange={(e) =>
-                  handleUpdateSection({
-                    titleStyles: { ...sectionTitleStyles, borderRadius: e.target.value }
-                  })
-                }
-                className="flex-1"
-              />
-              <span className="text-sm text-muted-foreground self-center">
-                px
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <Separator />
-
-        <div className="space-y-3">
-          <h3 className="text-xs font-semibold">Spacing</h3>
-          <div>
-            <Label className="text-xs font-semibold">Padding</Label>
-            <div className="grid grid-cols-2 gap-2 mt-2">
-              <div>
-                <Label className="text-xs text-muted-foreground">Top</Label>
-                <Input
-                  type="number"
-                  min="0"
-                  value={parseInt(sectionTitleStyles.paddingTop || "0")}
-                  onChange={(e) =>
-                    handleUpdateSection({
-                      titleStyles: { ...sectionTitleStyles, paddingTop: e.target.value }
-                    })
-                  }
-                  className="mt-1"
-                  placeholder="0"
-                />
-              </div>
-              <div>
-                <Label className="text-xs text-muted-foreground">Right</Label>
-                <Input
-                  type="number"
-                  min="0"
-                  value={parseInt(sectionTitleStyles.paddingRight || "0")}
-                  onChange={(e) =>
-                    handleUpdateSection({
-                      titleStyles: { ...sectionTitleStyles, paddingRight: e.target.value }
-                    })
-                  }
-                  className="mt-1"
-                  placeholder="0"
-                />
-              </div>
-              <div>
-                <Label className="text-xs text-muted-foreground">Bottom</Label>
-                <Input
-                  type="number"
-                  min="0"
-                  value={parseInt(sectionTitleStyles.paddingBottom || "0")}
-                  onChange={(e) =>
-                    handleUpdateSection({
-                      titleStyles: { ...sectionTitleStyles, paddingBottom: e.target.value }
-                    })
-                  }
-                  className="mt-1"
-                  placeholder="0"
-                />
-              </div>
-              <div>
-                <Label className="text-xs text-muted-foreground">Left</Label>
-                <Input
-                  type="number"
-                  min="0"
-                  value={parseInt(sectionTitleStyles.paddingLeft || "0")}
-                  onChange={(e) =>
-                    handleUpdateSection({
-                      titleStyles: { ...sectionTitleStyles, paddingLeft: e.target.value }
-                    })
-                  }
-                  className="mt-1"
-                  placeholder="0"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <Label className="text-xs font-semibold">Margin</Label>
-            <div className="grid grid-cols-2 gap-2 mt-2">
-              <div>
-                <Label className="text-xs text-muted-foreground">Top</Label>
-                <Input
-                  type="number"
-                  min="0"
-                  value={parseInt(sectionTitleStyles.marginTop || "0")}
-                  onChange={(e) =>
-                    handleUpdateSection({
-                      titleStyles: { ...sectionTitleStyles, marginTop: e.target.value }
-                    })
-                  }
-                  className="mt-1"
-                  placeholder="0"
-                />
-              </div>
-              <div>
-                <Label className="text-xs text-muted-foreground">Right</Label>
-                <Input
-                  type="number"
-                  min="0"
-                  value={parseInt(sectionTitleStyles.marginRight || "0")}
-                  onChange={(e) =>
-                    handleUpdateSection({
-                      titleStyles: { ...sectionTitleStyles, marginRight: e.target.value }
-                    })
-                  }
-                  className="mt-1"
-                  placeholder="0"
-                />
-              </div>
-              <div>
-                <Label className="text-xs text-muted-foreground">Bottom</Label>
-                <Input
-                  type="number"
-                  min="0"
-                  value={parseInt(sectionTitleStyles.marginBottom || "0")}
-                  onChange={(e) =>
-                    handleUpdateSection({
-                      titleStyles: { ...sectionTitleStyles, marginBottom: e.target.value }
-                    })
-                  }
-                  className="mt-1"
-                  placeholder="0"
-                />
-              </div>
-              <div>
-                <Label className="text-xs text-muted-foreground">Left</Label>
-                <Input
-                  type="number"
-                  min="0"
-                  value={parseInt(sectionTitleStyles.marginLeft || "0")}
-                  onChange={(e) =>
-                    handleUpdateSection({
-                      titleStyles: { ...sectionTitleStyles, marginLeft: e.target.value }
-                    })
-                  }
-                  className="mt-1"
-                  placeholder="0"
-                />
-              </div>
-            </div>
-          </div>
-
-          {isMultiColumn && (
-            <div>
-              <Label className="text-xs font-semibold">Gap Between Columns</Label>
-              <div className="flex gap-2 mt-2">
-                <Input
-                  type="number"
-                  min="0"
-                  max="100"
-                  value={String(typeof sectionTitleStyles.columnGap === "number" ? sectionTitleStyles.columnGap : 24)}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    const numValue = value === "" ? 24 : parseInt(value, 10);
-                    handleUpdateSection({
-                      titleStyles: { ...sectionTitleStyles, columnGap: isNaN(numValue) ? 24 : numValue }
-                    });
-                  }}
-                  className="flex-1"
-                />
-                <span className="text-sm text-muted-foreground self-center">
-                  px
-                </span>
-              </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                Spacing between columns (default: 24px)
-              </p>
-            </div>
-          )}
-        </div>
-      </Card>
-    );
-  }
 
   if (selectedElementType === "section-content") {
     // Handle both old format (section-content-id) and new format (section-content-id-col1)
@@ -3052,6 +2966,26 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
           </div>
 
           <div>
+            <Label className="text-xs font-semibold">Line Height</Label>
+            <div className="flex gap-2 mt-2">
+              <Input
+                type="number"
+                min="0.5"
+                max="3"
+                step="0.1"
+                value={parseFloat(text.lineHeight || "1.5")}
+                onChange={(e) =>
+                  handleUpdateText({ lineHeight: e.target.value })
+                }
+                className="flex-1"
+              />
+              <span className="text-sm text-muted-foreground self-center">
+                em
+              </span>
+            </div>
+          </div>
+
+          <div>
             <Label className="text-xs font-semibold">Font Weight</Label>
             <Button
               variant={text.fontWeight ? "default" : "outline"}
@@ -3243,23 +3177,25 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
 
         <div className="space-y-3">
           <h3 className="text-xs font-semibold">Position & Size</h3>
-          <div>
-            <Label className="text-xs font-semibold">Position - X</Label>
-            <div className="flex gap-2 mt-2">
-              <Input
-                type="number"
-                min="0"
-                value={text.left}
-                onChange={(e) =>
-                  handleUpdateText({ left: parseInt(e.target.value) || 0 })
-                }
-                className="flex-1"
-              />
-              <span className="text-sm text-muted-foreground self-center">
-                px
-              </span>
+          {!text.fullWidth && (
+            <div>
+              <Label className="text-xs font-semibold">Position - X</Label>
+              <div className="flex gap-2 mt-2">
+                <Input
+                  type="number"
+                  min="0"
+                  value={text.left}
+                  onChange={(e) =>
+                    handleUpdateText({ left: parseInt(e.target.value) || 0 })
+                  }
+                  className="flex-1"
+                />
+                <span className="text-sm text-muted-foreground self-center">
+                  px
+                </span>
+              </div>
             </div>
-          </div>
+          )}
 
           <div>
             <Label className="text-xs font-semibold">Position - Y</Label>
@@ -3279,22 +3215,40 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             </div>
           </div>
 
-          <div>
-            <Label className="text-xs font-semibold">Width</Label>
-            <div className="flex gap-2 mt-2">
-              <Input
-                type="number"
-                min="50"
-                value={text.width}
-                onChange={(e) =>
-                  handleUpdateText({ width: parseInt(e.target.value) || 200 })
-                }
-                className="flex-1"
-              />
-              <span className="text-sm text-muted-foreground self-center">
-                px
-              </span>
+          {!text.fullWidth && (
+            <div>
+              <Label className="text-xs font-semibold">Width</Label>
+              <div className="flex gap-2 mt-2">
+                <Input
+                  type="number"
+                  min="50"
+                  value={text.width}
+                  onChange={(e) =>
+                    handleUpdateText({ width: parseInt(e.target.value) || 200 })
+                  }
+                  className="flex-1"
+                />
+                <span className="text-sm text-muted-foreground self-center">
+                  px
+                </span>
+              </div>
             </div>
+          )}
+
+          <div>
+            <Button
+              onClick={() => handleUpdateText({ fullWidth: !text.fullWidth })}
+              variant={text.fullWidth ? "default" : "outline"}
+              size="sm"
+              className="w-full mt-2"
+            >
+              {text.fullWidth ? "✓ Full Width" : "Make Full Width"}
+            </Button>
+            {text.fullWidth && (
+              <p className="text-xs text-muted-foreground mt-2">
+                Width is determined by the section bounds
+              </p>
+            )}
           </div>
         </div>
 

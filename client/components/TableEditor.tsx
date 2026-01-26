@@ -80,8 +80,6 @@ export const TableEditor: React.FC<TableEditorProps> = ({
   };
 
   React.useEffect(() => {
-    if (!selected) return;
-
     const handleMouseMove = (e: MouseEvent) => {
       if (isDragging) {
         const deltaX = e.clientX - dragStart.x;
@@ -137,7 +135,7 @@ export const TableEditor: React.FC<TableEditorProps> = ({
         document.removeEventListener("mouseup", handleMouseUp);
       };
     }
-  }, [isDragging, isResizing, dragStart, initialPos, initialSize, selected, onUpdate]);
+  }, [isDragging, isResizing, dragStart, initialPos, initialSize, onUpdate]);
 
   const getCursorForHandle = (handle: ResizeHandle): string => {
     if (!handle) return "grab";
@@ -167,9 +165,16 @@ export const TableEditor: React.FC<TableEditorProps> = ({
     />
   );
 
+  const handleDragStart = (e: React.DragEvent) => {
+    const img = new Image();
+    img.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+    e.dataTransfer.setDragImage(img, 0, 0);
+  };
+
   return (
     <div
       ref={containerRef}
+      draggable="false"
       style={{
         position: "absolute",
         left: `${left}px`,
@@ -179,8 +184,12 @@ export const TableEditor: React.FC<TableEditorProps> = ({
         cursor: isDragging ? "grabbing" : "grab",
         pointerEvents: "auto",
         zIndex: selected ? 1000 : 10,
+        userSelect: "none",
+        WebkitUserSelect: "none",
+        WebkitUserDrag: "none",
       }}
       onMouseDown={(e) => handleMouseDown(e, null)}
+      onDragStart={handleDragStart}
     >
       <div style={{ padding: "10px" }}>
         <TableElement

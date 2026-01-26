@@ -122,6 +122,7 @@ export default function AdminTemplates() {
               <SelectContent>
                 <SelectItem value="all">All statuses</SelectItem>
                 <SelectItem value="draft">Draft</SelectItem>
+                <SelectItem value="published">Published</SelectItem>
                 <SelectItem value="sent">Sent</SelectItem>
                 <SelectItem value="accepted">Accepted</SelectItem>
                 <SelectItem value="declined">Declined</SelectItem>

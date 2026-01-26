@@ -327,8 +327,33 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
   const [canvasHeights, setCanvasHeights] = React.useState<Record<string, number>>({});
   const [customContentHeights, setCustomContentHeights] = React.useState<Record<string, number>>({});
   const [resizingContentId, setResizingContentId] = React.useState<string | null>(null);
+  const [sectionWidths, setSectionWidths] = React.useState<Record<string, number>>({});
 
   const sectionRefs = React.useRef<Map<string, HTMLDivElement>>(new Map());
+
+  React.useEffect(() => {
+    const resizeObserver = new ResizeObserver(() => {
+      const newWidths: Record<string, number> = {};
+      proposal.sections.forEach((section) => {
+        const element = sectionRefs.current.get(section.id);
+        if (element) {
+          newWidths[section.id] = element.getBoundingClientRect().width;
+        }
+      });
+      setSectionWidths(newWidths);
+    });
+
+    proposal.sections.forEach((section) => {
+      const element = sectionRefs.current.get(section.id);
+      if (element) {
+        resizeObserver.observe(element);
+      }
+    });
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [proposal.sections]);
 
   React.useEffect(() => {
     const newHeights: Record<string, number> = {};
@@ -552,59 +577,70 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
             "space-y-3";
 
           return (
-          <div
-            key={section.id}
-            data-section-id={section.id}
-            ref={(el) => {
-              if (el) sectionRefs.current.set(section.id, el);
-            }}
-            className={containerClassName}
-            style={{
-              gap: isMultiColumn ? `${columnGapValue}px` : undefined,
-              marginBottom: `${gapAfterValue}px`,
-              position: "relative",
-              border: `2px solid #e5e7eb`,
-              borderRadius: "8px",
-              padding: "12px",
-              backgroundColor: selectedElementId?.includes(`section-title-${section.id}`) ? "#f9fafb" : "transparent"
-            }}
-            onDragOver={handleDragOver}
-            onDragLeave={() => setDragOverSectionId(null)}
-            onDrop={(e) => handleDrop(e, section.id)}
-          >
-            {isMultiColumn && (
-              <div className="col-span-full mb-2">
-                <div
-                  className="text-sm font-semibold text-gray-600 px-3 py-1 rounded bg-gray-100 hover:bg-gray-200 cursor-pointer transition-colors"
-                  onClick={() =>
-                    onSelectElement(`section-title-${section.id}`, "section-title")
-                  }
-                  title={`Click to edit section: ${section.title}`}
-                >
-                  {section.title}
-                </div>
-              </div>
-            )}
-            {!isMultiColumn && (
+            <div key={section.id} style={{ marginBottom: `${parseInt((section as any).contentStyles?.gapAfter || "10")}px` }}>
+              {/* Section Title - Outside the panel */}
               <div className="mb-2">
-                <div
-                  className="text-sm font-semibold text-gray-600 px-3 py-1 rounded bg-gray-100 hover:bg-gray-200 cursor-pointer transition-colors"
-                  onClick={() =>
-                    onSelectElement(`section-title-${section.id}`, "section-title")
-                  }
-                  title={`Click to edit section: ${section.title}`}
-                >
+                <div className="text-sm font-semibold text-gray-600 px-3 py-1 rounded bg-gray-100">
                   {section.title}
                 </div>
               </div>
-            )}
 
-            {!isMultiColumn && (
+              {/* Section Content Panel */}
               <div
+                data-section-id={section.id}
+                ref={(el) => {
+                  if (el) sectionRefs.current.set(section.id, el);
+                }}
+                className={containerClassName}
+                style={{
+                  gap: isMultiColumn ? `${columnGapValue}px` : undefined,
+                  position: "relative",
+                  border: selectedElementId === `section-${section.id}` ? "2px solid #3b82f6" : `${parseInt((section as any).contentStyles?.borderWidth || "1")}px solid ${(section as any).contentStyles?.borderColor || "#e5e7eb"}`,
+                  borderRadius: `${parseInt((section as any).contentStyles?.borderRadius || "8")}px`,
+                  padding: `${parseInt((section as any).contentStyles?.paddingTop || "12")}px ${parseInt((section as any).contentStyles?.paddingRight || "12")}px ${parseInt((section as any).contentStyles?.paddingBottom || "12")}px ${parseInt((section as any).contentStyles?.paddingLeft || "12")}px`,
+                  backgroundColor: (section as any).contentStyles?.backgroundColor || (selectedElementId === `section-${section.id}` ? "#f9fafb" : "transparent"),
+                  backgroundImage: (section as any).contentStyles?.backgroundImage ? `url(${(section as any).contentStyles.backgroundImage})` : undefined,
+                  backgroundSize: (section as any).contentStyles?.backgroundSize || "cover",
+                  backgroundPosition: "center",
+                  backgroundRepeat: "no-repeat",
+                  cursor: "pointer",
+                  transition: "border-color 0.2s",
+                  marginTop: `${parseInt((section as any).contentStyles?.marginTop || "0")}px`,
+                  marginRight: `${parseInt((section as any).contentStyles?.marginRight || "0")}px`,
+                  marginBottom: `${parseInt((section as any).contentStyles?.marginBottom || "0")}px`,
+                  marginLeft: `${parseInt((section as any).contentStyles?.marginLeft || "0")}px`,
+                }}
+                onClick={(e) => {
+                  // Only select section if clicking on the border area, not on child elements
+                  if (e.target === e.currentTarget) {
+                    onSelectElement(`section-${section.id}`, "section");
+                  }
+                }}
+                onDragOver={handleDragOver}
+                onDragLeave={() => setDragOverSectionId(null)}
+                onDrop={(e) => handleDrop(e, section.id)}
+              >
+              {(section as any).contentStyles?.backgroundImage && (section as any).contentStyles?.backgroundOpacity && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: "rgba(255, 255, 255, " + ((100 - parseInt((section as any).contentStyles.backgroundOpacity || "100")) / 100) + ")",
+                    borderRadius: (section as any).contentStyles?.borderRadius ? `${(section as any).contentStyles.borderRadius}px` : "8px",
+                    pointerEvents: "none",
+                  }}
+                />
+              )}
+              {!isMultiColumn && (
+                <div
                 data-content-id={`section-content-${section.id}`}
                 style={{
                   minHeight: customContentHeights[`section-content-${section.id}`] ? `${customContentHeights[`section-content-${section.id}`]}px` : "auto",
                   position: "relative",
+                  zIndex: 1,
                 }}
               >
                 <SelectableElement
@@ -653,11 +689,11 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                     title="Drag to resize section height"
                   />
               </div>
-            )}
+              )}
 
-            {isMultiColumn && (
-              <>
-                {section.layout === "two-column" && (
+              {isMultiColumn && (
+                <>
+                  {section.layout === "two-column" && (
                   <>
                     <div style={{
                       backgroundColor: (section as any).columnStyles?.[0]?.backgroundColor || "transparent",
@@ -692,10 +728,10 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                         color={(section as any).columnStyles?.[0]?.color || (section as any).contentStyles?.color}
                         fontSize={(section as any).columnStyles?.[0]?.fontSize || (section as any).contentStyles?.fontSize}
                         textAlign={(section as any).columnStyles?.[0]?.textAlign || (section as any).contentStyles?.textAlign}
-                        backgroundColor="transparent"
-                        backgroundImage={undefined}
-                        backgroundSize={undefined}
-                        backgroundOpacity={undefined}
+                        backgroundColor={(section as any).columnStyles?.[0]?.backgroundColor}
+                        backgroundImage={(section as any).columnStyles?.[0]?.backgroundImage}
+                        backgroundSize={(section as any).columnStyles?.[0]?.backgroundSize}
+                        backgroundOpacity={(section as any).columnStyles?.[0]?.backgroundOpacity}
                         borderColor={(section as any).columnStyles?.[0]?.borderColor || (section as any).contentStyles?.borderColor}
                         borderWidth={(section as any).columnStyles?.[0]?.borderWidth || (section as any).contentStyles?.borderWidth}
                         borderRadius={(section as any).columnStyles?.[0]?.borderRadius || (section as any).contentStyles?.borderRadius}
@@ -753,10 +789,10 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                         color={(section as any).columnStyles?.[1]?.color || (section as any).contentStyles?.color}
                         fontSize={(section as any).columnStyles?.[1]?.fontSize || (section as any).contentStyles?.fontSize}
                         textAlign={(section as any).columnStyles?.[1]?.textAlign || (section as any).contentStyles?.textAlign}
-                        backgroundColor="transparent"
-                        backgroundImage={undefined}
-                        backgroundSize={undefined}
-                        backgroundOpacity={undefined}
+                        backgroundColor={(section as any).columnStyles?.[1]?.backgroundColor}
+                        backgroundImage={(section as any).columnStyles?.[1]?.backgroundImage}
+                        backgroundSize={(section as any).columnStyles?.[1]?.backgroundSize}
+                        backgroundOpacity={(section as any).columnStyles?.[1]?.backgroundOpacity}
                         borderColor={(section as any).columnStyles?.[1]?.borderColor || (section as any).contentStyles?.borderColor}
                         borderWidth={(section as any).columnStyles?.[1]?.borderWidth || (section as any).contentStyles?.borderWidth}
                         borderRadius={(section as any).columnStyles?.[1]?.borderRadius || (section as any).contentStyles?.borderRadius}
@@ -818,10 +854,10 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                         color={(section as any).columnStyles?.[0]?.color || (section as any).contentStyles?.color}
                         fontSize={(section as any).columnStyles?.[0]?.fontSize || (section as any).contentStyles?.fontSize}
                         textAlign={(section as any).columnStyles?.[0]?.textAlign || (section as any).contentStyles?.textAlign}
-                        backgroundColor="transparent"
-                        backgroundImage={undefined}
-                        backgroundSize={undefined}
-                        backgroundOpacity={undefined}
+                        backgroundColor={(section as any).columnStyles?.[0]?.backgroundColor}
+                        backgroundImage={(section as any).columnStyles?.[0]?.backgroundImage}
+                        backgroundSize={(section as any).columnStyles?.[0]?.backgroundSize}
+                        backgroundOpacity={(section as any).columnStyles?.[0]?.backgroundOpacity}
                         borderColor={(section as any).columnStyles?.[0]?.borderColor || (section as any).contentStyles?.borderColor}
                         borderWidth={(section as any).columnStyles?.[0]?.borderWidth || (section as any).contentStyles?.borderWidth}
                         borderRadius={(section as any).columnStyles?.[0]?.borderRadius || (section as any).contentStyles?.borderRadius}
@@ -879,10 +915,10 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                         color={(section as any).columnStyles?.[1]?.color || (section as any).contentStyles?.color}
                         fontSize={(section as any).columnStyles?.[1]?.fontSize || (section as any).contentStyles?.fontSize}
                         textAlign={(section as any).columnStyles?.[1]?.textAlign || (section as any).contentStyles?.textAlign}
-                        backgroundColor="transparent"
-                        backgroundImage={undefined}
-                        backgroundSize={undefined}
-                        backgroundOpacity={undefined}
+                        backgroundColor={(section as any).columnStyles?.[1]?.backgroundColor}
+                        backgroundImage={(section as any).columnStyles?.[1]?.backgroundImage}
+                        backgroundSize={(section as any).columnStyles?.[1]?.backgroundSize}
+                        backgroundOpacity={(section as any).columnStyles?.[1]?.backgroundOpacity}
                         borderColor={(section as any).columnStyles?.[1]?.borderColor || (section as any).contentStyles?.borderColor}
                         borderWidth={(section as any).columnStyles?.[1]?.borderWidth || (section as any).contentStyles?.borderWidth}
                         borderRadius={(section as any).columnStyles?.[1]?.borderRadius || (section as any).contentStyles?.borderRadius}
@@ -940,10 +976,10 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                         color={(section as any).columnStyles?.[2]?.color || (section as any).contentStyles?.color}
                         fontSize={(section as any).columnStyles?.[2]?.fontSize || (section as any).contentStyles?.fontSize}
                         textAlign={(section as any).columnStyles?.[2]?.textAlign || (section as any).contentStyles?.textAlign}
-                        backgroundColor="transparent"
-                        backgroundImage={undefined}
-                        backgroundSize={undefined}
-                        backgroundOpacity={undefined}
+                        backgroundColor={(section as any).columnStyles?.[2]?.backgroundColor}
+                        backgroundImage={(section as any).columnStyles?.[2]?.backgroundImage}
+                        backgroundSize={(section as any).columnStyles?.[2]?.backgroundSize}
+                        backgroundOpacity={(section as any).columnStyles?.[2]?.backgroundOpacity}
                         borderColor={(section as any).columnStyles?.[2]?.borderColor || (section as any).contentStyles?.borderColor}
                         borderWidth={(section as any).columnStyles?.[2]?.borderWidth || (section as any).contentStyles?.borderWidth}
                         borderRadius={(section as any).columnStyles?.[2]?.borderRadius || (section as any).contentStyles?.borderRadius}
@@ -1006,7 +1042,6 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
 
             {(section.shapes && section.shapes.length > 0) || (section.tables && section.tables.length > 0) || ((section as any).texts && (section as any).texts.length > 0) || ((section as any).images && (section as any).images.length > 0) || (section.signatureFields && section.signatureFields.length > 0) || isAddingSignatureMode ? (
               <div
-                className={isMultiColumn ? "col-span-full relative mt-4 bg-gray-50 rounded" : "relative mt-4 bg-gray-50 rounded"}
                 style={{ position: "relative", minHeight: `${canvasHeights[section.id] || 100}px`, height: "auto", cursor: isAddingSignatureMode ? "crosshair" : "default" }}
                 onClick={(e) => {
                   if (isAddingSignatureMode && selectedSignatoryId && onAddSignatureField) {
@@ -1015,7 +1050,8 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                     const y = e.clientY - rect.top;
                     onAddSignatureField(section.id, selectedSignatoryId, x, y);
                   }
-                }}>
+                }}
+              >
                 {section.shapes && section.shapes.map((shape, sIndex) => (
                   <ShapeEditor
                     key={`shape-${sIndex}`}
@@ -1067,36 +1103,45 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                     }
                   />
                 ))}
-                {(section as any).texts && (section as any).texts.map((text: any, tIndex: number) => (
-                  <TextEditor
-                    key={`text-${tIndex}`}
-                    id={`text-${section.id}-${tIndex}`}
-                    content={text.content}
-                    top={text.top}
-                    left={text.left}
-                    width={text.width}
-                    height={text.height}
-                    fontSize={text.fontSize}
-                    color={text.color}
-                    fontWeight={text.fontWeight}
-                    backgroundColor={text.backgroundColor}
-                    backgroundOpacity={text.backgroundOpacity}
-                    borderColor={text.borderColor}
-                    borderWidth={text.borderWidth}
-                    borderRadius={text.borderRadius}
-                    paddingTop={text.paddingTop}
-                    paddingRight={text.paddingRight}
-                    paddingBottom={text.paddingBottom}
-                    paddingLeft={text.paddingLeft}
-                    selected={selectedElementId === `text-${section.id}-${tIndex}`}
-                    onSelect={() =>
-                      onSelectElement(`text-${section.id}-${tIndex}`, "text")
-                    }
-                    onUpdate={(updates) =>
-                      onUpdateText?.(section.id, tIndex, updates)
-                    }
-                  />
-                ))}
+                {(section as any).texts && (section as any).texts.map((text: any, tIndex: number) => {
+                  const sectionPadLeft = parseInt((section as any).contentStyles?.paddingLeft || "12");
+                  const sectionPadRight = parseInt((section as any).contentStyles?.paddingRight || "12");
+                  return (
+                    <TextEditor
+                      key={`text-${tIndex}`}
+                      id={`text-${section.id}-${tIndex}`}
+                      content={text.content}
+                      top={text.top}
+                      left={text.left}
+                      width={text.width}
+                      height={text.height}
+                      fontSize={text.fontSize}
+                      color={text.color}
+                      fontWeight={text.fontWeight}
+                      backgroundColor={text.backgroundColor}
+                      backgroundOpacity={text.backgroundOpacity}
+                      borderColor={text.borderColor}
+                      borderWidth={text.borderWidth}
+                      borderRadius={text.borderRadius}
+                      paddingTop={text.paddingTop}
+                      paddingRight={text.paddingRight}
+                      paddingBottom={text.paddingBottom}
+                      paddingLeft={text.paddingLeft}
+                      selected={selectedElementId === `text-${section.id}-${tIndex}`}
+                      onSelect={() =>
+                        onSelectElement(`text-${section.id}-${tIndex}`, "text")
+                      }
+                      onUpdate={(updates) =>
+                        onUpdateText?.(section.id, tIndex, updates)
+                      }
+                      fullWidth={text.fullWidth}
+                      parentWidth={sectionWidths[section.id]}
+                      sectionPaddingLeft={sectionPadLeft}
+                      sectionPaddingRight={sectionPadRight}
+                      lineHeight={text.lineHeight}
+                    />
+                  );
+                })}
                 {(section as any).images && (section as any).images.map((image: any, iIndex: number) => (
                   <ImageEditor
                     key={`image-${iIndex}`}
@@ -1141,9 +1186,10 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                   );
                 })}
               </div>
-            ) : null}
-          </div>
-        );
+              ) : null}
+              </div>
+            </div>
+          );
         })}
       </div>
 

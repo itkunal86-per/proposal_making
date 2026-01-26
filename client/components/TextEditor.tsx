@@ -39,7 +39,13 @@ interface TextEditorProps {
     paddingRight?: string;
     paddingBottom?: string;
     paddingLeft?: string;
+    lineHeight?: string;
   }) => void;
+  fullWidth?: boolean;
+  parentWidth?: number;
+  sectionPaddingLeft?: number;
+  sectionPaddingRight?: number;
+  lineHeight?: string;
 }
 
 type ResizeHandle =
@@ -70,6 +76,11 @@ export const TextEditor: React.FC<TextEditorProps> = ({
   selected,
   onSelect,
   onUpdate,
+  fullWidth = false,
+  parentWidth,
+  sectionPaddingLeft = 12,
+  sectionPaddingRight = 12,
+  lineHeight = "1.5",
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState<ResizeHandle>(null);
@@ -80,6 +91,12 @@ export const TextEditor: React.FC<TextEditorProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<HTMLDivElement>(null);
   const isInitializedRef = useRef(false);
+
+  // Calculate actual width based on fullWidth mode
+  const actualWidth = fullWidth && parentWidth
+    ? parentWidth - sectionPaddingLeft - sectionPaddingRight
+    : width;
+  const actualLeft = fullWidth ? sectionPaddingLeft : left;
 
   const handleMouseDown = (e: React.MouseEvent, handle: ResizeHandle = null) => {
     const target = e.target as HTMLElement;
@@ -151,8 +168,6 @@ export const TextEditor: React.FC<TextEditorProps> = ({
   }, [content]);
 
   React.useEffect(() => {
-    if (!selected) return;
-
     const handleMouseMove = (e: MouseEvent) => {
       if (isDragging) {
         const deltaX = e.clientX - dragStart.x;
@@ -211,7 +226,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({
         document.removeEventListener("mouseup", handleMouseUp);
       };
     }
-  }, [isDragging, isResizing, dragStart, initialPos, initialSize, selected, onUpdate]);
+  }, [isDragging, isResizing, dragStart, initialPos, initialSize, onUpdate]);
 
   const getCursorForHandle = (handle: ResizeHandle): string => {
     if (!handle) return "grab";
@@ -241,20 +256,31 @@ export const TextEditor: React.FC<TextEditorProps> = ({
     />
   );
 
+  const handleDragStart = (e: React.DragEvent) => {
+    const img = new Image();
+    img.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+    e.dataTransfer.setDragImage(img, 0, 0);
+  };
+
   return (
     <div
       ref={containerRef}
+      draggable="false"
       style={{
         position: "absolute",
-        left: `${left}px`,
+        left: `${actualLeft}px`,
         top: `${top}px`,
-        width: `${width}px`,
+        width: `${actualWidth}px`,
         height: `${height}px`,
         cursor: isDragging ? "grabbing" : "grab",
         pointerEvents: "auto",
         zIndex: selected ? 1000 : 10,
+        userSelect: "none",
+        WebkitUserSelect: "none",
+        WebkitUserDrag: "none",
       }}
       onMouseDown={(e) => handleMouseDown(e, null)}
+      onDragStart={handleDragStart}
       onDoubleClick={handleDoubleClick}
     >
 
@@ -283,39 +309,68 @@ export const TextEditor: React.FC<TextEditorProps> = ({
         }
       `}</style>
       <div
-        ref={editorRef}
-        contentEditable={isEditing}
-        suppressContentEditableWarning
-        onInput={handleInput}
-        onBlur={handleBlur}
-        onMouseDown={(e) => {
-          if (isEditing) {
-            e.stopPropagation();
-          }
-        }}
-        dir="ltr"
-        data-text-editor="true"
         style={{
-          padding: `${paddingTop}px ${paddingRight}px ${paddingBottom}px ${paddingLeft}px`,
-          border: `${borderWidth}px solid ${borderColor}`,
-          borderRadius: `${borderRadius}px`,
-          backgroundColor: backgroundColor,
-          opacity: parseInt(backgroundOpacity || "100") / 100,
-          cursor: isEditing ? "text" : "grab",
+          position: "relative",
           height: "100%",
           width: "100%",
-          boxSizing: "border-box",
-          wordWrap: "break-word",
-          fontSize: `${fontSize}px`,
-          color: color,
-          fontWeight: fontWeight ? "bold" : "normal",
-          outline: isEditing ? "2px solid #3b82f6" : "none",
-          outlineOffset: "-2px",
-          whiteSpace: "pre-wrap",
-          overflowWrap: "break-word",
+          borderRadius: `${borderRadius}px`,
+          overflow: "hidden",
         }}
       >
-        {!content && !isEditing && "Click to edit..."}
+        {backgroundColor && backgroundColor !== "transparent" && backgroundColor !== "rgba(0, 0, 0, 0)" && (
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: backgroundColor,
+              opacity: parseInt(backgroundOpacity || "100") / 100,
+              borderRadius: `${borderRadius}px`,
+              zIndex: 0,
+              pointerEvents: "none",
+            }}
+          />
+        )}
+        <div
+          ref={editorRef}
+          contentEditable={isEditing}
+          suppressContentEditableWarning
+          onInput={handleInput}
+          onBlur={handleBlur}
+          onMouseDown={(e) => {
+            if (isEditing) {
+              e.stopPropagation();
+            }
+          }}
+          dir="ltr"
+          data-text-editor="true"
+          style={{
+            padding: `${paddingTop}px ${paddingRight}px ${paddingBottom}px ${paddingLeft}px`,
+            border: `${borderWidth}px solid ${borderColor}`,
+            borderRadius: `${borderRadius}px`,
+            backgroundColor: "transparent",
+            opacity: 1,
+            cursor: isEditing ? "text" : "grab",
+            height: "100%",
+            width: "100%",
+            boxSizing: "border-box",
+            wordWrap: "break-word",
+            fontSize: `${fontSize}px`,
+            color: color,
+            fontWeight: fontWeight ? "bold" : "normal",
+            outline: isEditing ? "2px solid #3b82f6" : "none",
+            outlineOffset: "-2px",
+            whiteSpace: "pre-wrap",
+            overflowWrap: "break-word",
+            position: "relative",
+            zIndex: 1,
+            lineHeight: lineHeight,
+          }}
+        >
+          {!content && !isEditing && "Click to edit..."}
+        </div>
       </div>
 
       {selected && !isEditing && (

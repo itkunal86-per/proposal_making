@@ -378,7 +378,7 @@ export default function ProposalEditor() {
     }, 400);
   }
 
-  const handleSectionNavigate = (sectionId: string) => {
+  const handleSectionNavigate = useCallback((sectionId: string) => {
     const sectionIndex = p?.sections.findIndex((s) => String(s.id) === String(sectionId));
     if (sectionIndex !== undefined && sectionIndex !== -1) {
       setCurrent(sectionIndex);
@@ -393,7 +393,7 @@ export default function ProposalEditor() {
         }
       }, 100);
     }
-  };
+  }, [p?.sections]);
 
   const handleMediaUploaded = useCallback((media: { id: string; url: string; type: "image" | "video"; name: string }, destination: "document" | "library") => {
     if (destination === "document") {
@@ -452,6 +452,19 @@ export default function ProposalEditor() {
       setShowDeleteConfirm(false);
     }
   }, [isSystemTemplateEdit, p, nav, searchParams]);
+
+  const handleSelectElement = useCallback((elementId: string, elementType: string) => {
+    setSelectedElementId(elementId);
+    setSelectedElementType(elementType);
+    setActivePanel("properties");
+  }, []);
+
+  const handleSelectElementInDialog = useCallback((elementId: string, elementType: string) => {
+    setSelectedElementId(elementId);
+    setSelectedElementType(elementType);
+    setActivePanel("properties");
+    setSectionsDialogOpen(false);
+  }, []);
 
   if (!p) return null;
 
@@ -536,6 +549,7 @@ export default function ProposalEditor() {
                   ) : (
                     <>
                       <SelectItem value="draft">Draft</SelectItem>
+                      <SelectItem value="published">Published</SelectItem>
                       <SelectItem value="sent">Sent</SelectItem>
                       <SelectItem value="accepted">Accepted</SelectItem>
                       <SelectItem value="declined">Declined</SelectItem>
@@ -774,11 +788,7 @@ export default function ProposalEditor() {
             <ProposalPreview
               proposal={p}
               selectedElementId={selectedElementId}
-              onSelectElement={(elementId, elementType) => {
-                setSelectedElementId(elementId);
-                setSelectedElementType(elementType);
-                setActivePanel("properties");
-              }}
+              onSelectElement={handleSelectElement}
               onAIElement={(id, type) => {
                 setAIElementId(id);
                 setAIElementType(type);
@@ -930,6 +940,8 @@ export default function ProposalEditor() {
                     width: 200,
                     left: Math.round(x),
                     top: Math.round(y),
+                    fullWidth: false,
+                    lineHeight: "1.5",
                   };
                   const updated = {
                     ...p,
@@ -1167,12 +1179,7 @@ export default function ProposalEditor() {
           setCurrent(index);
           setSectionsDialogOpen(false);
         }}
-        onSelectElement={(elementId, elementType) => {
-          setSelectedElementId(elementId);
-          setSelectedElementType(elementType);
-          setActivePanel("properties");
-          setSectionsDialogOpen(false);
-        }}
+        onSelectElement={handleSelectElementInDialog}
         onUpdateProposal={(updated) => {
           setP(updated);
           commit(updated);

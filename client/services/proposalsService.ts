@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { getStoredToken, getStoredAuth } from "@/lib/auth";
 
-export type ProposalStatus = "draft" | "sent" | "accepted" | "declined";
+export type ProposalStatus = "draft" | "published" | "sent" | "accepted" | "declined";
 
 export interface ShapeElement {
   id: string;
@@ -60,6 +60,8 @@ export interface TextElement {
   height?: number;
   top: number;
   left: number;
+  fullWidth?: boolean;
+  lineHeight?: string;
 }
 
 export interface ImageElement {
@@ -140,6 +142,7 @@ export interface Proposal {
   client_id?: string;
   status: ProposalStatus;
   createdBy: string;
+  createdByEmail?: string;
   createdAt: number;
   updatedAt: number;
   sections: ProposalSection[];
@@ -159,23 +162,34 @@ const PROPOSALS_ENDPOINT = "https://propai-api.hirenq.com/api/proposals";
 const PROPOSALS_DETAILS_ENDPOINT = "https://propai-api.hirenq.com/api/proposals/details";
 
 interface ApiProposalResponse {
-  id: string;
+  id: string | number;
   title: string;
-  client_id?: string;
+  client_id?: string | number;
   status: ProposalStatus;
   created_at: string;
-  created_by?: string;
-  due_date?: string;
+  created_by?: string | number;
+  subscriber_id?: string | number;
+  due_date?: string | null;
   approval_flow?: string;
   sharing_public?: number;
   sharing_token?: string;
   sharing_allow_comments?: number;
   currency?: string;
-  tax_rate?: number;
+  tax_rate?: string | number;
   updated_at?: string;
   client?: {
     id: string;
     name: string;
+  } | null;
+  create_by?: {
+    user_details_id?: string;
+    user_id?: string | number;
+    name?: string;
+    email?: string;
+    phone?: string;
+    company?: string;
+    created_at?: string;
+    updated_at?: string;
   };
   pricing?: {
     currency?: string;
@@ -268,6 +282,8 @@ const textElementSchema = z.object({
   height: z.number().optional(),
   top: z.number(),
   left: z.number(),
+  fullWidth: z.boolean().optional(),
+  lineHeight: z.string().optional(),
 }).passthrough();
 
 const imageElementSchema = z.object({
@@ -305,7 +321,7 @@ const proposalSchema = z.object({
   title: z.string(),
   client: z.string().optional(),
   client_id: z.union([z.string(), z.number()]).optional(),
-  status: z.union([z.literal("draft"), z.literal("sent"), z.literal("accepted"), z.literal("declined")]).optional(),
+  status: z.union([z.literal("draft"), z.literal("published"), z.literal("sent"), z.literal("accepted"), z.literal("declined")]).optional(),
   createdBy: z.union([z.string(), z.number()]).optional(),
   createdAt: z.union([z.number(), z.string()]).optional(),
   updatedAt: z.union([z.number(), z.string()]).optional(),
@@ -506,7 +522,7 @@ function persist(list: Proposal[]) {
 export async function persistProposal(p: Proposal) {
   if (!isBrowser()) return;
   const list = readStored() ?? [];
-  const idx = list.findIndex((x) => x.id === p.id);
+  const idx = list.findIndex((x) => String(x.id) === String(p.id));
   if (idx === -1) {
     persist([p, ...list]);
   } else {
@@ -676,6 +692,8 @@ function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmai
 
   const clientName = typeof apiProposal.client === "string" ? apiProposal.client : (apiProposal.client?.name || "");
   const clientId = typeof apiProposal.client_id === "string" ? apiProposal.client_id : (apiProposal.client_id ? String(apiProposal.client_id) : undefined);
+  const createdByName = apiProposal.create_by?.name || apiProposal.created_by || userEmail || "You";
+  const createdByEmail = apiProposal.create_by?.email || userEmail || "you@example.com";
 
   return {
     id: proposalId,
@@ -683,7 +701,8 @@ function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmai
     client: clientName,
     client_id: clientId,
     status: apiProposal.status,
-    createdBy: apiProposal.created_by || userEmail || "you@example.com",
+    createdBy: String(createdByName),
+    createdByEmail: String(createdByEmail),
     createdAt: createdAtMs,
     updatedAt: updatedAtMs,
     sections,
@@ -832,7 +851,7 @@ export async function getProposalDetails(id: string): Promise<Proposal | undefin
     // Convert API response directly (handles all structure variations)
     let normalized = convertApiProposalToProposal(json);
     const list = readStored() ?? [];
-    const idx = list.findIndex((x) => x.id === normalized.id);
+    const idx = list.findIndex((x) => String(x.id) === String(normalized.id));
     const localProposal = idx !== -1 ? list[idx] : null;
 
     // Merge with local storage to preserve layout and column data
@@ -866,8 +885,20 @@ export async function getProposalDetails(id: string): Promise<Proposal | undefin
                 : localSection.columnStyles,
               // Use local styles if API didn't return them
               titleStyles: apiSection.titleStyles || localSection.titleStyles,
-              contentStyles: apiSection.contentStyles || localSection.contentStyles,
+              // For contentStyles, always prefer local styles to preserve backgrounds
+              // Only use API if local is completely missing
+              // Ensure we have contentStyles (even if empty, since the UI relies on it)
+              contentStyles: localSection.contentStyles || apiSection.contentStyles || {},
             };
+
+            console.log("Merged section contentStyles:", {
+              sectionId: mergedSection.id,
+              sectionTitle: mergedSection.title,
+              hasBackgroundImage: !!mergedSection.contentStyles?.backgroundImage,
+              backgroundImage: mergedSection.contentStyles?.backgroundImage,
+              localHasContentStyles: !!localSection.contentStyles,
+              apiHasContentStyles: !!apiSection.contentStyles,
+            });
 
             if (mergedSection.layout !== "single") {
               console.log("Merged section with multi-column layout:", {
@@ -885,12 +916,37 @@ export async function getProposalDetails(id: string): Promise<Proposal | undefin
 
             return mergedSection;
           }
-          return apiSection;
+          // Ensure API sections have contentStyles with defaults
+          // But preserve any background styling from the API
+          const defaultStyles = {
+            gapAfter: 10,
+            paddingTop: "12",
+            paddingRight: "12",
+            paddingBottom: "12",
+            paddingLeft: "12",
+            marginTop: "0",
+            marginRight: "0",
+            marginBottom: "0",
+            marginLeft: "0",
+            borderWidth: "1",
+            borderColor: "#e5e7eb",
+            borderRadius: "8",
+            backgroundColor: undefined,
+            backgroundImage: undefined,
+            backgroundSize: "cover",
+            backgroundOpacity: "100",
+          };
+          return {
+            ...apiSection,
+            contentStyles: apiSection.contentStyles
+              ? { ...defaultStyles, ...apiSection.contentStyles }
+              : defaultStyles,
+          };
         }),
       };
     }
 
-    persist([normalized, ...list.filter(x => x.id !== normalized.id)]);
+    persist([normalized, ...list.filter(x => String(x.id) !== String(normalized.id))]);
     return normalized;
   } catch (err) {
     console.warn("Error fetching proposal details, falling back to local storage:", err);
@@ -1097,7 +1153,7 @@ export async function deleteProposal(id: string) {
   }
 
   const list = await getAll();
-  persist(list.filter((p) => p.id !== id));
+  persist(list.filter((p) => String(p.id) !== String(id)));
 }
 
 export async function duplicateProposal(id: string): Promise<Proposal | undefined> {
@@ -1193,7 +1249,20 @@ export async function addSection(p: Proposal, title = "New Section", layout: "si
     marginLeft: 0,
   }) : undefined;
   const titleStyles = columnCount > 0 ? { columnGap: 0 } : {};
-  const contentStyles = { gapAfter: 10 };
+  const contentStyles = {
+    gapAfter: 10,
+    paddingTop: "12",
+    paddingRight: "12",
+    paddingBottom: "12",
+    paddingLeft: "12",
+    marginTop: "0",
+    marginRight: "0",
+    marginBottom: "0",
+    marginLeft: "0",
+    borderWidth: "1",
+    borderColor: "#e5e7eb",
+    borderRadius: "8",
+  };
 
   const newSection = { id: uuid(), title, content: "", layout, columnContents, columnStyles, titleStyles, contentStyles, media: [], shapes: [], tables: [], texts: [], images: [], comments: [] };
   const updated = {

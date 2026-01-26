@@ -54,7 +54,20 @@ export const SectionsDialog: React.FC<SectionsDialogProps> = ({
       marginLeft: 0,
     }) : undefined;
     const titleStyles = columnCount > 0 ? { columnGap: 0 } : {};
-    const contentStyles = { gapAfter: 10 };
+    const contentStyles = {
+      gapAfter: 10,
+      paddingTop: "12",
+      paddingRight: "12",
+      paddingBottom: "12",
+      paddingLeft: "12",
+      marginTop: "0",
+      marginRight: "0",
+      marginBottom: "0",
+      marginLeft: "0",
+      borderWidth: "1",
+      borderColor: "#e5e7eb",
+      borderRadius: "8",
+    };
 
     const newSection = {
       id: uuid(),
@@ -112,9 +125,9 @@ export const SectionsDialog: React.FC<SectionsDialogProps> = ({
 
       onUpdateProposal(updated);
 
-      // Auto-select the newly added section's title element in the properties panel
+      // Auto-select the newly added section in the properties panel
       if (onSelectElement && newSection) {
-        onSelectElement(`section-title-${newSection.id}`, "section-title");
+        onSelectElement(`section-${newSection.id}`, "section");
       }
 
       setTemplateDialogOpen(false);

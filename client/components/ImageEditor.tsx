@@ -68,8 +68,6 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
   };
 
   React.useEffect(() => {
-    if (!selected) return;
-
     const handleMouseMove = (e: MouseEvent) => {
       if (isDragging) {
         const deltaX = e.clientX - dragStart.x;
@@ -125,7 +123,7 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
         window.removeEventListener("mouseup", handleMouseUp);
       };
     }
-  }, [selected, isDragging, isResizing, dragStart, initialPos, initialSize, onUpdate]);
+  }, [isDragging, isResizing, dragStart, initialPos, initialSize, onUpdate]);
 
   if (!selected) {
     return (
@@ -146,10 +144,18 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
     );
   }
 
+  const handleDragStart = (e: React.DragEvent) => {
+    const img = new Image();
+    img.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+    e.dataTransfer.setDragImage(img, 0, 0);
+  };
+
   return (
     <div
       ref={containerRef}
+      draggable="false"
       onMouseDown={(e) => handleMouseDown(e, null)}
+      onDragStart={handleDragStart}
       style={{
         position: "absolute",
         top: `${top}px`,
@@ -158,6 +164,8 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
         height: `${height}px`,
         cursor: isDragging ? "grabbing" : "grab",
         userSelect: "none",
+        WebkitUserSelect: "none",
+        WebkitUserDrag: "none",
         zIndex: selected ? 1000 : 10,
       }}
     >

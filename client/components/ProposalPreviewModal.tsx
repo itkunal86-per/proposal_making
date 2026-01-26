@@ -27,6 +27,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
   const [canvasHeights, setCanvasHeights] = useState<Record<string, number>>({});
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [sectionWidths, setSectionWidths] = useState<Record<string, number>>({});
   const sectionRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
   React.useEffect(() => {
@@ -36,6 +37,30 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
       document.body.style.overflow = "unset";
     };
   }, []);
+
+  React.useEffect(() => {
+    const resizeObserver = new ResizeObserver(() => {
+      const newWidths: Record<string, number> = {};
+      proposal.sections.forEach((section) => {
+        const element = sectionRefs.current.get(section.id);
+        if (element) {
+          newWidths[section.id] = element.getBoundingClientRect().width;
+        }
+      });
+      setSectionWidths(newWidths);
+    });
+
+    proposal.sections.forEach((section) => {
+      const element = sectionRefs.current.get(section.id);
+      if (element) {
+        resizeObserver.observe(element);
+      }
+    });
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [proposal.sections]);
 
   React.useEffect(() => {
     const newHeights: Record<string, number> = {};
@@ -236,7 +261,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
         <div className="border-b border-slate-200 px-6 py-4 flex items-center justify-between">
           <h1 className="text-2xl font-bold">{proposal.title}</h1>
           <div className="flex items-center gap-2">
-            {!isTemplate && (
+            {!isTemplate && proposal.status === "accepted" && (
               <Button
                 onClick={() => setShareDialogOpen(true)}
                 variant="outline"
@@ -284,8 +309,8 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
           </div>
 
           {/* Main Content */}
-          <div className="flex-1 overflow-y-auto">
-            <div ref={contentRef} className="max-w-4xl mx-auto bg-white p-8 shadow-sm">
+          <div className="flex-1 overflow-y-auto flex justify-center">
+            <div ref={contentRef} className="bg-white p-8 shadow-sm max-w-4xl w-full">
             {/* Title */}
             <div
               className="mb-8 relative"
@@ -341,19 +366,21 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                       color: (section as any).contentStyles?.color,
                       fontSize: `${(section as any).contentStyles?.fontSize || 16}px`,
                       textAlign: ((section as any).contentStyles?.textAlign || "left") as any,
-                      backgroundColor: (section as any).contentStyles?.backgroundColor,
+                      backgroundColor: (section as any).contentStyles?.backgroundColor || undefined,
                       backgroundImage: (section as any).contentStyles?.backgroundImage ? `url(${(section as any).contentStyles?.backgroundImage})` : undefined,
-                      backgroundSize: (section as any).contentStyles?.backgroundSize || "cover",
+                      backgroundSize: ((section as any).contentStyles?.backgroundImage ? (section as any).contentStyles?.backgroundSize || "cover" : undefined),
                       backgroundPosition: "center",
                       backgroundRepeat: "no-repeat",
-                      padding: `${(section as any).contentStyles?.paddingTop || 0}px ${(section as any).contentStyles?.paddingRight || 0}px ${(section as any).contentStyles?.paddingBottom || 0}px ${(section as any).contentStyles?.paddingLeft || 0}px`,
+                      padding: `${parseInt((section as any).contentStyles?.paddingTop || "0")}px ${parseInt((section as any).contentStyles?.paddingRight || "0")}px ${parseInt((section as any).contentStyles?.paddingBottom || "0")}px ${parseInt((section as any).contentStyles?.paddingLeft || "0")}px`,
                       borderRadius: (section as any).contentStyles?.borderRadius ? `${(section as any).contentStyles?.borderRadius}px` : undefined,
                       fontWeight: (section as any).contentStyles?.bold ? "bold" : "normal",
                       fontStyle: (section as any).contentStyles?.italic ? "italic" : "normal",
                       textDecoration: (section as any).contentStyles?.underline ? "underline" : (section as any).contentStyles?.strikethrough ? "line-through" : "none",
+                      position: "relative",
+                      minHeight: (section.shapes && section.shapes.length > 0) || (section.tables && section.tables.length > 0) || ((section as any).texts && (section as any).texts.length > 0) || ((section as any).images && (section as any).images.length > 0) || (section.signatureFields && section.signatureFields.length > 0) ? `${canvasHeights[section.id] || 100}px` : undefined,
                     }}
                   >
-                    {(section as any).contentStyles?.backgroundImage && (section as any).contentStyles?.backgroundOpacity && (
+                    {(section as any).contentStyles?.backgroundImage && (section as any).contentStyles?.backgroundOpacity ? (
                       <div
                         style={{
                           position: "absolute",
@@ -364,15 +391,217 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                           backgroundColor: `rgba(255, 255, 255, ${(100 - parseInt((section as any).contentStyles?.backgroundOpacity || "100")) / 100})`,
                           borderRadius: (section as any).contentStyles?.borderRadius ? `${(section as any).contentStyles?.borderRadius}px` : undefined,
                           pointerEvents: "none",
+                          zIndex: 0,
                         }}
                       />
-                    )}
+                    ) : null}
                     <div
-                      style={{ position: "relative", zIndex: 1 }}
+                      style={{ position: "relative", zIndex: 1, width: "100%", minHeight: "100%" }}
                       dangerouslySetInnerHTML={{
                         __html: decodeHtmlEntities(replaceVariables(section.content, variables)),
                       }}
                     />
+                    {/* Positioned Elements Container */}
+                    {((section.shapes && section.shapes.length > 0) || (section.tables && section.tables.length > 0) || ((section as any).texts && (section as any).texts.length > 0) || ((section as any).images && (section as any).images.length > 0) || (section.signatureFields && section.signatureFields.length > 0)) && (
+                      <>
+                        {section.shapes && section.shapes.map((shape, sIndex) => {
+                          const backgroundOverlayOpacity = shape.backgroundImage && shape.backgroundOpacity ? (100 - parseInt(shape.backgroundOpacity || "100")) / 100 : 0;
+                          const commonShapeStyle: React.CSSProperties = {
+                            position: "absolute",
+                            left: `${shape.left}px`,
+                            top: `${shape.top}px`,
+                            width: `${shape.width}px`,
+                            height: `${shape.height}px`,
+                            cursor: "default",
+                            backgroundColor: shape.backgroundColor,
+                            backgroundImage: shape.backgroundImage ? `url(${shape.backgroundImage})` : undefined,
+                            backgroundSize: shape.backgroundImage ? shape.backgroundSize : undefined,
+                            backgroundPosition: "center",
+                            backgroundRepeat: "no-repeat",
+                            borderWidth: shape.borderWidth ? `${shape.borderWidth}px` : "0px",
+                            borderColor: shape.borderColor,
+                            borderStyle: shape.borderWidth ? "solid" : "none",
+                          };
+
+                          return (
+                            <div key={`shape-${sIndex}`} style={{ pointerEvents: "none" }}>
+                              {shape.type === "circle" ? (
+                                <div
+                                  style={{
+                                    ...commonShapeStyle,
+                                    borderRadius: "50%",
+                                  }}
+                                >
+                                  {shape.backgroundImage && backgroundOverlayOpacity > 0 && (
+                                    <div
+                                      style={{
+                                        position: "absolute",
+                                        top: 0,
+                                        left: 0,
+                                        right: 0,
+                                        bottom: 0,
+                                        backgroundColor: `rgba(255, 255, 255, ${backgroundOverlayOpacity})`,
+                                        borderRadius: "50%",
+                                        pointerEvents: "none",
+                                      }}
+                                    />
+                                  )}
+                                </div>
+                              ) : shape.type === "triangle" ? (
+                                <div
+                                  style={{
+                                    position: "absolute",
+                                    left: `${shape.left}px`,
+                                    top: `${shape.top}px`,
+                                    width: 0,
+                                    height: 0,
+                                    borderLeft: `${shape.width / 2}px solid transparent`,
+                                    borderRight: `${shape.width / 2}px solid transparent`,
+                                    borderBottom: `${shape.height}px solid ${shape.backgroundColor}`,
+                                  }}
+                                />
+                              ) : (
+                                <div
+                                  style={{
+                                    ...commonShapeStyle,
+                                    borderRadius: shape.borderRadius ? `${shape.borderRadius}px` : "0px",
+                                  }}
+                                >
+                                  {shape.backgroundImage && backgroundOverlayOpacity > 0 && (
+                                    <div
+                                      style={{
+                                        position: "absolute",
+                                        top: 0,
+                                        left: 0,
+                                        right: 0,
+                                        bottom: 0,
+                                        backgroundColor: `rgba(255, 255, 255, ${backgroundOverlayOpacity})`,
+                                        borderRadius: shape.borderRadius ? `${shape.borderRadius}px` : "0px",
+                                        pointerEvents: "none",
+                                      }}
+                                    />
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                        {section.tables && section.tables.map((table, tIndex) => (
+                          <div key={`table-${tIndex}`} style={{ pointerEvents: "auto" }}>
+                            <TableEditor
+                              id={`table-${section.id}-${tIndex}`}
+                              rows={table.rows}
+                              columns={table.columns}
+                              cells={table.cells}
+                              borderWidth={table.borderWidth}
+                              borderColor={table.borderColor}
+                              headerBackground={table.headerBackground}
+                              cellBackground={table.cellBackground}
+                              textColor={table.textColor}
+                              padding={table.padding}
+                              width={table.width}
+                              height={table.height}
+                              top={table.top}
+                              left={table.left}
+                              selected={false}
+                              onSelect={() => {}}
+                              onUpdate={() => {}}
+                            />
+                          </div>
+                        ))}
+                        {(section as any).texts && (section as any).texts.map((text: any, tIndex: number) => {
+                          const sectionPadLeft = parseInt((section as any).contentStyles?.paddingLeft || "12");
+                          const sectionPadRight = parseInt((section as any).contentStyles?.paddingRight || "12");
+                          return (
+                            <div key={`text-${tIndex}`} style={{ pointerEvents: "auto" }}>
+                              <TextEditor
+                                id={`text-${section.id}-${tIndex}`}
+                                content={text.content}
+                                top={text.top}
+                                left={text.left}
+                                width={text.width}
+                                height={text.height}
+                                fontSize={text.fontSize}
+                                color={text.color}
+                                fontWeight={text.fontWeight}
+                                backgroundColor={text.backgroundColor}
+                                backgroundOpacity={text.backgroundOpacity}
+                                borderColor={text.borderColor}
+                                borderWidth={text.borderWidth}
+                                borderRadius={text.borderRadius}
+                                paddingTop={text.paddingTop}
+                                paddingRight={text.paddingRight}
+                                paddingBottom={text.paddingBottom}
+                                paddingLeft={text.paddingLeft}
+                                selected={false}
+                                onSelect={() => {}}
+                                onUpdate={() => {}}
+                                fullWidth={text.fullWidth}
+                                parentWidth={sectionWidths[section.id]}
+                                sectionPaddingLeft={sectionPadLeft}
+                                sectionPaddingRight={sectionPadRight}
+                                lineHeight={text.lineHeight}
+                              />
+                            </div>
+                          );
+                        })}
+                        {(section as any).images && (section as any).images.map((image: any, iIndex: number) => (
+                          <div key={`image-${iIndex}`} style={{ pointerEvents: "auto" }}>
+                            <ImageEditor
+                              id={`image-${section.id}-${iIndex}`}
+                              url={image.url}
+                              width={image.width}
+                              height={image.height}
+                              opacity={image.opacity}
+                              borderWidth={image.borderWidth}
+                              borderColor={image.borderColor}
+                              borderRadius={image.borderRadius}
+                              top={image.top}
+                              left={image.left}
+                              selected={false}
+                              onSelect={() => {}}
+                              onUpdate={() => {}}
+                            />
+                          </div>
+                        ))}
+                        {section.signatureFields && section.signatureFields.map((field, sIndex) => {
+                          const recipient = proposal.signatories?.find((s) => s.id === field.recipientId);
+                          return (
+                            <div
+                              key={`signature-${sIndex}`}
+                              style={{
+                                position: "absolute",
+                                left: `${field.left}px`,
+                                top: `${field.top}px`,
+                                width: `${field.width}px`,
+                                height: `${field.height}px`,
+                                borderRadius: field.borderRadius ? `${field.borderRadius}px` : "0px",
+                                borderWidth: field.borderWidth ? `${field.borderWidth}px` : "2px",
+                                borderStyle: "dashed",
+                                borderColor: field.borderColor || "#d1d5db",
+                                backgroundColor: "#f1f5f9",
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                pointerEvents: "none",
+                              }}
+                            >
+                              <div style={{ textAlign: "center" }}>
+                                <div style={{ fontSize: "12px", fontWeight: "bold", padding: "4px 8px", backgroundColor: "#e2e8f0", borderRadius: "4px" }}>
+                                  {recipient?.name || "Unknown"}
+                                </div>
+                                {recipient?.role && (
+                                  <div style={{ fontSize: "11px", color: "#64748b", marginTop: "4px" }}>
+                                    {recipient.role}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </>
+                    )}
                   </div>
                 ) : (
                   <div
@@ -388,6 +617,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                       const borderWidth = columnStyle?.borderWidth || contentStyle?.borderWidth || 0;
                       const borderColor = columnStyle?.borderColor || contentStyle?.borderColor || "#000000";
                       const borderStyle = borderWidth > 0 ? "solid" : "none";
+                      const hasBackgroundImage = columnStyle?.backgroundImage || contentStyle?.backgroundImage;
 
                       return (
                         <div
@@ -399,7 +629,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                             textAlign: ((columnStyle?.textAlign || contentStyle?.textAlign || "left") as any),
                             backgroundColor: columnStyle?.backgroundColor || contentStyle?.backgroundColor,
                             backgroundImage: columnStyle?.backgroundImage ? `url(${columnStyle.backgroundImage})` : undefined,
-                            backgroundSize: columnStyle?.backgroundSize || contentStyle?.backgroundSize || "cover",
+                            backgroundSize: hasBackgroundImage ? (columnStyle?.backgroundSize || contentStyle?.backgroundSize || "cover") : undefined,
                             backgroundPosition: "center",
                             backgroundRepeat: "no-repeat",
                             paddingTop: `${columnStyle?.paddingTop || contentStyle?.paddingTop || 0}px`,
@@ -417,6 +647,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                             fontWeight: columnStyle?.bold || contentStyle?.bold ? "bold" : "normal",
                             fontStyle: columnStyle?.italic || contentStyle?.italic ? "italic" : "normal",
                             textDecoration: columnStyle?.underline || contentStyle?.underline ? "underline" : columnStyle?.strikethrough || contentStyle?.strikethrough ? "line-through" : "none",
+                            position: hasBackgroundImage ? "relative" : undefined,
                           }}
                         >
                           <div
@@ -434,6 +665,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                       const borderWidth = columnStyle?.borderWidth || contentStyle?.borderWidth || 0;
                       const borderColor = columnStyle?.borderColor || contentStyle?.borderColor || "#000000";
                       const borderStyle = borderWidth > 0 ? "solid" : "none";
+                      const hasBackgroundImage = columnStyle?.backgroundImage || contentStyle?.backgroundImage;
 
                       return (
                         <div
@@ -445,7 +677,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                             textAlign: ((columnStyle?.textAlign || contentStyle?.textAlign || "left") as any),
                             backgroundColor: columnStyle?.backgroundColor || contentStyle?.backgroundColor,
                             backgroundImage: columnStyle?.backgroundImage ? `url(${columnStyle.backgroundImage})` : undefined,
-                            backgroundSize: columnStyle?.backgroundSize || contentStyle?.backgroundSize || "cover",
+                            backgroundSize: hasBackgroundImage ? (columnStyle?.backgroundSize || contentStyle?.backgroundSize || "cover") : undefined,
                             backgroundPosition: "center",
                             backgroundRepeat: "no-repeat",
                             paddingTop: `${columnStyle?.paddingTop || contentStyle?.paddingTop || 0}px`,
@@ -463,6 +695,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                             fontWeight: columnStyle?.bold || contentStyle?.bold ? "bold" : "normal",
                             fontStyle: columnStyle?.italic || contentStyle?.italic ? "italic" : "normal",
                             textDecoration: columnStyle?.underline || contentStyle?.underline ? "underline" : columnStyle?.strikethrough || contentStyle?.strikethrough ? "line-through" : "none",
+                            position: hasBackgroundImage ? "relative" : undefined,
                           }}
                         >
                           <div
@@ -506,199 +739,6 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                     ))}
                   </div>
                 )}
-
-                {/* Shapes, Tables, Texts, Images, and Signature Fields */}
-                {(section.shapes && section.shapes.length > 0) || (section.tables && section.tables.length > 0) || ((section as any).texts && (section as any).texts.length > 0) || ((section as any).images && (section as any).images.length > 0) || (section.signatureFields && section.signatureFields.length > 0) ? (
-                  <div className="relative mt-4 bg-gray-50 rounded" style={{ position: "relative", minHeight: `${canvasHeights[section.id] || 100}px`, height: "auto", pointerEvents: "none" }}>
-                    {section.shapes && section.shapes.map((shape, sIndex) => {
-                      const backgroundOverlayOpacity = shape.backgroundImage && shape.backgroundOpacity ? (100 - parseInt(shape.backgroundOpacity || "100")) / 100 : 0;
-                      const commonShapeStyle: React.CSSProperties = {
-                        position: "absolute",
-                        left: `${shape.left}px`,
-                        top: `${shape.top}px`,
-                        width: `${shape.width}px`,
-                        height: `${shape.height}px`,
-                        cursor: "default",
-                        backgroundColor: shape.backgroundColor,
-                        backgroundImage: shape.backgroundImage ? `url(${shape.backgroundImage})` : undefined,
-                        backgroundSize: shape.backgroundImage ? shape.backgroundSize : undefined,
-                        backgroundPosition: "center",
-                        backgroundRepeat: "no-repeat",
-                        borderWidth: shape.borderWidth ? `${shape.borderWidth}px` : "0px",
-                        borderColor: shape.borderColor,
-                        borderStyle: shape.borderWidth ? "solid" : "none",
-                      };
-
-                      return (
-                        <div key={`shape-${sIndex}`} style={{ pointerEvents: "none" }}>
-                          {shape.type === "circle" ? (
-                            <div
-                              style={{
-                                ...commonShapeStyle,
-                                borderRadius: "50%",
-                              }}
-                            >
-                              {shape.backgroundImage && backgroundOverlayOpacity > 0 && (
-                                <div
-                                  style={{
-                                    position: "absolute",
-                                    top: 0,
-                                    left: 0,
-                                    right: 0,
-                                    bottom: 0,
-                                    backgroundColor: `rgba(255, 255, 255, ${backgroundOverlayOpacity})`,
-                                    borderRadius: "50%",
-                                    pointerEvents: "none",
-                                  }}
-                                />
-                              )}
-                            </div>
-                          ) : shape.type === "triangle" ? (
-                            <div
-                              style={{
-                                position: "absolute",
-                                left: `${shape.left}px`,
-                                top: `${shape.top}px`,
-                                width: 0,
-                                height: 0,
-                                borderLeft: `${shape.width / 2}px solid transparent`,
-                                borderRight: `${shape.width / 2}px solid transparent`,
-                                borderBottom: `${shape.height}px solid ${shape.backgroundColor}`,
-                              }}
-                            />
-                          ) : (
-                            <div
-                              style={{
-                                ...commonShapeStyle,
-                                borderRadius: shape.borderRadius ? `${shape.borderRadius}px` : "0px",
-                              }}
-                            >
-                              {shape.backgroundImage && backgroundOverlayOpacity > 0 && (
-                                <div
-                                  style={{
-                                    position: "absolute",
-                                    top: 0,
-                                    left: 0,
-                                    right: 0,
-                                    bottom: 0,
-                                    backgroundColor: `rgba(255, 255, 255, ${backgroundOverlayOpacity})`,
-                                    borderRadius: shape.borderRadius ? `${shape.borderRadius}px` : "0px",
-                                    pointerEvents: "none",
-                                  }}
-                                />
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                    {section.tables && section.tables.map((table, tIndex) => (
-                      <div key={`table-${tIndex}`} style={{ pointerEvents: "auto" }}>
-                        <TableEditor
-                          id={`table-${section.id}-${tIndex}`}
-                          rows={table.rows}
-                          columns={table.columns}
-                          cells={table.cells}
-                          borderWidth={table.borderWidth}
-                          borderColor={table.borderColor}
-                          headerBackground={table.headerBackground}
-                          cellBackground={table.cellBackground}
-                          textColor={table.textColor}
-                          padding={table.padding}
-                          width={table.width}
-                          height={table.height}
-                          top={table.top}
-                          left={table.left}
-                          selected={false}
-                          onSelect={() => {}}
-                          onUpdate={() => {}}
-                        />
-                      </div>
-                    ))}
-                    {(section as any).texts && (section as any).texts.map((text: any, tIndex: number) => (
-                      <div key={`text-${tIndex}`} style={{ pointerEvents: "auto" }}>
-                        <TextEditor
-                          id={`text-${section.id}-${tIndex}`}
-                          content={text.content}
-                          top={text.top}
-                          left={text.left}
-                          width={text.width}
-                          height={text.height}
-                          fontSize={text.fontSize}
-                          color={text.color}
-                          fontWeight={text.fontWeight}
-                          backgroundColor={text.backgroundColor}
-                          backgroundOpacity={text.backgroundOpacity}
-                          borderColor={text.borderColor}
-                          borderWidth={text.borderWidth}
-                          borderRadius={text.borderRadius}
-                          paddingTop={text.paddingTop}
-                          paddingRight={text.paddingRight}
-                          paddingBottom={text.paddingBottom}
-                          paddingLeft={text.paddingLeft}
-                          selected={false}
-                          onSelect={() => {}}
-                          onUpdate={() => {}}
-                        />
-                      </div>
-                    ))}
-                    {(section as any).images && (section as any).images.map((image: any, iIndex: number) => (
-                      <div key={`image-${iIndex}`} style={{ pointerEvents: "auto" }}>
-                        <ImageEditor
-                          id={`image-${section.id}-${iIndex}`}
-                          url={image.url}
-                          width={image.width}
-                          height={image.height}
-                          opacity={image.opacity}
-                          borderWidth={image.borderWidth}
-                          borderColor={image.borderColor}
-                          borderRadius={image.borderRadius}
-                          top={image.top}
-                          left={image.left}
-                          selected={false}
-                          onSelect={() => {}}
-                          onUpdate={() => {}}
-                        />
-                      </div>
-                    ))}
-                    {section.signatureFields && section.signatureFields.map((field, sIndex) => {
-                      const recipient = proposal.signatories?.find((s) => s.id === field.recipientId);
-                      return (
-                        <div
-                          key={`signature-${sIndex}`}
-                          style={{
-                            position: "absolute",
-                            left: `${field.left}px`,
-                            top: `${field.top}px`,
-                            width: `${field.width}px`,
-                            height: `${field.height}px`,
-                            borderRadius: field.borderRadius ? `${field.borderRadius}px` : "0px",
-                            borderWidth: field.borderWidth ? `${field.borderWidth}px` : "2px",
-                            borderStyle: "dashed",
-                            borderColor: field.borderColor || "#d1d5db",
-                            backgroundColor: "#f1f5f9",
-                            display: "flex",
-                            flexDirection: "column",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            pointerEvents: "none",
-                          }}
-                        >
-                          <div style={{ textAlign: "center" }}>
-                            <div style={{ fontSize: "12px", fontWeight: "bold", padding: "4px 8px", backgroundColor: "#e2e8f0", borderRadius: "4px" }}>
-                              {recipient?.name || "Unknown"}
-                            </div>
-                            {recipient?.role && (
-                              <div style={{ fontSize: "11px", color: "#64748b", marginTop: "4px" }}>
-                                {recipient.role}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : null}
               </div>
             ))}
           </div>

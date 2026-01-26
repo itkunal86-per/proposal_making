@@ -17,6 +17,13 @@ export const BuildPanel: React.FC<BuildPanelProps> = ({ onAddContent, onShapeDra
   const [isDraggingText, setIsDraggingText] = useState(false);
   const [isDraggingImage, setIsDraggingImage] = useState(false);
 
+  // Create a transparent drag image to hide the default white container
+  const createTransparentDragImage = () => {
+    const img = new Image();
+    img.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+    return img;
+  };
+
   const contentTypes = [
     {
       id: "text",
@@ -56,6 +63,7 @@ export const BuildPanel: React.FC<BuildPanelProps> = ({ onAddContent, onShapeDra
   const handleShapeDragStart = (e: React.DragEvent<HTMLDivElement>) => {
     e.dataTransfer.effectAllowed = "copy";
     e.dataTransfer.setData("application/json", JSON.stringify({ type: "shape", shapeType: "square" }));
+    e.dataTransfer.setDragImage(createTransparentDragImage(), 0, 0);
     setIsDraggingShape(true);
     onShapeDragStart?.(e);
   };
@@ -63,6 +71,7 @@ export const BuildPanel: React.FC<BuildPanelProps> = ({ onAddContent, onShapeDra
   const handleTableDragStart = (e: React.DragEvent<HTMLDivElement>) => {
     e.dataTransfer.effectAllowed = "copy";
     e.dataTransfer.setData("application/json", JSON.stringify({ type: "table" }));
+    e.dataTransfer.setDragImage(createTransparentDragImage(), 0, 0);
     setIsDraggingTable(true);
     onTableDragStart?.(e);
   };
@@ -70,6 +79,7 @@ export const BuildPanel: React.FC<BuildPanelProps> = ({ onAddContent, onShapeDra
   const handleTextDragStart = (e: React.DragEvent<HTMLDivElement>) => {
     e.dataTransfer.effectAllowed = "copy";
     e.dataTransfer.setData("application/json", JSON.stringify({ type: "text" }));
+    e.dataTransfer.setDragImage(createTransparentDragImage(), 0, 0);
     setIsDraggingText(true);
     onTextDragStart?.(e);
   };
@@ -77,6 +87,7 @@ export const BuildPanel: React.FC<BuildPanelProps> = ({ onAddContent, onShapeDra
   const handleImageDragStart = (e: React.DragEvent<HTMLDivElement>) => {
     e.dataTransfer.effectAllowed = "copy";
     e.dataTransfer.setData("application/json", JSON.stringify({ type: "image" }));
+    e.dataTransfer.setDragImage(createTransparentDragImage(), 0, 0);
     setIsDraggingImage(true);
     onImageDragStart?.(e);
   };

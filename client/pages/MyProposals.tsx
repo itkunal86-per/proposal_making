@@ -35,6 +35,7 @@ import { Wand2, MoreVertical, FileText } from "lucide-react";
 
 const statusStyles: Record<string, string> = {
   draft: "bg-slate-100 text-slate-700 border border-slate-200",
+  published: "bg-purple-100 text-purple-700 border border-purple-200",
   sent: "bg-blue-100 text-blue-700 border border-blue-200",
   accepted: "bg-green-100 text-green-700 border border-green-200",
   declined: "bg-red-100 text-red-700 border border-red-200",
@@ -135,14 +136,13 @@ export default function MyProposals() {
   };
 
   const mine = useMemo(() => {
-    const email = user?.email?.toLowerCase();
-    const list = rows.filter((p) => (email ? p.createdBy.toLowerCase() === email : true));
+    const list = rows;
     const q = search.trim().toLowerCase();
     const filtered = !q
       ? list
       : list.filter((r) => [r.title, r.client, r.createdBy].some((v) => v.toLowerCase().includes(q)));
     return filtered.sort((a, b) => b.updatedAt - a.updatedAt);
-  }, [rows, user, search]);
+  }, [rows, search]);
 
   const totalPages = Math.max(1, Math.ceil(mine.length / pageSize));
   const pageRows = mine.slice((page - 1) * pageSize, page * pageSize);
