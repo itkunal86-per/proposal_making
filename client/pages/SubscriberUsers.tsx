@@ -50,15 +50,8 @@ export default function SubscriberUsers() {
             <h1 className="text-2xl font-bold">Users</h1>
             <p className="text-muted-foreground">Manage your team members and their roles.</p>
           </div>
-          <Button onClick={addUser} disabled={adding}>
-            {adding ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Adding...
-              </>
-            ) : (
-              "Add User"
-            )}
+          <Button onClick={() => setDialogOpen(true)}>
+            Add User
           </Button>
         </div>
 
