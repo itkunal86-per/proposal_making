@@ -212,3 +212,141 @@ export async function createSubscriberUser(input: CreateUserInput): Promise<Crea
     };
   }
 }
+
+export async function fetchUserDetails(id: number): Promise<{ success: boolean; data?: SubscriberUserRecord; error?: string }> {
+  const token = getStoredToken();
+  if (!token) {
+    return {
+      success: false,
+      error: "No authentication token available",
+    };
+  }
+
+  try {
+    const res = await fetch(`${USERS_ENDPOINT}/${id}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+      cache: "no-store",
+    });
+
+    if (!res.ok) {
+      return {
+        success: false,
+        error: `Failed to fetch user: ${res.statusText}`,
+      };
+    }
+
+    const data: SubscriberUserRecord = await res.json();
+    return {
+      success: true,
+      data,
+    };
+  } catch (err) {
+    return {
+      success: false,
+      error: "Network error. Please try again.",
+    };
+  }
+}
+
+export async function updateSubscriberUser(id: number, input: UpdateUserInput): Promise<UpdateUserResult> {
+  const token = getStoredToken();
+  if (!token) {
+    return {
+      success: false,
+      error: "No authentication token available",
+    };
+  }
+
+  const name = input.name?.trim();
+  if (!name || !input.role_id) {
+    return {
+      success: false,
+      error: "Name and role are required",
+    };
+  }
+
+  try {
+    const res = await fetch(`${USERS_ENDPOINT}/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        name,
+        role_id: input.role_id,
+        status: input.status,
+      }),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+
+      if (errorData.issues) {
+        return {
+          success: false,
+          error: errorData.error || "Validation failed",
+          fieldErrors: errorData.issues,
+        };
+      }
+
+      return {
+        success: false,
+        error: errorData.error || "Failed to update user",
+      };
+    }
+
+    const data: SubscriberUserRecord = await res.json();
+
+    return {
+      success: true,
+      data,
+    };
+  } catch (err) {
+    return {
+      success: false,
+      error: "Network error. Please try again.",
+    };
+  }
+}
+
+export async function deleteSubscriberUser(id: number): Promise<DeleteUserResult> {
+  const token = getStoredToken();
+  if (!token) {
+    return {
+      success: false,
+      error: "No authentication token available",
+    };
+  }
+
+  try {
+    const res = await fetch(`${USERS_ENDPOINT}/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      return {
+        success: false,
+        error: errorData.error || "Failed to delete user",
+      };
+    }
+
+    return {
+      success: true,
+    };
+  } catch (err) {
+    return {
+      success: false,
+      error: "Network error. Please try again.",
+    };
+  }
+}
