@@ -142,10 +142,10 @@ export async function createSubscriberUser(input: CreateUserInput): Promise<Crea
 
   const name = input.name?.trim();
   const email = input.email?.trim().toLowerCase();
-  if (!name || !email) {
+  if (!name || !email || !input.role_id) {
     return {
       success: false,
-      error: "Name and email are required",
+      error: "Name, email, and role are required",
     };
   }
 
@@ -159,6 +159,8 @@ export async function createSubscriberUser(input: CreateUserInput): Promise<Crea
       body: JSON.stringify({
         name,
         email,
+        role_id: input.role_id,
+        status: input.status,
       }),
     });
 
