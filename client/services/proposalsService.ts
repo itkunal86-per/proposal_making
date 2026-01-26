@@ -691,6 +691,7 @@ function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmai
 
   const clientName = typeof apiProposal.client === "string" ? apiProposal.client : (apiProposal.client?.name || "");
   const clientId = typeof apiProposal.client_id === "string" ? apiProposal.client_id : (apiProposal.client_id ? String(apiProposal.client_id) : undefined);
+  const createdByName = apiProposal.create_by?.name || apiProposal.created_by || userEmail || "you@example.com";
 
   return {
     id: proposalId,
@@ -698,7 +699,7 @@ function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmai
     client: clientName,
     client_id: clientId,
     status: apiProposal.status,
-    createdBy: apiProposal.created_by || userEmail || "you@example.com",
+    createdBy: String(createdByName),
     createdAt: createdAtMs,
     updatedAt: updatedAtMs,
     sections,
