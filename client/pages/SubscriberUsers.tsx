@@ -48,6 +48,18 @@ export default function SubscriberUsers() {
     );
   }, [rows, query]);
 
+  function handleEdit(user: SubscriberUserRecord) {
+    setSelectedUserId(user.id);
+    setSelectedUserName(user.user.name);
+    setEditDialogOpen(true);
+  }
+
+  function handleDelete(user: SubscriberUserRecord) {
+    setSelectedUserId(user.id);
+    setSelectedUserName(user.user.name);
+    setDeleteDialogOpen(true);
+  }
+
   return (
     <AppShell>
       <section className="container py-6">
