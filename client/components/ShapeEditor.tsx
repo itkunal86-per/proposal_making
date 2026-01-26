@@ -182,7 +182,7 @@ export const ShapeEditor: React.FC<ShapeEditorProps> = ({
         userSelect: "none",
         WebkitUserSelect: "none",
         WebkitUserDrag: "none",
-      }}
+      } as React.CSSProperties & { WebkitUserDrag: string }}
       onMouseDown={(e) => handleMouseDown(e, null)}
       onDragStart={handleDragStart}
     >
