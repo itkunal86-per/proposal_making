@@ -45,6 +45,7 @@ export interface CreateUserResult {
 }
 
 const USERS_ENDPOINT = "https://propai-api.hirenq.com/api/subscriber/users";
+const ROLES_ENDPOINT = "https://propai-api.hirenq.com/api/subscriber/roles";
 
 const userRecordSchema = z.object({
   id: z.number(),
