@@ -69,6 +69,12 @@ const userRecordSchema = z.object({
 
 const userListSchema = z.array(userRecordSchema);
 
+const roleOptionSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+});
+const roleListSchema = z.array(roleOptionSchema);
+
 export async function listSubscriberUsers(): Promise<SubscriberUserRecord[]> {
   const token = getStoredToken();
   if (!token) {
