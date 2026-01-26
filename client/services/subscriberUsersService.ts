@@ -142,7 +142,7 @@ export async function fetchRoles(): Promise<RoleOption[]> {
     }
 
     const json = await res.json();
-    const list = roleListSchema.parse(json);
+    const list = roleListSchema.parse(json) as RoleOption[];
     return list;
   } catch (err) {
     throw new Error("Failed to fetch roles. Please try again.");
