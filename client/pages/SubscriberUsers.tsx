@@ -105,6 +105,7 @@ export default function SubscriberUsers() {
                     <TableHead>Role</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Added On</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -116,6 +117,28 @@ export default function SubscriberUsers() {
                       <TableCell>{u.status}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {new Date(u.created_at).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleEdit(u)}
+                            className="h-8 w-8 p-0"
+                            title="Edit user"
+                          >
+                            <Edit2 className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleDelete(u)}
+                            className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                            title="Delete user"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
