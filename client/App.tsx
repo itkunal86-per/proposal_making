@@ -28,6 +28,7 @@ import AdminUsers from "./pages/AdminUsers";
 import MyProposals from "./pages/MyProposals";
 import MyTemplates from "./pages/MyTemplates";
 import MyClients from "./pages/MyClients";
+import SubscriberUsers from "./pages/SubscriberUsers";
 import Integrations from "./pages/Integrations";
 import SubscriberSettings from "./pages/SubscriberSettings";
 import Privacy from "./pages/Privacy";
