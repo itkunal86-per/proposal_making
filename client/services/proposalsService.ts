@@ -142,6 +142,7 @@ export interface Proposal {
   client_id?: string;
   status: ProposalStatus;
   createdBy: string;
+  createdByEmail?: string;
   createdAt: number;
   updatedAt: number;
   sections: ProposalSection[];
