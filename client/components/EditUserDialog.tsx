@@ -57,11 +57,9 @@ export default function EditUserDialog({
   async function loadUserAndRoles() {
     try {
       setLoading(true);
-      const [userRes, rolesRes] = await Promise.all([
-        fetchUserDetails(userId!),
-        fetchRoles(),
-      ]);
 
+      // Fetch user details
+      const userRes = await fetchUserDetails(userId!);
       if (userRes.success && userRes.data) {
         setName(userRes.data.user.name);
         setEmail(userRes.data.user.email);
@@ -72,10 +70,18 @@ export default function EditUserDialog({
           title: "Error",
           description: userRes.error || "Failed to load user details",
         });
+        return;
       }
 
-      if (rolesRes.data) {
-        setRoles(rolesRes.data);
+      // Fetch roles
+      try {
+        const rolesList = await fetchRoles();
+        setRoles(rolesList);
+      } catch (err: any) {
+        toast({
+          title: "Error",
+          description: "Failed to load roles",
+        });
       }
     } catch (err: any) {
       toast({
