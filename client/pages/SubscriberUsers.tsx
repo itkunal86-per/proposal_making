@@ -14,7 +14,7 @@ export default function SubscriberUsers() {
   const [query, setQuery] = useState("");
   const [rows, setRows] = useState<SubscriberUserRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [adding, setAdding] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchUsers();
@@ -41,27 +41,6 @@ export default function SubscriberUsers() {
       )
     );
   }, [rows, query]);
-
-  async function addUser() {
-    const name = prompt("Full name");
-    if (!name) return;
-    const email = prompt("Email");
-    if (!email) return;
-
-    setAdding(true);
-    const result = await createSubscriberUser({ name, email });
-    setAdding(false);
-
-    if (result.success) {
-      toast({ title: "Success", description: `User ${name} added successfully` });
-      await fetchUsers();
-    } else {
-      toast({
-        title: "Error",
-        description: result.error || "Failed to add user",
-      });
-    }
-  }
 
   return (
     <AppShell>
