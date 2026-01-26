@@ -135,17 +135,13 @@ export default function MyProposals() {
   };
 
   const mine = useMemo(() => {
-    const email = user?.email?.toLowerCase();
-    // For "user" role, show all proposals. For "subscriber" role, filter by creator.
-    const list = user?.role === "user"
-      ? rows
-      : rows.filter((p) => (email ? (p.createdByEmail?.toLowerCase() === email || p.createdBy.toLowerCase() === email) : true));
+    const list = rows;
     const q = search.trim().toLowerCase();
     const filtered = !q
       ? list
       : list.filter((r) => [r.title, r.client, r.createdBy].some((v) => v.toLowerCase().includes(q)));
     return filtered.sort((a, b) => b.updatedAt - a.updatedAt);
-  }, [rows, user, search]);
+  }, [rows, search]);
 
   const totalPages = Math.max(1, Math.ceil(mine.length / pageSize));
   const pageRows = mine.slice((page - 1) * pageSize, page * pageSize);
