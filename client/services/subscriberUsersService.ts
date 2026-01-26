@@ -25,9 +25,16 @@ export interface SubscriberUserRecord {
   role: RoleData;
 }
 
+export interface RoleOption {
+  id: number;
+  name: string;
+}
+
 export type CreateUserInput = {
   name: string;
   email: string;
+  role_id: number;
+  status: "Active" | "Inactive";
 };
 
 export interface CreateUserResult {
