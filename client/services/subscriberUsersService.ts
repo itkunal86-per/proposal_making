@@ -37,11 +37,29 @@ export type CreateUserInput = {
   status: "Active" | "Inactive";
 };
 
+export type UpdateUserInput = {
+  name: string;
+  role_id: number;
+  status: "Active" | "Inactive";
+};
+
 export interface CreateUserResult {
   success: boolean;
   data?: SubscriberUserRecord;
   error?: string;
   fieldErrors?: Record<string, string[]>;
+}
+
+export interface UpdateUserResult {
+  success: boolean;
+  data?: SubscriberUserRecord;
+  error?: string;
+  fieldErrors?: Record<string, string[]>;
+}
+
+export interface DeleteUserResult {
+  success: boolean;
+  error?: string;
 }
 
 const USERS_ENDPOINT = "https://propai-api.hirenq.com/api/subscriber/users";
