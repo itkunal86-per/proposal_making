@@ -114,7 +114,7 @@ export async function listSubscriberUsers(): Promise<SubscriberUserRecord[]> {
     }
 
     const json = await res.json();
-    const list = userListSchema.parse(json);
+    const list = userListSchema.parse(json) as SubscriberUserRecord[];
     return list;
   } catch (err) {
     throw new Error("Failed to fetch users. Please try again.");
