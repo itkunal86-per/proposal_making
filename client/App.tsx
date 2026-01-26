@@ -69,7 +69,7 @@ const App = () => (
                   <Route path="/admin/settings" element={<AdminSettings />} />
                 </Route>
 
-                <Route element={<RequireRole roles={["subscriber"]} />}>
+                <Route element={<RequireRole roles={["subscriber", "user"]} />}>
                   <Route path="/my/proposals" element={<MyProposals />} />
                   <Route path="/my/templates" element={<MyTemplates />} />
                   <Route path="/my/clients" element={<MyClients />} />
