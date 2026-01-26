@@ -161,23 +161,34 @@ const PROPOSALS_ENDPOINT = "https://propai-api.hirenq.com/api/proposals";
 const PROPOSALS_DETAILS_ENDPOINT = "https://propai-api.hirenq.com/api/proposals/details";
 
 interface ApiProposalResponse {
-  id: string;
+  id: string | number;
   title: string;
-  client_id?: string;
+  client_id?: string | number;
   status: ProposalStatus;
   created_at: string;
-  created_by?: string;
-  due_date?: string;
+  created_by?: string | number;
+  subscriber_id?: string | number;
+  due_date?: string | null;
   approval_flow?: string;
   sharing_public?: number;
   sharing_token?: string;
   sharing_allow_comments?: number;
   currency?: string;
-  tax_rate?: number;
+  tax_rate?: string | number;
   updated_at?: string;
   client?: {
     id: string;
     name: string;
+  } | null;
+  create_by?: {
+    user_details_id?: string;
+    user_id?: string | number;
+    name?: string;
+    email?: string;
+    phone?: string;
+    company?: string;
+    created_at?: string;
+    updated_at?: string;
   };
   pricing?: {
     currency?: string;
