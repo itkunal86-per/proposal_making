@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { getStoredToken, getStoredAuth } from "@/lib/auth";
 
-export type ProposalStatus = "draft" | "sent" | "accepted" | "declined";
+export type ProposalStatus = "draft" | "publish" | "sent" | "accepted" | "declined";
 
 export interface ShapeElement {
   id: string;
