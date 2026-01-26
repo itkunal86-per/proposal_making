@@ -549,6 +549,7 @@ export default function ProposalEditor() {
                   ) : (
                     <>
                       <SelectItem value="draft">Draft</SelectItem>
+                      <SelectItem value="publish">Publish</SelectItem>
                       <SelectItem value="sent">Sent</SelectItem>
                       <SelectItem value="accepted">Accepted</SelectItem>
                       <SelectItem value="declined">Declined</SelectItem>
