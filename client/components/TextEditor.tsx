@@ -278,7 +278,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({
         userSelect: "none",
         WebkitUserSelect: "none",
         WebkitUserDrag: "none",
-      }}
+      } as React.CSSProperties & { WebkitUserDrag: string }}
       onMouseDown={(e) => handleMouseDown(e, null)}
       onDragStart={handleDragStart}
       onDoubleClick={handleDoubleClick}

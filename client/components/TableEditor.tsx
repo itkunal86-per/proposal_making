@@ -187,7 +187,7 @@ export const TableEditor: React.FC<TableEditorProps> = ({
         userSelect: "none",
         WebkitUserSelect: "none",
         WebkitUserDrag: "none",
-      }}
+      } as React.CSSProperties & { WebkitUserDrag: string }}
       onMouseDown={(e) => handleMouseDown(e, null)}
       onDragStart={handleDragStart}
     >

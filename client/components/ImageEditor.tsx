@@ -167,7 +167,7 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
         WebkitUserSelect: "none",
         WebkitUserDrag: "none",
         zIndex: selected ? 1000 : 10,
-      }}
+      } as React.CSSProperties & { WebkitUserDrag: string }}
     >
       <ImageElement
         id={id}
