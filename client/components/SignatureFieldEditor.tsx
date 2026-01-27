@@ -112,7 +112,7 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
     >
       <div
         ref={elementRef}
-        className={`absolute pointer-events-auto transition-all duration-200 flex flex-col items-center justify-center border-slate-300 bg-slate-50 ${
+        className={`absolute pointer-events-auto transition-all duration-200 flex flex-col border-slate-300 bg-slate-50 ${
           selected ? "ring-2 ring-blue-500 ring-offset-1" : ""
         }`}
         style={{
@@ -128,7 +128,11 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
         }}
         onMouseDown={handleMouseDown}
       >
-        <div className="text-center pointer-events-none">
+        {/* Signature space */}
+        <div className="flex-1 pointer-events-none border-b border-slate-300" />
+
+        {/* Name and role info */}
+        <div className="text-center pointer-events-none p-2">
           <div className="text-xs font-semibold px-2 py-1 rounded bg-slate-200 text-foreground">
             {recipient?.name || "Unknown"}
           </div>
