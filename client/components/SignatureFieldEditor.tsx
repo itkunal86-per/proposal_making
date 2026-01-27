@@ -29,7 +29,7 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      if (!selected || !containerRef.current) return;
+      if (!containerRef.current) return;
 
       if (isDragging && elementRef.current) {
         const rect = containerRef.current.getBoundingClientRect();
