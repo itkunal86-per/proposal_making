@@ -578,16 +578,18 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                                 borderRadius: field.borderRadius ? `${field.borderRadius}px` : "0px",
                                 borderWidth: field.borderWidth ? `${field.borderWidth}px` : "2px",
                                 borderStyle: "dashed",
-                                borderColor: field.borderColor || "#d1d5db",
-                                backgroundColor: "#f1f5f9",
+                                borderColor: field.borderColor || "#cbd5e1",
+                                backgroundColor: "#f8fafc",
                                 display: "flex",
                                 flexDirection: "column",
-                                alignItems: "center",
-                                justifyContent: "center",
                                 pointerEvents: "none",
                               }}
                             >
-                              <div style={{ textAlign: "center" }}>
+                              {/* Signature space */}
+                              <div style={{ flex: 1, borderBottom: "1px solid #cbd5e1" }} />
+
+                              {/* Name and role info */}
+                              <div style={{ textAlign: "center", padding: "8px" }}>
                                 <div style={{ fontSize: "12px", fontWeight: "bold", padding: "4px 8px", backgroundColor: "#e2e8f0", borderRadius: "4px" }}>
                                   {recipient?.name || "Unknown"}
                                 </div>
