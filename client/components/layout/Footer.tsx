@@ -18,17 +18,17 @@ export default function Footer() {
               <h4 className="text-sm font-semibold">Product</h4>
               <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
                 <li>
-                  <a href="#features" className="hover:text-foreground">
+                  <a href="/features" className="hover:text-foreground">
                     Features
                   </a>
                 </li>
                 <li>
-                  <a href="#how" className="hover:text-foreground">
+                  <a href="/how-it-works" className="hover:text-foreground">
                     How it works
                   </a>
                 </li>
                 <li>
-                  <a href="#faq" className="hover:text-foreground">
+                  <a href="/faq" className="hover:text-foreground">
                     FAQ
                   </a>
                 </li>
