@@ -23,19 +23,19 @@ export default function Header() {
         </a>
         <nav className="hidden items-center gap-6 md:flex">
           <a
-            href="#features"
+            href="/features"
             className="text-sm text-muted-foreground hover:text-foreground"
           >
             Features
           </a>
           <a
-            href="#how"
+            href="/how-it-works"
             className="text-sm text-muted-foreground hover:text-foreground"
           >
             How it works
           </a>
           <a
-            href="#faq"
+            href="/faq"
             className="text-sm text-muted-foreground hover:text-foreground"
           >
             FAQ
