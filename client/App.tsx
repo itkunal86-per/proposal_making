@@ -55,6 +55,7 @@ const App = () => (
               <Route path="/register" element={<Register />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<TermsAndConditions />} />
+              <Route path="/contact" element={<Contact />} />
               <Route path="/p/:token" element={<ProposalView />} />
               <Route path="/proposal/:token" element={<ProposalPublicView />} />
               <Route path="/invite/:token" element={<AcceptInvite />} />
