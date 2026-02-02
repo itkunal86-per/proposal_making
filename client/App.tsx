@@ -33,6 +33,7 @@ import Integrations from "./pages/Integrations";
 import SubscriberSettings from "./pages/SubscriberSettings";
 import Privacy from "./pages/Privacy";
 import TermsAndConditions from "./pages/TermsAndConditions";
+import Contact from "./pages/Contact";
 import { AuthProvider } from "@/providers/AuthProvider";
 import { RequireAuth, RequireRole } from "@/components/auth/RouteGuards";
 
