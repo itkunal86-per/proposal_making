@@ -202,6 +202,14 @@ export default function MyClients() {
               >
                 {isSyncing ? "Syncing..." : "Sync From GHL"}
               </Button>
+              <Button
+                onClick={syncFromHubspot}
+                disabled={isSyncing}
+                variant="outline"
+                className="w-full sm:w-auto gap-2"
+              >
+                {isSyncing ? "Syncing..." : "Sync From Hubspot"}
+              </Button>
             </div>
           </div>
         </div>
