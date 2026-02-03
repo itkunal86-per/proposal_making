@@ -77,6 +77,44 @@ export default function MyClients() {
     }
   }
 
+  async function syncFromHubspot() {
+    setIsSyncing(true);
+    try {
+      const token = getStoredToken();
+      if (!token) {
+        throw new Error("Authentication token not found. Please log in again.");
+      }
+
+      const response = await fetch("https://propai-api.hirenq.com/api/clients/sync-from-hubspot", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      toast({
+        title: data.message || "Clients synced successfully",
+        description: `${data.count || 0} client(s) synced from HubSpot`,
+      });
+      await refresh();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to sync clients from HubSpot";
+      toast({
+        title: "Sync failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsSyncing(false);
+    }
+  }
+
   async function onAdd(payload: { name: string; email: string; company?: string; status: ClientStatus; onError?: (errors: Record<string, string | string[]>) => void }) {
     if (!payload.name.trim() || !payload.email.trim()) {
       if (payload.onError) {
