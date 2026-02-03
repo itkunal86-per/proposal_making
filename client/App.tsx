@@ -33,6 +33,10 @@ import Integrations from "./pages/Integrations";
 import SubscriberSettings from "./pages/SubscriberSettings";
 import Privacy from "./pages/Privacy";
 import TermsAndConditions from "./pages/TermsAndConditions";
+import Contact from "./pages/Contact";
+import Features from "./pages/Features";
+import HowItWorks from "./pages/HowItWorks";
+import FAQ from "./pages/FAQ";
 import { AuthProvider } from "@/providers/AuthProvider";
 import { RequireAuth, RequireRole } from "@/components/auth/RouteGuards";
 
@@ -54,6 +58,10 @@ const App = () => (
               <Route path="/register" element={<Register />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<TermsAndConditions />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/features" element={<Features />} />
+              <Route path="/how-it-works" element={<HowItWorks />} />
+              <Route path="/faq" element={<FAQ />} />
               <Route path="/p/:token" element={<ProposalView />} />
               <Route path="/proposal/:token" element={<ProposalPublicView />} />
               <Route path="/invite/:token" element={<AcceptInvite />} />
