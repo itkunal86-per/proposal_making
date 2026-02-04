@@ -1,9 +1,8 @@
-import React, { Suspense } from "react";
-import { ProposalJsonData, ThemeJsonData } from "@shared/api";
+import React from "react";
 
 interface ProposalJsonRendererProps {
-  proposalJson: ProposalJsonData;
-  themeJson: ThemeJsonData;
+  proposalJson: any;
+  themeJson: any;
 }
 
 export const ProposalJsonRenderer: React.FC<ProposalJsonRendererProps> = ({
