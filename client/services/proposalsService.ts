@@ -735,6 +735,8 @@ function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmai
       role: s.role,
       order: parseInt(String(s.order)),
     })) : [],
+    proposal_json: (apiProposal as any).proposal_json || undefined,
+    theme_json: (apiProposal as any).theme_json || undefined,
   };
 }
 
