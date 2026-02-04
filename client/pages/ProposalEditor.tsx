@@ -32,6 +32,7 @@ import { updateSystemTemplate, getSystemTemplateDetails, deleteSystemTemplate, t
 import { type ClientRecord, listClients } from "@/services/clientsService";
 import { ProposalPreview } from "@/components/ProposalPreview";
 import { ProposalPreviewModal } from "@/components/ProposalPreviewModal";
+import { ProposalJsonEditorRenderer } from "@/components/ProposalJsonEditorRenderer";
 import { PropertiesPanel } from "@/components/PropertiesPanel";
 import { ProposalEditorSidebar, type PanelType } from "@/components/ProposalEditorSidebar";
 import { SectionsDialog } from "@/components/SectionsDialog";
