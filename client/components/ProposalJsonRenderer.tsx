@@ -231,12 +231,13 @@ export const ProposalJsonRenderer: React.FC<ProposalJsonRendererProps> = ({
   return (
     <div
       style={{
-        maxWidth: `${themeJson.layout.maxWidth}px`,
+        maxWidth: `${theme.layout.maxWidth}px`,
         margin: "0 auto",
         padding: "2rem",
-        backgroundColor: themeJson.colors.backgroundPrimary,
-        fontFamily: themeJson.fonts.primary,
-        color: themeJson.colors.textPrimary,
+        backgroundColor: theme.colors.backgroundPrimary,
+        fontFamily: theme.fonts.primary,
+        color: theme.colors.textPrimary,
+        width: "100%",
       }}
     >
       {/* Proposal Title */}
@@ -245,12 +246,13 @@ export const ProposalJsonRenderer: React.FC<ProposalJsonRendererProps> = ({
           style={{
             fontSize: "48px",
             fontWeight: 700,
-            color: themeJson.colors.backgroundDark,
-            fontFamily: themeJson.fonts.primary,
+            color: theme.colors.backgroundDark,
+            fontFamily: theme.fonts.primary,
             marginBottom: "2rem",
+            marginTop: "0px",
             textAlign: "center",
             paddingBottom: "1rem",
-            borderBottom: `3px solid ${themeJson.colors.accent}`,
+            borderBottom: `3px solid ${theme.colors.accent}`,
           }}
         >
           {proposalJson.title}
