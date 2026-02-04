@@ -221,6 +221,10 @@ export const ProposalJsonRenderer: React.FC<ProposalJsonRendererProps> = ({
           marginBottom: "1rem",
           display: "block",
         }}
+        onError={(e) => {
+          console.warn("Failed to load image:", image.url);
+          (e.target as HTMLImageElement).style.display = "none";
+        }}
       />
     );
   };
