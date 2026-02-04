@@ -24,6 +24,7 @@ export const ProposalJsonEditorRenderer: React.FC<ProposalJsonEditorRendererProp
   selectedElementId,
   selectedElementType,
   editMode = false,
+  onAddSection,
 }) => {
   const [selectedSectionId, setSelectedSectionId] = useState<string | number | null>(null);
   const [selectedTextId, setSelectedTextId] = useState<string | null>(null);
