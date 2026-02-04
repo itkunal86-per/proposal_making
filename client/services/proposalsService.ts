@@ -155,6 +155,8 @@ export interface Proposal {
   versions: ProposalVersionSnapshot[];
   titleStyles?: Record<string, any>;
   signatories?: SignatureRecipient[];
+  proposal_json?: any; // Simplified JSON structure with sections and content
+  theme_json?: any; // Theme design system with colors, typography, layout, etc.
 }
 
 const STORAGE_KEY = "app_proposals";
