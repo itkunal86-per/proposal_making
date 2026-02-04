@@ -10,24 +10,38 @@ export const ProposalJsonRenderer: React.FC<ProposalJsonRendererProps> = ({
   proposalJson,
   themeJson,
 }) => {
+  // Validates and returns theme data safely
+  const theme = themeJson;
+
   // Helper function to get typography style based on text type
   const getTextStyle = (
     type: "heading" | "paragraph" | "listItem",
     level?: string
   ): React.CSSProperties => {
-    const theme = themeJson;
-
     if (type === "heading" && level) {
       const headingKey = level as keyof typeof theme.typography.heading;
       const headingStyle = theme.typography.heading[headingKey];
+      if (!headingStyle) {
+        // Fallback for headings not defined in theme
+        return {
+          fontSize: "24px",
+          fontWeight: 600,
+          lineHeight: 1.2,
+          color: theme.colors.textPrimary,
+          marginBottom: "15px",
+          fontFamily: theme.fonts.primary,
+          marginTop: "0px",
+        };
+      }
       return {
-        fontSize: `${headingStyle?.fontSize || 24}px`,
-        fontWeight: headingStyle?.fontWeight || 600,
-        lineHeight: headingStyle?.lineHeight || 1.2,
-        color: headingStyle?.color || theme.colors.textPrimary,
-        marginBottom: `${headingStyle?.marginBottom || 15}px`,
-        textTransform: (headingStyle?.textTransform as any) || "none",
+        fontSize: `${headingStyle.fontSize}px`,
+        fontWeight: headingStyle.fontWeight,
+        lineHeight: headingStyle.lineHeight,
+        color: headingStyle.color,
+        marginBottom: `${headingStyle.marginBottom}px`,
+        textTransform: (headingStyle.textTransform as any) || "none",
         fontFamily: theme.fonts.primary,
+        marginTop: "0px",
       };
     }
 
@@ -38,18 +52,22 @@ export const ProposalJsonRenderer: React.FC<ProposalJsonRendererProps> = ({
         lineHeight: theme.typography.paragraph.lineHeight,
         color: theme.typography.paragraph.color,
         fontFamily: theme.fonts.primary,
+        marginBottom: "1rem",
+        marginTop: "0px",
       };
     }
 
-    if (type === "listItem") {
+    if (type === "listItem" && theme.typography.listItem) {
       return {
-        fontSize: `${theme.typography.listItem?.fontSize || 16}px`,
-        fontWeight: theme.typography.listItem?.fontWeight || 600,
+        fontSize: `${theme.typography.listItem.fontSize}px`,
+        fontWeight: theme.typography.listItem.fontWeight,
         color: theme.colors.textPrimary,
         fontFamily: theme.fonts.primary,
         display: "flex",
-        alignItems: "center",
-        gap: `${theme.typography.listItem?.gap || 15}px`,
+        alignItems: "flex-start",
+        gap: `${theme.typography.listItem.gap}px`,
+        marginBottom: "0.5rem",
+        textTransform: (theme.typography.listItem.textTransform as any) || "none",
       };
     }
 
