@@ -280,9 +280,17 @@ export const ProposalJsonRenderer: React.FC<ProposalJsonRendererProps> = ({
       )}
 
       {/* Sections */}
-      {proposalJson.sections && proposalJson.sections.length > 0 && (
+      {proposalJson.sections && proposalJson.sections.length > 0 ? (
         <div>
-          {proposalJson.sections.map((section) => renderSection(section))}
+          {proposalJson.sections.map((section, idx) => (
+            <React.Fragment key={section.id || idx}>
+              {renderSection(section)}
+            </React.Fragment>
+          ))}
+        </div>
+      ) : (
+        <div style={{ padding: "2rem", textAlign: "center", color: theme.colors.textMuted }}>
+          <p>No sections available</p>
         </div>
       )}
     </div>
