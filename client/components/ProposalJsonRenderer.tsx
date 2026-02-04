@@ -227,21 +227,33 @@ export const ProposalJsonRenderer: React.FC<ProposalJsonRendererProps> = ({
         {/* Texts */}
         {section.texts && section.texts.length > 0 && (
           <div style={{ marginBottom: section.images || section.signatureFields ? "1rem" : "0" }}>
-            {section.texts.map((text) => renderTextContent(text))}
+            {section.texts.map((text, idx) => (
+              <React.Fragment key={text.id || idx}>
+                {renderTextContent(text)}
+              </React.Fragment>
+            ))}
           </div>
         )}
 
         {/* Images */}
         {section.images && section.images.length > 0 && (
           <div style={{ marginBottom: section.signatureFields ? "1rem" : "0" }}>
-            {section.images.map((image) => renderImage(image))}
+            {section.images.map((image, idx) => (
+              <React.Fragment key={image.id || idx}>
+                {renderImage(image)}
+              </React.Fragment>
+            ))}
           </div>
         )}
 
         {/* Signature Fields */}
         {section.signatureFields && section.signatureFields.length > 0 && (
           <div>
-            {section.signatureFields.map((field) => renderSignatureField(field))}
+            {section.signatureFields.map((field, idx) => (
+              <React.Fragment key={field.id || idx}>
+                {renderSignatureField(field)}
+              </React.Fragment>
+            ))}
           </div>
         )}
       </div>
