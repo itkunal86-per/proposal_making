@@ -194,7 +194,7 @@ export const ProposalJsonEditorRenderer: React.FC<ProposalJsonEditorRendererProp
 
   // Render text content
   const renderTextContent = (text: any, sectionId: string | number) => {
-    const style = getTextStyle(text.type, text.level);
+    const style = getTextStyle(text.type, text.level, text);
     const isEditing = editingTextId === text.id;
     const elementId = `text-${sectionId}-${text.id}`;
     const isSelected = selectedElementId === elementId && selectedElementType === "text";
