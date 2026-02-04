@@ -115,13 +115,15 @@ export const ProposalJsonEditorRenderer: React.FC<ProposalJsonEditorRendererProp
     onProposalJsonChange(updated);
   };
 
-  // Helper to get text style
-  const getTextStyle = (type: "heading" | "paragraph" | "listItem", level?: string): React.CSSProperties => {
+  // Helper to get text style - merges theme styles with individual text element overrides
+  const getTextStyle = (type: "heading" | "paragraph" | "listItem", level?: string, textElement?: any): React.CSSProperties => {
+    let baseStyle: React.CSSProperties = {};
+
     if (type === "heading" && level) {
       const headingKey = level as keyof typeof theme.typography.heading;
       const headingStyle = theme.typography.heading[headingKey];
       if (!headingStyle) {
-        return {
+        baseStyle = {
           fontSize: "24px",
           fontWeight: 600,
           lineHeight: 1.2,
@@ -130,21 +132,20 @@ export const ProposalJsonEditorRenderer: React.FC<ProposalJsonEditorRendererProp
           fontFamily: theme.fonts.primary,
           marginTop: "0px",
         };
+      } else {
+        baseStyle = {
+          fontSize: `${headingStyle.fontSize}px`,
+          fontWeight: headingStyle.fontWeight,
+          lineHeight: headingStyle.lineHeight,
+          color: headingStyle.color,
+          marginBottom: `${headingStyle.marginBottom}px`,
+          textTransform: (headingStyle.textTransform as any) || "none",
+          fontFamily: theme.fonts.primary,
+          marginTop: "0px",
+        };
       }
-      return {
-        fontSize: `${headingStyle.fontSize}px`,
-        fontWeight: headingStyle.fontWeight,
-        lineHeight: headingStyle.lineHeight,
-        color: headingStyle.color,
-        marginBottom: `${headingStyle.marginBottom}px`,
-        textTransform: (headingStyle.textTransform as any) || "none",
-        fontFamily: theme.fonts.primary,
-        marginTop: "0px",
-      };
-    }
-
-    if (type === "paragraph") {
-      return {
+    } else if (type === "paragraph") {
+      baseStyle = {
         fontSize: `${theme.typography.paragraph.fontSize}px`,
         fontWeight: theme.typography.paragraph.fontWeight,
         lineHeight: theme.typography.paragraph.lineHeight,
@@ -153,11 +154,42 @@ export const ProposalJsonEditorRenderer: React.FC<ProposalJsonEditorRendererProp
         marginBottom: "1rem",
         marginTop: "0px",
       };
+    } else {
+      baseStyle = {
+        fontFamily: theme.fonts.primary,
+      };
     }
 
-    return {
-      fontFamily: theme.fonts.primary,
-    };
+    // Apply individual text element overrides on top of theme styles
+    if (textElement) {
+      const overrides: React.CSSProperties = {};
+
+      if (textElement.color) {
+        overrides.color = textElement.color;
+      }
+      if (textElement.fontSize) {
+        const size = typeof textElement.fontSize === "number" ? textElement.fontSize : parseInt(textElement.fontSize);
+        overrides.fontSize = `${size}px`;
+      }
+      if (textElement.fontWeight) {
+        const weight = typeof textElement.fontWeight === "number" ? textElement.fontWeight : parseInt(textElement.fontWeight);
+        overrides.fontWeight = weight;
+      }
+      if (textElement.backgroundColor) {
+        overrides.backgroundColor = textElement.backgroundColor;
+        if (!overrides.padding) {
+          overrides.padding = "0.25rem 0.5rem";
+        }
+      }
+      if (textElement.marginBottom) {
+        const margin = typeof textElement.marginBottom === "number" ? textElement.marginBottom : parseInt(textElement.marginBottom);
+        overrides.marginBottom = `${margin}px`;
+      }
+
+      return { ...baseStyle, ...overrides };
+    }
+
+    return baseStyle;
   };
 
   // Render text content
