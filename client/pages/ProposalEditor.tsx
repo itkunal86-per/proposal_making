@@ -798,6 +798,32 @@ export default function ProposalEditor() {
                 selectedElementId={selectedElementId}
                 selectedElementType={selectedElementType}
                 editMode={true}
+                onAddSection={() => {
+                  // Add a new section to the JSON structure
+                  const newSection = {
+                    id: Date.now(),
+                    title: "New Section",
+                    layout: "single",
+                    texts: [
+                      {
+                        id: `text-${Date.now()}`,
+                        type: "paragraph",
+                        content: "Add your content here",
+                      },
+                    ],
+                    images: [],
+                    signatureFields: [],
+                  };
+                  const updated = {
+                    ...p,
+                    proposal_json: {
+                      ...p.proposal_json,
+                      sections: [...(p.proposal_json.sections || []), newSection],
+                    },
+                  };
+                  commit(updated);
+                  toast({ title: "Section added", description: "New section has been created" });
+                }}
               />
             ) : (
               <ProposalPreview
