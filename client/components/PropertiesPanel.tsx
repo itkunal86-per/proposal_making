@@ -95,11 +95,20 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
 
   if (!selectedElementId || !selectedElementType) {
     return (
-      <Card className="p-4">
-        <div className="text-center text-muted-foreground">
-          <p className="text-sm">Select an element to edit its properties</p>
+      <div
+        style={{
+          padding: "16px",
+          backgroundColor: themeStyles.componentBg,
+          borderRadius: "4px",
+          border: `1px solid ${themeStyles.borderColor}`,
+        }}
+      >
+        <div style={{ textAlign: "center" }}>
+          <p style={{ fontSize: "12px", color: themeStyles.textMuted }}>
+            Select an element to edit its properties
+          </p>
         </div>
-      </Card>
+      </div>
     );
   }
 
