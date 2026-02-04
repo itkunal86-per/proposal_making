@@ -1144,6 +1144,7 @@ export default function ProposalEditor() {
                     setAIDialogOpen(true);
                   }
                 }}
+                themeJson={p?.theme_json}
               />
             ) : activePanel === "document" ? (
               <DocumentPanel
