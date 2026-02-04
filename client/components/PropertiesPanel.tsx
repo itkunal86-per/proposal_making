@@ -52,12 +52,46 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   onRemoveMedia,
   variables,
   onOpenAI,
+  themeJson,
 }) => {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [mediaUrl, setMediaUrl] = useState("");
   const [mediaType, setMediaType] = useState<"image" | "video">("image");
   const editorRef = useRef<HTMLDivElement>(null);
+
+  // Helper function to get theme-based styles
+  const getThemeStyles = () => {
+    if (!themeJson) {
+      return {
+        panelBg: "#ffffff",
+        panelText: "#000000",
+        textPrimary: "#0c2226",
+        textSecondary: "#727272",
+        textMuted: "#696868",
+        accentColor: "#3747ff",
+        borderColor: "#d1d5db",
+        componentBg: "#ffffff",
+        fontSize: "14px",
+        fontFamily: "system-ui, sans-serif",
+      };
+    }
+
+    return {
+      panelBg: themeJson.components?.textBlock?.backgroundColor || "#ffffff",
+      panelText: themeJson.colors?.textPrimary || "#0c2226",
+      textPrimary: themeJson.colors?.textPrimary || "#0c2226",
+      textSecondary: themeJson.colors?.textSecondary || "#727272",
+      textMuted: themeJson.colors?.textMuted || "#696868",
+      accentColor: themeJson.colors?.accent || "#3747ff",
+      borderColor: themeJson.colors?.border || "#d1d5db",
+      componentBg: themeJson.components?.textBlock?.backgroundColor || "#ffffff",
+      fontSize: `${themeJson.typography?.paragraph?.fontSize || 14}px`,
+      fontFamily: themeJson.fonts?.primary || "system-ui, sans-serif",
+    };
+  };
+
+  const themeStyles = getThemeStyles();
 
   if (!selectedElementId || !selectedElementType) {
     return (
