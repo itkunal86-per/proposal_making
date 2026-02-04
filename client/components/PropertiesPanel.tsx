@@ -2771,6 +2771,98 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   if (selectedElementType === "text") {
     const parts = selectedElementId.split("-");
     const sectionId = parts[1];
+    const textId = parts[2];
+
+    // Check if this is a JSON proposal
+    if ((proposal as any).proposal_json) {
+      const jsonProposal = (proposal as any).proposal_json;
+      const section = jsonProposal.sections?.find((s: any) => String(s.id) === String(sectionId));
+
+      if (!section || !section.texts) {
+        return (
+          <Card className="p-4">
+            <div className="text-center text-muted-foreground">
+              <p className="text-sm">Text not found</p>
+            </div>
+          </Card>
+        );
+      }
+
+      const text = section.texts.find((t: any) => t.id === textId);
+
+      if (!text) {
+        return (
+          <Card className="p-4">
+            <div className="text-center text-muted-foreground">
+              <p className="text-sm">Text not found</p>
+            </div>
+          </Card>
+        );
+      }
+
+      const handleUpdateText = (updates: Partial<typeof text>) => {
+        const updatedJson = {
+          ...jsonProposal,
+          sections: jsonProposal.sections.map((s: any) =>
+            String(s.id) === String(sectionId)
+              ? {
+                  ...s,
+                  texts: s.texts.map((t: any) => (t.id === textId ? { ...t, ...updates } : t)),
+                }
+              : s
+          ),
+        };
+        onUpdateProposal({ ...proposal, proposal_json: updatedJson });
+      };
+
+      return (
+        <Card className="p-4 space-y-4">
+          <div>
+            <Label className="text-xs font-semibold">Text Type</Label>
+            <select
+              value={text.type}
+              onChange={(e) => handleUpdateText({ type: e.target.value })}
+              className="w-full mt-2 px-2 py-1 border border-slate-300 rounded"
+            >
+              <option value="paragraph">Paragraph</option>
+              <option value="heading">Heading</option>
+              <option value="listItem">List Item</option>
+            </select>
+          </div>
+
+          {text.type === "heading" && (
+            <div>
+              <Label className="text-xs font-semibold">Heading Level</Label>
+              <select
+                value={text.level || "h3"}
+                onChange={(e) => handleUpdateText({ level: e.target.value })}
+                className="w-full mt-2 px-2 py-1 border border-slate-300 rounded"
+              >
+                <option value="h1">H1</option>
+                <option value="h2">H2</option>
+                <option value="h3">H3</option>
+                <option value="h4">H4</option>
+                <option value="h5">H5</option>
+                <option value="h6">H6</option>
+              </select>
+            </div>
+          )}
+
+          <div>
+            <Label className="text-xs font-semibold">Content</Label>
+            <textarea
+              value={text.content}
+              onChange={(e) => handleUpdateText({ content: e.target.value })}
+              className="w-full mt-2 px-3 py-2 border border-slate-300 rounded text-sm font-mono"
+              rows={4}
+              style={{ fontFamily: "monospace", fontSize: "12px" }}
+            />
+          </div>
+        </Card>
+      );
+    }
+
+    // Handle traditional proposal structure
     const textIndex = parseInt(parts[2]);
     const section = proposal.sections.find((s) => String(s.id) === String(sectionId));
 
