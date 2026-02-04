@@ -794,6 +794,9 @@ export default function ProposalEditor() {
                   const updated = { ...p, proposal_json: updatedJson };
                   commit(updated);
                 }}
+                onSelectElement={handleSelectElement}
+                selectedElementId={selectedElementId}
+                selectedElementType={selectedElementType}
                 editMode={true}
               />
             ) : (
