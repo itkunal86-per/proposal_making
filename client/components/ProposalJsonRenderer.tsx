@@ -28,42 +28,142 @@ export const ProposalJsonRenderer: React.FC<ProposalJsonRendererProps> = ({
     console.log("ProposalJsonRenderer mounted with:", debugInfo);
   }, [proposalJson, themeJson]);
 
-  // Validates and returns theme data safely
-  const theme = themeJson;
-
-  if (!proposalJson || !themeJson) {
-    const errorMsg = {
-      hasProposalJson: !!proposalJson,
-      hasThemeJson: !!themeJson,
-      proposalJsonType: typeof proposalJson,
-      themeJsonType: typeof themeJson,
-    };
-    console.warn("ProposalJsonRenderer: Missing proposalJson or themeJson", errorMsg);
+  if (!proposalJson) {
     return (
       <div style={{ padding: "2rem", textAlign: "center", color: "#666" }}>
-        <p>Unable to render proposal - missing data</p>
-        <pre style={{ fontSize: "12px", textAlign: "left", backgroundColor: "#f5f5f5", padding: "1rem", borderRadius: "4px" }}>
-          {JSON.stringify(errorMsg, null, 2)}
-        </pre>
+        <p>Unable to render proposal - missing proposal data</p>
       </div>
     );
   }
 
-  // Verify critical data structure
-  if (!proposalJson.sections || !Array.isArray(proposalJson.sections)) {
-    console.warn("ProposalJsonRenderer: Invalid sections structure", {
-      hasSections: !!proposalJson.sections,
-      isArray: Array.isArray(proposalJson.sections),
-      sectionsType: typeof proposalJson.sections,
-    });
-  }
-
-  if (!themeJson.colors || !themeJson.fonts) {
-    console.warn("ProposalJsonRenderer: Invalid theme structure", {
-      hasColors: !!themeJson.colors,
-      hasFonts: !!themeJson.fonts,
-    });
-  }
+  // Create safe theme object with defaults
+  const theme = themeJson ? {
+    colors: themeJson.colors || {
+      textPrimary: "#0c2226",
+      textSecondary: "#727272",
+      textMuted: "#696868",
+      backgroundPrimary: "#ffffff",
+      backgroundDark: "#04072f",
+      accent: "#3747ff",
+      border: "#d1d5db",
+    },
+    fonts: themeJson.fonts || {
+      primary: "system-ui, sans-serif",
+      icon: "Font Awesome 6 Pro",
+    },
+    typography: themeJson.typography || {
+      heading: {
+        h3: {
+          fontSize: 30,
+          fontWeight: 600,
+          lineHeight: 1.2,
+          textTransform: "capitalize",
+          color: "#0c2226",
+          marginBottom: 15,
+        },
+      },
+      paragraph: {
+        fontSize: 16,
+        fontWeight: 600,
+        lineHeight: 1.6,
+        color: "#727272",
+      },
+      listItem: {
+        fontSize: 16,
+        fontWeight: 900,
+        gap: 15,
+        iconColor: "#3747ff",
+        textTransform: "capitalize",
+      },
+    },
+    boxModel: themeJson.boxModel || {
+      defaultPadding: { top: 8, right: 8, bottom: 8, left: 8 },
+      borderRadius: 4,
+      borderWidth: 1,
+    },
+    layout: themeJson.layout || {
+      sectionGap: 10,
+      columnGutter: 12,
+      maxWidth: 776,
+    },
+    components: themeJson.components || {
+      textBlock: {
+        backgroundColor: "#ffffff",
+        borderColor: "#d1d5db",
+      },
+      darkPanel: {
+        backgroundColor: "#04072f",
+        textColor: "#faf5f5",
+      },
+      featureList: {
+        icon: "fa-solid fa-circle-check",
+        iconColor: "#3747ff",
+      },
+    },
+  } : {
+    colors: {
+      textPrimary: "#0c2226",
+      textSecondary: "#727272",
+      textMuted: "#696868",
+      backgroundPrimary: "#ffffff",
+      backgroundDark: "#04072f",
+      accent: "#3747ff",
+      border: "#d1d5db",
+    },
+    fonts: {
+      primary: "system-ui, sans-serif",
+      icon: "Font Awesome 6 Pro",
+    },
+    typography: {
+      heading: {
+        h3: {
+          fontSize: 30,
+          fontWeight: 600,
+          lineHeight: 1.2,
+          textTransform: "capitalize",
+          color: "#0c2226",
+          marginBottom: 15,
+        },
+      },
+      paragraph: {
+        fontSize: 16,
+        fontWeight: 600,
+        lineHeight: 1.6,
+        color: "#727272",
+      },
+      listItem: {
+        fontSize: 16,
+        fontWeight: 900,
+        gap: 15,
+        iconColor: "#3747ff",
+        textTransform: "capitalize",
+      },
+    },
+    boxModel: {
+      defaultPadding: { top: 8, right: 8, bottom: 8, left: 8 },
+      borderRadius: 4,
+      borderWidth: 1,
+    },
+    layout: {
+      sectionGap: 10,
+      columnGutter: 12,
+      maxWidth: 776,
+    },
+    components: {
+      textBlock: {
+        backgroundColor: "#ffffff",
+        borderColor: "#d1d5db",
+      },
+      darkPanel: {
+        backgroundColor: "#04072f",
+        textColor: "#faf5f5",
+      },
+      featureList: {
+        icon: "fa-solid fa-circle-check",
+        iconColor: "#3747ff",
+      },
+    },
+  };
 
   // Helper function to get typography style based on text type - merges theme styles with individual text element overrides
   const getTextStyle = (
