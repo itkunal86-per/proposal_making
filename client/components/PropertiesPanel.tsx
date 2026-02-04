@@ -267,73 +267,30 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
 
         <div style={{ marginBottom: "16px" }}>
           <ThemedLabel theme={themeStyles}>Text Type</ThemedLabel>
-          <select
-            value={text.type || "paragraph"}
-            onChange={(e) => handleUpdateText({ type: e.target.value as any })}
-            style={{
-              width: "100%",
-              marginTop: "8px",
-              padding: "8px 12px",
-              border: `1px solid ${themeStyles.borderColor}`,
-              borderRadius: "4px",
-              fontSize: themeStyles.fontSize,
-              color: themeStyles.textPrimary,
-              backgroundColor: themeStyles.componentBg,
-            }}
-          >
+          <ThemedSelect value={text.type || "paragraph"} onChange={(e) => handleUpdateText({ type: e.target.value as any })} theme={themeStyles}>
             <option value="heading">Heading</option>
             <option value="paragraph">Paragraph</option>
             <option value="listItem">List Item</option>
-          </select>
+          </ThemedSelect>
         </div>
 
         {text.type === "heading" && (
           <div style={{ marginBottom: "16px" }}>
             <ThemedLabel theme={themeStyles}>Heading Level</ThemedLabel>
-            <select
-              value={text.level || "h1"}
-              onChange={(e) => handleUpdateText({ level: e.target.value as any })}
-              style={{
-                width: "100%",
-                marginTop: "8px",
-                padding: "8px 12px",
-                border: `1px solid ${themeStyles.borderColor}`,
-                borderRadius: "4px",
-                fontSize: themeStyles.fontSize,
-                color: themeStyles.textPrimary,
-                backgroundColor: themeStyles.componentBg,
-              }}
-            >
+            <ThemedSelect value={text.level || "h1"} onChange={(e) => handleUpdateText({ level: e.target.value as any })} theme={themeStyles}>
               <option value="h1">H1</option>
               <option value="h2">H2</option>
               <option value="h3">H3</option>
               <option value="h4">H4</option>
               <option value="h5">H5</option>
               <option value="h6">H6</option>
-            </select>
+            </ThemedSelect>
           </div>
         )}
 
         <div style={{ marginBottom: "16px" }}>
           <ThemedLabel theme={themeStyles}>Content</ThemedLabel>
-          <textarea
-            value={text.content || ""}
-            onChange={(e) => handleUpdateText({ content: e.target.value })}
-            style={{
-              width: "100%",
-              minHeight: "100px",
-              marginTop: "8px",
-              padding: "10px 12px",
-              border: `1px solid ${themeStyles.borderColor}`,
-              borderRadius: "4px",
-              fontSize: themeStyles.fontSize,
-              color: themeStyles.textPrimary,
-              backgroundColor: themeStyles.componentBg,
-              fontFamily: themeStyles.fontFamily,
-              resize: "vertical",
-            }}
-            placeholder="Enter text content..."
-          />
+          <ThemedTextarea value={text.content || ""} onChange={(e) => handleUpdateText({ content: e.target.value })} placeholder="Enter text content..." theme={themeStyles} />
         </div>
 
         <ThemedSeparator theme={themeStyles} />
