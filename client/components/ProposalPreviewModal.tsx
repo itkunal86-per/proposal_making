@@ -31,6 +31,9 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
   const [sectionWidths, setSectionWidths] = useState<Record<string, number>>({});
   const sectionRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
+  // Check if proposal has new JSON structure
+  const hasJsonStructure = proposal.proposal_json && proposal.theme_json;
+
   React.useEffect(() => {
     // Disable body scroll when modal is open
     document.body.style.overflow = "hidden";
