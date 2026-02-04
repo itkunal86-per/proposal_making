@@ -266,13 +266,13 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
   };
 
   // If new JSON structure is available, use the new renderer
-  if (hasJsonStructure) {
+  if (hasJsonStructure && proposal.proposal_json && proposal.theme_json) {
     return (
       <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0, 0, 0, 0.5)", zIndex: 9998 }}>
         <div style={{ position: "fixed", inset: 0, display: "flex", flexDirection: "column", backgroundColor: "white", zIndex: 9999 }}>
           {/* Header */}
           <div className="border-b border-slate-200 px-6 py-4 flex items-center justify-between">
-            <h1 className="text-2xl font-bold">{proposal.proposal_json.title}</h1>
+            <h1 className="text-2xl font-bold">{proposal.proposal_json.title || "Proposal"}</h1>
             <div className="flex items-center gap-2">
               {!isTemplate && proposal.proposal_json.status === "accepted" && (
                 <Button
@@ -299,10 +299,16 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
           {/* Content - JSON-based Renderer (uses ONLY proposal_json and theme_json) */}
           <div className="flex-1 overflow-y-auto bg-slate-50 flex justify-center p-6">
             <div ref={contentRef} className="w-full">
-              <ProposalJsonRenderer
-                proposalJson={proposal.proposal_json}
-                themeJson={proposal.theme_json}
-              />
+              {proposal.proposal_json && proposal.theme_json ? (
+                <ProposalJsonRenderer
+                  proposalJson={proposal.proposal_json}
+                  themeJson={proposal.theme_json}
+                />
+              ) : (
+                <div style={{ padding: "2rem", textAlign: "center", color: "#666" }}>
+                  <p>Unable to render proposal preview</p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -310,7 +316,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
             open={shareDialogOpen}
             onOpenChange={setShareDialogOpen}
             proposalId={proposal.id}
-            proposalTitle={proposal.proposal_json.title}
+            proposalTitle={proposal.proposal_json.title || proposal.title}
           />
         </div>
       </div>
