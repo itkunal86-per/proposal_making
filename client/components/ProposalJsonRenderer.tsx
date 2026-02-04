@@ -175,7 +175,7 @@ export const ProposalJsonRenderer: React.FC<ProposalJsonRendererProps> = ({
 
     if (type === "heading" && level) {
       const headingKey = level as keyof typeof theme.typography.heading;
-      const headingStyle = theme.typography.heading[headingKey];
+      const headingStyle = theme.typography?.heading ? theme.typography.heading[headingKey] : null;
       if (!headingStyle) {
         // Fallback for headings not defined in theme
         baseStyle = {
@@ -200,26 +200,28 @@ export const ProposalJsonRenderer: React.FC<ProposalJsonRendererProps> = ({
         };
       }
     } else if (type === "paragraph") {
+      const paragraphStyle = theme.typography?.paragraph;
       baseStyle = {
-        fontSize: `${theme.typography.paragraph.fontSize}px`,
-        fontWeight: theme.typography.paragraph.fontWeight,
-        lineHeight: theme.typography.paragraph.lineHeight,
-        color: theme.typography.paragraph.color,
+        fontSize: paragraphStyle ? `${paragraphStyle.fontSize}px` : "16px",
+        fontWeight: paragraphStyle ? paragraphStyle.fontWeight : 600,
+        lineHeight: paragraphStyle ? paragraphStyle.lineHeight : 1.6,
+        color: paragraphStyle ? paragraphStyle.color : theme.colors.textPrimary,
         fontFamily: theme.fonts.primary,
         marginBottom: "1rem",
         marginTop: "0px",
       };
-    } else if (type === "listItem" && theme.typography.listItem) {
+    } else if (type === "listItem") {
+      const listItemStyle = theme.typography?.listItem;
       baseStyle = {
-        fontSize: `${theme.typography.listItem.fontSize}px`,
-        fontWeight: theme.typography.listItem.fontWeight,
+        fontSize: listItemStyle ? `${listItemStyle.fontSize}px` : "16px",
+        fontWeight: listItemStyle ? listItemStyle.fontWeight : 900,
         color: theme.colors.textPrimary,
         fontFamily: theme.fonts.primary,
         display: "flex",
         alignItems: "flex-start",
-        gap: `${theme.typography.listItem.gap}px`,
+        gap: listItemStyle ? `${listItemStyle.gap}px` : "15px",
         marginBottom: "0.5rem",
-        textTransform: (theme.typography.listItem.textTransform as any) || "none",
+        textTransform: (listItemStyle?.textTransform as any) || "none",
       };
     } else {
       baseStyle = {
