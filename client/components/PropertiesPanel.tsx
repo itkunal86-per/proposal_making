@@ -477,28 +477,19 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
           <>
             <div style={{ marginBottom: "16px" }}>
               <ThemedLabel theme={themeStyles}>Background Size</ThemedLabel>
-              <select
+              <ThemedSelect
                 value={sectionStyles.backgroundSize || "cover"}
                 onChange={(e) =>
                   handleUpdateSection({
                     contentStyles: { ...sectionStyles, backgroundSize: e.target.value },
                   })
                 }
-                style={{
-                  width: "100%",
-                  marginTop: "8px",
-                  padding: "8px 12px",
-                  border: `1px solid ${themeStyles.borderColor}`,
-                  borderRadius: "4px",
-                  fontSize: themeStyles.fontSize,
-                  color: themeStyles.textPrimary,
-                  backgroundColor: themeStyles.componentBg,
-                }}
+                theme={themeStyles}
               >
                 <option value="cover">Cover</option>
                 <option value="contain">Contain</option>
                 <option value="stretch">Stretch</option>
-              </select>
+              </ThemedSelect>
             </div>
 
             <div style={{ marginBottom: "16px" }}>
