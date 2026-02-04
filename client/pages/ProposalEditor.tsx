@@ -786,7 +786,18 @@ export default function ProposalEditor() {
         <div className="flex-1 flex gap-4 overflow-hidden">
           {/* Editor Preview - scrollable with auto-expanding content */}
           <div ref={previewContainerRef} className="flex-1 overflow-y-auto p-6">
-            <ProposalPreview
+            {p?.proposal_json && p?.theme_json ? (
+              <ProposalJsonEditorRenderer
+                proposalJson={p.proposal_json}
+                themeJson={p.theme_json}
+                onProposalJsonChange={(updatedJson) => {
+                  const updated = { ...p, proposal_json: updatedJson };
+                  commit(updated);
+                }}
+                editMode={true}
+              />
+            ) : (
+              <ProposalPreview
               proposal={p}
               selectedElementId={selectedElementId}
               onSelectElement={handleSelectElement}
@@ -1081,6 +1092,7 @@ export default function ProposalEditor() {
               isAddingSignatureMode={addingSignatureMode}
               selectedSignatoryId={selectedSignatoryId}
             />
+            )}
           </div>
 
           {/* Properties Panel */}
