@@ -630,12 +630,12 @@ export const ProposalJsonEditorRenderer: React.FC<ProposalJsonEditorRendererProp
   return (
     <div
       style={{
-        maxWidth: `${theme?.layout?.maxWidth || 776}px`,
+        maxWidth: `${theme.layout.maxWidth}px`,
         margin: "0 auto",
         padding: "2rem",
-        backgroundColor: theme?.colors?.backgroundPrimary || "#ffffff",
-        fontFamily: theme?.fonts?.primary || "system-ui, sans-serif",
-        color: theme?.colors?.textPrimary || "#0c2226",
+        backgroundColor: theme.colors.backgroundPrimary,
+        fontFamily: theme.fonts.primary,
+        color: theme.colors.textPrimary,
         width: "100%",
       }}
     >
