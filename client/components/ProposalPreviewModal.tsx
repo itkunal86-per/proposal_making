@@ -265,9 +265,9 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
         <div style={{ position: "fixed", inset: 0, display: "flex", flexDirection: "column", backgroundColor: "white", zIndex: 9999 }}>
           {/* Header */}
           <div className="border-b border-slate-200 px-6 py-4 flex items-center justify-between">
-            <h1 className="text-2xl font-bold">{proposal.title}</h1>
+            <h1 className="text-2xl font-bold">{proposal.proposal_json.title}</h1>
             <div className="flex items-center gap-2">
-              {!isTemplate && proposal.status === "accepted" && (
+              {!isTemplate && proposal.proposal_json.status === "accepted" && (
                 <Button
                   onClick={() => setShareDialogOpen(true)}
                   variant="outline"
@@ -289,7 +289,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
             </div>
           </div>
 
-          {/* Content - JSON-based Renderer */}
+          {/* Content - JSON-based Renderer (uses ONLY proposal_json and theme_json) */}
           <div className="flex-1 overflow-y-auto bg-slate-50 flex justify-center p-6">
             <div ref={contentRef} className="w-full">
               <ProposalJsonRenderer
@@ -303,7 +303,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
             open={shareDialogOpen}
             onOpenChange={setShareDialogOpen}
             proposalId={proposal.id}
-            proposalTitle={proposal.title}
+            proposalTitle={proposal.proposal_json.title}
           />
         </div>
       </div>
