@@ -591,11 +591,11 @@ export const ProposalJsonEditorRenderer: React.FC<ProposalJsonEditorRendererProp
                 style={{
                   width: `${field.width}px`,
                   height: `${field.height}px`,
-                  borderRadius: `${theme?.boxModel?.borderRadius || 4}px`,
+                  borderRadius: `${theme.boxModel.borderRadius}px`,
                   borderWidth: "2px",
                   borderStyle: "dashed",
-                  borderColor: theme?.colors?.border || "#d1d5db",
-                  backgroundColor: theme?.colors?.backgroundPrimary || "#ffffff",
+                  borderColor: theme.colors.border,
+                  backgroundColor: theme.colors.backgroundPrimary,
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
@@ -605,15 +605,15 @@ export const ProposalJsonEditorRenderer: React.FC<ProposalJsonEditorRendererProp
                   marginTop: "1rem",
                 }}
               >
-                <div style={{ flex: 1, width: "100%", borderBottom: `1px solid ${theme?.colors?.border || "#d1d5db"}` }} />
+                <div style={{ flex: 1, width: "100%", borderBottom: `1px solid ${theme.colors.border}` }} />
                 <div
                   style={{
                     fontSize: "12px",
                     fontWeight: "bold",
                     padding: "8px 4px",
-                    backgroundColor: theme?.colors?.accent || "#3747ff",
-                    color: theme?.colors?.backgroundPrimary || "#ffffff",
-                    borderRadius: `${theme?.boxModel?.borderRadius || 4}px`,
+                    backgroundColor: theme.colors.accent,
+                    color: theme.colors.backgroundPrimary,
+                    borderRadius: `${theme.boxModel.borderRadius}px`,
                     marginTop: "8px",
                   }}
                 >
