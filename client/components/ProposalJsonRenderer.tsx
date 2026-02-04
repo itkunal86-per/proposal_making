@@ -10,8 +10,28 @@ export const ProposalJsonRenderer: React.FC<ProposalJsonRendererProps> = ({
   proposalJson,
   themeJson,
 }) => {
+  // Debug logging
+  React.useEffect(() => {
+    console.log("ProposalJsonRenderer mounted with:", {
+      proposalJson: proposalJson ? { title: proposalJson.title, sections: proposalJson.sections?.length } : null,
+      themeJson: themeJson ? { themeId: themeJson.themeId } : null,
+    });
+  }, [proposalJson, themeJson]);
+
   // Validates and returns theme data safely
   const theme = themeJson;
+
+  if (!proposalJson || !themeJson) {
+    console.warn("ProposalJsonRenderer: Missing proposalJson or themeJson", {
+      hasProposalJson: !!proposalJson,
+      hasThemeJson: !!themeJson,
+    });
+    return (
+      <div style={{ padding: "2rem", textAlign: "center", color: "#666" }}>
+        <p>Unable to render proposal - missing data</p>
+      </div>
+    );
+  }
 
   // Helper function to get typography style based on text type
   const getTextStyle = (
