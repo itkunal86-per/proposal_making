@@ -97,9 +97,66 @@ const ThemedSectionTitle: React.FC<{ children: React.ReactNode; theme: ThemeStyl
 
 // Helper component for themed input wrapper
 const ThemedInputWrapper: React.FC<{ children: React.ReactNode; gap?: string }> = ({ children, gap = "8px" }) => (
-  <div style={{ display: "flex", gap, marginTop: "8px" }}>
+  <div style={{ display: "flex", gap, marginTop: "8px", alignItems: "center" }}>
     {children}
   </div>
+);
+
+// Helper component for themed select
+const ThemedSelect: React.FC<{
+  value: string | number;
+  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  children: React.ReactNode;
+  theme: ThemeStyles;
+  multiple?: boolean;
+}> = ({ value, onChange, children, theme, multiple }) => (
+  <select
+    value={value}
+    onChange={onChange}
+    multiple={multiple}
+    style={{
+      width: "100%",
+      marginTop: "8px",
+      padding: "8px 12px",
+      border: `1px solid ${theme.borderColor}`,
+      borderRadius: "4px",
+      fontSize: theme.fontSize,
+      color: theme.textPrimary,
+      backgroundColor: theme.componentBg,
+      fontFamily: theme.fontFamily,
+      cursor: "pointer",
+    }}
+  >
+    {children}
+  </select>
+);
+
+// Helper component for themed textarea
+const ThemedTextarea: React.FC<{
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  placeholder?: string;
+  theme: ThemeStyles;
+  minHeight?: string;
+}> = ({ value, onChange, placeholder, theme, minHeight = "100px" }) => (
+  <textarea
+    value={value}
+    onChange={onChange}
+    placeholder={placeholder}
+    style={{
+      width: "100%",
+      minHeight,
+      marginTop: "8px",
+      padding: "10px 12px",
+      border: `1px solid ${theme.borderColor}`,
+      borderRadius: "4px",
+      fontSize: theme.fontSize,
+      color: theme.textPrimary,
+      backgroundColor: theme.componentBg,
+      fontFamily: theme.fontFamily,
+      resize: "vertical",
+    }}
+  />
 );
 
 export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
