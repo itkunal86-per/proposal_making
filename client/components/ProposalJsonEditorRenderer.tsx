@@ -162,6 +162,8 @@ export const ProposalJsonEditorRenderer: React.FC<ProposalJsonEditorRendererProp
   const renderTextContent = (text: any, sectionId: string | number) => {
     const style = getTextStyle(text.type, text.level);
     const isEditing = editingTextId === text.id;
+    const elementId = `text-${sectionId}-${text.id}`;
+    const isSelected = selectedElementId === elementId && selectedElementType === "text";
 
     if (isEditing && editMode) {
       return (
@@ -223,17 +225,22 @@ export const ProposalJsonEditorRenderer: React.FC<ProposalJsonEditorRendererProp
             gap: "0.5rem",
             alignItems: "flex-start",
             marginBottom: "0.5rem",
-            ...(selectedTextId === text.id && editMode ? { backgroundColor: "#e3f2fd", padding: "0.5rem" } : {}),
+            ...(isSelected ? { backgroundColor: "#e3f2fd", padding: "0.5rem", outline: "2px solid #3b82f6", outlineOffset: "2px" } : {}),
           }}
-          onClick={() => editMode && setSelectedTextId(text.id)}
+          onClick={() => {
+            onSelectElement?.(elementId, "text");
+            setSelectedTextId(text.id);
+          }}
+          style={{ cursor: "pointer" }}
         >
           <HeadingTag style={style}>{text.content}</HeadingTag>
-          {editMode && selectedTextId === text.id && (
+          {editMode && isSelected && (
             <div style={{ display: "flex", gap: "0.25rem", marginTop: "0.5rem" }}>
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   setEditingTextId(text.id);
                   setEditingTextContent(text.content);
                 }}
@@ -243,7 +250,10 @@ export const ProposalJsonEditorRenderer: React.FC<ProposalJsonEditorRendererProp
               <Button
                 size="sm"
                 variant="destructive"
-                onClick={() => handleDeleteText(sectionId, text.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDeleteText(sectionId, text.id);
+                }}
               >
                 <Trash2 className="w-3 h-3" />
               </Button>
@@ -262,17 +272,22 @@ export const ProposalJsonEditorRenderer: React.FC<ProposalJsonEditorRendererProp
             gap: "0.5rem",
             alignItems: "flex-start",
             marginBottom: "0.5rem",
-            ...(selectedTextId === text.id && editMode ? { backgroundColor: "#e3f2fd", padding: "0.5rem" } : {}),
+            ...(isSelected ? { backgroundColor: "#e3f2fd", padding: "0.5rem", outline: "2px solid #3b82f6", outlineOffset: "2px" } : {}),
           }}
-          onClick={() => editMode && setSelectedTextId(text.id)}
+          onClick={() => {
+            onSelectElement?.(elementId, "text");
+            setSelectedTextId(text.id);
+          }}
+          style={{ cursor: "pointer" }}
         >
           <p style={style}>{text.content}</p>
-          {editMode && selectedTextId === text.id && (
+          {editMode && isSelected && (
             <div style={{ display: "flex", gap: "0.25rem" }}>
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   setEditingTextId(text.id);
                   setEditingTextContent(text.content);
                 }}
@@ -282,7 +297,10 @@ export const ProposalJsonEditorRenderer: React.FC<ProposalJsonEditorRendererProp
               <Button
                 size="sm"
                 variant="destructive"
-                onClick={() => handleDeleteText(sectionId, text.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDeleteText(sectionId, text.id);
+                }}
               >
                 <Trash2 className="w-3 h-3" />
               </Button>
