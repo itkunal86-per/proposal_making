@@ -161,7 +161,7 @@ export const ProposalJsonRenderer: React.FC<ProposalJsonRendererProps> = ({
 
   // Render text content
   const renderTextContent = (text: any) => {
-    const style = getTextStyle(text.type, text.level);
+    const style = getTextStyle(text.type, text.level, text);
 
     if (text.type === "heading") {
       const HeadingTag = (text.level || "h3") as any;
