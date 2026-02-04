@@ -735,8 +735,33 @@ function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmai
       role: s.role,
       order: parseInt(String(s.order)),
     })) : [],
-    proposal_json: (apiProposal as any).proposal_json || undefined,
-    theme_json: (apiProposal as any).theme_json || undefined,
+    // Parse JSON strings if they come as strings from API
+    proposal_json: (() => {
+      const proposalJsonData = (apiProposal as any).proposal_json;
+      if (!proposalJsonData) return undefined;
+      if (typeof proposalJsonData === 'string') {
+        try {
+          return JSON.parse(proposalJsonData);
+        } catch (e) {
+          console.error("Failed to parse proposal_json:", e);
+          return undefined;
+        }
+      }
+      return proposalJsonData;
+    })(),
+    theme_json: (() => {
+      const themeJsonData = (apiProposal as any).theme_json;
+      if (!themeJsonData) return undefined;
+      if (typeof themeJsonData === 'string') {
+        try {
+          return JSON.parse(themeJsonData);
+        } catch (e) {
+          console.error("Failed to parse theme_json:", e);
+          return undefined;
+        }
+      }
+      return themeJsonData;
+    })(),
   };
 }
 
