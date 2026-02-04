@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { ProposalJsonData, ThemeJsonData } from "@shared/api";
 
 interface ProposalJsonRendererProps {
