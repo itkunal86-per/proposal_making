@@ -414,28 +414,19 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
 
         <div style={{ marginBottom: "16px" }}>
           <ThemedLabel theme={themeStyles}>Layout</ThemedLabel>
-          <select
+          <ThemedSelect
             value={section.layout || "single"}
             onChange={(e) =>
               handleUpdateSection({
                 layout: e.target.value as "single" | "two-column" | "three-column",
               })
             }
-            style={{
-              width: "100%",
-              marginTop: "8px",
-              padding: "8px 12px",
-              border: `1px solid ${themeStyles.borderColor}`,
-              borderRadius: "4px",
-              fontSize: themeStyles.fontSize,
-              color: themeStyles.textPrimary,
-              backgroundColor: themeStyles.componentBg,
-            }}
+            theme={themeStyles}
           >
             <option value="single">Single Column</option>
             <option value="two-column">Two Columns</option>
             <option value="three-column">Three Columns</option>
-          </select>
+          </ThemedSelect>
         </div>
 
         <ThemedSeparator theme={themeStyles} />
