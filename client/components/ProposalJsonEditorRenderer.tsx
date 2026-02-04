@@ -31,15 +31,142 @@ export const ProposalJsonEditorRenderer: React.FC<ProposalJsonEditorRendererProp
   const [editingTextId, setEditingTextId] = useState<string | null>(null);
   const [editingTextContent, setEditingTextContent] = useState<string>("");
 
-  if (!proposalJson || !themeJson) {
+  if (!proposalJson) {
     return (
       <div style={{ padding: "2rem", textAlign: "center", color: "#666" }}>
-        <p>Unable to render proposal - missing data</p>
+        <p>Unable to render proposal - missing proposal data</p>
       </div>
     );
   }
 
-  const theme = themeJson;
+  // Create safe theme object with defaults
+  const theme = themeJson ? {
+    colors: themeJson.colors || {
+      textPrimary: "#0c2226",
+      textSecondary: "#727272",
+      textMuted: "#696868",
+      backgroundPrimary: "#ffffff",
+      backgroundDark: "#04072f",
+      accent: "#3747ff",
+      border: "#d1d5db",
+    },
+    fonts: themeJson.fonts || {
+      primary: "system-ui, sans-serif",
+      icon: "Font Awesome 6 Pro",
+    },
+    typography: themeJson.typography || {
+      heading: {
+        h3: {
+          fontSize: 30,
+          fontWeight: 600,
+          lineHeight: 1.2,
+          textTransform: "capitalize",
+          color: "#0c2226",
+          marginBottom: 15,
+        },
+      },
+      paragraph: {
+        fontSize: 16,
+        fontWeight: 600,
+        lineHeight: 1.6,
+        color: "#727272",
+      },
+      listItem: {
+        fontSize: 16,
+        fontWeight: 900,
+        gap: 15,
+        iconColor: "#3747ff",
+        textTransform: "capitalize",
+      },
+    },
+    boxModel: themeJson.boxModel || {
+      defaultPadding: { top: 8, right: 8, bottom: 8, left: 8 },
+      borderRadius: 4,
+      borderWidth: 1,
+    },
+    layout: themeJson.layout || {
+      sectionGap: 10,
+      columnGutter: 12,
+      maxWidth: 776,
+    },
+    components: themeJson.components || {
+      textBlock: {
+        backgroundColor: "#ffffff",
+        borderColor: "#d1d5db",
+      },
+      darkPanel: {
+        backgroundColor: "#04072f",
+        textColor: "#faf5f5",
+      },
+      featureList: {
+        icon: "fa-solid fa-circle-check",
+        iconColor: "#3747ff",
+      },
+    },
+  } : {
+    colors: {
+      textPrimary: "#0c2226",
+      textSecondary: "#727272",
+      textMuted: "#696868",
+      backgroundPrimary: "#ffffff",
+      backgroundDark: "#04072f",
+      accent: "#3747ff",
+      border: "#d1d5db",
+    },
+    fonts: {
+      primary: "system-ui, sans-serif",
+      icon: "Font Awesome 6 Pro",
+    },
+    typography: {
+      heading: {
+        h3: {
+          fontSize: 30,
+          fontWeight: 600,
+          lineHeight: 1.2,
+          textTransform: "capitalize",
+          color: "#0c2226",
+          marginBottom: 15,
+        },
+      },
+      paragraph: {
+        fontSize: 16,
+        fontWeight: 600,
+        lineHeight: 1.6,
+        color: "#727272",
+      },
+      listItem: {
+        fontSize: 16,
+        fontWeight: 900,
+        gap: 15,
+        iconColor: "#3747ff",
+        textTransform: "capitalize",
+      },
+    },
+    boxModel: {
+      defaultPadding: { top: 8, right: 8, bottom: 8, left: 8 },
+      borderRadius: 4,
+      borderWidth: 1,
+    },
+    layout: {
+      sectionGap: 10,
+      columnGutter: 12,
+      maxWidth: 776,
+    },
+    components: {
+      textBlock: {
+        backgroundColor: "#ffffff",
+        borderColor: "#d1d5db",
+      },
+      darkPanel: {
+        backgroundColor: "#04072f",
+        textColor: "#faf5f5",
+      },
+      featureList: {
+        icon: "fa-solid fa-circle-check",
+        iconColor: "#3747ff",
+      },
+    },
+  };
 
   // Handle proposal title change
   const handleTitleChange = (newTitle: string) => {
