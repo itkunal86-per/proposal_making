@@ -334,26 +334,13 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
 
         <div style={{ marginBottom: "16px" }}>
           <ThemedLabel theme={themeStyles}>Font Weight</ThemedLabel>
-          <select
-            value={text.fontWeight || 400}
-            onChange={(e) => handleUpdateText({ fontWeight: parseInt(e.target.value) })}
-            style={{
-              width: "100%",
-              marginTop: "8px",
-              padding: "8px 12px",
-              border: `1px solid ${themeStyles.borderColor}`,
-              borderRadius: "4px",
-              fontSize: themeStyles.fontSize,
-              color: themeStyles.textPrimary,
-              backgroundColor: themeStyles.componentBg,
-            }}
-          >
+          <ThemedSelect value={text.fontWeight || 400} onChange={(e) => handleUpdateText({ fontWeight: parseInt(e.target.value) })} theme={themeStyles}>
             <option value="400">Normal (400)</option>
             <option value="500">Medium (500)</option>
             <option value="600">Semibold (600)</option>
             <option value="700">Bold (700)</option>
             <option value="900">Heavy (900)</option>
-          </select>
+          </ThemedSelect>
         </div>
 
         <ThemedSeparator theme={themeStyles} />
