@@ -174,13 +174,13 @@ export const ProposalJsonRenderer: React.FC<ProposalJsonRendererProps> = ({
   // Render section
   const renderSection = (section: any) => {
     const sectionStyle: React.CSSProperties = {
-      marginBottom: `${themeJson.layout.sectionGap}px`,
-      padding: `${themeJson.boxModel.defaultPadding.top}px ${themeJson.boxModel.defaultPadding.right}px ${themeJson.boxModel.defaultPadding.bottom}px ${themeJson.boxModel.defaultPadding.left}px`,
-      borderRadius: `${themeJson.boxModel.borderRadius}px`,
-      backgroundColor: themeJson.colors.backgroundPrimary,
-      borderWidth: `${themeJson.boxModel.borderWidth}px`,
+      marginBottom: `${theme.layout.sectionGap}px`,
+      padding: `${theme.boxModel.defaultPadding.top}px ${theme.boxModel.defaultPadding.right}px ${theme.boxModel.defaultPadding.bottom}px ${theme.boxModel.defaultPadding.left}px`,
+      borderRadius: `${theme.boxModel.borderRadius}px`,
+      backgroundColor: theme.colors.backgroundPrimary,
+      borderWidth: `${theme.boxModel.borderWidth}px`,
       borderStyle: "solid",
-      borderColor: themeJson.colors.border,
+      borderColor: theme.colors.border,
     };
 
     return (
@@ -191,10 +191,11 @@ export const ProposalJsonRenderer: React.FC<ProposalJsonRendererProps> = ({
             style={{
               fontSize: "28px",
               fontWeight: 700,
-              color: themeJson.colors.textPrimary,
-              fontFamily: themeJson.fonts.primary,
+              color: theme.colors.textPrimary,
+              fontFamily: theme.fonts.primary,
               marginBottom: "1.5rem",
-              borderBottom: `2px solid ${themeJson.colors.accent}`,
+              marginTop: "0px",
+              borderBottom: `2px solid ${theme.colors.accent}`,
               paddingBottom: "0.75rem",
             }}
           >
