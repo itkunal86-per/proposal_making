@@ -523,10 +523,30 @@ export const ProposalJsonEditorRenderer: React.FC<ProposalJsonEditorRendererProp
               {renderSection(section)}
             </React.Fragment>
           ))}
+          {editMode && (
+            <div style={{ marginTop: "2rem", display: "flex", justifyContent: "center" }}>
+              <Button
+                onClick={onAddSection}
+                className="gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                Add Section
+              </Button>
+            </div>
+          )}
         </div>
       ) : (
         <div style={{ padding: "2rem", textAlign: "center", color: theme.colors.textMuted }}>
           <p>No sections available</p>
+          {editMode && (
+            <Button
+              onClick={onAddSection}
+              className="gap-2 mt-4"
+            >
+              <Plus className="w-4 h-4" />
+              Add First Section
+            </Button>
+          )}
         </div>
       )}
     </div>
