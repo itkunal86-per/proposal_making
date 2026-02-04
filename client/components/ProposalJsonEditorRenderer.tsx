@@ -12,6 +12,7 @@ interface ProposalJsonEditorRendererProps {
   selectedElementId?: string | null;
   selectedElementType?: string | null;
   editMode?: boolean;
+  onAddSection?: () => void;
 }
 
 export const ProposalJsonEditorRenderer: React.FC<ProposalJsonEditorRendererProps> = ({
