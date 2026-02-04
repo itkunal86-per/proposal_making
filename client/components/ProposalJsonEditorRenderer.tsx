@@ -19,6 +19,9 @@ export const ProposalJsonEditorRenderer: React.FC<ProposalJsonEditorRendererProp
   themeJson,
   onProposalJsonChange,
   onThemeJsonChange,
+  onSelectElement,
+  selectedElementId,
+  selectedElementType,
   editMode = false,
 }) => {
   const [selectedSectionId, setSelectedSectionId] = useState<string | number | null>(null);
