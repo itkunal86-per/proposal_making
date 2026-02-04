@@ -498,19 +498,14 @@ export const ProposalJsonEditorRenderer: React.FC<ProposalJsonEditorRendererProp
 
   // Render section
   const renderSection = (section: any) => {
-    // Get safe defaults for theme.boxModel
-    const boxModel = theme?.boxModel || { defaultPadding: { top: 8, right: 8, bottom: 8, left: 8 }, borderRadius: 4, borderWidth: 1 };
-    const layout = theme?.layout || { sectionGap: 10 };
-    const colors = theme?.colors || { backgroundPrimary: "#ffffff", border: "#d1d5db", accent: "#3747ff" };
-
     const sectionStyle: React.CSSProperties = {
-      marginBottom: `${layout.sectionGap}px`,
-      padding: `${boxModel.defaultPadding?.top || 8}px ${boxModel.defaultPadding?.right || 8}px ${boxModel.defaultPadding?.bottom || 8}px ${boxModel.defaultPadding?.left || 8}px`,
-      borderRadius: `${boxModel.borderRadius || 4}px`,
-      backgroundColor: colors.backgroundPrimary,
-      borderWidth: `${boxModel.borderWidth || 1}px`,
+      marginBottom: `${theme.layout.sectionGap}px`,
+      padding: `${theme.boxModel.defaultPadding.top}px ${theme.boxModel.defaultPadding.right}px ${theme.boxModel.defaultPadding.bottom}px ${theme.boxModel.defaultPadding.left}px`,
+      borderRadius: `${theme.boxModel.borderRadius}px`,
+      backgroundColor: theme.colors.backgroundPrimary,
+      borderWidth: `${theme.boxModel.borderWidth}px`,
       borderStyle: "solid",
-      borderColor: selectedSectionId === section.id && editMode ? colors.accent : colors.border,
+      borderColor: selectedSectionId === section.id && editMode ? theme.colors.accent : theme.colors.border,
       cursor: editMode ? "pointer" : "default",
     };
 
