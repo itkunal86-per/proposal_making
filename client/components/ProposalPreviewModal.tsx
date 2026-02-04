@@ -35,13 +35,18 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
   const hasJsonStructure = proposal.proposal_json && proposal.theme_json;
 
   React.useEffect(() => {
-    console.log("ProposalPreviewModal - proposal data:", {
+    const debugInfo = {
       hasJsonStructure,
       hasProposalJson: !!proposal.proposal_json,
       hasThemeJson: !!proposal.theme_json,
-      proposalJsonKeys: proposal.proposal_json ? Object.keys(proposal.proposal_json) : [],
-      themeJsonKeys: proposal.theme_json ? Object.keys(proposal.theme_json) : [],
-    });
+      proposalJsonType: typeof proposal.proposal_json,
+      themeJsonType: typeof proposal.theme_json,
+      proposalJsonKeys: proposal.proposal_json ? (typeof proposal.proposal_json === 'object' ? Object.keys(proposal.proposal_json) : 'string') : [],
+      themeJsonKeys: proposal.theme_json ? (typeof proposal.theme_json === 'object' ? Object.keys(proposal.theme_json) : 'string') : [],
+      proposalJsonTitle: proposal.proposal_json?.title,
+      themeJsonId: proposal.theme_json?.themeId,
+    };
+    console.log("ProposalPreviewModal - proposal data:", debugInfo);
     // Disable body scroll when modal is open
     document.body.style.overflow = "hidden";
     return () => {
