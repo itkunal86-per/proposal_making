@@ -258,6 +258,59 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
     }
   };
 
+  // If new JSON structure is available, use the new renderer
+  if (hasJsonStructure) {
+    return (
+      <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0, 0, 0, 0.5)", zIndex: 9998 }}>
+        <div style={{ position: "fixed", inset: 0, display: "flex", flexDirection: "column", backgroundColor: "white", zIndex: 9999 }}>
+          {/* Header */}
+          <div className="border-b border-slate-200 px-6 py-4 flex items-center justify-between">
+            <h1 className="text-2xl font-bold">{proposal.title}</h1>
+            <div className="flex items-center gap-2">
+              {!isTemplate && proposal.status === "accepted" && (
+                <Button
+                  onClick={() => setShareDialogOpen(true)}
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <Share2 className="w-4 h-4" />
+                  Share
+                </Button>
+              )}
+              <Button
+                onClick={onClose}
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0"
+              >
+                <X className="w-5 h-5" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Content - JSON-based Renderer */}
+          <div className="flex-1 overflow-y-auto bg-slate-50 flex justify-center p-6">
+            <div ref={contentRef} className="w-full">
+              <ProposalJsonRenderer
+                proposalJson={proposal.proposal_json}
+                themeJson={proposal.theme_json}
+              />
+            </div>
+          </div>
+
+          <ShareLinkDialog
+            open={shareDialogOpen}
+            onOpenChange={setShareDialogOpen}
+            proposalId={proposal.id}
+            proposalTitle={proposal.title}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // Original renderer for legacy proposal structure
   return (
     <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0, 0, 0, 0.5)", zIndex: 9998 }}>
       <div style={{ position: "fixed", inset: 0, display: "flex", flexDirection: "column", backgroundColor: "white", zIndex: 9999 }}>
