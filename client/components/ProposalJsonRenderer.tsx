@@ -22,15 +22,37 @@ export const ProposalJsonRenderer: React.FC<ProposalJsonRendererProps> = ({
   const theme = themeJson;
 
   if (!proposalJson || !themeJson) {
-    console.warn("ProposalJsonRenderer: Missing proposalJson or themeJson", {
+    const errorMsg = {
       hasProposalJson: !!proposalJson,
       hasThemeJson: !!themeJson,
-    });
+      proposalJsonType: typeof proposalJson,
+      themeJsonType: typeof themeJson,
+    };
+    console.warn("ProposalJsonRenderer: Missing proposalJson or themeJson", errorMsg);
     return (
       <div style={{ padding: "2rem", textAlign: "center", color: "#666" }}>
         <p>Unable to render proposal - missing data</p>
+        <pre style={{ fontSize: "12px", textAlign: "left", backgroundColor: "#f5f5f5", padding: "1rem", borderRadius: "4px" }}>
+          {JSON.stringify(errorMsg, null, 2)}
+        </pre>
       </div>
     );
+  }
+
+  // Verify critical data structure
+  if (!proposalJson.sections || !Array.isArray(proposalJson.sections)) {
+    console.warn("ProposalJsonRenderer: Invalid sections structure", {
+      hasSections: !!proposalJson.sections,
+      isArray: Array.isArray(proposalJson.sections),
+      sectionsType: typeof proposalJson.sections,
+    });
+  }
+
+  if (!themeJson.colors || !themeJson.fonts) {
+    console.warn("ProposalJsonRenderer: Invalid theme structure", {
+      hasColors: !!themeJson.colors,
+      hasFonts: !!themeJson.fonts,
+    });
   }
 
   // Helper function to get typography style based on text type
