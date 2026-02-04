@@ -248,7 +248,7 @@ export const ProposalJsonEditorRenderer: React.FC<ProposalJsonEditorRendererProp
 
     if (type === "heading" && level) {
       const headingKey = level as keyof typeof theme.typography.heading;
-      const headingStyle = theme.typography.heading[headingKey];
+      const headingStyle = theme.typography?.heading ? theme.typography.heading[headingKey] : null;
       if (!headingStyle) {
         baseStyle = {
           fontSize: "24px",
@@ -272,11 +272,12 @@ export const ProposalJsonEditorRenderer: React.FC<ProposalJsonEditorRendererProp
         };
       }
     } else if (type === "paragraph") {
+      const paragraphStyle = theme.typography?.paragraph;
       baseStyle = {
-        fontSize: `${theme.typography.paragraph.fontSize}px`,
-        fontWeight: theme.typography.paragraph.fontWeight,
-        lineHeight: theme.typography.paragraph.lineHeight,
-        color: theme.typography.paragraph.color,
+        fontSize: paragraphStyle ? `${paragraphStyle.fontSize}px` : "16px",
+        fontWeight: paragraphStyle ? paragraphStyle.fontWeight : 600,
+        lineHeight: paragraphStyle ? paragraphStyle.lineHeight : 1.6,
+        color: paragraphStyle ? paragraphStyle.color : theme.colors.textPrimary,
         fontFamily: theme.fonts.primary,
         marginBottom: "1rem",
         marginTop: "0px",
