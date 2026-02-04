@@ -12,10 +12,21 @@ export const ProposalJsonRenderer: React.FC<ProposalJsonRendererProps> = ({
 }) => {
   // Debug logging
   React.useEffect(() => {
-    console.log("ProposalJsonRenderer mounted with:", {
-      proposalJson: proposalJson ? { title: proposalJson.title, sections: proposalJson.sections?.length } : null,
-      themeJson: themeJson ? { themeId: themeJson.themeId } : null,
-    });
+    const debugInfo = {
+      proposalJson: proposalJson ? {
+        title: proposalJson.title,
+        sectionsCount: proposalJson.sections?.length,
+        hasThemeId: !!proposalJson.themeId,
+        sectionTitles: proposalJson.sections?.map(s => s.title)
+      } : null,
+      themeJson: themeJson ? {
+        themeId: themeJson.themeId,
+        hasColors: !!themeJson.colors,
+        hasFonts: !!themeJson.fonts,
+        hasTypography: !!themeJson.typography
+      } : null,
+    };
+    console.log("ProposalJsonRenderer mounted with:", debugInfo);
   }, [proposalJson, themeJson]);
 
   // Validates and returns theme data safely
