@@ -58,8 +58,8 @@ interface ThemeStyles {
 }
 
 // Helper component for themed labels
-const ThemedLabel: React.FC<{ children: React.ReactNode; theme: ThemeStyles }> = ({ children, theme }) => (
-  <label style={{ fontSize: "12px", fontWeight: 600, color: theme.textPrimary, display: "block" }}>
+const ThemedLabel: React.FC<{ children: React.ReactNode; theme: ThemeStyles; size?: string }> = ({ children, theme, size = "12px" }) => (
+  <label style={{ fontSize: size, fontWeight: 600, color: theme.textPrimary, display: "block", fontFamily: theme.fontFamily }}>
     {children}
   </label>
 );
