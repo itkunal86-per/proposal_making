@@ -91,19 +91,21 @@ export const ProposalJsonRenderer: React.FC<ProposalJsonRendererProps> = ({
 
     if (text.type === "paragraph") {
       return (
-        <p key={text.id} style={{ ...style, marginBottom: "1rem" }}>
+        <p key={text.id} style={style}>
           {text.content}
         </p>
       );
     }
 
     if (text.type === "listItem") {
+      const listItemIcon = theme.components.featureList?.icon || "✓";
+      const listItemColor = theme.components.featureList?.iconColor || theme.colors.accent;
       return (
         <div key={text.id} style={style}>
-          <span style={{ color: themeJson.typography.listItem?.iconColor }}>
-            ✓
+          <span style={{ color: listItemColor, flexShrink: 0, marginTop: "2px" }}>
+            {listItemIcon === "fa-solid fa-circle-check" ? "✓" : listItemIcon}
           </span>
-          <span>{text.content}</span>
+          <span style={{ flex: 1 }}>{text.content}</span>
         </div>
       );
     }
