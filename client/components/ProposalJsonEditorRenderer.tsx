@@ -8,6 +8,9 @@ interface ProposalJsonEditorRendererProps {
   themeJson: any;
   onProposalJsonChange: (updatedJson: any) => void;
   onThemeJsonChange?: (updatedJson: any) => void;
+  onSelectElement?: (elementId: string, elementType: string) => void;
+  selectedElementId?: string | null;
+  selectedElementType?: string | null;
   editMode?: boolean;
 }
 
