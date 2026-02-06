@@ -32,6 +32,7 @@ import { updateSystemTemplate, getSystemTemplateDetails, deleteSystemTemplate, t
 import { type ClientRecord, listClients } from "@/services/clientsService";
 import { ProposalPreview } from "@/components/ProposalPreview";
 import { ProposalPreviewModal } from "@/components/ProposalPreviewModal";
+import { ProposalJsonEditorRenderer } from "@/components/ProposalJsonEditorRenderer";
 import { PropertiesPanel } from "@/components/PropertiesPanel";
 import { ProposalEditorSidebar, type PanelType } from "@/components/ProposalEditorSidebar";
 import { SectionsDialog } from "@/components/SectionsDialog";
@@ -785,7 +786,47 @@ export default function ProposalEditor() {
         <div className="flex-1 flex gap-4 overflow-hidden">
           {/* Editor Preview - scrollable with auto-expanding content */}
           <div ref={previewContainerRef} className="flex-1 overflow-y-auto p-6">
-            <ProposalPreview
+            {p?.proposal_json && p?.theme_json ? (
+              <ProposalJsonEditorRenderer
+                proposalJson={p.proposal_json}
+                themeJson={p.theme_json}
+                onProposalJsonChange={(updatedJson) => {
+                  const updated = { ...p, proposal_json: updatedJson };
+                  commit(updated);
+                }}
+                onSelectElement={handleSelectElement}
+                selectedElementId={selectedElementId}
+                selectedElementType={selectedElementType}
+                editMode={true}
+                onAddSection={() => {
+                  // Add a new section to the JSON structure
+                  const newSection = {
+                    id: Date.now(),
+                    title: "New Section",
+                    layout: "single",
+                    texts: [
+                      {
+                        id: `text-${Date.now()}`,
+                        type: "paragraph",
+                        content: "Add your content here",
+                      },
+                    ],
+                    images: [],
+                    signatureFields: [],
+                  };
+                  const updated = {
+                    ...p,
+                    proposal_json: {
+                      ...p.proposal_json,
+                      sections: [...(p.proposal_json.sections || []), newSection],
+                    },
+                  };
+                  commit(updated);
+                  toast({ title: "Section added", description: "New section has been created" });
+                }}
+              />
+            ) : (
+              <ProposalPreview
               proposal={p}
               selectedElementId={selectedElementId}
               onSelectElement={handleSelectElement}
@@ -1080,6 +1121,7 @@ export default function ProposalEditor() {
               isAddingSignatureMode={addingSignatureMode}
               selectedSignatoryId={selectedSignatoryId}
             />
+            )}
           </div>
 
           {/* Properties Panel */}
@@ -1102,6 +1144,7 @@ export default function ProposalEditor() {
                     setAIDialogOpen(true);
                   }
                 }}
+                themeJson={p?.theme_json}
               />
             ) : activePanel === "document" ? (
               <DocumentPanel
