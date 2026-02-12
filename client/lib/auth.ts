@@ -96,7 +96,7 @@ export async function apiAuthenticate(email: string, password: string): Promise<
   error: string | null;
 }> {
   try {
-    const response = await fetch("https://propai-api.hirenq.com/api/auth/login", {
+    const response = await fetch("/api/auth/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -149,7 +149,7 @@ export async function apiRegister(params: {
   message?: string;
 }> {
   try {
-    const response = await fetch("https://propai-api.hirenq.com/api/auth/register", {
+    const response = await fetch("/api/auth/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
