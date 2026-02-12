@@ -12,6 +12,7 @@ import Layout from "@/components/layout/Layout";
 import GetStarted from "./pages/GetStarted";
 import Login from "./pages/Login";
 import Reset from "./pages/Reset";
+import ResetPassword from "./pages/ResetPassword";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import ProposalEditor from "./pages/ProposalEditor";
@@ -55,6 +56,7 @@ const App = () => (
               <Route path="/get-started" element={<GetStarted />} />
               <Route path="/login" element={<Login />} />
               <Route path="/reset" element={<Reset />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/register" element={<Register />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<TermsAndConditions />} />
