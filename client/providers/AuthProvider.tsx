@@ -20,6 +20,7 @@ interface SignUpResult {
   error?: string;
   user?: AuthenticatedUser;
   fieldErrors?: Record<string, string[]>;
+  message?: string;
 }
 
 interface AuthContextValue {
@@ -66,7 +67,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     phone,
     remember,
   }) => {
-    const { user, token, error, fieldErrors } = await apiRegister({
+    const { user, token, error, fieldErrors, message } = await apiRegister({
       name,
       email,
       password,
@@ -80,9 +81,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         fieldErrors,
       };
     }
-    persistAuth(user, token ?? undefined, remember);
-    setUser(user);
-    return { success: true, user };
+    // Don't persist auth after registration - user needs to verify email first
+    return { success: true, user, message };
   }, []);
 
   const signOut = useCallback(() => {

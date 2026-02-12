@@ -63,8 +63,14 @@ export default function Register() {
         }
         return;
       }
-      toast({ title: "Welcome!", description: "Registration successful" });
-      navigate("/dashboard", { replace: true });
+      toast({
+        title: "Registration Successful",
+        description: result.message || "Please check your email to verify your account",
+      });
+      // Redirect to login page after a short delay
+      setTimeout(() => {
+        navigate("/login", { replace: true });
+      }, 2000);
     } catch (err) {
       setErrors({ form: "Network error. Please try again." });
     } finally {

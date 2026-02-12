@@ -87,6 +87,7 @@ interface ApiRegisterResponse {
     company: string;
     phone: string;
   };
+  message?: string;
 }
 
 export async function apiAuthenticate(email: string, password: string): Promise<{
@@ -145,6 +146,7 @@ export async function apiRegister(params: {
   token: string | null;
   error: string | null;
   fieldErrors?: Record<string, string[]>;
+  message?: string;
 }> {
   try {
     const response = await fetch("https://propai-api.hirenq.com/api/auth/register", {
@@ -188,6 +190,7 @@ export async function apiRegister(params: {
       user: authUser,
       token: data.token,
       error: null,
+      message: data.message,
     };
   } catch (err) {
     return {
