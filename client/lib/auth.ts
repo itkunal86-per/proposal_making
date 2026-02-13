@@ -178,6 +178,16 @@ export async function apiRegister(params: {
 
     const data: ApiRegisterResponse = await response.json();
 
+    // Handle email verification flow - API returns only a message
+    if (!data.user) {
+      return {
+        user: null,
+        token: null,
+        error: null,
+        message: data.message || "Registration successful",
+      };
+    }
+
     const authUser: AuthenticatedUser = {
       id: String(data.user.id),
       email: data.user.email,

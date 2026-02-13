@@ -74,15 +74,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       company,
       phone,
     });
-    if (!user || error) {
+    // If there's an actual error, return failure
+    if (error) {
       return {
         success: false,
-        error: error || "Registration failed",
+        error: error,
         fieldErrors,
       };
     }
-    // Don't persist auth after registration - user needs to verify email first
-    return { success: true, user, message };
+    // Success if message exists (email verification flow) or if user exists
+    if (message || user) {
+      return { success: true, user: user || undefined, message };
+    }
+    // Fallback error case
+    return {
+      success: false,
+      error: "Registration failed",
+      fieldErrors,
+    };
   }, []);
 
   const signOut = useCallback(() => {
