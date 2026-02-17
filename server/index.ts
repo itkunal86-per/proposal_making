@@ -1,7 +1,12 @@
 import express, { Express } from "express";
 import cors from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const EXTERNAL_API_URL = "https://propai-api.hirenq.com";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export function createServer(): Express {
   const app = express();
@@ -9,6 +14,12 @@ export function createServer(): Express {
   // Middleware
   app.use(cors());
   app.use(express.json());
+
+  // Serve static frontend files from dist/spa in production
+  if (process.env.NODE_ENV === "production") {
+    const frontendPath = path.join(__dirname, "..", "spa");
+    app.use(express.static(frontendPath));
+  }
 
   // Health check
   app.get("/api/ping", (req, res) => {
@@ -147,5 +158,24 @@ export function createServer(): Express {
     }
   });
 
+  // SPA fallback - serve index.html for client-side routing
+  if (process.env.NODE_ENV === "production") {
+    app.get("*", (req, res) => {
+      res.sendFile(path.join(__dirname, "..", "spa", "index.html"));
+    });
+  }
+
   return app;
+}
+
+// Start server in production
+if (import.meta.url === `file://${process.argv[1]}`) {
+  const PORT = process.env.PORT || 3000;
+  const app = createServer();
+
+  app.listen(PORT, () => {
+    console.log(`🚀 Fusion Starter server running on port ${PORT}`);
+    console.log(`📱 Frontend: http://localhost:${PORT}`);
+    console.log(`🔧 API: http://localhost:${PORT}/api`);
+  });
 }
