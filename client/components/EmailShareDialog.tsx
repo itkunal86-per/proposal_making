@@ -141,17 +141,11 @@ export const EmailShareDialog: React.FC<EmailShareDialogProps> = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
-        <DialogHeader className="flex flex-row items-center justify-between">
+        <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Mail className="w-5 h-5" />
             Share "{proposalTitle}" via email
           </DialogTitle>
-          <button
-            onClick={() => onOpenChange(false)}
-            className="text-slate-400 hover:text-slate-600"
-          >
-            <X className="w-5 h-5" />
-          </button>
         </DialogHeader>
 
         <div className="space-y-4">
