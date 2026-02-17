@@ -1,7 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import { X } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { replaceVariables, decodeHtmlEntities } from "@/lib/variableUtils";
 import { ShapeEditor } from "@/components/ShapeEditor";
@@ -221,29 +219,6 @@ export default function PublicProposal() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <div className="sticky top-0 z-50 border-b border-slate-200 bg-white px-6 py-4 shadow-sm">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900">
-              {proposal.title}
-            </h1>
-            {proposal.client && (
-              <p className="text-sm text-slate-500 mt-1">
-                Client: {proposal.client}
-              </p>
-            )}
-          </div>
-          <a
-            href="/"
-            className="text-slate-400 hover:text-slate-600 transition-colors"
-            title="Close"
-          >
-            <X className="w-6 h-6" />
-          </a>
-        </div>
-      </div>
-
       {/* Main Content */}
       <div className="flex flex-1 overflow-hidden">
         {/* Left Sidebar */}
