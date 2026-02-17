@@ -334,11 +334,11 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
 
   return (
     <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0, 0, 0, 0.5)", zIndex: 9998 }}>
-      <div style={{ position: "fixed", inset: 0, display: "flex", flexDirection: "column", backgroundColor: "white", zIndex: 9999 }}>
+      <div style={{ position: "fixed", inset: 0, display: "flex", flexDirection: "column", backgroundColor: "white", zIndex: 9999, overflow: "visible" }}>
         {/* Header */}
-        <div className="border-b border-slate-200 px-6 py-4 flex items-center justify-between">
+        <div className="border-b border-slate-200 px-6 py-4 flex items-center justify-between overflow-visible">
           <h1 className="text-2xl font-bold">{proposal.title}</h1>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 overflow-visible">
             {!isTemplate && proposal.status === "accepted" && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
