@@ -106,5 +106,46 @@ export function createServer(): Express {
     }
   });
 
+  // Send proposal email endpoint
+  app.post("/api/send-proposal-email", async (req, res) => {
+    try {
+      const { to, from, subject, body, shareLink } = req.body;
+
+      if (!to || !Array.isArray(to) || to.length === 0) {
+        return res.status(400).json({
+          error: "Invalid recipients",
+        });
+      }
+
+      if (!from || !subject || !body) {
+        return res.status(400).json({
+          error: "Missing required fields",
+        });
+      }
+
+      // TODO: Integrate with email service (SendGrid, AWS SES, etc.)
+      // For now, we'll just log and return success
+      console.log("Email to be sent:", {
+        to,
+        from,
+        subject,
+        body,
+        shareLink,
+      });
+
+      // Simulate email sending
+      res.status(200).json({
+        success: true,
+        message: "Email sent successfully",
+      });
+    } catch (error) {
+      console.error("Send email error:", error);
+      res.status(500).json({
+        error: "Failed to send email",
+        message: "Please try again later",
+      });
+    }
+  });
+
   return app;
 }

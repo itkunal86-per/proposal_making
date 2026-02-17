@@ -16,6 +16,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { enableProposalSharing } from "@/services/proposalsService";
+import { EmailShareDialog } from "@/components/EmailShareDialog";
 
 interface ProposalPreviewModalProps {
   proposal: Proposal;
@@ -36,6 +37,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
   const [sectionWidths, setSectionWidths] = useState<Record<string, number>>({});
   const [isCopyingLink, setIsCopyingLink] = useState(false);
   const [shareLink, setShareLink] = useState<string | null>(null);
+  const [emailDialogOpen, setEmailDialogOpen] = useState(false);
   const sectionRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
   React.useEffect(() => {
@@ -304,10 +306,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
       if (result.success && result.token) {
         const generatedShareLink = `${window.location.origin}/preview/proposal/${result.token}`;
         setShareLink(generatedShareLink);
-        const subject = `Check out my proposal: ${proposal.title}`;
-        const body = `I'd like to share this proposal with you:\n\n${generatedShareLink}`;
-        const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-        window.location.href = mailtoLink;
+        setEmailDialogOpen(true);
       } else {
         toast({
           title: "Error",
@@ -902,6 +901,13 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
           </div>
         </div>
       </div>
+
+      <EmailShareDialog
+        open={emailDialogOpen}
+        onOpenChange={setEmailDialogOpen}
+        proposalTitle={proposal.title}
+        shareLink={shareLink || ""}
+      />
     </div>
   );
 };
