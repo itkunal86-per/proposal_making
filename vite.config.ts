@@ -3,6 +3,8 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { createServer as createExpressServer } from "./server";
 
+const isProduction = process.env.NODE_ENV === "production";
+
 // https://vitejs.dev/config/
 export default defineConfig({
   server: {
@@ -25,7 +27,8 @@ export default defineConfig({
     },
   ],
   build: {
-    outDir: "dist",
+    outDir: isProduction ? "dist/spa" : "dist",
+    emptyOutDir: true,
   },
   resolve: {
     alias: {
