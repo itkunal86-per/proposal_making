@@ -31,6 +31,7 @@ export const EmailShareDialog: React.FC<EmailShareDialogProps> = ({
   const [isSending, setIsSending] = useState(false);
   const [senderName, setSenderName] = useState(authContext?.user?.name || "");
   const [senderEmail, setSenderEmail] = useState(authContext?.user?.email || "");
+  const [message, setMessage] = useState(`Please check the proposal: ${proposalTitle}`);
 
   const addRecipient = () => {
     if (currentEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(currentEmail)) {
@@ -93,7 +94,7 @@ export const EmailShareDialog: React.FC<EmailShareDialogProps> = ({
 
       const emailData = {
         to: recipients,
-        title: `Please check the proposal: ${proposalTitle}`,
+        title: message,
         button_text: "View document",
         button_url: shareLink,
         sender_name: senderName,
@@ -121,6 +122,7 @@ export const EmailShareDialog: React.FC<EmailShareDialogProps> = ({
       // Reset and close
       setRecipients([]);
       setCurrentEmail("");
+      setMessage(`Please check the proposal: ${proposalTitle}`);
       setSenderName(authContext?.user?.name || "");
       setSenderEmail(authContext?.user?.email || "");
       onOpenChange(false);
@@ -226,6 +228,23 @@ export const EmailShareDialog: React.FC<EmailShareDialogProps> = ({
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
             <p className="text-sm font-medium text-slate-900">Proposal</p>
             <p className="text-sm text-slate-700 mt-1">{proposalTitle}</p>
+          </div>
+
+          {/* Message Field */}
+          <div>
+            <label className="text-sm font-medium text-slate-700 mb-2 block">
+              Message
+            </label>
+            <textarea
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="Enter message for recipients"
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              rows={4}
+            />
+            <p className="text-xs text-slate-500 mt-2">
+              This message will be sent as the email title to all recipients.
+            </p>
           </div>
 
           {/* Send Button */}
