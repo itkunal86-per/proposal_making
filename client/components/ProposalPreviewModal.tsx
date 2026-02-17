@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { X, Share2 } from "lucide-react";
+import { X, Share2, Copy, FileDown, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { Proposal } from "@/services/proposalsService";
@@ -8,7 +8,14 @@ import { ShapeEditor } from "@/components/ShapeEditor";
 import { TableEditor } from "@/components/TableEditor";
 import { TextEditor } from "@/components/TextEditor";
 import { ImageEditor } from "@/components/ImageEditor";
-import { ShareLinkDialog } from "@/components/ShareLinkDialog";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import { enableProposalSharing } from "@/services/proposalsService";
 
 interface ProposalPreviewModalProps {
   proposal: Proposal;
@@ -26,8 +33,8 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
   const contentRef = useRef<HTMLDivElement>(null);
   const [canvasHeights, setCanvasHeights] = useState<Record<string, number>>({});
   const [activeSection, setActiveSection] = useState<string | null>(null);
-  const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [sectionWidths, setSectionWidths] = useState<Record<string, number>>({});
+  const [isCopyingLink, setIsCopyingLink] = useState(false);
   const sectionRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
   React.useEffect(() => {
@@ -244,6 +251,77 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
     }
   };
 
+  const handleCopyShareLink = async () => {
+    setIsCopyingLink(true);
+    try {
+      const result = await enableProposalSharing(proposal.id);
+      if (result.success && result.token) {
+        const shareLink = `https://propai-api.hirenq.com/api/public/proposal/${result.token}`;
+
+        // Try modern Clipboard API first
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          try {
+            await navigator.clipboard.writeText(shareLink);
+            toast({ title: "Success", description: "Share link copied to clipboard" });
+            return;
+          } catch (err) {
+            // Fall through to fallback
+          }
+        }
+
+        // Fallback: create temporary input and copy
+        const tempInput = document.createElement('input');
+        tempInput.value = shareLink;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand('copy');
+        document.body.removeChild(tempInput);
+        toast({ title: "Success", description: "Share link copied to clipboard" });
+      } else {
+        toast({
+          title: "Error",
+          description: result.error || "Failed to generate share link",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error("Copy share link error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to copy share link",
+        variant: "destructive"
+      });
+    } finally {
+      setIsCopyingLink(false);
+    }
+  };
+
+  const handleShareViaEmail = async () => {
+    try {
+      const result = await enableProposalSharing(proposal.id);
+      if (result.success && result.token) {
+        const shareLink = `https://propai-api.hirenq.com/api/public/proposal/${result.token}`;
+        const subject = `Check out my proposal: ${proposal.title}`;
+        const body = `I'd like to share this proposal with you:\n\n${shareLink}`;
+        const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        window.location.href = mailtoLink;
+      } else {
+        toast({
+          title: "Error",
+          description: result.error || "Failed to generate share link",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error("Share via email error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to generate share link",
+        variant: "destructive"
+      });
+    }
+  };
+
   const scrollToSection = (sectionId: string) => {
     const element = sectionRefs.current.get(sectionId);
     if (element) {
@@ -262,15 +340,55 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
           <h1 className="text-2xl font-bold">{proposal.title}</h1>
           <div className="flex items-center gap-2">
             {!isTemplate && proposal.status === "accepted" && (
-              <Button
-                onClick={() => setShareDialogOpen(true)}
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-2"
-              >
-                <Share2 className="w-4 h-4" />
-                Share
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center gap-2"
+                  >
+                    <Share2 className="w-4 h-4" />
+                    Share
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <div className="px-2 py-1.5">
+                    <div className="text-sm font-semibold text-slate-900">Share settings</div>
+                    <div className="text-xs text-slate-500 mt-1">
+                      Document Status
+                    </div>
+                    <div className="inline-block mt-1 px-2 py-1 bg-slate-100 rounded text-xs font-medium text-slate-700">
+                      {proposal.status.charAt(0).toUpperCase() + proposal.status.slice(1)}
+                    </div>
+                    <div className="text-xs text-slate-500 mt-2">
+                      Anyone with the link can view and sign.
+                    </div>
+                  </div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={handleCopyShareLink}
+                    disabled={isCopyingLink}
+                    className="flex items-center gap-2"
+                  >
+                    <Copy className="w-4 h-4" />
+                    <span>Copy link</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={handleShareViaEmail}
+                    className="flex items-center gap-2"
+                  >
+                    <Mail className="w-4 h-4" />
+                    <span>Share via email</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={handleExportPDF}
+                    className="flex items-center gap-2"
+                  >
+                    <FileDown className="w-4 h-4" />
+                    <span>Download as PDF</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
             <Button
               onClick={onClose}
@@ -747,13 +865,6 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
           </div>
         </div>
       </div>
-
-      <ShareLinkDialog
-        open={shareDialogOpen}
-        onOpenChange={setShareDialogOpen}
-        proposalId={proposal.id}
-        proposalTitle={proposal.title}
-      />
     </div>
   );
 };
