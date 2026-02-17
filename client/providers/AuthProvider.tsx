@@ -20,6 +20,7 @@ interface SignUpResult {
   error?: string;
   user?: AuthenticatedUser;
   fieldErrors?: Record<string, string[]>;
+  message?: string;
 }
 
 interface AuthContextValue {
@@ -30,7 +31,7 @@ interface AuthContextValue {
   signOut: () => void;
 }
 
-const AuthContext = createContext<AuthContextValue | undefined>(undefined);
+export const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthenticatedUser | null>(null);
@@ -66,23 +67,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     phone,
     remember,
   }) => {
-    const { user, token, error, fieldErrors } = await apiRegister({
+    const { user, token, error, fieldErrors, message } = await apiRegister({
       name,
       email,
       password,
       company,
       phone,
     });
-    if (!user || error) {
+    // If there's an actual error, return failure
+    if (error) {
       return {
         success: false,
-        error: error || "Registration failed",
+        error: error,
         fieldErrors,
       };
     }
-    persistAuth(user, token ?? undefined, remember);
-    setUser(user);
-    return { success: true, user };
+    // Success if message exists (email verification flow) or if user exists
+    if (message || user) {
+      return { success: true, user: user || undefined, message };
+    }
+    // Fallback error case
+    return {
+      success: false,
+      error: "Registration failed",
+      fieldErrors,
+    };
   }, []);
 
   const signOut = useCallback(() => {

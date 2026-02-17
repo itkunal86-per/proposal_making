@@ -19,6 +19,7 @@ import ProposalEditor from "./pages/ProposalEditor";
 import ProposalSettings from "./pages/ProposalSettings";
 import ProposalView from "./pages/ProposalView";
 import ProposalPublicView from "./pages/ProposalPublicView";
+import PublicProposal from "./pages/PublicProposal";
 import AcceptInvite from "./pages/AcceptInvite";
 import AdminPackages from "./pages/AdminPackages";
 import AdminTemplates from "./pages/AdminTemplates";
@@ -66,6 +67,7 @@ const App = () => (
               <Route path="/faq" element={<FAQ />} />
               <Route path="/p/:token" element={<ProposalView />} />
               <Route path="/proposal/:token" element={<ProposalPublicView />} />
+              <Route path="/preview/proposal/:token" element={<PublicProposal />} />
               <Route path="/invite/:token" element={<AcceptInvite />} />
 
               <Route element={<RequireAuth />}>

@@ -87,6 +87,7 @@ interface ApiRegisterResponse {
     company: string;
     phone: string;
   };
+  message?: string;
 }
 
 export async function apiAuthenticate(email: string, password: string): Promise<{
@@ -95,7 +96,7 @@ export async function apiAuthenticate(email: string, password: string): Promise<
   error: string | null;
 }> {
   try {
-    const response = await fetch("https://propai-api.hirenq.com/api/auth/login", {
+    const response = await fetch("/api/auth/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -145,9 +146,10 @@ export async function apiRegister(params: {
   token: string | null;
   error: string | null;
   fieldErrors?: Record<string, string[]>;
+  message?: string;
 }> {
   try {
-    const response = await fetch("https://propai-api.hirenq.com/api/auth/register", {
+    const response = await fetch("/api/auth/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -176,6 +178,16 @@ export async function apiRegister(params: {
 
     const data: ApiRegisterResponse = await response.json();
 
+    // Handle email verification flow - API returns only a message
+    if (!data.user) {
+      return {
+        user: null,
+        token: null,
+        error: null,
+        message: data.message || "Registration successful",
+      };
+    }
+
     const authUser: AuthenticatedUser = {
       id: String(data.user.id),
       email: data.user.email,
@@ -188,6 +200,7 @@ export async function apiRegister(params: {
       user: authUser,
       token: data.token,
       error: null,
+      message: data.message,
     };
   } catch (err) {
     return {
