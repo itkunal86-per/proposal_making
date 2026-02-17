@@ -351,42 +351,68 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                     Share
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <div className="px-2 py-1.5">
-                    <div className="text-sm font-semibold text-slate-900">Share settings</div>
-                    <div className="text-xs text-slate-500 mt-1">
+                <DropdownMenuContent align="end" className="w-72 p-0">
+                  {/* Header Section */}
+                  <div className="bg-gradient-to-r from-blue-50 to-cyan-50 px-4 py-3 border-b border-blue-100">
+                    <div className="text-sm font-bold text-slate-900">Share settings</div>
+                    <div className="text-xs text-slate-600 mt-2 mb-3">
                       Document Status
                     </div>
-                    <div className="inline-block mt-1 px-2 py-1 bg-slate-100 rounded text-xs font-medium text-slate-700">
-                      {proposal.status.charAt(0).toUpperCase() + proposal.status.slice(1)}
+                    <div className="inline-flex items-center rounded-lg px-3 py-1.5 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200">
+                      <div className="w-2 h-2 rounded-full bg-green-500 mr-2"></div>
+                      <span className="text-xs font-semibold text-green-700">
+                        {proposal.status.charAt(0).toUpperCase() + proposal.status.slice(1)}
+                      </span>
                     </div>
-                    <div className="text-xs text-slate-500 mt-2">
+                    <div className="text-xs text-slate-600 mt-3 leading-relaxed">
                       Anyone with the link can view and sign.
                     </div>
                   </div>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={handleCopyShareLink}
-                    disabled={isCopyingLink}
-                    className="flex items-center gap-2"
-                  >
-                    <Copy className="w-4 h-4" />
-                    <span>Copy link</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={handleShareViaEmail}
-                    className="flex items-center gap-2"
-                  >
-                    <Mail className="w-4 h-4" />
-                    <span>Share via email</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={handleExportPDF}
-                    className="flex items-center gap-2"
-                  >
-                    <FileDown className="w-4 h-4" />
-                    <span>Download as PDF</span>
-                  </DropdownMenuItem>
+
+                  <DropdownMenuSeparator className="m-0" />
+
+                  {/* Menu Items Section */}
+                  <div className="p-2">
+                    <DropdownMenuItem
+                      onClick={handleCopyShareLink}
+                      disabled={isCopyingLink}
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-md cursor-pointer hover:bg-blue-50 transition-colors"
+                    >
+                      <div className="p-1.5 bg-blue-100 rounded-md">
+                        <Copy className="w-4 h-4 text-blue-600" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="text-sm font-medium text-slate-900">Copy link</div>
+                        <div className="text-xs text-slate-500">Share via link</div>
+                      </div>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem
+                      onClick={handleShareViaEmail}
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-md cursor-pointer hover:bg-blue-50 transition-colors mt-1"
+                    >
+                      <div className="p-1.5 bg-purple-100 rounded-md">
+                        <Mail className="w-4 h-4 text-purple-600" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="text-sm font-medium text-slate-900">Share via email</div>
+                        <div className="text-xs text-slate-500">Send link by email</div>
+                      </div>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem
+                      onClick={handleExportPDF}
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-md cursor-pointer hover:bg-blue-50 transition-colors mt-1"
+                    >
+                      <div className="p-1.5 bg-orange-100 rounded-md">
+                        <FileDown className="w-4 h-4 text-orange-600" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="text-sm font-medium text-slate-900">Download as PDF</div>
+                        <div className="text-xs text-slate-500">Export proposal</div>
+                      </div>
+                    </DropdownMenuItem>
+                  </div>
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
