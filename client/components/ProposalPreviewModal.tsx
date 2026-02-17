@@ -35,6 +35,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [sectionWidths, setSectionWidths] = useState<Record<string, number>>({});
   const [isCopyingLink, setIsCopyingLink] = useState(false);
+  const [shareLink, setShareLink] = useState<string | null>(null);
   const sectionRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
   React.useEffect(() => {
@@ -256,12 +257,13 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
     try {
       const result = await enableProposalSharing(proposal.id);
       if (result.success && result.token) {
-        const shareLink = `${window.location.origin}/preview/proposal/${result.token}`;
+        const generatedShareLink = `${window.location.origin}/preview/proposal/${result.token}`;
+        setShareLink(generatedShareLink);
 
         // Try modern Clipboard API first
         if (navigator.clipboard && navigator.clipboard.writeText) {
           try {
-            await navigator.clipboard.writeText(shareLink);
+            await navigator.clipboard.writeText(generatedShareLink);
             toast({ title: "Success", description: "Share link copied to clipboard" });
             return;
           } catch (err) {
@@ -271,7 +273,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
 
         // Fallback: create temporary input and copy
         const tempInput = document.createElement('input');
-        tempInput.value = shareLink;
+        tempInput.value = generatedShareLink;
         document.body.appendChild(tempInput);
         tempInput.select();
         document.execCommand('copy');
@@ -300,9 +302,10 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
     try {
       const result = await enableProposalSharing(proposal.id);
       if (result.success && result.token) {
-        const shareLink = `${window.location.origin}/preview/proposal/${result.token}`;
+        const generatedShareLink = `${window.location.origin}/preview/proposal/${result.token}`;
+        setShareLink(generatedShareLink);
         const subject = `Check out my proposal: ${proposal.title}`;
-        const body = `I'd like to share this proposal with you:\n\n${shareLink}`;
+        const body = `I'd like to share this proposal with you:\n\n${generatedShareLink}`;
         const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
         window.location.href = mailtoLink;
       } else {
@@ -367,6 +370,14 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                     <div className="text-xs text-slate-600 mt-3 leading-relaxed">
                       Anyone with the link can view and sign.
                     </div>
+                    {shareLink && (
+                      <div className="mt-3 pt-3 border-t border-blue-200">
+                        <p className="text-xs text-slate-600 font-medium mb-2">Share Link:</p>
+                        <p className="text-xs bg-white px-2 py-1.5 rounded border border-slate-200 text-slate-700 break-all font-mono">
+                          {shareLink}
+                        </p>
+                      </div>
+                    )}
                   </div>
 
                   <DropdownMenuSeparator className="m-0" />
