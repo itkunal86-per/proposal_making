@@ -3,6 +3,7 @@ import { X, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
+import { getStoredToken } from "@/lib/auth";
 import {
   Dialog,
   DialogContent,
@@ -65,6 +66,11 @@ export const EmailShareDialog: React.FC<EmailShareDialogProps> = ({
 
     setIsSending(true);
     try {
+      const token = getStoredToken();
+      if (!token) {
+        throw new Error("Not authenticated");
+      }
+
       const subject = `${proposalTitle} - Proposal`;
       const body = message
         ? `${message}\n\nView proposal: ${shareLink}`
@@ -78,10 +84,11 @@ export const EmailShareDialog: React.FC<EmailShareDialogProps> = ({
         shareLink,
       };
 
-      const response = await fetch("/api/send-proposal-email", {
+      const response = await fetch("https://propai-api.hirenq.com/api/send-proposal-email", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
         },
         body: JSON.stringify(emailData),
       });
