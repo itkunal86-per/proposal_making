@@ -115,8 +115,8 @@ export const EmailShareDialog: React.FC<EmailShareDialogProps> = ({
       }
 
       toast({
-        title: "Success",
-        description: `Email sent to ${recipients.length} recipient(s)`,
+        title: "Email Sent Successfully",
+        description: `Proposal email with message "${message}" sent to ${recipients.length} recipient(s)`,
       });
 
       // Reset and close
