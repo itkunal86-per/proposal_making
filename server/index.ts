@@ -69,5 +69,42 @@ export function createServer(): Express {
     }
   });
 
+  // Proxy public proposal endpoint
+  app.get("/api/public/proposal/:token", async (req, res) => {
+    try {
+      const { token } = req.params;
+
+      if (!token) {
+        return res.status(400).json({
+          error: "Invalid share token",
+        });
+      }
+
+      const response = await fetch(
+        `${EXTERNAL_API_URL}/api/public/proposal/${token}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return res.status(response.status).json(data);
+      }
+
+      res.status(200).json(data);
+    } catch (error) {
+      console.error("Public proposal error:", error);
+      res.status(500).json({
+        error: "Failed to load proposal",
+        message: "Please try again later",
+      });
+    }
+  });
+
   return app;
 }
