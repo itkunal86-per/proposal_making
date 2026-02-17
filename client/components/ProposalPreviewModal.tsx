@@ -256,7 +256,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
     try {
       const result = await enableProposalSharing(proposal.id);
       if (result.success && result.token) {
-        const shareLink = `${window.location.origin}/public/proposal/${result.token}`;
+        const shareLink = `${window.location.origin}/share/${result.token}`;
 
         // Try modern Clipboard API first
         if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -300,7 +300,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
     try {
       const result = await enableProposalSharing(proposal.id);
       if (result.success && result.token) {
-        const shareLink = `${window.location.origin}/public/proposal/${result.token}`;
+        const shareLink = `${window.location.origin}/share/${result.token}`;
         const subject = `Check out my proposal: ${proposal.title}`;
         const body = `I'd like to share this proposal with you:\n\n${shareLink}`;
         const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
