@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { X, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 import { getStoredToken } from "@/lib/auth";
+import { AuthContext } from "@/providers/AuthProvider";
 import {
   Dialog,
   DialogContent,
@@ -24,11 +25,12 @@ export const EmailShareDialog: React.FC<EmailShareDialogProps> = ({
   proposalTitle,
   shareLink,
 }) => {
+  const authContext = useContext(AuthContext);
   const [recipients, setRecipients] = useState<string[]>([]);
   const [currentEmail, setCurrentEmail] = useState("");
-  const [message, setMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
-  const [userEmail, setUserEmail] = useState("user@example.com");
+  const [senderName, setSenderName] = useState(authContext?.user?.name || "");
+  const [senderEmail, setSenderEmail] = useState(authContext?.user?.email || "");
 
   const addRecipient = () => {
     if (currentEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(currentEmail)) {
@@ -64,6 +66,24 @@ export const EmailShareDialog: React.FC<EmailShareDialogProps> = ({
       return;
     }
 
+    if (!senderName.trim()) {
+      toast({
+        title: "Sender Name Required",
+        description: "Please enter your name",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!senderEmail.trim()) {
+      toast({
+        title: "Sender Email Required",
+        description: "Please enter your email",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSending(true);
     try {
       const token = getStoredToken();
@@ -71,17 +91,13 @@ export const EmailShareDialog: React.FC<EmailShareDialogProps> = ({
         throw new Error("Not authenticated");
       }
 
-      const subject = `${proposalTitle} - Proposal`;
-      const body = message
-        ? `${message}\n\nView proposal: ${shareLink}`
-        : `Check out this proposal: ${shareLink}`;
-
       const emailData = {
         to: recipients,
-        from: userEmail,
-        subject,
-        body,
-        shareLink,
+        title: `Please check the proposal: ${proposalTitle}`,
+        button_text: "View document",
+        button_url: shareLink,
+        sender_name: senderName,
+        sender_email: senderEmail,
       };
 
       const response = await fetch("https://propai-api.hirenq.com/api/send-proposal-email", {
@@ -105,7 +121,8 @@ export const EmailShareDialog: React.FC<EmailShareDialogProps> = ({
       // Reset and close
       setRecipients([]);
       setCurrentEmail("");
-      setMessage("");
+      setSenderName(authContext?.user?.name || "");
+      setSenderEmail(authContext?.user?.email || "");
       onOpenChange(false);
     } catch (error) {
       console.error("Send email error:", error);
@@ -136,15 +153,41 @@ export const EmailShareDialog: React.FC<EmailShareDialogProps> = ({
         </DialogHeader>
 
         <div className="space-y-4">
+          {/* Sender Name Field */}
+          <div>
+            <label className="text-sm font-medium text-slate-700 mb-2 block">
+              Your Name
+            </label>
+            <Input
+              type="text"
+              value={senderName}
+              onChange={(e) => setSenderName(e.target.value)}
+              placeholder="Enter your name"
+            />
+          </div>
+
+          {/* Sender Email Field */}
+          <div>
+            <label className="text-sm font-medium text-slate-700 mb-2 block">
+              Your Email
+            </label>
+            <Input
+              type="email"
+              value={senderEmail}
+              onChange={(e) => setSenderEmail(e.target.value)}
+              placeholder="Enter your email"
+            />
+          </div>
+
           {/* To Field */}
           <div>
             <label className="text-sm font-medium text-slate-700 mb-2 block">
-              To
+              Send To
             </label>
             <div className="flex gap-2 mb-2">
               <Input
                 type="email"
-                placeholder="Enter email address"
+                placeholder="Enter recipient email address"
                 value={currentEmail}
                 onChange={(e) => setCurrentEmail(e.target.value)}
                 onKeyPress={handleKeyPress}
@@ -179,47 +222,10 @@ export const EmailShareDialog: React.FC<EmailShareDialogProps> = ({
             )}
           </div>
 
-          {/* From Field */}
-          <div>
-            <label className="text-sm font-medium text-slate-700 mb-2 block">
-              From
-            </label>
-            <Input
-              type="email"
-              value={userEmail}
-              onChange={(e) => setUserEmail(e.target.value)}
-              className="bg-slate-50"
-            />
-          </div>
-
-          {/* Subject Field */}
-          <div>
-            <label className="text-sm font-medium text-slate-700 mb-2 block">
-              Subject
-            </label>
-            <Input
-              type="text"
-              value={`${proposalTitle} - Proposal`}
-              readOnly
-              className="bg-slate-50"
-            />
-          </div>
-
-          {/* Message Field */}
-          <div>
-            <label className="text-sm font-medium text-slate-700 mb-2 block">
-              Message
-            </label>
-            <textarea
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="Add your message (optional)"
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-              rows={8}
-            />
-            <p className="text-xs text-slate-500 mt-2">
-              The proposal link will be automatically added to the email.
-            </p>
+          {/* Proposal Info */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+            <p className="text-sm font-medium text-slate-900">Proposal</p>
+            <p className="text-sm text-slate-700 mt-1">{proposalTitle}</p>
           </div>
 
           {/* Send Button */}
