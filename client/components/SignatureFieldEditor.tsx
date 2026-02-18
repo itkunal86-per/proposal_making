@@ -62,6 +62,13 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
     }
   }, [selected]);
 
+  // Clear transform when drag ends
+  useEffect(() => {
+    if (!isDragging && elementRef.current) {
+      elementRef.current.style.transform = "";
+    }
+  }, [isDragging]);
+
   // Auto-hide controls after 3 seconds if not interacting
   useEffect(() => {
     if (showControls && !selected && !isDragging && !isResizing) {
@@ -114,12 +121,21 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
 
     if (isDraggingRef.current) {
       const rect = parent.getBoundingClientRect();
-      const newLeft = e.clientX - rect.left - dragOffsetRef.current.x;
-      const newTop = e.clientY - rect.top - dragOffsetRef.current.y;
+      const newLeft = Math.max(0, e.clientX - rect.left - dragOffsetRef.current.x);
+      const newTop = Math.max(0, e.clientY - rect.top - dragOffsetRef.current.y);
 
+      // Update ref for instant visual feedback using transform
+      const deltaX = newLeft - field.left;
+      const deltaY = newTop - field.top;
+
+      if (elementRef.current) {
+        elementRef.current.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+      }
+
+      // Call onUpdate to persist to parent state (will update when batched)
       onUpdate({
-        left: Math.max(0, newLeft),
-        top: Math.max(0, newTop),
+        left: newLeft,
+        top: newTop,
       });
     }
 
@@ -130,6 +146,7 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
       const newWidth = Math.max(100, resizeStartRef.current.width + deltaX);
       const newHeight = Math.max(60, resizeStartRef.current.height + deltaY);
 
+      // Call onUpdate to persist to parent state
       onUpdate({
         width: newWidth,
         height: newHeight,

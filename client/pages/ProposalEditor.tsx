@@ -980,7 +980,7 @@ export default function ProposalEditor() {
                       ? {
                           ...s,
                           signatureFields: (s.signatureFields || []).map((field) =>
-                            field.id === fieldId ? { ...field, ...updates } : field
+                            String(field.id) === String(fieldId) ? { ...field, ...updates } : field
                           ),
                         }
                       : s
