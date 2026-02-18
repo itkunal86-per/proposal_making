@@ -1156,6 +1156,11 @@ export default function ProposalEditor() {
           proposal={p}
           variables={variables}
           onClose={() => setShowPreviewModal(false)}
+          onOpenSignatureDetails={(sectionId, fieldIndex) => {
+            setSignatureDetailsData({ sectionId, fieldIndex });
+            setSignatureDetailsOpen(true);
+            setShowPreviewModal(false);
+          }}
         />
       )}
 
