@@ -9,7 +9,6 @@ interface SignatureFieldEditorProps {
   onSelect: () => void;
   onUpdate: (updates: Partial<SignatureField>) => void;
   onDelete: () => void;
-  canvasRef?: HTMLDivElement | null;
 }
 
 export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
@@ -20,7 +19,6 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
   onSelect,
   onUpdate,
   onDelete,
-  canvasRef,
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
@@ -31,10 +29,10 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (isDragging && elementRef.current) {
-        const parentContainer = canvasRef || elementRef.current?.parentElement;
-        if (!parentContainer) return;
+        const parent = elementRef.current.parentElement;
+        if (!parent) return;
 
-        const rect = parentContainer.getBoundingClientRect();
+        const rect = parent.getBoundingClientRect();
         const newLeft = e.clientX - rect.left - dragOffset.x;
         const newTop = e.clientY - rect.top - dragOffset.y;
 
@@ -71,7 +69,7 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
         document.removeEventListener("mouseup", handleMouseUp);
       };
     }
-  }, [isDragging, isResizing, dragOffset, resizeStart, canvasRef, onUpdate]);
+  }, [isDragging, isResizing, dragOffset, resizeStart, onUpdate]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest(".resize-handle")) return;
