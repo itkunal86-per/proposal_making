@@ -7,6 +7,7 @@ import { ShapeEditor } from "@/components/ShapeEditor";
 import { TableEditor } from "@/components/TableEditor";
 import { TextEditor } from "@/components/TextEditor";
 import { ImageEditor } from "@/components/ImageEditor";
+import { SignatureDetailsModal } from "@/components/SignatureDetailsModal";
 
 interface ProposalSection {
   id: string;
@@ -52,6 +53,8 @@ export default function PublicProposal() {
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [sectionWidths, setSectionWidths] = useState<Record<string, number>>({});
   const sectionRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const [signatureModalOpen, setSignatureModalOpen] = useState(false);
+  const [selectedSignature, setSelectedSignature] = useState<{ sectionIndex: number; fieldIndex: number } | null>(null);
 
   useEffect(() => {
     fetchProposal();
@@ -693,7 +696,15 @@ export default function PublicProposal() {
                                     display: "flex",
                                     flexDirection: "column",
                                     padding: "8px",
-                                    pointerEvents: "none",
+                                    pointerEvents: isSigned ? "none" : "auto",
+                                    cursor: isSigned ? "default" : "pointer",
+                                  }}
+                                  onClick={() => {
+                                    if (!isSigned) {
+                                      const sectionIndex = proposal.sections.findIndex(s => s.id === section.id);
+                                      setSelectedSignature({ sectionIndex, fieldIndex: sIndex });
+                                      setSignatureModalOpen(true);
+                                    }
                                   }}
                                 >
                                   {isSigned ? (
@@ -857,6 +868,38 @@ export default function PublicProposal() {
           </div>
         </div>
       </div>
+
+      {/* Signature Modal */}
+      {signatureModalOpen && selectedSignature && proposal && (
+        <SignatureDetailsModal
+          open={signatureModalOpen}
+          signatureDetails={proposal.sections[selectedSignature.sectionIndex]?.signatureFields?.[selectedSignature.fieldIndex] || {}}
+          onClose={() => {
+            setSignatureModalOpen(false);
+            setSelectedSignature(null);
+          }}
+          onSave={(details) => {
+            // Update the proposal with signature data
+            const updatedProposal = {
+              ...proposal,
+              sections: proposal.sections.map((s, sIdx) =>
+                sIdx === selectedSignature.sectionIndex
+                  ? {
+                      ...s,
+                      signatureFields: (s.signatureFields || []).map((f, fIdx) =>
+                        fIdx === selectedSignature.fieldIndex ? { ...f, ...details } : f
+                      ),
+                    }
+                  : s
+              ),
+            };
+            setProposal(updatedProposal);
+            setSignatureModalOpen(false);
+            setSelectedSignature(null);
+            toast({ title: "Signature saved successfully" });
+          }}
+        />
+      )}
     </div>
   );
 }
