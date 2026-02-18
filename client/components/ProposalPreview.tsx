@@ -296,6 +296,7 @@ interface ProposalPreviewProps {
   onUpdateImage?: (sectionId: string, imageIndex: number, updates: any) => void;
   onUpdateSignatureField?: (sectionId: string, fieldId: string, updates: any) => void;
   onDeleteSignatureField?: (sectionId: string, fieldId: string) => void;
+  onAddSignature?: (sectionId: string, x: number, y: number) => void;
   onAddSignatureField?: (sectionId: string, recipientId: string, x: number, y: number) => void;
   isAddingSignatureMode?: boolean;
   selectedSignatoryId?: string | null;
@@ -318,6 +319,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
   onUpdateImage,
   onUpdateSignatureField,
   onDeleteSignatureField,
+  onAddSignature,
   onAddSignatureField,
   isAddingSignatureMode = false,
   selectedSignatoryId = null,
@@ -482,8 +484,10 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
   });
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    const data = e.dataTransfer.types.includes("application/json");
-    if (data) {
+    // Allow both JSON data (shapes, tables, etc.) and signature drops
+    const hasJsonData = e.dataTransfer.types.includes("application/json");
+    const hasSignatureData = e.dataTransfer.types.includes("signature/drag");
+    if (hasJsonData || hasSignatureData) {
       e.preventDefault();
       e.dataTransfer.dropEffect = "copy";
     }
@@ -494,6 +498,19 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
     setDragOverSectionId(null);
 
     try {
+      // Handle signature drops
+      if (e.dataTransfer.types.includes("signature/drag")) {
+        const sectionElement = sectionRefs.current.get(sectionId);
+        if (sectionElement) {
+          const rect = sectionElement.getBoundingClientRect();
+          const x = Math.max(0, e.clientX - rect.left);
+          const y = Math.max(0, e.clientY - rect.top);
+          onAddSignature?.(sectionId, x, y);
+        }
+        return;
+      }
+
+      // Handle other element drops
       const data = e.dataTransfer.getData("application/json");
       if (data) {
         const draggedItem = JSON.parse(data);
@@ -1164,16 +1181,14 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                     }
                   />
                 ))}
-                {section.signatureFields && section.signatureFields.map((field) => {
-                  const recipient = proposal.signatories?.find((s) => s.id === field.recipientId);
-                  // Use stable ID based on section + recipient (never changes during persistence)
-                  const signatureId = `signature-${section.id}-${field.recipientId}`;
+                {section.signatureFields && section.signatureFields.map((field, fieldIndex) => {
+                  const signatureId = `signature-${section.id}-${fieldIndex}`;
                   return (
                     <SignatureFieldEditor
                       key={signatureId}
                       id={signatureId}
                       field={field}
-                      recipient={recipient}
+                      index={fieldIndex}
                       selected={selectedElementId === signatureId}
                       onSelect={() =>
                         onSelectElement(signatureId, "signature")

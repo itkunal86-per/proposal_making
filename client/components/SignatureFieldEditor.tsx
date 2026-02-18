@@ -1,10 +1,20 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { SignatureField, SignatureRecipient } from "@/services/proposalsService";
+
+interface SignatureField {
+  id: string | number;
+  width: number;
+  height: number;
+  top: number;
+  left: number;
+  borderColor?: string;
+  borderWidth?: number;
+  borderRadius?: number;
+}
 
 interface SignatureFieldEditorProps {
   id: string;
   field: SignatureField;
-  recipient: SignatureRecipient | undefined;
+  index: number;
   selected: boolean;
   onSelect: () => void;
   onUpdate: (updates: Partial<SignatureField>) => void;
@@ -14,7 +24,7 @@ interface SignatureFieldEditorProps {
 export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
   id,
   field,
-  recipient,
+  index,
   selected,
   onSelect,
   onUpdate,
@@ -148,18 +158,27 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
       onMouseDown={handleMouseDown}
     >
       {/* Signature space */}
-      <div className="flex-1 pointer-events-none border-b border-slate-300" />
+      <div className="flex-1 pointer-events-none border-b border-slate-300 flex items-center justify-center">
+        <svg
+          className="w-8 h-8 text-slate-300"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.5}
+            d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.216 0-2.25 1.034-2.25 2.25v10.5a2.25 2.25 0 002.25 2.25h3c1.216 0 2.25-1.034 2.25-2.25m0-1.5c0 1.216 1.034 2.25 2.25 2.25h1.5a2.25 2.25 0 002.25-2.25m-1.5 0V18a2.25 2.25 0 002.25 2.25h.75m0 0V5.25"
+          />
+        </svg>
+      </div>
 
-      {/* Name and role info */}
+      {/* Label */}
       <div className="text-center pointer-events-none p-2">
         <div className="text-xs font-semibold px-2 py-1 rounded bg-slate-200 text-foreground">
-          {recipient?.name || "Unknown"}
+          Signature {index + 1}
         </div>
-        {recipient?.role && (
-          <div className="text-xs text-muted-foreground mt-1">
-            {recipient.role}
-          </div>
-        )}
       </div>
 
       {showControls && (
@@ -180,7 +199,7 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
               onDelete();
             }}
             className="absolute -top-6 -right-6 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center hover:bg-red-600 pointer-events-auto"
-            title="Delete signature field"
+            title="Delete signature"
           >
             ✕
           </button>
