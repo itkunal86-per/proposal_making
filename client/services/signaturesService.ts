@@ -1,6 +1,8 @@
 import { getStoredToken } from "@/lib/auth";
 
-const API_BASE = "https://propai-api.hirenq.com/api";
+import { apiConfig } from "@/lib/apiConfig";
+
+const API_BASE = apiConfig.baseUrl + "/api";
 
 export interface SignatoryData {
   id?: number;

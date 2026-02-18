@@ -1,11 +1,12 @@
 import { getStoredToken } from "@/lib/auth";
+import { apiConfig } from "@/lib/apiConfig";
 
-const UPLOAD_ENDPOINT = "https://propai-api.hirenq.com/api/upload/media";
-const UPLOAD_LIBRARY_ENDPOINT = "https://propai-api.hirenq.com/api/upload/media/library";
-const FETCH_MEDIA_ENDPOINT = "https://propai-api.hirenq.com/api/proposal/media";
-const FETCH_LIBRARY_ENDPOINT = "https://propai-api.hirenq.com/api/media/library";
-const DELETE_MEDIA_ENDPOINT = "https://propai-api.hirenq.com/api/proposal/media";
-const DELETE_LIBRARY_ENDPOINT = "https://propai-api.hirenq.com/api/media/library";
+const UPLOAD_ENDPOINT = apiConfig.baseUrl + "/api/upload/media";
+const UPLOAD_LIBRARY_ENDPOINT = apiConfig.baseUrl + "/api/upload/media/library";
+const FETCH_MEDIA_ENDPOINT = apiConfig.baseUrl + "/api/proposal/media";
+const FETCH_LIBRARY_ENDPOINT = apiConfig.baseUrl + "/api/media/library";
+const DELETE_MEDIA_ENDPOINT = apiConfig.baseUrl + "/api/proposal/media";
+const DELETE_LIBRARY_ENDPOINT = apiConfig.baseUrl + "/api/media/library";
 
 export interface MediaItem {
   id: number;

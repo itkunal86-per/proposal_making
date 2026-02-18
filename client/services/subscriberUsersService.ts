@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { getStoredToken } from "@/lib/auth";
+import { apiConfig } from "@/lib/apiConfig";
 
 export interface UserData {
   id: number;
@@ -62,8 +63,8 @@ export interface DeleteUserResult {
   error?: string;
 }
 
-const USERS_ENDPOINT = "https://propai-api.hirenq.com/api/subscriber/users";
-const ROLES_ENDPOINT = "https://propai-api.hirenq.com/api/subscriber/roles";
+const USERS_ENDPOINT = apiConfig.baseUrl + "/api/subscriber/users";
+const ROLES_ENDPOINT = apiConfig.baseUrl + "/api/subscriber/roles";
 
 const userRecordSchema = z.object({
   id: z.number(),

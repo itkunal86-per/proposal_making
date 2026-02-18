@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { ProposalPreviewModal } from "@/components/ProposalPreviewModal";
 import { MoreVertical, FileText, Upload } from "lucide-react";
 import { getStoredToken } from "@/lib/auth";
+import { apiConfig } from "@/lib/apiConfig";
 
 const statusStyles: Record<string, string> = {
   active: "bg-green-100 text-green-700 border border-green-200",
@@ -215,7 +216,7 @@ export default function MyTemplates() {
       formData.append('file', previewImageUpload);
       formData.append('template_id', previewImageTemplateId);
 
-      const response = await fetch('https://propai-api.hirenq.com/api/templates/system/preview-image', {
+      const response = await fetch(apiConfig.baseUrl + '/api/templates/system/preview-image', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

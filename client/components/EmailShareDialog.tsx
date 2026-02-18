@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 import { getStoredToken } from "@/lib/auth";
+import { apiConfig } from "@/lib/apiConfig";
 import { AuthContext } from "@/providers/AuthProvider";
 import {
   Dialog,
@@ -101,7 +102,7 @@ export const EmailShareDialog: React.FC<EmailShareDialogProps> = ({
         sender_email: senderEmail,
       };
 
-      const response = await fetch("https://propai-api.hirenq.com/api/send-proposal-email", {
+      const response = await fetch(apiConfig.baseUrl + "/api/send-proposal-email", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

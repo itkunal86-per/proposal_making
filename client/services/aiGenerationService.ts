@@ -1,5 +1,6 @@
 import { Proposal, ProposalSection } from "./proposalsService";
 import { getStoredToken } from "@/lib/auth";
+import { apiConfig } from "@/lib/apiConfig";
 
 interface GenerateProposalRequest {
   prompt: string;
@@ -264,7 +265,7 @@ export async function initializeProposalChat(
       formData.append("file", "");
     }
 
-    const response = await fetch("https://propai-api.hirenq.com/api/chat/init", {
+    const response = await fetch(apiConfig.baseUrl + "/api/chat/init", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${token}`,
@@ -304,7 +305,7 @@ export async function generateProposalFromTemplate(
   }
 
   try {
-    const response = await fetch("https://propai-api.hirenq.com/api/chat/proposal/generate-from-template", {
+    const response = await fetch(apiConfig.baseUrl + "/api/chat/proposal/generate-from-template", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

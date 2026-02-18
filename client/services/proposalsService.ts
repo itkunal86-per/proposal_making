@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { getStoredToken, getStoredAuth } from "@/lib/auth";
+import { apiConfig } from "@/lib/apiConfig";
 
 export type ProposalStatus = "draft" | "published" | "sent" | "accepted" | "declined";
 
@@ -158,8 +159,8 @@ export interface Proposal {
 }
 
 const STORAGE_KEY = "app_proposals";
-const PROPOSALS_ENDPOINT = "https://propai-api.hirenq.com/api/proposals";
-const PROPOSALS_DETAILS_ENDPOINT = "https://propai-api.hirenq.com/api/proposals/details";
+const PROPOSALS_ENDPOINT = apiConfig.endpoints.proposals;
+const PROPOSALS_DETAILS_ENDPOINT = apiConfig.endpoints.proposalsDetails;
 
 interface ApiProposalResponse {
   id: string | number;
@@ -1380,7 +1381,7 @@ export async function getPublicProposal(sharingToken: string): Promise<Proposal 
 
   // Try the external API first
   try {
-    const res = await fetch(`https://propai-api.hirenq.com/api/public/proposal/${sharingToken}`);
+    const res = await fetch(`${apiConfig.endpoints.publicProposal}/${sharingToken}`);
 
     if (res.ok) {
       const data: ApiProposalResponse = await res.json();
@@ -1395,26 +1396,7 @@ export async function getPublicProposal(sharingToken: string): Promise<Proposal 
     console.warn("External API request failed, trying fallback methods:", err);
   }
 
-  // Fallback 1: Try local server endpoint
-  if (!apiProposal) {
-    try {
-      const res = await fetch(`/api/public/proposal/${sharingToken}`);
-
-      if (res.ok) {
-        const data: ApiProposalResponse = await res.json();
-        apiProposal = convertApiProposalToProposal(data);
-
-        // Verify we have sections
-        if (apiProposal.sections && apiProposal.sections.length > 0) {
-          console.log("Successfully fetched proposal from local API");
-        }
-      }
-    } catch (err) {
-      console.warn("Local API request failed:", err);
-    }
-  }
-
-  // Fallback 2: Check local storage for proposal with matching sharing token
+  // Fallback: Check local storage for proposal with matching sharing token
   // This is important because local storage contains the full proposal with shapes, texts, and tables
   // which the backend API might not return
   let localProposal: Proposal | null = null;

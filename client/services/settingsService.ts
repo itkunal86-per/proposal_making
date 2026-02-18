@@ -1,6 +1,8 @@
 import { getStoredToken } from "@/lib/auth";
 
-const API_ENDPOINT = "https://propai-api.hirenq.com/api/settings";
+import { apiConfig } from "@/lib/apiConfig";
+
+const API_ENDPOINT = apiConfig.endpoints.settings;
 
 export interface SettingsData {
   id: number;

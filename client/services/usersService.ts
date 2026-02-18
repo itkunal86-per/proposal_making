@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { getStoredToken } from "@/lib/auth";
+import { apiConfig } from "@/lib/apiConfig";
 
 export type UserRole = "admin" | "subscriber";
 
@@ -22,7 +23,7 @@ export type CreateUserInput = {
 };
 
 const STORAGE_KEY = "app_users";
-const API_ENDPOINT = "https://propai-api.hirenq.com/api/users";
+const API_ENDPOINT = apiConfig.endpoints.users;
 
 const userSchema = z.object({
   id: z.string(),

@@ -11,6 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
 import { getStoredToken } from "@/lib/auth";
+import { apiConfig } from "@/lib/apiConfig";
 import { MoreVertical, Users as UsersIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { type ClientRecord, type ClientStatus, type CreateClientResult, type UpdateClientResult, type DeleteClientResult, listClients, createClient, updateClient, deleteClient } from "@/services/clientsService";
@@ -47,7 +48,7 @@ export default function MyClients() {
         throw new Error("Authentication token not found. Please log in again.");
       }
 
-      const response = await fetch("https://propai-api.hirenq.com/api/clients/sync-from-ghl", {
+      const response = await fetch(apiConfig.baseUrl + "/api/clients/sync-from-ghl", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

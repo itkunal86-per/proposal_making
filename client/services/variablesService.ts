@@ -35,7 +35,9 @@ export interface DeleteVariableResponse {
   variable_id: string;
 }
 
-const API_BASE = "https://propai-api.hirenq.com/api";
+import { apiConfig } from "@/lib/apiConfig";
+
+const API_BASE = apiConfig.baseUrl + "/api";
 
 export async function fetchVariables(proposalId: string): Promise<{
   data: Variable[] | null;

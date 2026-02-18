@@ -1,5 +1,7 @@
 import { AUTH_USERS, type AuthUserRecord, type UserRole } from "@/data/users";
 
+import { apiConfig } from "./apiConfig";
+
 export type AuthenticatedUser = {
   id: string;
   email: string;
@@ -96,7 +98,7 @@ export async function apiAuthenticate(email: string, password: string): Promise<
   error: string | null;
 }> {
   try {
-    const response = await fetch("/api/auth/login", {
+    const response = await fetch(apiConfig.endpoints.login, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -149,7 +151,7 @@ export async function apiRegister(params: {
   message?: string;
 }> {
   try {
-    const response = await fetch("/api/auth/register", {
+    const response = await fetch(apiConfig.endpoints.register, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

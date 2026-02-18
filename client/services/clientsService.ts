@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { getStoredToken } from "@/lib/auth";
+import { apiConfig } from "@/lib/apiConfig";
 
 export type ClientStatus = "active" | "inactive";
 
@@ -21,7 +22,7 @@ export type CreateClientInput = {
 };
 
 const STORAGE_KEY = "app_clients";
-const CLIENTS_ENDPOINT = "https://propai-api.hirenq.com/api/clients";
+const CLIENTS_ENDPOINT = apiConfig.endpoints.clients;
 
 interface ApiClientResponse {
   id: string;

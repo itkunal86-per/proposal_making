@@ -16,6 +16,7 @@ import { MoreHorizontal, Upload } from "lucide-react";
 import { listSystemTemplates, convertSystemTemplateToProposal, createSystemTemplate, getSystemTemplateDetails, deleteSystemTemplate, type SystemTemplate } from "@/services/systemTemplatesService";
 import { createProposal, type Proposal } from "@/services/proposalsService";
 import { getStoredToken } from "@/lib/auth";
+import { apiConfig } from "@/lib/apiConfig";
 
 export default function AdminSystemTemplates() {
   const nav = useNavigate();
@@ -190,7 +191,7 @@ export default function AdminSystemTemplates() {
       formData.append('file', previewImageUpload);
       formData.append('template_id', previewImageTemplateId);
 
-      const response = await fetch('https://propai-api.hirenq.com/api/templates/system/preview-image', {
+      const response = await fetch(apiConfig.baseUrl + '/api/templates/system/preview-image', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

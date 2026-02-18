@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
 import { replaceVariables, decodeHtmlEntities } from "@/lib/variableUtils";
+import { apiConfig } from "@/lib/apiConfig";
 import { ShapeEditor } from "@/components/ShapeEditor";
 import { TableEditor } from "@/components/TableEditor";
 import { TextEditor } from "@/components/TextEditor";
@@ -65,7 +66,7 @@ export default function PublicProposal() {
 
     try {
       setLoading(true);
-      const response = await fetch(`/api/public/proposal/${token}`);
+      const response = await fetch(`${apiConfig.endpoints.publicProposal}/${token}`);
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { apiConfig } from "@/lib/apiConfig";
 
 export default function Reset() {
   const [email, setEmail] = useState("");
@@ -23,7 +24,7 @@ export default function Reset() {
 
     try {
       const response = await fetch(
-        "https://propai-api.hirenq.com/api/forgot-password",
+        apiConfig.endpoints.forgotPassword,
         {
           method: "POST",
           headers: {

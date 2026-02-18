@@ -1,7 +1,8 @@
 import { getStoredToken } from "@/lib/auth";
 import type { Proposal } from "./proposalsService";
+import { apiConfig } from "@/lib/apiConfig";
 
-const SYSTEM_TEMPLATES_ENDPOINT = "https://propai-api.hirenq.com/api/templates/system";
+const SYSTEM_TEMPLATES_ENDPOINT = apiConfig.baseUrl + "/api/templates/system";
 
 export interface SystemTemplate {
   id: string;
