@@ -51,16 +51,26 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
   const isResizingRef = useRef(false);
   const dragOffsetRef = useRef({ x: 0, y: 0 });
   const resizeStartRef = useRef({ x: 0, y: 0, width: 0, height: 0 });
+  const selectedRef = useRef(selected);
 
-  // Reset dragging/resizing state when signature is deselected
+  // Keep selectedRef in sync
+  useEffect(() => {
+    selectedRef.current = selected;
+  }, [selected]);
+
+  // Reset dragging/resizing state and clear transform when signature is deselected
   useEffect(() => {
     if (!selected && (isDragging || isResizing)) {
       isDraggingRef.current = false;
       isResizingRef.current = false;
       setIsDragging(false);
       setIsResizing(false);
+      // Clear transform immediately to prevent visual lag
+      if (elementRef.current) {
+        elementRef.current.style.transform = "";
+      }
     }
-  }, [selected]);
+  }, [selected, isDragging, isResizing]);
 
   // Clear transform when drag ends
   useEffect(() => {
@@ -113,11 +123,20 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
     if (!isDraggingRef.current && !isResizingRef.current) return;
     if (!elementRef.current) return;
 
+    // Double-check: stop if this signature is no longer selected
+    // This prevents interference between multiple signatures
+    if (!selectedRef.current) {
+      isDraggingRef.current = false;
+      isResizingRef.current = false;
+      return;
+    }
+
     const parent = getPositionedParent();
     if (!parent) return;
 
     // Prevent default to avoid text selection while dragging
     e.preventDefault();
+    e.stopPropagation();
 
     if (isDraggingRef.current) {
       const rect = parent.getBoundingClientRect();
