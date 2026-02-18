@@ -9,6 +9,13 @@ interface SignatureField {
   borderColor?: string;
   borderWidth?: number;
   borderRadius?: number;
+  status?: "pending" | "signed" | "declined";
+  fullName?: string;
+  email?: string;
+  position?: string;
+  signature?: string;
+  signatureDisplayText?: string;
+  signedAt?: number;
 }
 
 interface SignatureFieldEditorProps {
