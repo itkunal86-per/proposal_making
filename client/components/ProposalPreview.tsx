@@ -330,6 +330,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
   const [sectionWidths, setSectionWidths] = React.useState<Record<string, number>>({});
 
   const sectionRefs = React.useRef<Map<string, HTMLDivElement>>(new Map());
+  const canvasRefs = React.useRef<Map<string, HTMLDivElement>>(new Map());
 
   React.useEffect(() => {
     const resizeObserver = new ResizeObserver(() => {
@@ -1042,6 +1043,9 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
 
             {(section.shapes && section.shapes.length > 0) || (section.tables && section.tables.length > 0) || ((section as any).texts && (section as any).texts.length > 0) || ((section as any).images && (section as any).images.length > 0) || (section.signatureFields && section.signatureFields.length > 0) || isAddingSignatureMode ? (
               <div
+                ref={(el) => {
+                  if (el) canvasRefs.current.set(section.id, el);
+                }}
                 style={{ position: "relative", minHeight: `${canvasHeights[section.id] || 100}px`, height: "auto", cursor: isAddingSignatureMode ? "crosshair" : "default" }}
                 onClick={(e) => {
                   if (isAddingSignatureMode && selectedSignatoryId && onAddSignatureField) {
@@ -1166,6 +1170,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                 ))}
                 {section.signatureFields && section.signatureFields.map((field) => {
                   const recipient = proposal.signatories?.find((s) => s.id === field.recipientId);
+                  const canvasRef = canvasRefs.current.get(section.id);
                   return (
                     <SignatureFieldEditor
                       key={`signature-${field.id}`}
@@ -1182,6 +1187,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                       onDelete={() =>
                         onDeleteSignatureField?.(section.id, String(field.id))
                       }
+                      canvasRef={canvasRef}
                     />
                   );
                 })}

@@ -1076,6 +1076,9 @@ export default function ProposalEditor() {
                 commit(updated);
                 setAddingSignatureMode(false);
                 setSelectedSignatoryId(null);
+                // Auto-select the newly created signature field for immediate interaction
+                setSelectedElementId(`signature-${sectionId}-0`);
+                setSelectedElementType("signature");
               }}
               isAddingSignatureMode={addingSignatureMode}
               selectedSignatoryId={selectedSignatoryId}
