@@ -740,16 +740,6 @@ export default function PublicProposal() {
                                   ) : (
                                     <>
                                       <div style={{ flex: 1, borderBottom: "1px solid #cbd5e1" }} />
-                                      <div style={{ textAlign: "center", padding: "4px" }}>
-                                        <div style={{ fontSize: "12px", fontWeight: "bold", padding: "4px 8px", backgroundColor: "#e2e8f0", borderRadius: "4px" }}>
-                                          {field.fullName || "Signature"}
-                                        </div>
-                                        {field.position && (
-                                          <div style={{ fontSize: "11px", color: "#64748b", marginTop: "4px" }}>
-                                            {field.position}
-                                          </div>
-                                        )}
-                                      </div>
                                     </>
                                   )}
                                 </div>
