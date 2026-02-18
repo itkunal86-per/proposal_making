@@ -670,26 +670,30 @@ function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmai
             top: typeof image.top === "number" ? image.top : 0,
             left: typeof image.left === "number" ? image.left : 0,
           })) : [],
-          signatureFields: Array.isArray(s.signatureFields) ? s.signatureFields.map((field) => ({
-            id: String(field.id),
-            recipientId: String(field.recipientId),
-            sectionId: String(field.sectionId),
-            width: field.width,
-            height: field.height,
-            top: typeof field.top === "number" ? field.top : 0,
-            left: typeof field.left === "number" ? field.left : 0,
-            status: field.status,
-            signedAt: field.signedAt,
-            signatureData: field.signatureData,
-            signatureDisplayText: field.signatureDisplayText,
-            borderColor: field.borderColor,
-            borderWidth: field.borderWidth,
-            borderRadius: field.borderRadius,
-            fullName: field.fullName,
-            email: field.email,
-            position: field.position,
-            signature: field.signature,
-          })) : [],
+          signatureFields: Array.isArray(s.signatureFields) ? s.signatureFields.map((field, fieldIdx) => {
+            const mapped = {
+              id: String(field.id),
+              recipientId: String(field.recipientId || field.recipient_id || ""),
+              sectionId: String(field.sectionId || field.section_id || ""),
+              width: field.width,
+              height: field.height,
+              top: typeof field.top === "number" ? field.top : 0,
+              left: typeof field.left === "number" ? field.left : 0,
+              status: field.status,
+              signedAt: field.signedAt || field.signed_at,
+              signatureData: field.signatureData || field.signature_data,
+              signatureDisplayText: field.signatureDisplayText || field.signature_display_text,
+              borderColor: field.borderColor || field.border_color,
+              borderWidth: field.borderWidth || field.border_width,
+              borderRadius: field.borderRadius || field.border_radius,
+              fullName: field.fullName || field.full_name,
+              email: field.email,
+              position: field.position,
+              signature: field.signature,
+            };
+            console.log(`Mapped signature field [${fieldIdx}]:`, mapped, "from original:", field);
+            return mapped;
+          }) : [],
           comments: Array.isArray(s.comments) ? s.comments : [],
           titleStyles: normalizeStyles(s.titleStyles),
           contentStyles: normalizeStyles(s.contentStyles),
@@ -858,6 +862,15 @@ export async function getProposalDetails(id: string): Promise<Proposal | undefin
     }
 
     const json = await res.json();
+
+    // Log the raw API response structure for signature debugging
+    if (json.sections) {
+      json.sections.forEach((section: any, idx: number) => {
+        if (section.signatureFields && section.signatureFields.length > 0) {
+          console.log(`Section ${idx} raw signatureFields:`, JSON.stringify(section.signatureFields, null, 2));
+        }
+      });
+    }
 
     // Convert API response directly (handles all structure variations)
     let normalized = convertApiProposalToProposal(json);
