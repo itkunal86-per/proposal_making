@@ -25,29 +25,14 @@ interface SignatureDetailsModalProps {
   onSave: (details: SignatureDetails) => void;
 }
 
-// Generate signature initials and style from full name
+// Generate signature from full name
 const generateSignature = (fullName: string): string => {
   if (!fullName || fullName.trim().length === 0) {
     return "";
   }
 
-  // Get initials from full name
-  const names = fullName.trim().split(/\s+/);
-  let signature = "";
-
-  if (names.length === 1) {
-    // Single name: use first 3 letters
-    signature = names[0].substring(0, 3);
-  } else if (names.length === 2) {
-    // Two names: use first letter of each
-    signature = names[0][0] + names[1][0];
-  } else {
-    // Multiple names: use first letter of first and last name
-    signature = names[0][0] + names[names.length - 1][0];
-  }
-
-  // Return stylized signature (can be customized)
-  return signature.toUpperCase();
+  // Return the full name as signature
+  return fullName.trim();
 };
 
 export const SignatureDetailsModal: React.FC<SignatureDetailsModalProps> = ({
