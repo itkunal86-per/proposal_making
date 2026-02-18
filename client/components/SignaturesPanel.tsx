@@ -127,16 +127,35 @@ export const SignaturesPanel: React.FC<SignaturesPanelProps> = ({
         setNewRecipient({ name: "", email: "", role: "" });
         setAddingRecipient(false);
       } else {
+        // Convert error to string in case it's an object
+        let errorMessage = "Failed to add signatory";
+        if (result.error) {
+          if (typeof result.error === "string") {
+            errorMessage = result.error;
+          } else {
+            errorMessage = JSON.stringify(result.error);
+          }
+        }
+
         toast({
           title: "Error",
-          description: result.error || "Failed to add signatory",
+          description: errorMessage,
           variant: "destructive",
         });
       }
     } catch (error) {
+      let errorMessage = "Failed to add signatory";
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === "string") {
+        errorMessage = error;
+      } else if (error && typeof error === "object") {
+        errorMessage = JSON.stringify(error);
+      }
+
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to add signatory",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -167,16 +186,35 @@ export const SignaturesPanel: React.FC<SignaturesPanelProps> = ({
           description: "Signatory removed",
         });
       } else {
+        // Convert error to string in case it's an object
+        let errorMessage = "Failed to remove signatory";
+        if (result.error) {
+          if (typeof result.error === "string") {
+            errorMessage = result.error;
+          } else {
+            errorMessage = JSON.stringify(result.error);
+          }
+        }
+
         toast({
           title: "Error",
-          description: result.error || "Failed to remove signatory",
+          description: errorMessage,
           variant: "destructive",
         });
       }
     } catch (error) {
+      let errorMessage = "Failed to remove signatory";
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === "string") {
+        errorMessage = error;
+      } else if (error && typeof error === "object") {
+        errorMessage = JSON.stringify(error);
+      }
+
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to remove signatory",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
