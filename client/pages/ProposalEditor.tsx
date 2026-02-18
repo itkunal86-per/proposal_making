@@ -972,30 +972,44 @@ export default function ProposalEditor() {
                 };
                 commit(updated);
               }}
-              onUpdateSignatureField={(sectionId, fieldId, updates) => {
+              onUpdateSignatureField={(sectionId, fieldIndexOrId, updates) => {
                 const updated = {
                   ...p,
                   sections: p.sections.map((s) =>
                     String(s.id) === String(sectionId)
                       ? {
                           ...s,
-                          signatureFields: (s.signatureFields || []).map((field) =>
-                            String(field.id) === String(fieldId) ? { ...field, ...updates } : field
-                          ),
+                          signatureFields: (s.signatureFields || []).map((field, index) => {
+                            // Use index-based matching for reliability
+                            // fieldIndexOrId is passed as a number (index) from ProposalPreview
+                            if (typeof fieldIndexOrId === "number") {
+                              return index === fieldIndexOrId ? { ...field, ...updates } : field;
+                            }
+                            // Fallback to ID-based matching for backwards compatibility
+                            return String(field.id) === String(fieldIndexOrId) ? { ...field, ...updates } : field;
+                          }),
                         }
                       : s
                   ),
                 };
                 commit(updated);
               }}
-              onDeleteSignatureField={(sectionId, fieldId) => {
+              onDeleteSignatureField={(sectionId, fieldIndexOrId) => {
                 const updated = {
                   ...p,
                   sections: p.sections.map((s) =>
                     String(s.id) === String(sectionId)
                       ? {
                           ...s,
-                          signatureFields: (s.signatureFields || []).filter((field) => field.id !== fieldId),
+                          signatureFields: (s.signatureFields || []).filter((field, index) => {
+                            // Use index-based filtering for reliability
+                            // fieldIndexOrId is passed as a number (index) from ProposalPreview
+                            if (typeof fieldIndexOrId === "number") {
+                              return index !== fieldIndexOrId;
+                            }
+                            // Fallback to ID-based matching for backwards compatibility
+                            return String(field.id) !== String(fieldIndexOrId);
+                          }),
                         }
                       : s
                   ),
@@ -1003,8 +1017,13 @@ export default function ProposalEditor() {
                 commit(updated);
               }}
               onAddSignature={(sectionId, x, y) => {
+                // Generate unique ID for this signature
+                const uniqueId = typeof crypto !== "undefined" && "randomUUID" in crypto
+                  ? crypto.randomUUID()
+                  : Math.random().toString(36).slice(2) + Date.now().toString(36);
+
                 const newField = {
-                  id: 0,
+                  id: uniqueId,
                   recipientId: "",
                   sectionId,
                   width: 280,
