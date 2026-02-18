@@ -316,7 +316,7 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
             )}
           </div>
         ) : (
-          <div className="flex flex-col items-center gap-2 text-slate-300">
+          <div className="flex items-center justify-center text-slate-300">
             <svg
               className="w-8 h-8"
               fill="none"
@@ -330,7 +330,6 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
                 d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.216 0-2.25 1.034-2.25 2.25v10.5a2.25 2.25 0 002.25 2.25h3c1.216 0 2.25-1.034 2.25-2.25m0-1.5c0 1.216 1.034 2.25 2.25 2.25h1.5a2.25 2.25 0 002.25-2.25m-1.5 0V18a2.25 2.25 0 002.25 2.25h.75m0 0V5.25"
               />
             </svg>
-            <span className="text-xs">Click to sign</span>
           </div>
         )}
       </div>
