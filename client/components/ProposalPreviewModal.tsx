@@ -719,7 +719,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                           </div>
                         ))}
                         {section.signatureFields && section.signatureFields.map((field, sIndex) => {
-                          const recipient = proposal.signatories?.find((s) => s.id === field.recipientId);
+                          const isSigned = field.status === "signed" && field.signatureDisplayText;
                           return (
                             <div
                               key={`signature-${sIndex}`}
@@ -732,27 +732,62 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                                 borderRadius: field.borderRadius ? `${field.borderRadius}px` : "0px",
                                 borderWidth: field.borderWidth ? `${field.borderWidth}px` : "2px",
                                 borderStyle: "dashed",
-                                borderColor: field.borderColor || "#cbd5e1",
-                                backgroundColor: "#f8fafc",
+                                borderColor: isSigned ? "#22c55e" : field.borderColor || "#cbd5e1",
+                                backgroundColor: isSigned ? "#dcfce7" : "#f8fafc",
                                 display: "flex",
                                 flexDirection: "column",
                                 pointerEvents: "none",
+                                padding: "8px",
                               }}
                             >
-                              {/* Signature space */}
-                              <div style={{ flex: 1, borderBottom: "1px solid #cbd5e1" }} />
-
-                              {/* Name and role info */}
-                              <div style={{ textAlign: "center", padding: "8px" }}>
-                                <div style={{ fontSize: "12px", fontWeight: "bold", padding: "4px 8px", backgroundColor: "#e2e8f0", borderRadius: "4px" }}>
-                                  {recipient?.name || "Unknown"}
-                                </div>
-                                {recipient?.role && (
-                                  <div style={{ fontSize: "11px", color: "#64748b", marginTop: "4px" }}>
-                                    {recipient.role}
+                              {isSigned ? (
+                                <div style={{ textAlign: "center", fontSize: "14px" }}>
+                                  <div
+                                    style={{
+                                      fontFamily: "cursive",
+                                      fontStyle: "italic",
+                                      fontWeight: "bold",
+                                      marginBottom: "4px",
+                                      fontSize: "16px",
+                                      color: "#1f2937",
+                                    }}
+                                  >
+                                    {field.signature}
                                   </div>
-                                )}
-                              </div>
+                                  <div
+                                    style={{
+                                      fontSize: "11px",
+                                      color: "#4b5563",
+                                      whiteSpace: "pre-wrap",
+                                      lineHeight: "1.3",
+                                    }}
+                                  >
+                                    {field.signatureDisplayText?.replace(/\\n/g, '\n')}
+                                  </div>
+                                  {field.position && (
+                                    <div style={{ fontSize: "10px", color: "#6b7280", marginTop: "4px", fontStyle: "italic" }}>
+                                      {field.position}
+                                    </div>
+                                  )}
+                                </div>
+                              ) : (
+                                <>
+                                  {/* Empty signature space */}
+                                  <div style={{ flex: 1, borderBottom: "1px solid #cbd5e1" }} />
+
+                                  {/* Name and role info */}
+                                  <div style={{ textAlign: "center", padding: "4px" }}>
+                                    <div style={{ fontSize: "12px", fontWeight: "bold", padding: "4px 8px", backgroundColor: "#e2e8f0", borderRadius: "4px" }}>
+                                      {field.fullName || "Signature"}
+                                    </div>
+                                    {field.position && (
+                                      <div style={{ fontSize: "11px", color: "#64748b", marginTop: "4px" }}>
+                                        {field.position}
+                                      </div>
+                                    )}
+                                  </div>
+                                </>
+                              )}
                             </div>
                           );
                         })}
