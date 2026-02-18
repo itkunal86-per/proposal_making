@@ -32,17 +32,6 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
   onDelete,
   onOpenDetails,
 }) => {
-  // Debug logging
-  useEffect(() => {
-    console.log(`🖊️ SignatureFieldEditor [${id}]:`, {
-      status: field.status,
-      fullName: field.fullName,
-      signature: field.signature,
-      signatureDisplayText: field.signatureDisplayText,
-      hasDisplayText: !!field.signatureDisplayText,
-      position: { top: field.top, left: field.left, width: field.width, height: field.height },
-    });
-  }, [id, field]);
 
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);

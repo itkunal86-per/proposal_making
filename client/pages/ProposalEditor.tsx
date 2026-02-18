@@ -1169,6 +1169,18 @@ export default function ProposalEditor() {
           const sectionIndex = p.sections.findIndex((s) => s.id === signatureDetailsData.sectionId);
           if (sectionIndex >= 0) {
             const currentField = p.sections[sectionIndex]?.signatureFields?.[signatureDetailsData.fieldIndex];
+            const updatedField = {
+              ...currentField,
+              ...details,
+              // Preserve position and sizing
+              width: currentField?.width || 280,
+              height: currentField?.height || 120,
+              top: currentField?.top,
+              left: currentField?.left,
+              sectionId: currentField?.sectionId || signatureDetailsData.sectionId,
+              id: currentField?.id,
+            };
+
             const updated = {
               ...p,
               sections: p.sections.map((s, idx) =>
@@ -1176,19 +1188,7 @@ export default function ProposalEditor() {
                   ? {
                       ...s,
                       signatureFields: (s.signatureFields || []).map((f, fIdx) =>
-                        fIdx === signatureDetailsData.fieldIndex
-                          ? {
-                              ...f,
-                              ...details,
-                              // Preserve position and sizing
-                              width: currentField?.width || f.width,
-                              height: currentField?.height || f.height,
-                              top: currentField?.top || f.top,
-                              left: currentField?.left || f.left,
-                              sectionId: currentField?.sectionId || f.sectionId,
-                              id: currentField?.id || f.id,
-                            }
-                          : f
+                        fIdx === signatureDetailsData.fieldIndex ? updatedField : f
                       ),
                     }
                   : s

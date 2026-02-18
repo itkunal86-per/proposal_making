@@ -71,7 +71,7 @@ export const SignatureDetailsModal: React.FC<SignatureDetailsModalProps> = ({
   const handleSave = () => {
     // If already signed, preserve the original timestamp and display text
     if (isSignedAlready && signatureDetails.signedAt && signatureDetails.signatureDisplayText) {
-      onSave({
+      const saveData = {
         fullName,
         email,
         position,
@@ -79,7 +79,8 @@ export const SignatureDetailsModal: React.FC<SignatureDetailsModalProps> = ({
         signedAt: signatureDetails.signedAt,
         signatureDisplayText: signatureDetails.signatureDisplayText,
         status: "signed" as const,
-      });
+      };
+      onSave(saveData);
       return;
     }
 

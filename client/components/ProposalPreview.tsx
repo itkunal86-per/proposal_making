@@ -471,26 +471,6 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
     );
   }
 
-  // Debug logging
-  console.log("📄 ProposalPreview received proposal:", {
-    id: proposal.id,
-    title: proposal.title,
-    sectionsCount: proposal.sections?.length,
-    sections: proposal.sections?.map((s: any) => ({
-      id: s.id,
-      title: s.title,
-      textsCount: s.texts?.length,
-      imagesCount: s.images?.length,
-      shapesCount: s.shapes?.length,
-      signatureFieldsCount: s.signatureFields?.length,
-      signatureFields: s.signatureFields?.map((f: any) => ({
-        id: f.id,
-        fullName: f.fullName,
-        status: f.status,
-        position: { top: f.top, left: f.left },
-      })),
-    })),
-  });
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     // Allow both JSON data (shapes, tables, etc.) and signature drops
