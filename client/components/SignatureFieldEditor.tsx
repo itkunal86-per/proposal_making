@@ -37,6 +37,10 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
   const [showControls, setShowControls] = useState(true);
   const elementRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout>();
+  const isDraggingRef = useRef(false);
+  const isResizingRef = useRef(false);
+  const dragOffsetRef = useRef({ x: 0, y: 0 });
+  const resizeStartRef = useRef({ x: 0, y: 0, width: 0, height: 0 });
 
   // Auto-hide controls after 3 seconds if not interacting
   useEffect(() => {
@@ -57,17 +61,37 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
     }
   }, [selected, isDragging, isResizing]);
 
+  // Find the closest positioned ancestor (position: relative, absolute, or fixed)
+  const getPositionedParent = useCallback((): HTMLElement | null => {
+    if (!elementRef.current) return null;
+    
+    let parent = elementRef.current.parentElement;
+    while (parent) {
+      const style = window.getComputedStyle(parent);
+      const position = style.position;
+      
+      // If we find a positioned parent or reach the document, return it
+      if (position === "relative" || position === "absolute" || position === "fixed") {
+        return parent;
+      }
+      
+      parent = parent.parentElement;
+    }
+    
+    return null;
+  }, []);
+
   const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (!isDragging && !isResizing) return;
+    if (!isDraggingRef.current && !isResizingRef.current) return;
     if (!elementRef.current) return;
 
-    const parent = elementRef.current.parentElement;
+    const parent = getPositionedParent();
     if (!parent) return;
 
-    if (isDragging) {
+    if (isDraggingRef.current) {
       const rect = parent.getBoundingClientRect();
-      const newLeft = e.clientX - rect.left - dragOffset.x;
-      const newTop = e.clientY - rect.top - dragOffset.y;
+      const newLeft = e.clientX - rect.left - dragOffsetRef.current.x;
+      const newTop = e.clientY - rect.top - dragOffsetRef.current.y;
 
       onUpdate({
         left: Math.max(0, newLeft),
@@ -75,30 +99,33 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
       });
     }
 
-    if (isResizing) {
-      const deltaX = e.clientX - resizeStart.x;
-      const deltaY = e.clientY - resizeStart.y;
+    if (isResizingRef.current) {
+      const deltaX = e.clientX - resizeStartRef.current.x;
+      const deltaY = e.clientY - resizeStartRef.current.y;
 
-      const newWidth = Math.max(100, resizeStart.width + deltaX);
-      const newHeight = Math.max(60, resizeStart.height + deltaY);
+      const newWidth = Math.max(100, resizeStartRef.current.width + deltaX);
+      const newHeight = Math.max(60, resizeStartRef.current.height + deltaY);
 
       onUpdate({
         width: newWidth,
         height: newHeight,
       });
     }
-  }, [isDragging, isResizing, dragOffset, resizeStart, onUpdate]);
+  }, [onUpdate, getPositionedParent]);
 
   const handleMouseUp = useCallback(() => {
+    isDraggingRef.current = false;
+    isResizingRef.current = false;
     setIsDragging(false);
     setIsResizing(false);
   }, []);
 
-  // Attach event listeners
+  // Attach event listeners globally when dragging/resizing starts
   useEffect(() => {
     if (isDragging || isResizing) {
       document.addEventListener("mousemove", handleMouseMove);
       document.addEventListener("mouseup", handleMouseUp);
+      
       return () => {
         document.removeEventListener("mousemove", handleMouseMove);
         document.removeEventListener("mouseup", handleMouseUp);
@@ -116,22 +143,34 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
     if (!elementRef.current) return;
 
     const elementRect = elementRef.current.getBoundingClientRect();
+    const parent = getPositionedParent();
+    if (!parent) return;
 
-    setDragOffset({
-      x: e.clientX - elementRect.left,
-      y: e.clientY - elementRect.top,
-    });
+    const parentRect = parent.getBoundingClientRect();
+
+    // Calculate offset relative to the positioned parent
+    dragOffsetRef.current = {
+      x: e.clientX - parentRect.left - field.left,
+      y: e.clientY - parentRect.top - field.top,
+    };
+
+    setDragOffset(dragOffsetRef.current);
+    isDraggingRef.current = true;
     setIsDragging(true);
   };
 
   const handleResizeMouseDown = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setResizeStart({
+    
+    resizeStartRef.current = {
       x: e.clientX,
       y: e.clientY,
       width: field.width,
       height: field.height,
-    });
+    };
+    
+    setResizeStart(resizeStartRef.current);
+    isResizingRef.current = true;
     setIsResizing(true);
   };
 
