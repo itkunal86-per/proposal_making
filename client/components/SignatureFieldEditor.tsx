@@ -165,9 +165,14 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
       return;
     }
 
-    // Don't drag if clicking on the click-to-edit area
-    const contentDiv = (e.currentTarget as HTMLElement).querySelector("div[title='Click to edit signature details']");
-    if (contentDiv && contentDiv.contains(target)) {
+    // Don't drag if clicking directly on the edit area title
+    if (target.getAttribute("title") === "Click to edit signature details") {
+      return;
+    }
+
+    // Don't drag if clicking on content inside the edit area
+    const isInsideContentArea = target.closest("div[title='Click to edit signature details']");
+    if (isInsideContentArea && target !== e.currentTarget) {
       return;
     }
 
@@ -228,7 +233,7 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
         borderColor: field.status === "signed" ? "#22c55e" : field.borderColor || "#d1d5db",
         backgroundColor: field.status === "signed" ? "#dcfce7" : "#f1f5f9",
         cursor: isDragging ? "grabbing" : "grab",
-        zIndex: isDragging || isResizing ? 10000 : selected ? 1000 : 10,
+        zIndex: isDragging || isResizing ? 999999 : selected ? 1000 : 10,
         visibility: "visible",
         display: "flex",
       }}
@@ -295,7 +300,7 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
       </div>
 
       {/* Label */}
-      <div className="text-center pointer-events-none p-2 bg-slate-100">
+      <div className="text-center pointer-events-auto p-2 bg-slate-100 select-none" style={{ cursor: "grab" }}>
         <div className="text-xs font-semibold px-2 py-1 rounded bg-slate-300 text-slate-800">
           {field.fullName ? `${field.fullName}${field.position ? ` - ${field.position}` : ""}` : `Signature ${index + 1}`}
         </div>
