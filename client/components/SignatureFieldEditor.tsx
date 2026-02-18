@@ -6,6 +6,9 @@ interface SignatureFieldEditorProps {
   field: SignatureField;
   recipient: SignatureRecipient | undefined;
   selected: boolean;
+  isDraggingThis?: boolean;
+  onDragStart?: () => void;
+  onDragEnd?: () => void;
   onSelect: () => void;
   onUpdate: (updates: Partial<SignatureField>) => void;
   onDelete: () => void;
@@ -16,6 +19,9 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
   field,
   recipient,
   selected,
+  isDraggingThis = false,
+  onDragStart,
+  onDragEnd,
   onSelect,
   onUpdate,
   onDelete,
@@ -26,9 +32,9 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
   const [resizeStart, setResizeStart] = useState({ x: 0, y: 0, width: 0, height: 0 });
   const elementRef = useRef<HTMLDivElement>(null);
 
-  // Show controls for newly placed fields (id === 0) or when selected
+  // Show controls for newly placed fields (id === 0), when selected, or when dragging
   const isNewField = field.id === 0;
-  const shouldShowControls = selected || isNewField;
+  const shouldShowControls = selected || isNewField || isDragging || isResizing;
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -63,6 +69,7 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
     const handleMouseUp = () => {
       setIsDragging(false);
       setIsResizing(false);
+      onDragEnd?.();
     };
 
     if (isDragging || isResizing) {
@@ -73,7 +80,7 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
         document.removeEventListener("mouseup", handleMouseUp);
       };
     }
-  }, [isDragging, isResizing, dragOffset, resizeStart, onUpdate]);
+  }, [isDragging, isResizing, dragOffset, resizeStart, onUpdate, onDragEnd]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
@@ -91,6 +98,7 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
       y: e.clientY - elementRect.top,
     });
     setIsDragging(true);
+    onDragStart?.();
   };
 
   const handleResizeMouseDown = (e: React.MouseEvent) => {
@@ -122,7 +130,7 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
         borderWidth: field.borderWidth ? `${field.borderWidth}px` : "2px",
         borderStyle: "dashed",
         cursor: isDragging ? "grabbing" : "grab",
-        zIndex: selected || isDragging || isResizing ? 1000 : 10,
+        zIndex: isDraggingThis ? 10000 : selected || isDragging || isResizing ? 1000 : 10,
       }}
       onMouseDown={handleMouseDown}
     >
