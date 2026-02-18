@@ -26,6 +26,7 @@ interface SignatureDetailsModalProps {
   signatureDetails: SignatureDetails;
   onClose: () => void;
   onSave: (details: SignatureDetails) => void;
+  isAlreadySigned?: boolean;
 }
 
 // Generate signature from full name
@@ -43,11 +44,13 @@ export const SignatureDetailsModal: React.FC<SignatureDetailsModalProps> = ({
   signatureDetails,
   onClose,
   onSave,
+  isAlreadySigned = false,
 }) => {
   const [fullName, setFullName] = useState(signatureDetails.fullName || "");
   const [email, setEmail] = useState(signatureDetails.email || "");
   const [position, setPosition] = useState(signatureDetails.position || "");
   const [signature, setSignature] = useState(signatureDetails.signature || "");
+  const isSignedAlready = signatureDetails.status === "signed" || isAlreadySigned;
 
   // Auto-generate signature when fullName changes
   useEffect(() => {
@@ -66,7 +69,21 @@ export const SignatureDetailsModal: React.FC<SignatureDetailsModalProps> = ({
   }, [open, signatureDetails]);
 
   const handleSave = () => {
-    // Get current date and time with timezone
+    // If already signed, preserve the original timestamp and display text
+    if (isSignedAlready && signatureDetails.signedAt && signatureDetails.signatureDisplayText) {
+      onSave({
+        fullName,
+        email,
+        position,
+        signature,
+        signedAt: signatureDetails.signedAt,
+        signatureDisplayText: signatureDetails.signatureDisplayText,
+        status: "signed" as const,
+      });
+      return;
+    }
+
+    // Generate new timestamp and display text for first-time signatures
     const now = new Date();
     const dateStr = now.toLocaleDateString("en-US", {
       year: "numeric",
@@ -105,9 +122,18 @@ export const SignatureDetailsModal: React.FC<SignatureDetailsModalProps> = ({
         <DialogHeader>
           <DialogTitle>Signature Details</DialogTitle>
           <DialogDescription>
-            Enter the signer's information. The signature will be auto-generated.
+            {isSignedAlready
+              ? "This signature has been signed. You can update the details, and the original signature time will be preserved."
+              : "Enter the signer's information. The signature will be auto-generated."}
           </DialogDescription>
         </DialogHeader>
+
+        {isSignedAlready && signatureDetails.signatureDisplayText && (
+          <div className="bg-blue-50 border border-blue-200 rounded p-3 text-sm text-blue-900">
+            <div className="font-semibold mb-1">Original Signature:</div>
+            <div className="whitespace-pre-wrap font-mono text-xs">{signatureDetails.signatureDisplayText}</div>
+          </div>
+        )}
 
         <div className="space-y-4 py-4">
           {/* Full Name */}
@@ -158,17 +184,23 @@ export const SignatureDetailsModal: React.FC<SignatureDetailsModalProps> = ({
             <Label htmlFor="signature" className="text-sm font-semibold">
               Signature (Auto-generated)
             </Label>
-            <div className="border border-slate-200 rounded-md p-4 bg-slate-50 flex items-center justify-center min-h-16">
-              <div
-                className="text-3xl font-script text-slate-700 select-none"
-                style={{
-                  fontFamily: "cursive",
-                  fontStyle: "italic",
-                  fontWeight: "bold",
-                  letterSpacing: "0.1em",
-                }}
-              >
-                {signature || "Your Signature"}
+            <div className="border border-slate-200 rounded-md p-6 bg-slate-50">
+              <div className="text-center">
+                <div
+                  className="text-4xl text-slate-700 select-none mb-2"
+                  style={{
+                    fontFamily: "cursive",
+                    fontStyle: "italic",
+                    fontWeight: "bold",
+                  }}
+                >
+                  {signature || "Your Signature"}
+                </div>
+                {isSignedAlready && signatureDetails.signedAt && (
+                  <div className="text-xs text-slate-600 whitespace-pre-wrap leading-tight">
+                    {signatureDetails.signatureDisplayText}
+                  </div>
+                )}
               </div>
             </div>
             <input
