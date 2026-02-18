@@ -7,7 +7,7 @@ export default function Layout({ children }: { children: ReactNode }) {
   const { pathname } = useLocation();
   const appShellPrefixes = ["/dashboard", "/admin", "/my", "/integrations"];
   const usesAppShell = appShellPrefixes.some((prefix) => pathname.startsWith(prefix));
-  const isPublicProposalView = pathname.startsWith("/proposal/");
+  const isPublicProposalView = pathname.startsWith("/proposal/") || pathname.startsWith("/preview/proposal/");
   const hideHeader = usesAppShell || isPublicProposalView;
   const hideFooter =
     usesAppShell || pathname.startsWith("/proposals") || pathname.startsWith("/p") || isPublicProposalView;

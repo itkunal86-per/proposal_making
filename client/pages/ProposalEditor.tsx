@@ -40,10 +40,10 @@ import { DocumentPanel } from "@/components/DocumentPanel";
 import { BuildPanel } from "@/components/BuildPanel";
 import { UploadsPanel } from "@/components/UploadsPanel";
 import { SignaturesPanel } from "@/components/SignaturesPanel";
+import { SignatureDetailsModal } from "@/components/SignatureDetailsModal";
 import { VariablesPanel } from "@/components/VariablesPanel";
 import { TextFormattingToolbar } from "@/components/TextFormattingToolbar";
 import { fetchVariables, type Variable as ApiVariable } from "@/services/variablesService";
-import { getSignatories } from "@/services/signaturesService";
 
 interface DocumentSettings {
   company?: string;
@@ -71,8 +71,6 @@ export default function ProposalEditor() {
   const [activePanel, setActivePanel] = useState<PanelType>("properties");
   const [documentSettings, setDocumentSettings] = useState<DocumentSettings>({});
   const [textFormatting, setTextFormatting] = useState<Record<string, any>>({});
-  const [addingSignatureMode, setAddingSignatureMode] = useState(false);
-  const [selectedSignatoryId, setSelectedSignatoryId] = useState<string | null>(null);
   const [documentMedia, setDocumentMedia] = useState<Array<{ id: string; url: string; type: "image" | "video"; name: string }>>([]);
   const [libraryMedia, setLibraryMedia] = useState<Array<{ id: string; url: string; type: "image" | "video"; name: string }>>([]);
   const [variables, setVariables] = useState<Array<{ id: string | number; name: string; value: string }>>([]);
@@ -80,6 +78,8 @@ export default function ProposalEditor() {
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [signatureDetailsOpen, setSignatureDetailsOpen] = useState(false);
+  const [signatureDetailsData, setSignatureDetailsData] = useState({ sectionId: "", fieldIndex: 0 });
   const previewContainerRef = useRef<HTMLDivElement>(null);
   const saveTimer = useRef<number | null>(null);
 
@@ -276,41 +276,6 @@ export default function ProposalEditor() {
     }
   }, [isSystemTemplateEdit, activePanel]);
 
-  // Fetch and sync signatories when proposal is loaded (skip for template edits)
-  useEffect(() => {
-    if (!p || !p.id || isSystemTemplateEdit) return;
-
-    const proposalId = p.id;
-
-    (async () => {
-      try {
-        const result = await getSignatories(proposalId);
-        // Check if proposal ID is still the same (in case it changed while fetching)
-        if (p?.id !== proposalId) return;
-
-        if (result.success && result.data) {
-          // Sync API signatories with proposal
-          const converted = result.data.map((s) => ({
-            id: String(s.id),
-            name: s.name,
-            email: s.email,
-            role: s.role,
-            order: s.order,
-          }));
-
-          // Only update if different
-          if (JSON.stringify(p.signatories) !== JSON.stringify(converted)) {
-            setP((prevP) => ({
-              ...prevP,
-              signatories: converted,
-            }));
-          }
-        }
-      } catch (error) {
-        console.error("Failed to fetch signatories:", error);
-      }
-    })();
-  }, [p?.id, isSystemTemplateEdit]);
 
   function commit(next: Proposal, keepVersion = false, note?: string) {
     console.log("Proposal Edit Form Submitted:", next);
@@ -470,17 +435,6 @@ export default function ProposalEditor() {
 
   const section = p.sections[current];
 
-  console.log("ProposalEditor render - variables and content:", {
-    variablesCount: variables.length,
-    variables: variables.map(v => ({ id: v.id, name: v.name, value: v.value })),
-    sectionsWithContent: p.sections.map(s => ({
-      id: s.id,
-      title: s.title,
-      contentLength: s.content?.length || 0,
-      contentSample: s.content?.substring(0, 100) || "",
-      columnContents: (s as any).columnContents?.map((c: string) => c?.substring(0, 50) || "") || [],
-    })),
-  });
 
   return (
     <div className="flex h-screen bg-slate-50">
@@ -1018,43 +972,62 @@ export default function ProposalEditor() {
                 };
                 commit(updated);
               }}
-              onUpdateSignatureField={(sectionId, fieldId, updates) => {
+              onUpdateSignatureField={(sectionId, fieldIndexOrId, updates) => {
                 const updated = {
                   ...p,
                   sections: p.sections.map((s) =>
                     String(s.id) === String(sectionId)
                       ? {
                           ...s,
-                          signatureFields: (s.signatureFields || []).map((field) =>
-                            field.id === fieldId ? { ...field, ...updates } : field
-                          ),
+                          signatureFields: (s.signatureFields || []).map((field, index) => {
+                            // Use index-based matching for reliability
+                            // fieldIndexOrId is passed as a number (index) from ProposalPreview
+                            if (typeof fieldIndexOrId === "number") {
+                              return index === fieldIndexOrId ? { ...field, ...updates } : field;
+                            }
+                            // Fallback to ID-based matching for backwards compatibility
+                            return String(field.id) === String(fieldIndexOrId) ? { ...field, ...updates } : field;
+                          }),
                         }
                       : s
                   ),
                 };
                 commit(updated);
               }}
-              onDeleteSignatureField={(sectionId, fieldId) => {
+              onDeleteSignatureField={(sectionId, fieldIndexOrId) => {
                 const updated = {
                   ...p,
                   sections: p.sections.map((s) =>
                     String(s.id) === String(sectionId)
                       ? {
                           ...s,
-                          signatureFields: (s.signatureFields || []).filter((field) => field.id !== fieldId),
+                          signatureFields: (s.signatureFields || []).filter((field, index) => {
+                            // Use index-based filtering for reliability
+                            // fieldIndexOrId is passed as a number (index) from ProposalPreview
+                            if (typeof fieldIndexOrId === "number") {
+                              return index !== fieldIndexOrId;
+                            }
+                            // Fallback to ID-based matching for backwards compatibility
+                            return String(field.id) !== String(fieldIndexOrId);
+                          }),
                         }
                       : s
                   ),
                 };
                 commit(updated);
               }}
-              onAddSignatureField={(sectionId, recipientId, x, y) => {
+              onAddSignature={(sectionId, x, y) => {
+                // Generate unique ID for this signature
+                const uniqueId = typeof crypto !== "undefined" && "randomUUID" in crypto
+                  ? crypto.randomUUID()
+                  : Math.random().toString(36).slice(2) + Date.now().toString(36);
+
                 const newField = {
-                  id: 0,
-                  recipientId,
+                  id: uniqueId,
+                  recipientId: "",
                   sectionId,
-                  width: 200,
-                  height: 80,
+                  width: 280,
+                  height: 120,
                   top: y,
                   left: x,
                   status: "pending" as const,
@@ -1074,11 +1047,17 @@ export default function ProposalEditor() {
                   ),
                 };
                 commit(updated);
-                setAddingSignatureMode(false);
-                setSelectedSignatoryId(null);
+                // Select the newly added signature immediately so it can be dragged
+                const sectionIndex = p.sections.findIndex((s) => String(s.id) === String(sectionId));
+                const fieldIndex = (p.sections[sectionIndex]?.signatureFields || []).length;
+                const signatureId = `signature-${sectionId}-${fieldIndex}`;
+                setSelectedElementId(signatureId);
+                setSelectedElementType("signature");
               }}
-              isAddingSignatureMode={addingSignatureMode}
-              selectedSignatoryId={selectedSignatoryId}
+              onOpenSignatureDetails={(sectionId, fieldIndex) => {
+                setSignatureDetailsData({ sectionId, fieldIndex });
+                setSignatureDetailsOpen(true);
+              }}
             />
           </div>
 
@@ -1123,20 +1102,7 @@ export default function ProposalEditor() {
                 onMediaRemoved={handleMediaRemoved}
               />
             ) : activePanel === "signatures" ? (
-              <SignaturesPanel
-                proposal={p}
-                onUpdateProposal={commit}
-                isAddingSignatureField={addingSignatureMode}
-                selectedSignatoryId={selectedSignatoryId}
-                onStartAddingSignatureField={(signatoryId) => {
-                  setAddingSignatureMode(true);
-                  setSelectedSignatoryId(signatoryId);
-                }}
-                onStopAddingSignatureField={() => {
-                  setAddingSignatureMode(false);
-                  setSelectedSignatoryId(null);
-                }}
-              />
+              <SignaturesPanel />
             ) : activePanel === "variables" ? (
               <VariablesPanel
                 proposalId={p.id}
@@ -1204,8 +1170,54 @@ export default function ProposalEditor() {
           proposal={p}
           variables={variables}
           onClose={() => setShowPreviewModal(false)}
+          onOpenSignatureDetails={(sectionId, fieldIndex) => {
+            setSignatureDetailsData({ sectionId, fieldIndex });
+            setSignatureDetailsOpen(true);
+            setShowPreviewModal(false);
+          }}
         />
       )}
+
+      <SignatureDetailsModal
+        open={signatureDetailsOpen}
+        signatureDetails={
+          p?.sections[p.sections.findIndex((s) => s.id === signatureDetailsData.sectionId)]?.signatureFields?.[signatureDetailsData.fieldIndex] || {}
+        }
+        onClose={() => setSignatureDetailsOpen(false)}
+        onSave={(details) => {
+          const sectionIndex = p.sections.findIndex((s) => s.id === signatureDetailsData.sectionId);
+          if (sectionIndex >= 0) {
+            const currentField = p.sections[sectionIndex]?.signatureFields?.[signatureDetailsData.fieldIndex];
+            const updatedField = {
+              ...currentField,
+              ...details,
+              // Preserve position and sizing
+              width: currentField?.width || 280,
+              height: currentField?.height || 120,
+              top: currentField?.top,
+              left: currentField?.left,
+              sectionId: currentField?.sectionId || signatureDetailsData.sectionId,
+              id: currentField?.id,
+            };
+
+            const updated = {
+              ...p,
+              sections: p.sections.map((s, idx) =>
+                idx === sectionIndex
+                  ? {
+                      ...s,
+                      signatureFields: (s.signatureFields || []).map((f, fIdx) =>
+                        fIdx === signatureDetailsData.fieldIndex ? updatedField : f
+                      ),
+                    }
+                  : s
+              ),
+            };
+            commit(updated);
+            setSignatureDetailsOpen(false);
+          }
+        }}
+      />
 
       <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
         <DialogContent>

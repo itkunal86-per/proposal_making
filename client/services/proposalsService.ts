@@ -98,10 +98,15 @@ export interface SignatureField {
   left: number;
   signedAt?: number;
   signatureData?: string;
+  signatureDisplayText?: string;
   status: SignatureStatus;
   borderColor?: string;
   borderWidth?: number;
   borderRadius?: number;
+  fullName?: string;
+  email?: string;
+  position?: string;
+  signature?: string;
 }
 
 export interface ProposalSection {
@@ -667,18 +672,23 @@ function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmai
           })) : [],
           signatureFields: Array.isArray(s.signatureFields) ? s.signatureFields.map((field) => ({
             id: String(field.id),
-            recipientId: String(field.recipientId),
-            sectionId: String(field.sectionId),
+            recipientId: String(field.recipientId || field.recipient_id || ""),
+            sectionId: String(field.sectionId || field.section_id || ""),
             width: field.width,
             height: field.height,
             top: typeof field.top === "number" ? field.top : 0,
             left: typeof field.left === "number" ? field.left : 0,
             status: field.status,
-            signedAt: field.signedAt,
-            signatureData: field.signatureData,
-            borderColor: field.borderColor,
-            borderWidth: field.borderWidth,
-            borderRadius: field.borderRadius,
+            signedAt: field.signedAt || field.signed_at,
+            signatureData: field.signatureData || field.signature_data,
+            signatureDisplayText: field.signatureDisplayText || field.signature_display_text,
+            borderColor: field.borderColor || field.border_color,
+            borderWidth: field.borderWidth || field.border_width,
+            borderRadius: field.borderRadius || field.border_radius,
+            fullName: field.fullName || field.full_name,
+            email: field.email,
+            position: field.position,
+            signature: field.signature,
           })) : [],
           comments: Array.isArray(s.comments) ? s.comments : [],
           titleStyles: normalizeStyles(s.titleStyles),

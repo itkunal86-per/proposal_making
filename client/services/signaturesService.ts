@@ -62,9 +62,20 @@ export async function createSignatory(data: CreateSignatoryRequest): Promise<{ s
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       console.error("Create signatory error:", errorData);
+
+      // Extract error message from various API response formats
+      let errorMessage = `Failed to create signatory: ${response.statusText}`;
+      if (typeof errorData?.message === "string") {
+        errorMessage = errorData.message;
+      } else if (typeof errorData?.error === "string") {
+        errorMessage = errorData.error;
+      } else if (errorData?.message && typeof errorData.message === "object") {
+        errorMessage = JSON.stringify(errorData.message);
+      }
+
       return {
         success: false,
-        error: errorData?.message || `Failed to create signatory: ${response.statusText}`,
+        error: errorMessage,
       };
     }
 
@@ -75,9 +86,18 @@ export async function createSignatory(data: CreateSignatoryRequest): Promise<{ s
     };
   } catch (error) {
     console.error("Create signatory exception:", error);
+    let errorMessage = "Failed to create signatory";
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    } else if (typeof error === "string") {
+      errorMessage = error;
+    } else if (error && typeof error === "object") {
+      errorMessage = JSON.stringify(error);
+    }
+
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Failed to create signatory",
+      error: errorMessage,
     };
   }
 }
@@ -104,9 +124,20 @@ export async function getSignatories(proposalId: string): Promise<{ success: boo
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       console.error("Get signatories error:", errorData);
+
+      // Extract error message from various API response formats
+      let errorMessage = `Failed to fetch signatories: ${response.statusText}`;
+      if (typeof errorData?.message === "string") {
+        errorMessage = errorData.message;
+      } else if (typeof errorData?.error === "string") {
+        errorMessage = errorData.error;
+      } else if (errorData?.message && typeof errorData.message === "object") {
+        errorMessage = JSON.stringify(errorData.message);
+      }
+
       return {
         success: false,
-        error: errorData?.message || `Failed to fetch signatories: ${response.statusText}`,
+        error: errorMessage,
       };
     }
 
@@ -117,9 +148,18 @@ export async function getSignatories(proposalId: string): Promise<{ success: boo
     };
   } catch (error) {
     console.error("Get signatories exception:", error);
+    let errorMessage = "Failed to fetch signatories";
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    } else if (typeof error === "string") {
+      errorMessage = error;
+    } else if (error && typeof error === "object") {
+      errorMessage = JSON.stringify(error);
+    }
+
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Failed to fetch signatories",
+      error: errorMessage,
     };
   }
 }
@@ -146,18 +186,38 @@ export async function deleteSignatory(signatureId: number | string): Promise<{ s
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       console.error("Delete signatory error:", errorData);
+
+      // Extract error message from various API response formats
+      let errorMessage = `Failed to delete signatory: ${response.statusText}`;
+      if (typeof errorData?.message === "string") {
+        errorMessage = errorData.message;
+      } else if (typeof errorData?.error === "string") {
+        errorMessage = errorData.error;
+      } else if (errorData?.message && typeof errorData.message === "object") {
+        errorMessage = JSON.stringify(errorData.message);
+      }
+
       return {
         success: false,
-        error: errorData?.message || `Failed to delete signatory: ${response.statusText}`,
+        error: errorMessage,
       };
     }
 
     return { success: true };
   } catch (error) {
     console.error("Delete signatory exception:", error);
+    let errorMessage = "Failed to delete signatory";
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    } else if (typeof error === "string") {
+      errorMessage = error;
+    } else if (error && typeof error === "object") {
+      errorMessage = JSON.stringify(error);
+    }
+
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Failed to delete signatory",
+      error: errorMessage,
     };
   }
 }
