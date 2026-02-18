@@ -32,6 +32,18 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
   onDelete,
   onOpenDetails,
 }) => {
+  // Debug logging
+  useEffect(() => {
+    console.log(`🖊️ SignatureFieldEditor [${id}]:`, {
+      status: field.status,
+      fullName: field.fullName,
+      signature: field.signature,
+      signatureDisplayText: field.signatureDisplayText,
+      hasDisplayText: !!field.signatureDisplayText,
+      position: { top: field.top, left: field.left, width: field.width, height: field.height },
+    });
+  }, [id, field]);
+
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
@@ -193,8 +205,12 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
         borderRadius: field.borderRadius ? `${field.borderRadius}px` : "0px",
         borderWidth: field.borderWidth ? `${field.borderWidth}px` : "2px",
         borderStyle: "dashed",
+        borderColor: field.status === "signed" ? "#22c55e" : field.borderColor || "#d1d5db",
+        backgroundColor: field.status === "signed" ? "#dcfce7" : "#f1f5f9",
         cursor: isDragging ? "grabbing" : "grab",
         zIndex: isDragging || isResizing ? 10000 : selected ? 1000 : 10,
+        visibility: "visible",
+        display: "flex",
       }}
       onMouseDown={handleMouseDown}
     >

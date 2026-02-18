@@ -472,7 +472,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
   }
 
   // Debug logging
-  console.log("ProposalPreview received proposal:", {
+  console.log("📄 ProposalPreview received proposal:", {
     id: proposal.id,
     title: proposal.title,
     sectionsCount: proposal.sections?.length,
@@ -482,6 +482,13 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
       textsCount: s.texts?.length,
       imagesCount: s.images?.length,
       shapesCount: s.shapes?.length,
+      signatureFieldsCount: s.signatureFields?.length,
+      signatureFields: s.signatureFields?.map((f: any) => ({
+        id: f.id,
+        fullName: f.fullName,
+        status: f.status,
+        position: { top: f.top, left: f.left },
+      })),
     })),
   });
 
@@ -1070,6 +1077,9 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                     onAddSignatureField(section.id, selectedSignatoryId, x, y);
                   }
                 }}
+                ref={(el) => {
+                  if (el) sectionRefs.current.set(section.id, el);
+                }}
               >
                 {section.shapes && section.shapes.map((shape, sIndex) => (
                   <ShapeEditor
@@ -1183,30 +1193,36 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                     }
                   />
                 ))}
-                {section.signatureFields && section.signatureFields.map((field, fieldIndex) => {
-                  const signatureId = `signature-${section.id}-${fieldIndex}`;
-                  return (
-                    <SignatureFieldEditor
-                      key={signatureId}
-                      id={signatureId}
-                      field={field}
-                      index={fieldIndex}
-                      selected={selectedElementId === signatureId}
-                      onSelect={() =>
-                        onSelectElement(signatureId, "signature")
-                      }
-                      onUpdate={(updates) =>
-                        onUpdateSignatureField?.(section.id, String(field.id), updates)
-                      }
-                      onDelete={() =>
-                        onDeleteSignatureField?.(section.id, String(field.id))
-                      }
-                      onOpenDetails={() =>
-                        onOpenSignatureDetails?.(section.id, fieldIndex)
-                      }
-                    />
-                  );
-                })}
+                {section.signatureFields && section.signatureFields.length > 0 && (
+                  <>
+                    {console.log("Rendering signature fields:", section.signatureFields)}
+                    {section.signatureFields.map((field, fieldIndex) => {
+                      const signatureId = `signature-${section.id}-${fieldIndex}`;
+                      console.log(`Signature field [${signatureId}]:`, field);
+                      return (
+                        <SignatureFieldEditor
+                          key={signatureId}
+                          id={signatureId}
+                          field={field}
+                          index={fieldIndex}
+                          selected={selectedElementId === signatureId}
+                          onSelect={() =>
+                            onSelectElement(signatureId, "signature")
+                          }
+                          onUpdate={(updates) =>
+                            onUpdateSignatureField?.(section.id, String(field.id), updates)
+                          }
+                          onDelete={() =>
+                            onDeleteSignatureField?.(section.id, String(field.id))
+                          }
+                          onOpenDetails={() =>
+                            onOpenSignatureDetails?.(section.id, fieldIndex)
+                          }
+                        />
+                      );
+                    })}
+                  </>
+                )}
               </div>
               ) : null}
               </div>
