@@ -3,7 +3,7 @@ name: Deploy to FTP
 on:
   push:
     branches:
-      - main2
+      - main
 
 jobs:
   deploy:
