@@ -6,9 +6,6 @@ interface SignatureFieldEditorProps {
   field: SignatureField;
   recipient: SignatureRecipient | undefined;
   selected: boolean;
-  isDraggingThis?: boolean;
-  onDragStart?: () => void;
-  onDragEnd?: () => void;
   onSelect: () => void;
   onUpdate: (updates: Partial<SignatureField>) => void;
   onDelete: () => void;
@@ -19,9 +16,6 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
   field,
   recipient,
   selected,
-  isDraggingThis = false,
-  onDragStart,
-  onDragEnd,
   onSelect,
   onUpdate,
   onDelete,
@@ -31,17 +25,28 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [resizeStart, setResizeStart] = useState({ x: 0, y: 0, width: 0, height: 0 });
   const elementRef = useRef<HTMLDivElement>(null);
+  const isDraggingRef = useRef(false);
+  const isResizingRef = useRef(false);
 
   // Show controls for newly placed fields (id === 0), when selected, or when dragging
   const isNewField = field.id === 0;
   const shouldShowControls = selected || isNewField || isDragging || isResizing;
 
+  // Update refs whenever state changes
+  useEffect(() => {
+    isDraggingRef.current = isDragging;
+    isResizingRef.current = isResizing;
+  }, [isDragging, isResizing]);
+
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      if (isDragging && elementRef.current) {
-        const parent = elementRef.current.parentElement;
-        if (!parent) return;
+      if (!isDraggingRef.current && !isResizingRef.current) return;
+      if (!elementRef.current) return;
 
+      const parent = elementRef.current.parentElement;
+      if (!parent) return;
+
+      if (isDraggingRef.current) {
         const rect = parent.getBoundingClientRect();
         const newLeft = e.clientX - rect.left - dragOffset.x;
         const newTop = e.clientY - rect.top - dragOffset.y;
@@ -52,7 +57,7 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
         });
       }
 
-      if (isResizing && elementRef.current) {
+      if (isResizingRef.current) {
         const deltaX = e.clientX - resizeStart.x;
         const deltaY = e.clientY - resizeStart.y;
 
@@ -69,18 +74,17 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
     const handleMouseUp = () => {
       setIsDragging(false);
       setIsResizing(false);
-      onDragEnd?.();
     };
 
-    if (isDragging || isResizing) {
-      document.addEventListener("mousemove", handleMouseMove);
-      document.addEventListener("mouseup", handleMouseUp);
-      return () => {
-        document.removeEventListener("mousemove", handleMouseMove);
-        document.removeEventListener("mouseup", handleMouseUp);
-      };
-    }
-  }, [isDragging, isResizing, dragOffset, resizeStart, onUpdate, onDragEnd]);
+    // Only attach listeners once when component mounts
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [dragOffset, resizeStart, onUpdate]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
@@ -98,7 +102,6 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
       y: e.clientY - elementRect.top,
     });
     setIsDragging(true);
-    onDragStart?.();
   };
 
   const handleResizeMouseDown = (e: React.MouseEvent) => {
@@ -130,7 +133,7 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
         borderWidth: field.borderWidth ? `${field.borderWidth}px` : "2px",
         borderStyle: "dashed",
         cursor: isDragging ? "grabbing" : "grab",
-        zIndex: isDraggingThis ? 10000 : selected || isDragging || isResizing ? 1000 : 10,
+        zIndex: isDragging || isResizing ? 10000 : selected ? 1000 : 10,
       }}
       onMouseDown={handleMouseDown}
     >

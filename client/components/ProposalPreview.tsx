@@ -328,7 +328,6 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
   const [customContentHeights, setCustomContentHeights] = React.useState<Record<string, number>>({});
   const [resizingContentId, setResizingContentId] = React.useState<string | null>(null);
   const [sectionWidths, setSectionWidths] = React.useState<Record<string, number>>({});
-  const [draggingSignatureId, setDraggingSignatureId] = React.useState<string | null>(null);
 
   const sectionRefs = React.useRef<Map<string, HTMLDivElement>>(new Map());
 
@@ -1168,7 +1167,6 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                 {section.signatureFields && section.signatureFields.map((field, fieldIndex) => {
                   const recipient = proposal.signatories?.find((s) => s.id === field.recipientId);
                   const signatureId = `signature-${section.id}-${field.id}`;
-                  const isDraggingThis = draggingSignatureId === signatureId;
                   return (
                     <SignatureFieldEditor
                       key={`signature-${section.id}-${fieldIndex}`}
@@ -1176,9 +1174,6 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                       field={field}
                       recipient={recipient}
                       selected={selectedElementId === signatureId}
-                      isDraggingThis={isDraggingThis}
-                      onDragStart={() => setDraggingSignatureId(signatureId)}
-                      onDragEnd={() => setDraggingSignatureId(null)}
                       onSelect={() =>
                         onSelectElement(signatureId, "signature")
                       }
