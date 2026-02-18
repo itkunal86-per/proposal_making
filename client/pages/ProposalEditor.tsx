@@ -40,6 +40,7 @@ import { DocumentPanel } from "@/components/DocumentPanel";
 import { BuildPanel } from "@/components/BuildPanel";
 import { UploadsPanel } from "@/components/UploadsPanel";
 import { SignaturesPanel } from "@/components/SignaturesPanel";
+import { SignatureDetailsModal } from "@/components/SignatureDetailsModal";
 import { VariablesPanel } from "@/components/VariablesPanel";
 import { TextFormattingToolbar } from "@/components/TextFormattingToolbar";
 import { fetchVariables, type Variable as ApiVariable } from "@/services/variablesService";
@@ -77,6 +78,8 @@ export default function ProposalEditor() {
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [signatureDetailsOpen, setSignatureDetailsOpen] = useState(false);
+  const [signatureDetailsData, setSignatureDetailsData] = useState({ sectionId: "", fieldIndex: 0 });
   const previewContainerRef = useRef<HTMLDivElement>(null);
   const saveTimer = useRef<number | null>(null);
 
@@ -1037,6 +1040,10 @@ export default function ProposalEditor() {
                 };
                 commit(updated);
               }}
+              onOpenSignatureDetails={(sectionId, fieldIndex) => {
+                setSignatureDetailsData({ sectionId, fieldIndex });
+                setSignatureDetailsOpen(true);
+              }}
             />
           </div>
 
@@ -1151,6 +1158,36 @@ export default function ProposalEditor() {
           onClose={() => setShowPreviewModal(false)}
         />
       )}
+
+      <SignatureDetailsModal
+        open={signatureDetailsOpen}
+        signatureDetails={
+          p?.sections[p.sections.findIndex((s) => s.id === signatureDetailsData.sectionId)]?.signatureFields?.[signatureDetailsData.fieldIndex] || {}
+        }
+        onClose={() => setSignatureDetailsOpen(false)}
+        onSave={(details) => {
+          const sectionIndex = p.sections.findIndex((s) => s.id === signatureDetailsData.sectionId);
+          if (sectionIndex >= 0) {
+            const updated = {
+              ...p,
+              sections: p.sections.map((s, idx) =>
+                idx === sectionIndex
+                  ? {
+                      ...s,
+                      signatureFields: (s.signatureFields || []).map((f, fIdx) =>
+                        fIdx === signatureDetailsData.fieldIndex
+                          ? { ...f, ...details }
+                          : f
+                      ),
+                    }
+                  : s
+              ),
+            };
+            commit(updated);
+            setSignatureDetailsOpen(false);
+          }
+        }}
+      />
 
       <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
         <DialogContent>

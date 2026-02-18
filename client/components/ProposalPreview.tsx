@@ -297,6 +297,7 @@ interface ProposalPreviewProps {
   onUpdateSignatureField?: (sectionId: string, fieldId: string, updates: any) => void;
   onDeleteSignatureField?: (sectionId: string, fieldId: string) => void;
   onAddSignature?: (sectionId: string, x: number, y: number) => void;
+  onOpenSignatureDetails?: (sectionId: string, fieldIndex: number) => void;
   onAddSignatureField?: (sectionId: string, recipientId: string, x: number, y: number) => void;
   isAddingSignatureMode?: boolean;
   selectedSignatoryId?: string | null;
@@ -320,6 +321,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
   onUpdateSignatureField,
   onDeleteSignatureField,
   onAddSignature,
+  onOpenSignatureDetails,
   onAddSignatureField,
   isAddingSignatureMode = false,
   selectedSignatoryId = null,
@@ -1198,6 +1200,9 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                       }
                       onDelete={() =>
                         onDeleteSignatureField?.(section.id, String(field.id))
+                      }
+                      onOpenDetails={() =>
+                        onOpenSignatureDetails?.(section.id, fieldIndex)
                       }
                     />
                   );

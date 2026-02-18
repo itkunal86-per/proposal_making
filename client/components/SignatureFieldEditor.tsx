@@ -19,6 +19,7 @@ interface SignatureFieldEditorProps {
   onSelect: () => void;
   onUpdate: (updates: Partial<SignatureField>) => void;
   onDelete: () => void;
+  onOpenDetails: () => void;
 }
 
 export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
@@ -29,6 +30,7 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
   onSelect,
   onUpdate,
   onDelete,
+  onOpenDetails,
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
@@ -197,20 +199,36 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
       onMouseDown={handleMouseDown}
     >
       {/* Signature space */}
-      <div className="flex-1 pointer-events-none border-b border-slate-300 flex items-center justify-center">
-        <svg
-          className="w-8 h-8 text-slate-300"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={1.5}
-            d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.216 0-2.25 1.034-2.25 2.25v10.5a2.25 2.25 0 002.25 2.25h3c1.216 0 2.25-1.034 2.25-2.25m0-1.5c0 1.216 1.034 2.25 2.25 2.25h1.5a2.25 2.25 0 002.25-2.25m-1.5 0V18a2.25 2.25 0 002.25 2.25h.75m0 0V5.25"
-          />
-        </svg>
+      <div
+        className="flex-1 pointer-events-auto border-b border-slate-300 flex items-center justify-center cursor-pointer hover:bg-slate-100 transition-colors"
+        onClick={(e) => {
+          e.stopPropagation();
+          onOpenDetails();
+        }}
+        title="Click to edit signature details"
+      >
+        {field.fullName ? (
+          <div className="text-center px-2">
+            <div className="text-sm font-semibold text-slate-700">{field.signature || field.fullName}</div>
+            {field.position && (
+              <div className="text-xs text-muted-foreground mt-1">{field.position}</div>
+            )}
+          </div>
+        ) : (
+          <svg
+            className="w-8 h-8 text-slate-300"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.216 0-2.25 1.034-2.25 2.25v10.5a2.25 2.25 0 002.25 2.25h3c1.216 0 2.25-1.034 2.25-2.25m0-1.5c0 1.216 1.034 2.25 2.25 2.25h1.5a2.25 2.25 0 002.25-2.25m-1.5 0V18a2.25 2.25 0 002.25 2.25h.75m0 0V5.25"
+            />
+          </svg>
+        )}
       </div>
 
       {/* Label */}

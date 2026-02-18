@@ -102,6 +102,10 @@ export interface SignatureField {
   borderColor?: string;
   borderWidth?: number;
   borderRadius?: number;
+  fullName?: string;
+  email?: string;
+  position?: string;
+  signature?: string;
 }
 
 export interface ProposalSection {
