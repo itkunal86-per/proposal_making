@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { SignatureField, SignatureRecipient } from "@/services/proposalsService";
 
 interface SignatureFieldEditorProps {
@@ -24,78 +24,77 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
   const [isResizing, setIsResizing] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [resizeStart, setResizeStart] = useState({ x: 0, y: 0, width: 0, height: 0 });
-  const [showControlsTemporarily, setShowControlsTemporarily] = useState(true);
+  const [showControls, setShowControls] = useState(true);
   const elementRef = useRef<HTMLDivElement>(null);
-  const isDraggingRef = useRef(false);
-  const isResizingRef = useRef(false);
-  const hasBeenInteractedRef = useRef(false);
+  const timeoutRef = useRef<NodeJS.Timeout>();
 
-  // Keep controls visible for 3 seconds after placement, or when selected/dragging/resizing
+  // Auto-hide controls after 3 seconds if not interacting
   useEffect(() => {
-    if (showControlsTemporarily && !hasBeenInteractedRef.current) {
-      const timer = setTimeout(() => {
-        setShowControlsTemporarily(false);
+    if (showControls && !selected && !isDragging && !isResizing) {
+      timeoutRef.current = setTimeout(() => {
+        setShowControls(false);
       }, 3000);
-      return () => clearTimeout(timer);
     }
-  }, [showControlsTemporarily]);
-
-  // Show controls when selected, dragging, resizing, or temporarily after placement
-  const shouldShowControls = selected || isDragging || isResizing || showControlsTemporarily;
-
-  // Update refs whenever state changes
-  useEffect(() => {
-    isDraggingRef.current = isDragging;
-    isResizingRef.current = isResizing;
-  }, [isDragging, isResizing]);
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!isDraggingRef.current && !isResizingRef.current) return;
-      if (!elementRef.current) return;
-
-      const parent = elementRef.current.parentElement;
-      if (!parent) return;
-
-      if (isDraggingRef.current) {
-        const rect = parent.getBoundingClientRect();
-        const newLeft = e.clientX - rect.left - dragOffset.x;
-        const newTop = e.clientY - rect.top - dragOffset.y;
-
-        onUpdate({
-          left: Math.max(0, newLeft),
-          top: Math.max(0, newTop),
-        });
-      }
-
-      if (isResizingRef.current) {
-        const deltaX = e.clientX - resizeStart.x;
-        const deltaY = e.clientY - resizeStart.y;
-
-        const newWidth = Math.max(100, resizeStart.width + deltaX);
-        const newHeight = Math.max(60, resizeStart.height + deltaY);
-
-        onUpdate({
-          width: newWidth,
-          height: newHeight,
-        });
-      }
-    };
-
-    const handleMouseUp = () => {
-      setIsDragging(false);
-      setIsResizing(false);
-    };
-
-    // Only attach listeners once when component mounts
-    document.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("mouseup", handleMouseUp);
-
     return () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
-  }, [dragOffset, resizeStart, onUpdate]);
+  }, [showControls, selected, isDragging, isResizing]);
+
+  // Show controls when selected or interacting
+  useEffect(() => {
+    if (selected || isDragging || isResizing) {
+      setShowControls(true);
+    }
+  }, [selected, isDragging, isResizing]);
+
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (!isDragging && !isResizing) return;
+    if (!elementRef.current) return;
+
+    const parent = elementRef.current.parentElement;
+    if (!parent) return;
+
+    if (isDragging) {
+      const rect = parent.getBoundingClientRect();
+      const newLeft = e.clientX - rect.left - dragOffset.x;
+      const newTop = e.clientY - rect.top - dragOffset.y;
+
+      onUpdate({
+        left: Math.max(0, newLeft),
+        top: Math.max(0, newTop),
+      });
+    }
+
+    if (isResizing) {
+      const deltaX = e.clientX - resizeStart.x;
+      const deltaY = e.clientY - resizeStart.y;
+
+      const newWidth = Math.max(100, resizeStart.width + deltaX);
+      const newHeight = Math.max(60, resizeStart.height + deltaY);
+
+      onUpdate({
+        width: newWidth,
+        height: newHeight,
+      });
+    }
+  }, [isDragging, isResizing, dragOffset, resizeStart, onUpdate]);
+
+  const handleMouseUp = useCallback(() => {
+    setIsDragging(false);
+    setIsResizing(false);
+  }, []);
+
+  // Attach event listeners
+  useEffect(() => {
+    if (isDragging || isResizing) {
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
+      return () => {
+        document.removeEventListener("mousemove", handleMouseMove);
+        document.removeEventListener("mouseup", handleMouseUp);
+      };
+    }
+  }, [isDragging, isResizing, handleMouseMove, handleMouseUp]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
@@ -103,7 +102,6 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
     // Don't drag if clicking on resize handle or delete button
     if (target.closest(".resize-handle") || target.closest("button")) return;
 
-    hasBeenInteractedRef.current = true;
     onSelect();
     if (!elementRef.current) return;
 
@@ -118,7 +116,6 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
 
   const handleResizeMouseDown = (e: React.MouseEvent) => {
     e.stopPropagation();
-    hasBeenInteractedRef.current = true;
     setResizeStart({
       x: e.clientX,
       y: e.clientY,
@@ -165,7 +162,7 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
         )}
       </div>
 
-      {shouldShowControls && (
+      {showControls && (
         <>
           {/* Resize handle */}
           <div
