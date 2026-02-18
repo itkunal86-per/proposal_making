@@ -26,6 +26,10 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
   const [resizeStart, setResizeStart] = useState({ x: 0, y: 0, width: 0, height: 0 });
   const elementRef = useRef<HTMLDivElement>(null);
 
+  // Show controls for newly placed fields (id === 0) or when selected
+  const isNewField = field.id === 0;
+  const shouldShowControls = selected || isNewField;
+
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (isDragging && elementRef.current) {
@@ -72,7 +76,10 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
   }, [isDragging, isResizing, dragOffset, resizeStart, onUpdate]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    if ((e.target as HTMLElement).closest(".resize-handle")) return;
+    const target = e.target as HTMLElement;
+
+    // Don't drag if clicking on resize handle or delete button
+    if (target.closest(".resize-handle") || target.closest("button")) return;
 
     onSelect();
     if (!elementRef.current) return;
@@ -100,7 +107,9 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
   return (
     <div
       ref={elementRef}
-      className={`absolute pointer-events-auto transition-all duration-200 flex flex-col border-slate-300 bg-slate-50 ${
+      className={`absolute pointer-events-auto flex flex-col border-slate-300 bg-slate-50 ${
+        !isDragging && !isResizing ? "transition-all duration-200" : ""
+      } ${
         selected ? "ring-2 ring-blue-500 ring-offset-1" : ""
       }`}
       style={{
@@ -113,7 +122,7 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
         borderWidth: field.borderWidth ? `${field.borderWidth}px` : "2px",
         borderStyle: "dashed",
         cursor: isDragging ? "grabbing" : "grab",
-        zIndex: selected ? 1000 : 10,
+        zIndex: selected || isDragging || isResizing ? 1000 : 10,
       }}
       onMouseDown={handleMouseDown}
     >
@@ -132,7 +141,7 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
         )}
       </div>
 
-      {selected && (
+      {shouldShowControls && (
         <>
           {/* Resize handle */}
           <div

@@ -1077,8 +1077,11 @@ export default function ProposalEditor() {
                 setAddingSignatureMode(false);
                 setSelectedSignatoryId(null);
                 // Auto-select the newly created signature field for immediate interaction
-                setSelectedElementId(`signature-${sectionId}-0`);
-                setSelectedElementType("signature");
+                // Use a small timeout to ensure React has re-rendered with the new field
+                setTimeout(() => {
+                  setSelectedElementId(`signature-${sectionId}-0`);
+                  setSelectedElementType("signature");
+                }, 0);
               }}
               isAddingSignatureMode={addingSignatureMode}
               selectedSignatoryId={selectedSignatoryId}
