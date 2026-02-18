@@ -52,6 +52,16 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
   const dragOffsetRef = useRef({ x: 0, y: 0 });
   const resizeStartRef = useRef({ x: 0, y: 0, width: 0, height: 0 });
 
+  // Reset dragging/resizing state when signature is deselected
+  useEffect(() => {
+    if (!selected && (isDragging || isResizing)) {
+      isDraggingRef.current = false;
+      isResizingRef.current = false;
+      setIsDragging(false);
+      setIsResizing(false);
+    }
+  }, [selected]);
+
   // Auto-hide controls after 3 seconds if not interacting
   useEffect(() => {
     if (showControls && !selected && !isDragging && !isResizing) {
@@ -92,11 +102,15 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
   }, []);
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
+    // Only process events if this instance is actually dragging or resizing
     if (!isDraggingRef.current && !isResizingRef.current) return;
     if (!elementRef.current) return;
 
     const parent = getPositionedParent();
     if (!parent) return;
+
+    // Prevent default to avoid text selection while dragging
+    e.preventDefault();
 
     if (isDraggingRef.current) {
       const rect = parent.getBoundingClientRect();
@@ -147,12 +161,22 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
     const target = e.target as HTMLElement;
 
     // Don't drag if clicking on resize handle or delete button
-    if (target.closest(".resize-handle") || target.closest("button")) return;
+    if (target.closest(".resize-handle") || target.closest("button")) {
+      return;
+    }
+
+    // Don't drag if clicking on the click-to-edit area
+    const contentDiv = (e.currentTarget as HTMLElement).querySelector("div[title='Click to edit signature details']");
+    if (contentDiv && contentDiv.contains(target)) {
+      return;
+    }
+
+    e.stopPropagation();
+    e.preventDefault();
 
     onSelect();
     if (!elementRef.current) return;
 
-    const elementRect = elementRef.current.getBoundingClientRect();
     const parent = getPositionedParent();
     if (!parent) return;
 

@@ -1175,10 +1175,8 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                 ))}
                 {section.signatureFields && section.signatureFields.length > 0 && (
                   <>
-                    {console.log("Rendering signature fields:", section.signatureFields)}
                     {section.signatureFields.map((field, fieldIndex) => {
                       const signatureId = `signature-${section.id}-${fieldIndex}`;
-                      console.log(`Signature field [${signatureId}]:`, field);
                       return (
                         <SignatureFieldEditor
                           key={signatureId}
