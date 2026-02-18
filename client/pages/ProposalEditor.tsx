@@ -1018,8 +1018,8 @@ export default function ProposalEditor() {
                   id: 0,
                   recipientId: "",
                   sectionId,
-                  width: 200,
-                  height: 80,
+                  width: 280,
+                  height: 120,
                   top: y,
                   left: x,
                   status: "pending" as const,
@@ -1168,6 +1168,7 @@ export default function ProposalEditor() {
         onSave={(details) => {
           const sectionIndex = p.sections.findIndex((s) => s.id === signatureDetailsData.sectionId);
           if (sectionIndex >= 0) {
+            const currentField = p.sections[sectionIndex]?.signatureFields?.[signatureDetailsData.fieldIndex];
             const updated = {
               ...p,
               sections: p.sections.map((s, idx) =>
@@ -1176,7 +1177,17 @@ export default function ProposalEditor() {
                       ...s,
                       signatureFields: (s.signatureFields || []).map((f, fIdx) =>
                         fIdx === signatureDetailsData.fieldIndex
-                          ? { ...f, ...details }
+                          ? {
+                              ...f,
+                              ...details,
+                              // Preserve position and sizing
+                              width: currentField?.width || f.width,
+                              height: currentField?.height || f.height,
+                              top: currentField?.top || f.top,
+                              left: currentField?.left || f.left,
+                              sectionId: currentField?.sectionId || f.sectionId,
+                              id: currentField?.id || f.id,
+                            }
                           : f
                       ),
                     }

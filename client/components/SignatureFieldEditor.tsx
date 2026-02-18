@@ -200,7 +200,7 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
     >
       {/* Signature space */}
       <div
-        className="flex-1 pointer-events-auto border-b border-slate-300 flex items-center justify-center cursor-pointer hover:bg-slate-100 transition-colors p-2"
+        className="flex-1 pointer-events-auto border-b border-slate-300 flex items-center justify-center cursor-pointer hover:bg-slate-100 transition-colors p-3 overflow-hidden"
         onClick={(e) => {
           e.stopPropagation();
           onOpenDetails();
@@ -208,9 +208,10 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
         title="Click to edit signature details"
       >
         {field.status === "signed" && field.signatureDisplayText ? (
-          <div className="text-center px-2">
+          <div className="text-center w-full px-1">
+            {/* Signature Name */}
             <div
-              className="text-sm font-script italic text-slate-700 mb-1"
+              className="text-lg font-bold text-slate-800 mb-1 break-words"
               style={{
                 fontFamily: "cursive",
                 fontStyle: "italic",
@@ -219,38 +220,48 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
             >
               {field.signature}
             </div>
-            <div className="text-xs text-slate-600 whitespace-pre-wrap leading-tight">
-              {field.signatureDisplayText}
+            {/* Signature Metadata */}
+            <div className="text-xs text-slate-600 whitespace-pre-wrap leading-tight break-words">
+              {field.signatureDisplayText?.replace(/\\n/g, '\n')}
             </div>
+            {/* Optional: Show position if available */}
+            {field.position && (
+              <div className="text-xs text-slate-500 mt-1 italic">
+                {field.position}
+              </div>
+            )}
           </div>
         ) : field.fullName ? (
           <div className="text-center px-2">
-            <div className="text-sm font-semibold text-slate-700">{field.signature || field.fullName}</div>
+            <div className="text-sm font-semibold text-slate-700 break-words">{field.signature || field.fullName}</div>
             {field.position && (
               <div className="text-xs text-muted-foreground mt-1">{field.position}</div>
             )}
           </div>
         ) : (
-          <svg
-            className="w-8 h-8 text-slate-300"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={1.5}
-              d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.216 0-2.25 1.034-2.25 2.25v10.5a2.25 2.25 0 002.25 2.25h3c1.216 0 2.25-1.034 2.25-2.25m0-1.5c0 1.216 1.034 2.25 2.25 2.25h1.5a2.25 2.25 0 002.25-2.25m-1.5 0V18a2.25 2.25 0 002.25 2.25h.75m0 0V5.25"
-            />
-          </svg>
+          <div className="flex flex-col items-center gap-2 text-slate-300">
+            <svg
+              className="w-8 h-8"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1.5}
+                d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.216 0-2.25 1.034-2.25 2.25v10.5a2.25 2.25 0 002.25 2.25h3c1.216 0 2.25-1.034 2.25-2.25m0-1.5c0 1.216 1.034 2.25 2.25 2.25h1.5a2.25 2.25 0 002.25-2.25m-1.5 0V18a2.25 2.25 0 002.25 2.25h.75m0 0V5.25"
+              />
+            </svg>
+            <span className="text-xs">Click to sign</span>
+          </div>
         )}
       </div>
 
       {/* Label */}
-      <div className="text-center pointer-events-none p-2">
-        <div className="text-xs font-semibold px-2 py-1 rounded bg-slate-200 text-foreground">
-          Signature {index + 1}
+      <div className="text-center pointer-events-none p-2 bg-slate-100">
+        <div className="text-xs font-semibold px-2 py-1 rounded bg-slate-300 text-slate-800">
+          {field.fullName ? `${field.fullName}${field.position ? ` - ${field.position}` : ""}` : `Signature ${index + 1}`}
         </div>
       </div>
 

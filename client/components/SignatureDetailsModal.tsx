@@ -131,7 +131,9 @@ export const SignatureDetailsModal: React.FC<SignatureDetailsModalProps> = ({
         {isSignedAlready && signatureDetails.signatureDisplayText && (
           <div className="bg-blue-50 border border-blue-200 rounded p-3 text-sm text-blue-900">
             <div className="font-semibold mb-1">Original Signature:</div>
-            <div className="whitespace-pre-wrap font-mono text-xs">{signatureDetails.signatureDisplayText}</div>
+            <div className="whitespace-pre-wrap font-mono text-xs">
+              {signatureDetails.signatureDisplayText.replace(/\\n/g, '\n')}
+            </div>
           </div>
         )}
 
@@ -198,7 +200,7 @@ export const SignatureDetailsModal: React.FC<SignatureDetailsModalProps> = ({
                 </div>
                 {isSignedAlready && signatureDetails.signedAt && (
                   <div className="text-xs text-slate-600 whitespace-pre-wrap leading-tight">
-                    {signatureDetails.signatureDisplayText}
+                    {signatureDetails.signatureDisplayText?.replace(/\\n/g, '\n')}
                   </div>
                 )}
               </div>
