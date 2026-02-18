@@ -269,7 +269,7 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
         borderColor: field.status === "signed" ? "#22c55e" : field.borderColor || "#d1d5db",
         backgroundColor: field.status === "signed" ? "#dcfce7" : "#f1f5f9",
         cursor: isDragging ? "grabbing" : "grab",
-        zIndex: isDragging || isResizing ? 999999 : selected ? 1000 : 10,
+        zIndex: isDragging || isResizing ? 2147483647 : selected ? 1000 : 10,
         visibility: "visible",
         display: "flex",
       }}
