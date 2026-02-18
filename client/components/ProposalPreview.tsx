@@ -1164,12 +1164,13 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                     }
                   />
                 ))}
-                {section.signatureFields && section.signatureFields.map((field, fieldIndex) => {
+                {section.signatureFields && section.signatureFields.map((field) => {
                   const recipient = proposal.signatories?.find((s) => s.id === field.recipientId);
-                  const signatureId = `signature-${section.id}-${field.id}`;
+                  // Use stable ID based on section + recipient (never changes during persistence)
+                  const signatureId = `signature-${section.id}-${field.recipientId}`;
                   return (
                     <SignatureFieldEditor
-                      key={`signature-${section.id}-${fieldIndex}`}
+                      key={signatureId}
                       id={signatureId}
                       field={field}
                       recipient={recipient}

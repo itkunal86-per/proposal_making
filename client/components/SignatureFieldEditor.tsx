@@ -24,13 +24,24 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
   const [isResizing, setIsResizing] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [resizeStart, setResizeStart] = useState({ x: 0, y: 0, width: 0, height: 0 });
+  const [showControlsTemporarily, setShowControlsTemporarily] = useState(true);
   const elementRef = useRef<HTMLDivElement>(null);
   const isDraggingRef = useRef(false);
   const isResizingRef = useRef(false);
+  const hasBeenInteractedRef = useRef(false);
 
-  // Show controls for newly placed fields (id === 0), when selected, or when dragging
-  const isNewField = field.id === 0;
-  const shouldShowControls = selected || isNewField || isDragging || isResizing;
+  // Keep controls visible for 3 seconds after placement, or when selected/dragging/resizing
+  useEffect(() => {
+    if (showControlsTemporarily && !hasBeenInteractedRef.current) {
+      const timer = setTimeout(() => {
+        setShowControlsTemporarily(false);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [showControlsTemporarily]);
+
+  // Show controls when selected, dragging, resizing, or temporarily after placement
+  const shouldShowControls = selected || isDragging || isResizing || showControlsTemporarily;
 
   // Update refs whenever state changes
   useEffect(() => {
@@ -92,6 +103,7 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
     // Don't drag if clicking on resize handle or delete button
     if (target.closest(".resize-handle") || target.closest("button")) return;
 
+    hasBeenInteractedRef.current = true;
     onSelect();
     if (!elementRef.current) return;
 
@@ -106,6 +118,7 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
 
   const handleResizeMouseDown = (e: React.MouseEvent) => {
     e.stopPropagation();
+    hasBeenInteractedRef.current = true;
     setResizeStart({
       x: e.clientX,
       y: e.clientY,
