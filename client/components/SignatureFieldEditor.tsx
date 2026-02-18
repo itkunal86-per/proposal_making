@@ -200,14 +200,30 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
     >
       {/* Signature space */}
       <div
-        className="flex-1 pointer-events-auto border-b border-slate-300 flex items-center justify-center cursor-pointer hover:bg-slate-100 transition-colors"
+        className="flex-1 pointer-events-auto border-b border-slate-300 flex items-center justify-center cursor-pointer hover:bg-slate-100 transition-colors p-2"
         onClick={(e) => {
           e.stopPropagation();
           onOpenDetails();
         }}
         title="Click to edit signature details"
       >
-        {field.fullName ? (
+        {field.status === "signed" && field.signatureDisplayText ? (
+          <div className="text-center px-2">
+            <div
+              className="text-sm font-script italic text-slate-700 mb-1"
+              style={{
+                fontFamily: "cursive",
+                fontStyle: "italic",
+                fontWeight: "bold",
+              }}
+            >
+              {field.signature}
+            </div>
+            <div className="text-xs text-slate-600 whitespace-pre-wrap leading-tight">
+              {field.signatureDisplayText}
+            </div>
+          </div>
+        ) : field.fullName ? (
           <div className="text-center px-2">
             <div className="text-sm font-semibold text-slate-700">{field.signature || field.fullName}</div>
             {field.position && (

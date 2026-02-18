@@ -98,6 +98,7 @@ export interface SignatureField {
   left: number;
   signedAt?: number;
   signatureData?: string;
+  signatureDisplayText?: string;
   status: SignatureStatus;
   borderColor?: string;
   borderWidth?: number;

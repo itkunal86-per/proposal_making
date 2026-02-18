@@ -16,6 +16,9 @@ interface SignatureDetails {
   email?: string;
   position?: string;
   signature?: string;
+  signedAt?: number;
+  signatureDisplayText?: string;
+  status?: "pending" | "signed" | "declined";
 }
 
 interface SignatureDetailsModalProps {
@@ -63,11 +66,36 @@ export const SignatureDetailsModal: React.FC<SignatureDetailsModalProps> = ({
   }, [open, signatureDetails]);
 
   const handleSave = () => {
+    // Get current date and time with timezone
+    const now = new Date();
+    const dateStr = now.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+    });
+    const timeStr = now.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true,
+    });
+    const timezoneOffset = -now.getTimezoneOffset();
+    const tzHours = Math.floor(Math.abs(timezoneOffset) / 60);
+    const tzMinutes = Math.abs(timezoneOffset) % 60;
+    const tzSign = timezoneOffset >= 0 ? "+" : "-";
+    const tzStr = `GMT${tzSign}${String(tzHours).padStart(2, "0")}${String(tzMinutes).padStart(2, "0")}`;
+
+    const signedAt = now.getTime();
+    const signatureDisplayText = `Signed by: ${fullName}\n${dateStr}, ${timeStr} ${tzStr}`;
+
     onSave({
       fullName,
       email,
       position,
       signature,
+      signedAt,
+      signatureDisplayText,
+      status: "signed" as const,
     });
   };
 
