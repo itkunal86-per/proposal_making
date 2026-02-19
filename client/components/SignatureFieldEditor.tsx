@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect } from "react";
 
 interface SignatureField {
   id: string | number;
@@ -40,10 +40,14 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
   onOpenDetails,
 }) => {
   const [isDragging, setIsDragging] = useState(false);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
-  const dragStartRef = useRef({ x: 0, y: 0 });
-  const fieldStartRef = useRef({ left: 0, top: 0 });
+  const dragStateRef = useRef({
+    isDragging: false,
+    startX: 0,
+    startY: 0,
+    startLeft: 0,
+    startTop: 0,
+  });
 
   const handleContainerMouseDown = (e: React.MouseEvent) => {
     // Don't drag if clicking on button
@@ -61,26 +65,28 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
     e.stopPropagation();
     onSelect();
 
-    dragStartRef.current = { x: e.clientX, y: e.clientY };
-    fieldStartRef.current = { left: field.left, top: field.top };
-    setDragOffset({ x: 0, y: 0 });
+    dragStateRef.current = {
+      isDragging: true,
+      startX: e.clientX,
+      startY: e.clientY,
+      startLeft: field.left,
+      startTop: field.top,
+    };
+
     setIsDragging(true);
   };
 
   useEffect(() => {
-    if (!isDragging) return;
+    if (!dragStateRef.current.isDragging) return;
 
     const handleMouseMove = (e: MouseEvent) => {
-      const deltaX = e.clientX - dragStartRef.current.x;
-      const deltaY = e.clientY - dragStartRef.current.y;
+      const deltaX = e.clientX - dragStateRef.current.startX;
+      const deltaY = e.clientY - dragStateRef.current.startY;
 
-      // Update visual position with transform during drag
-      setDragOffset({ x: deltaX, y: deltaY });
+      const newLeft = Math.max(0, dragStateRef.current.startLeft + deltaX);
+      const newTop = Math.max(0, dragStateRef.current.startTop + deltaY);
 
-      // Also update parent state during drag so it persists
-      const newLeft = Math.max(0, fieldStartRef.current.left + deltaX);
-      const newTop = Math.max(0, fieldStartRef.current.top + deltaY);
-
+      // Update parent with new position immediately
       onUpdate({
         left: newLeft,
         top: newTop,
@@ -88,18 +94,18 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
     };
 
     const handleMouseUp = () => {
-      setDragOffset({ x: 0, y: 0 });
+      dragStateRef.current.isDragging = false;
       setIsDragging(false);
     };
 
-    document.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("mouseup", handleMouseUp);
+    document.addEventListener("mousemove", handleMouseMove, { passive: false });
+    document.addEventListener("mouseup", handleMouseUp, { passive: false });
 
     return () => {
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [isDragging, onUpdate]);
+  }, [field.left, field.top, onUpdate]);
 
   return (
     <div
@@ -119,15 +125,31 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
         display: "flex",
         flexDirection: "column",
         boxShadow: selected ? "0 0 0 4px rgba(37, 99, 235, 0.1)" : "none",
-        transform: isDragging ? `translate(${dragOffset.x}px, ${dragOffset.y}px)` : "none",
         transition: isDragging ? "none" : "all 0.2s ease-out",
       }}
     >
       {/* Content area */}
-      <div style={{ flex: 1, padding: "12px", display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
+      <div
+        style={{
+          flex: 1,
+          padding: "12px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          textAlign: "center",
+        }}
+      >
         {field.status === "signed" && field.signature ? (
           <div>
-            <div style={{ fontFamily: "cursive", fontStyle: "italic", fontWeight: "bold", fontSize: "16px", marginBottom: "4px" }}>
+            <div
+              style={{
+                fontFamily: "cursive",
+                fontStyle: "italic",
+                fontWeight: "bold",
+                fontSize: "16px",
+                marginBottom: "4px",
+              }}
+            >
               {field.signature}
             </div>
             {field.fullName && <div style={{ fontSize: "12px" }}>{field.fullName}</div>}
@@ -135,7 +157,9 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
         ) : field.fullName ? (
           <div>
             <div style={{ fontWeight: "600", marginBottom: "4px" }}>{field.fullName}</div>
-            {field.position && <div style={{ fontSize: "12px", color: "#666" }}>{field.position}</div>}
+            {field.position && (
+              <div style={{ fontSize: "12px", color: "#666" }}>{field.position}</div>
+            )}
           </div>
         ) : (
           <div style={{ color: "#999", fontSize: "12px" }}>Signature {index + 1}</div>
@@ -143,12 +167,24 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
       </div>
 
       {/* Label */}
-      <div className="signature-label" style={{ padding: "8px", backgroundColor: "#f3f4f6", textAlign: "center", cursor: "pointer", borderTop: "1px solid #d1d5db" }} onClick={(e) => {
-        e.stopPropagation();
-        onOpenDetails();
-      }}>
+      <div
+        className="signature-label"
+        style={{
+          padding: "8px",
+          backgroundColor: "#f3f4f6",
+          textAlign: "center",
+          cursor: "pointer",
+          borderTop: "1px solid #d1d5db",
+        }}
+        onClick={(e) => {
+          e.stopPropagation();
+          onOpenDetails();
+        }}
+      >
         <div style={{ fontSize: "11px", fontWeight: "600" }}>
-          {field.fullName ? `${field.fullName}${field.position ? ` - ${field.position}` : ""}` : `Signature ${index + 1}`}
+          {field.fullName
+            ? `${field.fullName}${field.position ? ` - ${field.position}` : ""}`
+            : `Signature ${index + 1}`}
         </div>
       </div>
 
