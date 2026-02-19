@@ -802,26 +802,31 @@ export default function PublicProposal() {
               const section = proposal.sections[selectedSignature.sectionIndex];
               const sectionId = section?.id;
 
-              // Format all signature fields for the API
-              const signatureFields = (section?.signatureFields || []).map((field) => ({
-                id: field.id,
-                recipientId: field.recipientId || null,
-                sectionId: field.sectionId,
-                width: field.width,
-                height: field.height,
-                top: field.top,
-                left: field.left,
-                status: field.status,
-                signedAt: field.signedAt,
-                signatureDisplayText: field.signatureDisplayText,
-                borderColor: field.borderColor,
-                borderWidth: field.borderWidth,
-                borderRadius: field.borderRadius,
-                fullName: field.fullName,
-                email: field.email,
-                position: field.position,
-                signature: field.signature,
-              }));
+              // Format all signature fields for the API, including the updated field
+              const signatureFields = (section?.signatureFields || []).map((field, idx) => {
+                // If this is the field that was just updated, merge the new details
+                const fieldData = idx === selectedSignature.fieldIndex ? { ...field, ...details } : field;
+
+                return {
+                  id: fieldData.id,
+                  recipientId: fieldData.recipientId || null,
+                  sectionId: fieldData.sectionId,
+                  width: fieldData.width,
+                  height: fieldData.height,
+                  top: fieldData.top,
+                  left: fieldData.left,
+                  status: fieldData.status,
+                  signedAt: fieldData.signedAt,
+                  signatureDisplayText: fieldData.signatureDisplayText,
+                  borderColor: fieldData.borderColor,
+                  borderWidth: fieldData.borderWidth,
+                  borderRadius: fieldData.borderRadius,
+                  fullName: fieldData.fullName,
+                  email: fieldData.email,
+                  position: fieldData.position,
+                  signature: fieldData.signature,
+                };
+              });
 
               const response = await fetch(
                 "https://propai-api.hirenq.com/api/public/proposal/update/signature",
