@@ -40,6 +40,7 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
   onOpenDetails,
 }) => {
   const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
   const dragStartRef = useRef({ x: 0, y: 0 });
   const fieldStartRef = useRef({ left: 0, top: 0 });
@@ -62,6 +63,7 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
 
     dragStartRef.current = { x: e.clientX, y: e.clientY };
     fieldStartRef.current = { left: field.left, top: field.top };
+    setDragOffset({ x: 0, y: 0 });
     setIsDragging(true);
   };
 
@@ -72,13 +74,24 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
       const deltaX = e.clientX - dragStartRef.current.x;
       const deltaY = e.clientY - dragStartRef.current.y;
 
-      onUpdate({
-        left: Math.max(0, fieldStartRef.current.left + deltaX),
-        top: Math.max(0, fieldStartRef.current.top + deltaY),
-      });
+      // Only update visual position with transform during drag
+      setDragOffset({ x: deltaX, y: deltaY });
     };
 
-    const handleMouseUp = () => {
+    const handleMouseUp = (e: MouseEvent) => {
+      const deltaX = e.clientX - dragStartRef.current.x;
+      const deltaY = e.clientY - dragStartRef.current.y;
+
+      // Update actual position in parent on mouse up
+      const newLeft = Math.max(0, fieldStartRef.current.left + deltaX);
+      const newTop = Math.max(0, fieldStartRef.current.top + deltaY);
+
+      onUpdate({
+        left: newLeft,
+        top: newTop,
+      });
+
+      setDragOffset({ x: 0, y: 0 });
       setIsDragging(false);
     };
 
@@ -105,10 +118,12 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
         border: selected ? "3px solid #2563eb" : "2px solid #ef4444",
         borderRadius: field.borderRadius ? `${field.borderRadius}px` : "4px",
         cursor: isDragging ? "grabbing" : "grab",
-        zIndex: selected ? 1000 : 10,
+        zIndex: isDragging || selected ? 1000 : 10,
         display: "flex",
         flexDirection: "column",
         boxShadow: selected ? "0 0 0 4px rgba(37, 99, 235, 0.1)" : "none",
+        transform: isDragging ? `translate(${dragOffset.x}px, ${dragOffset.y}px)` : "none",
+        transition: isDragging ? "none" : "all 0.2s ease-out",
       }}
     >
       {/* Content area */}
