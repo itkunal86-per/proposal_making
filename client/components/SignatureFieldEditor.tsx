@@ -77,9 +77,11 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
   };
 
   useEffect(() => {
-    if (!dragStateRef.current.isDragging) return;
+    if (!isDragging) return;
 
     const handleMouseMove = (e: MouseEvent) => {
+      e.preventDefault();
+
       const deltaX = e.clientX - dragStateRef.current.startX;
       const deltaY = e.clientY - dragStateRef.current.startY;
 
@@ -98,14 +100,14 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
       setIsDragging(false);
     };
 
-    document.addEventListener("mousemove", handleMouseMove, { passive: false });
-    document.addEventListener("mouseup", handleMouseUp, { passive: false });
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
 
     return () => {
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [field.left, field.top, onUpdate]);
+  }, [isDragging, onUpdate]);
 
   return (
     <div
