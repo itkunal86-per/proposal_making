@@ -81,6 +81,10 @@ export default function PublicProposal() {
 
       const data: PublicProposalResponse = await response.json();
 
+      // Debug: log the raw response to see what we're getting
+      console.log("Public proposal API response:", data);
+      console.log("Sample section signature fields:", data.sections[0]?.signatureFields);
+
       // Normalize signature fields from API (handle both camelCase and snake_case)
       const normalizedData = {
         ...data,
@@ -109,6 +113,7 @@ export default function PublicProposal() {
         }))
       };
 
+      console.log("Normalized proposal:", normalizedData);
       setProposal(normalizedData);
       setError(null);
     } catch (err) {
