@@ -44,9 +44,7 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
   const [isResizing, setIsResizing] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [resizeStart, setResizeStart] = useState({ x: 0, y: 0, width: 0, height: 0 });
-  const [showControls, setShowControls] = useState(true);
   const elementRef = useRef<HTMLDivElement>(null);
-  const timeoutRef = useRef<NodeJS.Timeout>();
   const isDraggingRef = useRef(false);
   const isResizingRef = useRef(false);
   const dragOffsetRef = useRef({ x: 0, y: 0 });
@@ -79,24 +77,6 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
     }
   }, [isDragging]);
 
-  // Auto-hide controls after 3 seconds if not interacting
-  useEffect(() => {
-    if (showControls && !selected && !isDragging && !isResizing) {
-      timeoutRef.current = setTimeout(() => {
-        setShowControls(false);
-      }, 3000);
-    }
-    return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    };
-  }, [showControls, selected, isDragging, isResizing]);
-
-  // Show controls when selected or interacting
-  useEffect(() => {
-    if (selected || isDragging || isResizing) {
-      setShowControls(true);
-    }
-  }, [selected, isDragging, isResizing]);
 
   // Find the closest positioned ancestor (position: relative, absolute, or fixed)
   const getPositionedParent = useCallback((): HTMLElement | null => {
@@ -196,22 +176,19 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
   const handleMouseDown = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
 
-    // Don't drag if clicking on resize handle or delete button
+    // Don't drag if clicking on resize handle or any button
     if (target.closest(".resize-handle") || target.closest("button")) {
+      e.stopPropagation();
       return;
     }
 
-    // Don't drag if clicking directly on the edit area title
-    if (target.getAttribute("title") === "Click to edit signature details") {
+    // Don't drag if clicking on the editable signature space (label area)
+    if (target.closest(".signature-label")) {
+      e.stopPropagation();
       return;
     }
 
-    // Don't drag if clicking on content inside the edit area
-    const isInsideContentArea = target.closest("div[title='Click to edit signature details']");
-    if (isInsideContentArea && target !== e.currentTarget) {
-      return;
-    }
-
+    // Allow drag from anywhere else on the signature field
     e.stopPropagation();
     e.preventDefault();
 
@@ -219,11 +196,15 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
     if (!elementRef.current) return;
 
     const parent = getPositionedParent();
-    if (!parent) return;
+    if (!parent) {
+      console.warn("Could not find positioned parent for signature dragging");
+      return;
+    }
 
     const parentRect = parent.getBoundingClientRect();
+    const elementRect = elementRef.current.getBoundingClientRect();
 
-    // Calculate offset relative to the positioned parent
+    // Calculate offset relative to the positioned parent, accounting for any transforms
     dragOffsetRef.current = {
       x: e.clientX - parentRect.left - field.left,
       y: e.clientY - parentRect.top - field.top,
@@ -335,35 +316,42 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
       </div>
 
       {/* Label */}
-      <div className="text-center pointer-events-auto p-2 bg-slate-100 select-none" style={{ cursor: "grab" }}>
+      <div className="signature-label text-center pointer-events-auto p-2 bg-slate-100 select-none" style={{ cursor: "grab" }}>
         <div className="text-xs font-semibold px-2 py-1 rounded bg-slate-300 text-slate-800">
           {field.fullName ? `${field.fullName}${field.position ? ` - ${field.position}` : ""}` : `Signature ${index + 1}`}
         </div>
       </div>
 
-      {showControls && (
-        <>
-          {/* Resize handle */}
-          <div
-            className="resize-handle absolute bottom-0 right-0 w-3 h-3 bg-blue-500 rounded-full cursor-se-resize"
-            style={{
-              transform: "translate(50%, 50%)",
-            }}
-            onMouseDown={handleResizeMouseDown}
-          />
+      {/* Resize handle - always visible when selected */}
+      {selected && (
+        <div
+          className="resize-handle absolute bottom-0 right-0 w-3 h-3 bg-blue-500 rounded-full cursor-se-resize hover:bg-blue-600 transition-colors"
+          style={{
+            transform: "translate(50%, 50%)",
+          }}
+          onMouseDown={handleResizeMouseDown}
+          title="Resize signature"
+        />
+      )}
 
-          {/* Delete button */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete();
-            }}
-            className="absolute -top-6 -right-6 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center hover:bg-red-600 pointer-events-auto"
-            title="Delete signature"
-          >
-            ✕
-          </button>
-        </>
+      {/* Delete button - always visible when selected */}
+      {selected && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
+          onMouseDown={(e) => {
+            e.stopPropagation();
+          }}
+          className="absolute top-0 right-0 w-6 h-6 bg-red-500 text-white rounded-full text-sm flex items-center justify-center hover:bg-red-600 transition-colors pointer-events-auto z-50"
+          style={{
+            transform: "translate(50%, -50%)",
+          }}
+          title="Delete signature"
+        >
+          ✕
+        </button>
       )}
     </div>
   );
