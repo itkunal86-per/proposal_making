@@ -40,8 +40,9 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
   onOpenDetails,
 }) => {
   const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
+  const dragStartRef = useRef({ x: 0, y: 0 });
+  const fieldStartRef = useRef({ left: 0, top: 0 });
 
   const handleContainerMouseDown = (e: React.MouseEvent) => {
     // Don't drag if clicking on button
@@ -59,42 +60,36 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
     e.stopPropagation();
     onSelect();
 
-    setDragStart({ x: e.clientX, y: e.clientY });
+    dragStartRef.current = { x: e.clientX, y: e.clientY };
+    fieldStartRef.current = { left: field.left, top: field.top };
     setIsDragging(true);
   };
 
-  const handleMouseMove = useCallback(
-    (e: MouseEvent) => {
-      if (!isDragging) return;
+  useEffect(() => {
+    if (!isDragging) return;
 
-      const deltaX = e.clientX - dragStart.x;
-      const deltaY = e.clientY - dragStart.y;
+    const handleMouseMove = (e: MouseEvent) => {
+      const deltaX = e.clientX - dragStartRef.current.x;
+      const deltaY = e.clientY - dragStartRef.current.y;
 
       onUpdate({
-        left: Math.max(0, field.left + deltaX),
-        top: Math.max(0, field.top + deltaY),
+        left: Math.max(0, fieldStartRef.current.left + deltaX),
+        top: Math.max(0, fieldStartRef.current.top + deltaY),
       });
+    };
 
-      setDragStart({ x: e.clientX, y: e.clientY });
-    },
-    [isDragging, dragStart, field.left, field.top, onUpdate]
-  );
+    const handleMouseUp = () => {
+      setIsDragging(false);
+    };
 
-  const handleMouseUp = useCallback(() => {
-    setIsDragging(false);
-  }, []);
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
 
-  useEffect(() => {
-    if (isDragging) {
-      document.addEventListener("mousemove", handleMouseMove);
-      document.addEventListener("mouseup", handleMouseUp);
-
-      return () => {
-        document.removeEventListener("mousemove", handleMouseMove);
-        document.removeEventListener("mouseup", handleMouseUp);
-      };
-    }
-  }, [isDragging, handleMouseMove, handleMouseUp]);
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [isDragging, onUpdate]);
 
   return (
     <div
