@@ -172,17 +172,16 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
         width: `${field.width}px`,
         height: `${field.height}px`,
         borderRadius: field.borderRadius ? `${field.borderRadius}px` : "0px",
-        borderWidth: field.borderWidth ? `${field.borderWidth}px` : "2px",
-        borderStyle: "dashed",
-        borderColor: field.status === "signed" ? "#22c55e" : field.borderColor || "#d1d5db",
-        backgroundColor: field.status === "signed" ? "#dcfce7" : "#f1f5f9",
+        borderWidth: "2px",
+        borderStyle: "solid",
+        borderColor: selected ? "#2563eb" : "#ef4444",
+        backgroundColor: field.status === "signed" ? "#dcfce7" : "#fef2f2",
         cursor: isDragging ? "grabbing" : "grab",
         zIndex: isDragging || isResizing ? 999999 : selected ? 1000 : 10,
         display: "flex",
         flexDirection: "column",
         pointerEvents: "auto",
-        outline: selected ? "2px solid #3b82f6" : "none",
-        outlineOffset: "2px",
+        boxShadow: selected ? "0 0 0 3px rgba(37, 99, 235, 0.1)" : "0 0 0 1px rgba(239, 68, 68, 0.2)",
       }}
     >
       {/* Main content area - not clickable for drag */}
