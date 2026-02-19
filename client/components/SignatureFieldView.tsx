@@ -17,7 +17,6 @@ export const SignatureFieldView: React.FC<SignatureFieldViewProps> = ({
 
   return (
     <div
-      key={`signature-${sIndex}`}
       style={{
         position: "absolute",
         left: `${field.left}px`,
