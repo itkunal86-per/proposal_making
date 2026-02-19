@@ -799,7 +799,10 @@ export default function PublicProposal() {
 
             // Call API to update signature in database
             try {
-              const sectionId = proposal.sections[selectedSignature.sectionIndex]?.id;
+              const section = proposal.sections[selectedSignature.sectionIndex];
+              const sectionId = section?.id;
+              const signatureField = section?.signatureFields?.[selectedSignature.fieldIndex];
+
               const response = await fetch(
                 "https://propai-api.hirenq.com/api/public/proposal/update/signature",
                 {
@@ -809,7 +812,24 @@ export default function PublicProposal() {
                   },
                   body: JSON.stringify({
                     section_id: sectionId,
-                    token: token, // Include the sharing token
+                    token: token,
+                    signature_fields: {
+                      id: signatureField?.id,
+                      signature: signatureField?.signature,
+                      fullName: signatureField?.fullName,
+                      email: signatureField?.email,
+                      position: signatureField?.position,
+                      status: signatureField?.status,
+                      signedAt: signatureField?.signedAt,
+                      signatureDisplayText: signatureField?.signatureDisplayText,
+                      borderColor: signatureField?.borderColor,
+                      borderWidth: signatureField?.borderWidth,
+                      borderRadius: signatureField?.borderRadius,
+                      width: signatureField?.width,
+                      height: signatureField?.height,
+                      top: signatureField?.top,
+                      left: signatureField?.left,
+                    },
                   }),
                 }
               );
