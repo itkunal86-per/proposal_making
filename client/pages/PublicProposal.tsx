@@ -801,7 +801,27 @@ export default function PublicProposal() {
             try {
               const section = proposal.sections[selectedSignature.sectionIndex];
               const sectionId = section?.id;
-              const signatureField = section?.signatureFields?.[selectedSignature.fieldIndex];
+
+              // Format all signature fields for the API
+              const signatureFields = (section?.signatureFields || []).map((field) => ({
+                id: field.id,
+                recipientId: field.recipientId || null,
+                sectionId: field.sectionId,
+                width: field.width,
+                height: field.height,
+                top: field.top,
+                left: field.left,
+                status: field.status,
+                signedAt: field.signedAt,
+                signatureDisplayText: field.signatureDisplayText,
+                borderColor: field.borderColor,
+                borderWidth: field.borderWidth,
+                borderRadius: field.borderRadius,
+                fullName: field.fullName,
+                email: field.email,
+                position: field.position,
+                signature: field.signature,
+              }));
 
               const response = await fetch(
                 "https://propai-api.hirenq.com/api/public/proposal/update/signature",
@@ -813,23 +833,7 @@ export default function PublicProposal() {
                   body: JSON.stringify({
                     section_id: sectionId,
                     token: token,
-                    signature_fields: {
-                      id: signatureField?.id,
-                      signature: signatureField?.signature,
-                      fullName: signatureField?.fullName,
-                      email: signatureField?.email,
-                      position: signatureField?.position,
-                      status: signatureField?.status,
-                      signedAt: signatureField?.signedAt,
-                      signatureDisplayText: signatureField?.signatureDisplayText,
-                      borderColor: signatureField?.borderColor,
-                      borderWidth: signatureField?.borderWidth,
-                      borderRadius: signatureField?.borderRadius,
-                      width: signatureField?.width,
-                      height: signatureField?.height,
-                      top: signatureField?.top,
-                      left: signatureField?.left,
-                    },
+                    signatureFields: signatureFields,
                   }),
                 }
               );
