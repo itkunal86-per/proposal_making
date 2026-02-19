@@ -74,15 +74,10 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
       const deltaX = e.clientX - dragStartRef.current.x;
       const deltaY = e.clientY - dragStartRef.current.y;
 
-      // Only update visual position with transform during drag
+      // Update visual position with transform during drag
       setDragOffset({ x: deltaX, y: deltaY });
-    };
 
-    const handleMouseUp = (e: MouseEvent) => {
-      const deltaX = e.clientX - dragStartRef.current.x;
-      const deltaY = e.clientY - dragStartRef.current.y;
-
-      // Update actual position in parent on mouse up
+      // Also update parent state during drag so it persists
       const newLeft = Math.max(0, fieldStartRef.current.left + deltaX);
       const newTop = Math.max(0, fieldStartRef.current.top + deltaY);
 
@@ -90,7 +85,9 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
         left: newLeft,
         top: newTop,
       });
+    };
 
+    const handleMouseUp = () => {
       setDragOffset({ x: 0, y: 0 });
       setIsDragging(false);
     };
