@@ -81,10 +81,6 @@ export default function PublicProposal() {
 
       const data: PublicProposalResponse = await response.json();
 
-      // Debug: log the raw response to see what we're getting
-      console.log("Public proposal API response:", data);
-      console.log("Sample section signature fields:", data.sections[0]?.signatureFields);
-
       // Normalize signature fields from API (handle both camelCase and snake_case)
       const normalizedData = {
         ...data,
@@ -113,7 +109,6 @@ export default function PublicProposal() {
         }))
       };
 
-      console.log("Normalized proposal:", normalizedData);
       setProposal(normalizedData);
       setError(null);
     } catch (err) {
@@ -785,7 +780,7 @@ export default function PublicProposal() {
             setSignatureModalOpen(false);
             setSelectedSignature(null);
           }}
-          onSave={(details) => {
+          onSave={async (details) => {
             // Update the proposal with signature data
             const updatedProposal = {
               ...proposal,
@@ -801,6 +796,42 @@ export default function PublicProposal() {
               ),
             };
             setProposal(updatedProposal);
+
+            // Call API to update signature in database
+            try {
+              const sectionId = proposal.sections[selectedSignature.sectionIndex]?.id;
+              const response = await fetch(
+                "https://propai-api.hirenq.com/api/public/proposal/update/signature",
+                {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                    section_id: sectionId,
+                    token: token, // Include the sharing token
+                  }),
+                }
+              );
+
+              if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                console.error("Failed to update signature:", errorData);
+                toast({
+                  title: "Error",
+                  description: "Failed to save signature to database",
+                  variant: "destructive",
+                });
+              }
+            } catch (error) {
+              console.error("Error updating signature:", error);
+              toast({
+                title: "Error",
+                description: "Failed to save signature to database",
+                variant: "destructive",
+              });
+            }
+
             setSignatureModalOpen(false);
             setSelectedSignature(null);
             toast({ title: "Signature saved successfully" });
