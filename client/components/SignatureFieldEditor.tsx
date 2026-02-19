@@ -42,119 +42,60 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
   const elementRef = useRef<HTMLDivElement>(null);
-  const isDraggingRef = useRef(false);
-  const isResizingRef = useRef(false);
-  const dragOffsetRef = useRef({ x: 0, y: 0 });
-  const resizeStartRef = useRef({ x: 0, y: 0, width: 0, height: 0 });
+  const dragStartRef = useRef({ x: 0, y: 0 });
 
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     const target = e.target as HTMLElement;
 
-    // If clicking on button or resize handle, don't drag
-    if (target.tagName === "BUTTON" || target.closest("button") || target.closest(".resize-handle")) {
+    // Never drag if on a button
+    if (target.closest("button")) {
       return;
     }
 
-    // If clicking on the edit area, don't drag
-    if (target.closest('[title="Click to edit signature details"]')) {
+    // Never drag if on the edit area
+    const editArea = target.closest('[data-edit-area="true"]');
+    if (editArea) {
       return;
     }
 
+    // Start drag
     e.preventDefault();
     e.stopPropagation();
 
     onSelect();
 
-    if (!elementRef.current) return;
-
-    // Find the positioned parent
-    let parent = elementRef.current.parentElement;
-    while (parent) {
-      const pos = window.getComputedStyle(parent).position;
-      if (pos === "relative" || pos === "absolute" || pos === "fixed") {
-        break;
-      }
-      parent = parent.parentElement;
-    }
-
-    if (!parent) {
-      console.warn("No positioned parent found");
-      return;
-    }
-
-    const parentRect = parent.getBoundingClientRect();
-    dragOffsetRef.current = {
-      x: e.clientX - parentRect.left - field.left,
-      y: e.clientY - parentRect.top - field.top,
-    };
-
-    isDraggingRef.current = true;
-    setIsDragging(true);
-  }, [field.left, field.top, onSelect]);
-
-  const handleResizeMouseDown = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    onSelect();
-
-    resizeStartRef.current = {
+    dragStartRef.current = {
       x: e.clientX,
       y: e.clientY,
-      width: field.width,
-      height: field.height,
     };
 
-    isResizingRef.current = true;
-    setIsResizing(true);
-  }, [field.width, field.height, onSelect]);
+    setIsDragging(true);
+  };
 
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (!isDraggingRef.current && !isResizingRef.current) return;
-    if (!elementRef.current) return;
+  const handleMouseMove = useCallback(
+    (e: MouseEvent) => {
+      if (!isDragging || !elementRef.current) return;
 
-    e.preventDefault();
-    e.stopPropagation();
+      const deltaX = e.clientX - dragStartRef.current.x;
+      const deltaY = e.clientY - dragStartRef.current.y;
 
-    if (isDraggingRef.current) {
-      let parent = elementRef.current.parentElement;
-      while (parent) {
-        const pos = window.getComputedStyle(parent).position;
-        if (pos === "relative" || pos === "absolute" || pos === "fixed") {
-          break;
-        }
-        parent = parent.parentElement;
-      }
-
-      if (!parent) return;
-
-      const parentRect = parent.getBoundingClientRect();
-      const newLeft = Math.max(0, e.clientX - parentRect.left - dragOffsetRef.current.x);
-      const newTop = Math.max(0, e.clientY - parentRect.top - dragOffsetRef.current.y);
+      const newLeft = Math.max(0, field.left + deltaX);
+      const newTop = Math.max(0, field.top + deltaY);
 
       onUpdate({
         left: newLeft,
         top: newTop,
       });
-    }
 
-    if (isResizingRef.current) {
-      const deltaX = e.clientX - resizeStartRef.current.x;
-      const deltaY = e.clientY - resizeStartRef.current.y;
-
-      const newWidth = Math.max(100, resizeStartRef.current.width + deltaX);
-      const newHeight = Math.max(60, resizeStartRef.current.height + deltaY);
-
-      onUpdate({
-        width: newWidth,
-        height: newHeight,
-      });
-    }
-  }, [onUpdate]);
+      dragStartRef.current = {
+        x: e.clientX,
+        y: e.clientY,
+      };
+    },
+    [isDragging, field.left, field.top, onUpdate]
+  );
 
   const handleMouseUp = useCallback(() => {
-    isDraggingRef.current = false;
-    isResizingRef.current = false;
     setIsDragging(false);
     setIsResizing(false);
   }, []);
@@ -171,10 +112,59 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
     }
   }, [isDragging, isResizing, handleMouseMove, handleMouseUp]);
 
+  const handleResizeMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    onSelect();
+
+    dragStartRef.current = {
+      x: e.clientX,
+      y: e.clientY,
+    };
+
+    setIsResizing(true);
+  };
+
+  const handleResizeMouseMove = useCallback(
+    (e: MouseEvent) => {
+      if (!isResizing || !elementRef.current) return;
+
+      const deltaX = e.clientX - dragStartRef.current.x;
+      const deltaY = e.clientY - dragStartRef.current.y;
+
+      const newWidth = Math.max(100, field.width + deltaX);
+      const newHeight = Math.max(60, field.height + deltaY);
+
+      onUpdate({
+        width: newWidth,
+        height: newHeight,
+      });
+
+      dragStartRef.current = {
+        x: e.clientX,
+        y: e.clientY,
+      };
+    },
+    [isResizing, field.width, field.height, onUpdate]
+  );
+
+  useEffect(() => {
+    if (isResizing) {
+      document.addEventListener("mousemove", handleResizeMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
+
+      return () => {
+        document.removeEventListener("mousemove", handleResizeMouseMove);
+        document.removeEventListener("mouseup", handleMouseUp);
+      };
+    }
+  }, [isResizing, handleResizeMouseMove, handleMouseUp]);
+
   return (
     <div
       ref={elementRef}
-      className={`absolute flex flex-col ${selected ? "ring-2 ring-blue-500 ring-offset-1" : ""}`}
+      onMouseDown={handleMouseDown}
       style={{
         position: "absolute",
         left: `${field.left}px`,
@@ -187,12 +177,15 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
         borderColor: field.status === "signed" ? "#22c55e" : field.borderColor || "#d1d5db",
         backgroundColor: field.status === "signed" ? "#dcfce7" : "#f1f5f9",
         cursor: isDragging ? "grabbing" : "grab",
-        zIndex: isDragging || isResizing ? 2147483647 : selected ? 1000 : 10,
-        userSelect: "none",
+        zIndex: isDragging || isResizing ? 999999 : selected ? 1000 : 10,
+        display: "flex",
+        flexDirection: "column",
+        pointerEvents: "auto",
+        outline: selected ? "2px solid #3b82f6" : "none",
+        outlineOffset: "2px",
       }}
-      onMouseDown={handleMouseDown}
     >
-      {/* Signature space - non-interactive background */}
+      {/* Main content area - not clickable for drag */}
       <div
         style={{
           flex: 1,
@@ -270,14 +263,18 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
         )}
       </div>
 
-      {/* Editable area - clickable */}
+      {/* Edit area - clickable but not draggable */}
       <div
+        data-edit-area="true"
         style={{
           textAlign: "center",
           padding: "8px",
           backgroundColor: "#f1f5f9",
           cursor: "pointer",
           pointerEvents: "auto",
+          borderRadius: field.borderRadius
+            ? `0 0 ${field.borderRadius}px ${field.borderRadius}px`
+            : "0px",
         }}
         onClick={(e) => {
           e.stopPropagation();
@@ -301,27 +298,28 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
         </div>
       </div>
 
-      {/* Resize handle */}
+      {/* Resize handle - visible when selected */}
       {selected && (
         <div
-          className="resize-handle"
           style={{
             position: "absolute",
-            bottom: "-4px",
-            right: "-4px",
-            width: "12px",
-            height: "12px",
+            bottom: "-6px",
+            right: "-6px",
+            width: "16px",
+            height: "16px",
             backgroundColor: "#3b82f6",
             borderRadius: "50%",
             cursor: "nwse-resize",
             pointerEvents: "auto",
+            border: "2px solid white",
+            boxShadow: "0 0 4px rgba(0,0,0,0.2)",
           }}
           onMouseDown={handleResizeMouseDown}
           title="Resize signature"
         />
       )}
 
-      {/* Delete button */}
+      {/* Delete button - visible when selected */}
       {selected && (
         <button
           onClick={(e) => {
@@ -337,21 +335,22 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
             position: "absolute",
             top: "-8px",
             right: "-8px",
-            width: "24px",
-            height: "24px",
+            width: "28px",
+            height: "28px",
             backgroundColor: "#ef4444",
             color: "white",
-            border: "none",
+            border: "2px solid white",
             borderRadius: "50%",
             cursor: "pointer",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            fontSize: "14px",
+            fontSize: "16px",
             fontWeight: "bold",
             pointerEvents: "auto",
             zIndex: 50,
             padding: 0,
+            boxShadow: "0 0 4px rgba(0,0,0,0.2)",
           }}
           title="Delete signature"
         >
