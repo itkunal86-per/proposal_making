@@ -16,139 +16,134 @@ export default function Index() {
       <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(1400px_700px_at_50%_-200px,rgba(99,102,241,0.25),transparent),radial-gradient(900px_450px_at_80%_-150px,rgba(34,211,238,0.25),transparent)]" />
 
       {/* Hero */}
-      <section className="container pb-20 pt-16 sm:pb-28 sm:pt-24">
-        <div className="mx-auto max-w-4xl text-center">
-          <span className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs text-muted-foreground">
-            <span className="inline-block h-2 w-2 rounded-full bg-gradient-to-r from-primary to-cyan-500" />
-            AI Engine with Retrieval-Augmented Generation (RAG)
+      <section className="container pb-20 pt-20 sm:pb-32 sm:pt-32">
+        <div className="mx-auto max-w-5xl text-center">
+          <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-xs font-semibold text-primary border border-primary/20">
+            <span className="inline-block h-2 w-2 rounded-full bg-primary" />
+            Powered by AI & RAG
           </span>
-          <h1 className="mt-6 bg-gradient-to-b from-foreground to-foreground/80 bg-clip-text text-4xl font-extrabold leading-tight tracking-tight text-transparent sm:text-6xl">
-            Pitchsuite
+          <h1 className="mt-8 text-5xl font-bold tracking-tight text-foreground sm:text-7xl">
+            Proposals That Win
           </h1>
-          <p className="mx-auto mt-5 max-w-2xl text-lg text-muted-foreground">
-            Create, manage, and send winning proposals faster. Let the AI engine
-            suggest content, assemble templates, and personalize with RAG that
-            pulls facts from your knowledge base.
+          <p className="mx-auto mt-6 max-w-3xl text-xl text-muted-foreground leading-relaxed">
+            Create professional, personalized proposals in minutes. AI-powered content generation, smart templates, and secure e-signatures—everything you need to close deals faster.
           </p>
-          <div className="mt-8 flex items-center justify-center gap-3">
+          <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
             <a href={getStartedHref()}>
               <Button
                 size="lg"
-                className="h-12 px-8 bg-gradient-to-r from-primary to-cyan-500 text-white shadow-lg hover:opacity-90"
+                className="h-12 px-8 bg-primary text-white shadow-lg hover:bg-primary/90"
               >
-                Get Started
+                Start Free
               </Button>
             </a>
             <a
               href="#features"
-              className="text-sm text-primary hover:underline"
+              className="text-sm font-semibold text-primary hover:text-primary/80 underline-offset-4 hover:underline"
             >
-              See features
+              View Features →
             </a>
           </div>
         </div>
 
-        <div className="mx-auto mt-14 max-w-6xl rounded-xl border bg-card/60 p-3 backdrop-blur">
-          <div className="rounded-lg border bg-background p-6 shadow-sm">
-            <div className="grid gap-6 md:grid-cols-3">
-              <Feature
-                iconGradient="from-primary to-cyan-500"
-                title="RAG Content Generation"
-                desc="Generate tailored proposal sections by sourcing verified facts from your docs, CRM, and past wins."
-              />
-              <Feature
-                iconGradient="from-cyan-500 to-emerald-400"
-                title="Smart Templates"
-                desc="Reusable templates auto-filled by AI—branding, pricing, and statements kept in sync."
-              />
-              <Feature
-                iconGradient="from-fuchsia-500 to-primary"
-                title="Send, Track, E‑Sign"
-                desc="One-click sending with analytics and secure e‑sign to close deals faster."
-              />
-            </div>
+        <div className="mx-auto mt-20 max-w-6xl">
+          <div className="grid gap-6 md:grid-cols-3">
+            <Feature
+              iconGradient="from-blue-600 to-blue-400"
+              title="AI-Powered Content"
+              desc="Generate customized proposal sections with facts sourced from your knowledge base."
+            />
+            <Feature
+              iconGradient="from-purple-600 to-purple-400"
+              title="Professional Templates"
+              desc="Pre-built templates with consistent branding, pricing, and formatting."
+            />
+            <Feature
+              iconGradient="from-green-600 to-green-400"
+              title="Send & Track"
+              desc="Send proposals, track engagement, and collect e-signatures securely."
+            />
           </div>
         </div>
       </section>
 
       {/* How it works */}
-      <section id="how" className="container py-16 sm:py-24">
-        <div className="mx-auto max-w-3xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            How it works
+      <section id="how" className="container py-20 sm:py-32 border-t">
+        <div className="mx-auto max-w-3xl text-center mb-16">
+          <h2 className="text-4xl font-bold tracking-tight">
+            Simple workflow
           </h2>
-          <p className="mt-3 text-muted-foreground">
-            From brief to signed proposal in minutes.
+          <p className="mt-4 text-lg text-muted-foreground">
+            From briefing to signature in three simple steps.
           </p>
         </div>
-        <div className="mx-auto mt-10 grid max-w-5xl gap-6 sm:grid-cols-3">
+        <div className="mx-auto max-w-5xl grid gap-8 sm:grid-cols-3">
           <Step
             n="1"
             title="Brief"
-            desc="Describe the opportunity or paste an RFP. AI maps requirements and pulls relevant knowledge."
+            desc="Input your opportunity details. AI understands requirements and accesses your knowledge base."
           />
           <Step
             n="2"
             title="Compose"
-            desc="RAG drafts each section with citations. Edit inline, drop in pricing, and apply your brand."
+            desc="AI drafts each section with source citations. Customize, adjust pricing, and brand your proposal."
           />
           <Step
             n="3"
-            title="Send"
-            desc="Share, track engagement, and collect legally‑binding e‑signatures."
+            title="Send & Close"
+            desc="Send with one click, track opens and engagement, and collect legally-binding e-signatures."
           />
         </div>
       </section>
 
       {/* Benefits */}
-      <section id="features" className="container pb-16 sm:pb-24">
-        <div className="grid items-center gap-10 md:grid-cols-2">
+      <section id="features" className="container py-20 sm:py-32">
+        <div className="grid items-center gap-16 md:grid-cols-2">
           <div>
-            <h3 className="text-2xl font-semibold sm:text-3xl">
-              Built for speed, accuracy, and brand consistency
+            <h3 className="text-4xl font-bold tracking-tight">
+              Everything you need to win
             </h3>
-            <ul className="mt-6 space-y-3 text-sm text-muted-foreground">
-              <li className="flex items-start gap-3">
-                <Check className="mt-0.5 size-5 text-primary" />
-                <span>
-                  RAG citations keep content trustworthy and on‑brand.
+            <ul className="mt-8 space-y-4">
+              <li className="flex items-start gap-4">
+                <Check className="mt-1 size-5 text-primary shrink-0" />
+                <span className="text-base text-muted-foreground">
+                  <strong className="text-foreground">Accurate content:</strong> AI pulls verified facts from your knowledge base with full citations.
                 </span>
               </li>
-              <li className="flex items-start gap-3">
-                <Check className="mt-0.5 size-5 text-primary" />
-                <span>Role‑based collaboration and approvals.</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <Check className="mt-0.5 size-5 text-primary" />
-                <span>
-                  Template libraries, pricing tables, and content blocks.
+              <li className="flex items-start gap-4">
+                <Check className="mt-1 size-5 text-primary shrink-0" />
+                <span className="text-base text-muted-foreground">
+                  <strong className="text-foreground">Team collaboration:</strong> Role-based access, approval workflows, and version control.
                 </span>
               </li>
-              <li className="flex items-start gap-3">
-                <Check className="mt-0.5 size-5 text-primary" />
-                <span>
-                  Analytics: opens, time on page, and drop‑off insights.
+              <li className="flex items-start gap-4">
+                <Check className="mt-1 size-5 text-primary shrink-0" />
+                <span className="text-base text-muted-foreground">
+                  <strong className="text-foreground">Reusable assets:</strong> Template library, pricing modules, and content blocks.
+                </span>
+              </li>
+              <li className="flex items-start gap-4">
+                <Check className="mt-1 size-5 text-primary shrink-0" />
+                <span className="text-base text-muted-foreground">
+                  <strong className="text-foreground">Detailed analytics:</strong> Track opens, engagement time, and conversion metrics.
                 </span>
               </li>
             </ul>
-            <div className="mt-8">
+            <div className="mt-10">
               <a href={getStartedHref()}>
-                <Button className="bg-gradient-to-r from-primary to-cyan-500 text-white shadow hover:opacity-90">
-                  Start free
+                <Button className="h-11 px-6 bg-primary text-white shadow hover:bg-primary/90">
+                  Get Started Free
                 </Button>
               </a>
             </div>
           </div>
           <div className="relative">
-            <div className="relative overflow-hidden rounded-xl border bg-background shadow-sm">
-              <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(99,102,241,0.08),rgba(34,211,238,0.08))]" />
-              <div className="relative p-6">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <Stat label="Faster creation" value="-72%" />
-                  <Stat label="Win rate" value="+18%" />
-                  <Stat label="Time to send" value="8 min" />
-                  <Stat label="Brand drift" value="-90%" />
-                </div>
+            <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-blue-50 to-indigo-50 p-8 shadow-lg dark:from-slate-900 dark:to-slate-800">
+              <div className="grid gap-6 sm:grid-cols-2">
+                <Stat label="Faster creation" value="72%" />
+                <Stat label="Avg. win rate" value="+18%" />
+                <Stat label="Time to send" value="8 min" />
+                <Stat label="Less revision" value="-90%" />
               </div>
             </div>
           </div>
@@ -156,25 +151,25 @@ export default function Index() {
       </section>
 
       {/* CTA */}
-      <section className="container pb-24">
-        <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-r from-primary to-cyan-500 p-8 text-white shadow-lg">
-          <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/20 blur-2xl" />
-          <div className="relative flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <section className="container pb-32 pt-20 border-t">
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 to-slate-800 p-12 text-white shadow-2xl">
+          <div className="absolute -right-20 -top-20 h-60 w-60 rounded-full bg-primary/20 blur-3xl" />
+          <div className="absolute -left-20 -bottom-20 h-60 w-60 rounded-full bg-blue-500/20 blur-3xl" />
+          <div className="relative flex flex-col items-center gap-6 text-center sm:gap-8">
             <div>
-              <h3 className="text-2xl font-semibold">
-                Let AI draft your next proposal
+              <h3 className="text-4xl font-bold sm:text-5xl">
+                Ready to close more deals?
               </h3>
-              <p className="mt-1 text-white/90">
-                Try the RAG‑powered workflow free.
+              <p className="mt-4 text-lg text-white/80">
+                Start creating winning proposals with AI today. No credit card required.
               </p>
             </div>
             <a href={getStartedHref()}>
               <Button
                 size="lg"
-                variant="secondary"
-                className="h-12 bg-white text-primary hover:bg-white/90"
+                className="h-12 px-8 bg-white text-slate-900 font-semibold shadow-lg hover:bg-white/90"
               >
-                Get Started
+                Start Free →
               </Button>
             </a>
           </div>
@@ -194,13 +189,13 @@ function Feature({
   desc: string;
 }) {
   return (
-    <div className="flex gap-4 rounded-lg border p-5">
+    <div className="flex flex-col gap-4 rounded-xl border bg-gradient-to-br from-white to-slate-50 p-6 hover:shadow-md transition-shadow dark:from-slate-950 dark:to-slate-900">
       <div
-        className={`h-10 w-10 shrink-0 rounded-md bg-gradient-to-br ${iconGradient}`}
+        className={`h-12 w-12 rounded-lg bg-gradient-to-br ${iconGradient}`}
       />
       <div>
-        <h3 className="text-base font-semibold">{title}</h3>
-        <p className="mt-1 text-sm text-muted-foreground">{desc}</p>
+        <h3 className="text-lg font-semibold text-foreground">{title}</h3>
+        <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{desc}</p>
       </div>
     </div>
   );
@@ -208,21 +203,23 @@ function Feature({
 
 function Step({ n, title, desc }: { n: string; title: string; desc: string }) {
   return (
-    <div className="rounded-xl border bg-card p-6 text-center shadow-sm">
-      <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary to-cyan-500 text-white">
+    <div className="relative flex flex-col gap-4 rounded-xl border bg-gradient-to-br from-white to-slate-50 p-8 text-center hover:shadow-md transition-shadow dark:from-slate-950 dark:to-slate-900">
+      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-primary to-blue-600 text-lg font-bold text-white">
         {n}
       </div>
-      <h4 className="text-lg font-semibold">{title}</h4>
-      <p className="mt-2 text-sm text-muted-foreground">{desc}</p>
+      <div>
+        <h4 className="text-xl font-semibold text-foreground">{title}</h4>
+        <p className="mt-3 text-sm text-muted-foreground leading-relaxed">{desc}</p>
+      </div>
     </div>
   );
 }
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border p-4 text-center">
-      <div className="text-2xl font-bold">{value}</div>
-      <div className="mt-1 text-xs text-muted-foreground">{label}</div>
+    <div className="rounded-xl bg-white/50 backdrop-blur p-6 text-center dark:bg-slate-800/50">
+      <div className="text-4xl font-bold text-primary">{value}</div>
+      <div className="mt-2 text-sm font-medium text-muted-foreground">{label}</div>
     </div>
   );
 }
