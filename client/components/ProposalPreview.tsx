@@ -1187,14 +1187,12 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                           onSelect={() =>
                             onSelectElement(signatureId, "signature")
                           }
-                          onUpdate={(updates) => {
-                            console.log("🔄 Updating signature field:", { sectionId: section.id, fieldIndex, updates });
-                            onUpdateSignatureField?.(section.id, fieldIndex, updates);
-                          }}
-                          onDelete={() => {
-                            console.log("🗑️ onDelete triggered for signature:", { sectionId: section.id, fieldIndex });
-                            onDeleteSignatureField?.(section.id, fieldIndex);
-                          }}
+                          onUpdate={(updates) =>
+                            onUpdateSignatureField?.(section.id, fieldIndex, updates)
+                          }
+                          onDelete={() =>
+                            onDeleteSignatureField?.(section.id, fieldIndex)
+                          }
                           onOpenDetails={() =>
                             onOpenSignatureDetails?.(section.id, fieldIndex)
                           }

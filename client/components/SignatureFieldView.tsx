@@ -50,39 +50,29 @@ export const SignatureFieldView: React.FC<SignatureFieldViewProps> = ({
         }}
       >
         {isSigned ? (
-          <div style={{ textAlign: "center" }}>
+          <div style={{ textAlign: "center", width: "100%" }}>
             <div
               style={{
                 fontFamily: "cursive",
                 fontStyle: "italic",
                 fontWeight: "bold",
-                marginBottom: "4px",
+                marginBottom: "6px",
                 fontSize: "16px",
                 color: "#1f2937",
               }}
             >
               {field.signature}
             </div>
-            <div
-              style={{
-                fontSize: "11px",
-                color: "#4b5563",
-                whiteSpace: "pre-wrap",
-                lineHeight: "1.3",
-              }}
-            >
-              {field.signatureDisplayText?.replace(/\\n/g, '\n')}
-            </div>
-            {field.position && (
+            {field.signatureDisplayText && (
               <div
                 style={{
                   fontSize: "10px",
-                  color: "#6b7280",
-                  marginTop: "4px",
-                  fontStyle: "italic",
+                  color: "#4b5563",
+                  whiteSpace: "pre-wrap",
+                  lineHeight: "1.3",
                 }}
               >
-                {field.position}
+                {field.signatureDisplayText?.replace(/\\n/g, '\n')}
               </div>
             )}
           </div>
