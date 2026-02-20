@@ -981,9 +981,10 @@ export default function ProposalEditor() {
                           ...s,
                           signatureFields: (s.signatureFields || []).map((field, index) => {
                             // Use index-based matching for reliability
-                            // fieldIndexOrId is passed as a number (index) from ProposalPreview
-                            if (typeof fieldIndexOrId === "number") {
-                              return index === fieldIndexOrId ? { ...field, ...updates } : field;
+                            // fieldIndexOrId can be a number or string representation of index
+                            const fieldIndexAsNumber = typeof fieldIndexOrId === "number" ? fieldIndexOrId : parseInt(fieldIndexOrId, 10);
+                            if (!isNaN(fieldIndexAsNumber)) {
+                              return index === fieldIndexAsNumber ? { ...field, ...updates } : field;
                             }
                             // Fallback to ID-based matching for backwards compatibility
                             return String(field.id) === String(fieldIndexOrId) ? { ...field, ...updates } : field;
@@ -1003,9 +1004,10 @@ export default function ProposalEditor() {
                           ...s,
                           signatureFields: (s.signatureFields || []).filter((field, index) => {
                             // Use index-based filtering for reliability
-                            // fieldIndexOrId is passed as a number (index) from ProposalPreview
-                            if (typeof fieldIndexOrId === "number") {
-                              return index !== fieldIndexOrId;
+                            // fieldIndexOrId can be a number or string representation of index
+                            const fieldIndexAsNumber = typeof fieldIndexOrId === "number" ? fieldIndexOrId : parseInt(fieldIndexOrId, 10);
+                            if (!isNaN(fieldIndexAsNumber)) {
+                              return index !== fieldIndexAsNumber;
                             }
                             // Fallback to ID-based matching for backwards compatibility
                             return String(field.id) !== String(fieldIndexOrId);
