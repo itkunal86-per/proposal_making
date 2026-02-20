@@ -23,7 +23,7 @@ export default function Index() {
             AI Engine with Retrieval-Augmented Generation (RAG)
           </span>
           <h1 className="mt-6 bg-gradient-to-b from-foreground to-foreground/80 bg-clip-text text-4xl font-extrabold leading-tight tracking-tight text-transparent sm:text-6xl">
-            AI-Powered Proposal Management System
+            Pitchsuite
           </h1>
           <p className="mx-auto mt-5 max-w-2xl text-lg text-muted-foreground">
             Create, manage, and send winning proposals faster. Let the AI engine
