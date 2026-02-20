@@ -41,6 +41,19 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  
+  // Keep callback refs to avoid recreating listeners on parent re-renders
+  const onUpdateRef = useRef(onUpdate);
+  const onSelectRef = useRef(onSelect);
+  
+  useEffect(() => {
+    onUpdateRef.current = onUpdate;
+  }, [onUpdate]);
+  
+  useEffect(() => {
+    onSelectRef.current = onSelect;
+  }, [onSelect]);
+
   const dragStateRef = useRef({
     isDragging: false,
     startX: 0,
@@ -63,7 +76,7 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
 
     e.preventDefault();
     e.stopPropagation();
-    onSelect();
+    onSelectRef.current();
 
     dragStateRef.current = {
       isDragging: true,
@@ -89,7 +102,7 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
       const newTop = Math.max(0, dragStateRef.current.startTop + deltaY);
 
       // Update parent with new position immediately
-      onUpdate({
+      onUpdateRef.current({
         left: newLeft,
         top: newTop,
       });
@@ -107,7 +120,7 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [isDragging, onUpdate]);
+  }, [isDragging]); // Only depend on isDragging, not callbacks
 
   return (
     <div
