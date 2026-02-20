@@ -63,17 +63,22 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
   });
 
   const handleContainerMouseDown = (e: React.MouseEvent) => {
+    console.log("🖱️ MouseDown on signature field, target:", (e.target as HTMLElement).tagName);
+
     // Don't drag if clicking on button
     if ((e.target as HTMLElement).closest("button")) {
+      console.log("   Clicked on button, not dragging");
       e.stopPropagation();
       return;
     }
 
     // Don't drag if clicking on label area
     if ((e.target as HTMLElement).closest(".signature-label")) {
+      console.log("   Clicked on label, not dragging");
       return;
     }
 
+    console.log("   Starting drag");
     e.preventDefault();
     e.stopPropagation();
     onSelectRef.current();
@@ -90,16 +95,28 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
   };
 
   useEffect(() => {
-    if (!isDragging) return;
+    if (!isDragging) {
+      console.log("✋ isDragging is false, not setting up listeners");
+      return;
+    }
+
+    console.log("🚀 Setting up drag event listeners");
+
+    let moveCount = 0;
 
     const handleMouseMove = (e: MouseEvent) => {
       e.preventDefault();
+      moveCount++;
 
       const deltaX = e.clientX - dragStateRef.current.startX;
       const deltaY = e.clientY - dragStateRef.current.startY;
 
       const newLeft = Math.max(0, dragStateRef.current.startLeft + deltaX);
       const newTop = Math.max(0, dragStateRef.current.startTop + deltaY);
+
+      if (moveCount === 1 || moveCount % 10 === 0) {
+        console.log(`   Move #${moveCount}: delta (${deltaX}, ${deltaY}) → new pos (${newLeft}, ${newTop})`);
+      }
 
       // Update parent with new position immediately
       onUpdateRef.current({
@@ -109,6 +126,7 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
     };
 
     const handleMouseUp = () => {
+      console.log(`🛑 Drag ended after ${moveCount} moves`);
       dragStateRef.current.isDragging = false;
       setIsDragging(false);
     };
@@ -117,6 +135,7 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
     document.addEventListener("mouseup", handleMouseUp);
 
     return () => {
+      console.log("🗑️ Cleaning up drag listeners");
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
     };

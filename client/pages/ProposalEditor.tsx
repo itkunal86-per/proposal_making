@@ -973,6 +973,7 @@ export default function ProposalEditor() {
                 commit(updated);
               }}
               onUpdateSignatureField={(sectionId, fieldIndexOrId, updates) => {
+                console.log("📍 onUpdateSignatureField called:", { sectionId, fieldIndexOrId, updates, isNumber: typeof fieldIndexOrId === "number" });
                 const updated = {
                   ...p,
                   sections: p.sections.map((s) =>
@@ -983,7 +984,9 @@ export default function ProposalEditor() {
                             // Use index-based matching for reliability
                             // fieldIndexOrId is passed as a number (index) from ProposalPreview
                             if (typeof fieldIndexOrId === "number") {
-                              return index === fieldIndexOrId ? { ...field, ...updates } : field;
+                              const match = index === fieldIndexOrId;
+                              console.log("  Comparing index:", { index, fieldIndexOrId, match });
+                              return match ? { ...field, ...updates } : field;
                             }
                             // Fallback to ID-based matching for backwards compatibility
                             return String(field.id) === String(fieldIndexOrId) ? { ...field, ...updates } : field;
@@ -992,6 +995,7 @@ export default function ProposalEditor() {
                       : s
                   ),
                 };
+                console.log("📍 Updated proposal with signature field changes");
                 commit(updated);
               }}
               onDeleteSignatureField={(sectionId, fieldIndexOrId) => {
