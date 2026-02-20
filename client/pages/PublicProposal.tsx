@@ -8,6 +8,7 @@ import { TableEditor } from "@/components/TableEditor";
 import { TextEditor } from "@/components/TextEditor";
 import { ImageEditor } from "@/components/ImageEditor";
 import { SignatureDetailsModal } from "@/components/SignatureDetailsModal";
+import { SignatureFieldView } from "@/components/SignatureFieldView";
 
 interface ProposalSection {
   id: string;
@@ -668,108 +669,19 @@ export default function PublicProposal() {
                           )}
 
                         {section.signatureFields &&
-                          section.signatureFields.map((field: any, sIndex: number) => {
-                            const isSigned = field.status === "signed" && field.signatureDisplayText;
-                            return (
-                              <div
-                                key={`signature-${sIndex}`}
-                                style={{
-                                  position: "absolute",
-                                  left: `${field.left}px`,
-                                  top: `${field.top}px`,
-                                  width: `${field.width}px`,
-                                  height: `${field.height}px`,
-                                  borderRadius: field.borderRadius ? `${field.borderRadius}px` : "0px",
-                                  display: "flex",
-                                  flexDirection: "column",
-                                }}
-                              >
-                                {/* Main signature field box */}
-                                <div
-                                  style={{
-                                    flex: 1,
-                                    borderRadius: field.borderRadius ? `${field.borderRadius}px 0 0 0` : "0px",
-                                    borderWidth: field.borderWidth ? `${field.borderWidth}px` : "2px",
-                                    borderStyle: "dashed",
-                                    borderColor: isSigned ? "#22c55e" : field.borderColor || "#cbd5e1",
-                                    backgroundColor: isSigned ? "#dcfce7" : "#f8fafc",
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    padding: "8px",
-                                    pointerEvents: isSigned ? "none" : "auto",
-                                    cursor: isSigned ? "default" : "pointer",
-                                  }}
-                                  onClick={() => {
-                                    if (!isSigned) {
-                                      const sectionIndex = proposal.sections.findIndex(s => s.id === section.id);
-                                      setSelectedSignature({ sectionIndex, fieldIndex: sIndex });
-                                      setSignatureModalOpen(true);
-                                    }
-                                  }}
-                                >
-                                  {isSigned ? (
-                                    <div style={{ textAlign: "center" }}>
-                                      <div
-                                        style={{
-                                          fontFamily: "cursive",
-                                          fontStyle: "italic",
-                                          fontWeight: "bold",
-                                          marginBottom: "4px",
-                                          fontSize: "16px",
-                                          color: "#1f2937",
-                                        }}
-                                      >
-                                        {field.signature}
-                                      </div>
-                                      <div
-                                        style={{
-                                          fontSize: "11px",
-                                          color: "#4b5563",
-                                          whiteSpace: "pre-wrap",
-                                          lineHeight: "1.3",
-                                        }}
-                                      >
-                                        {field.signatureDisplayText?.replace(/\\n/g, '\n')}
-                                      </div>
-                                      {field.position && (
-                                        <div style={{ fontSize: "10px", color: "#6b7280", marginTop: "4px", fontStyle: "italic" }}>
-                                          {field.position}
-                                        </div>
-                                      )}
-                                    </div>
-                                  ) : (
-                                    <>
-                                      <div style={{ flex: 1, borderBottom: "1px solid #cbd5e1" }} />
-                                    </>
-                                  )}
-                                </div>
-
-                                {/* Label section */}
-                                <div style={{
-                                  textAlign: "center",
-                                  padding: "8px",
-                                  backgroundColor: "#f1f5f9",
-                                  borderRadius: field.borderRadius ? `0 0 ${field.borderRadius}px ${field.borderRadius}px` : "0px",
-                                  borderWidth: field.borderWidth ? `${field.borderWidth}px` : "2px",
-                                  borderTopWidth: "0px",
-                                  borderStyle: "dashed",
-                                  borderColor: isSigned ? "#22c55e" : field.borderColor || "#cbd5e1",
-                                  pointerEvents: "none",
-                                }}>
-                                  <div style={{
-                                    fontSize: "12px",
-                                    fontWeight: "bold",
-                                    padding: "4px 8px",
-                                    backgroundColor: "#cbd5e1",
-                                    borderRadius: "4px",
-                                    color: "#1f2937",
-                                  }}>
-                                    {field.fullName ? `${field.fullName}${field.position ? ` - ${field.position}` : ""}` : `Signature ${sIndex + 1}`}
-                                  </div>
-                                </div>
-                              </div>
-                            );
-                          })}
+                          section.signatureFields.map((field: any, sIndex: number) => (
+                            <SignatureFieldView
+                              key={`signature-${sIndex}`}
+                              field={field}
+                              sIndex={sIndex}
+                              onClick={() => {
+                                const sectionIndex = proposal.sections.findIndex(s => s.id === section.id);
+                                setSelectedSignature({ sectionIndex, fieldIndex: sIndex });
+                                setSignatureModalOpen(true);
+                              }}
+                              interactive={true}
+                            />
+                          ))}
                       </>
                     )}
                   </div>
@@ -868,7 +780,7 @@ export default function PublicProposal() {
             setSignatureModalOpen(false);
             setSelectedSignature(null);
           }}
-          onSave={(details) => {
+          onSave={async (details) => {
             // Update the proposal with signature data
             const updatedProposal = {
               ...proposal,
@@ -884,6 +796,71 @@ export default function PublicProposal() {
               ),
             };
             setProposal(updatedProposal);
+
+            // Call API to update signature in database
+            try {
+              const section = proposal.sections[selectedSignature.sectionIndex];
+              const sectionId = section?.id;
+
+              // Format all signature fields for the API, including the updated field
+              const signatureFields = (section?.signatureFields || []).map((field, idx) => {
+                // If this is the field that was just updated, merge the new details
+                const fieldData = idx === selectedSignature.fieldIndex ? { ...field, ...details } : field;
+
+                return {
+                  id: fieldData.id,
+                  recipientId: fieldData.recipientId || null,
+                  sectionId: fieldData.sectionId,
+                  width: fieldData.width,
+                  height: fieldData.height,
+                  top: fieldData.top,
+                  left: fieldData.left,
+                  status: fieldData.status,
+                  signedAt: fieldData.signedAt,
+                  signatureDisplayText: fieldData.signatureDisplayText,
+                  borderColor: fieldData.borderColor,
+                  borderWidth: fieldData.borderWidth,
+                  borderRadius: fieldData.borderRadius,
+                  fullName: fieldData.fullName,
+                  email: fieldData.email,
+                  position: fieldData.position,
+                  signature: fieldData.signature,
+                };
+              });
+
+              const response = await fetch(
+                "https://propai-api.hirenq.com/api/public/proposal/update/signature",
+                {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                    section_id: sectionId,
+                    token: token,
+                    signatureFields: signatureFields,
+                  }),
+                }
+              );
+
+              if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                console.error("Failed to update signature:", errorData);
+                toast({
+                  title: "Error",
+                  description: "Failed to save signature to database",
+                  variant: "destructive",
+                });
+              }
+            } catch (error) {
+              console.error("Error updating signature:", error);
+              toast({
+                title: "Error",
+                description: "Failed to save signature to database",
+                variant: "destructive",
+              });
+            }
+
             setSignatureModalOpen(false);
             setSelectedSignature(null);
             toast({ title: "Signature saved successfully" });

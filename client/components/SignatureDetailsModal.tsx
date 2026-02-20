@@ -104,7 +104,7 @@ export const SignatureDetailsModal: React.FC<SignatureDetailsModalProps> = ({
     const tzStr = `GMT${tzSign}${String(tzHours).padStart(2, "0")}${String(tzMinutes).padStart(2, "0")}`;
 
     const signedAt = now.getTime();
-    const signatureDisplayText = `Signed by: ${fullName}\n${dateStr}, ${timeStr} ${tzStr}`;
+    const signatureDisplayText = `${dateStr} ${timeStr}\n${email}`;
 
     onSave({
       fullName,
