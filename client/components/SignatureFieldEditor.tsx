@@ -41,18 +41,23 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  
+
   // Keep callback refs to avoid recreating listeners on parent re-renders
   const onUpdateRef = useRef(onUpdate);
   const onSelectRef = useRef(onSelect);
-  
+  const onDeleteRef = useRef(onDelete);
+
   useEffect(() => {
     onUpdateRef.current = onUpdate;
   }, [onUpdate]);
-  
+
   useEffect(() => {
     onSelectRef.current = onSelect;
   }, [onSelect]);
+
+  useEffect(() => {
+    onDeleteRef.current = onDelete;
+  }, [onDelete]);
 
   const dragStateRef = useRef({
     isDragging: false,
@@ -226,9 +231,10 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
       {selected && (
         <button
           onClick={(e) => {
+            console.log("🗑️ Delete button clicked");
             e.preventDefault();
             e.stopPropagation();
-            onDelete();
+            onDeleteRef.current();
           }}
           onMouseDown={(e) => {
             e.preventDefault();

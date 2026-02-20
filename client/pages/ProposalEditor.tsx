@@ -999,6 +999,7 @@ export default function ProposalEditor() {
                 commit(updated);
               }}
               onDeleteSignatureField={(sectionId, fieldIndexOrId) => {
+                console.log("🗑️ onDeleteSignatureField called:", { sectionId, fieldIndexOrId, isNumber: typeof fieldIndexOrId === "number" });
                 const updated = {
                   ...p,
                   sections: p.sections.map((s) =>
@@ -1009,6 +1010,8 @@ export default function ProposalEditor() {
                             // Use index-based filtering for reliability
                             // fieldIndexOrId is passed as a number (index) from ProposalPreview
                             if (typeof fieldIndexOrId === "number") {
+                              const willRemove = index === fieldIndexOrId;
+                              console.log(`  Filter check - index: ${index}, fieldIndexOrId: ${fieldIndexOrId}, remove: ${willRemove}`);
                               return index !== fieldIndexOrId;
                             }
                             // Fallback to ID-based matching for backwards compatibility
@@ -1018,6 +1021,7 @@ export default function ProposalEditor() {
                       : s
                   ),
                 };
+                console.log("🗑️ Updated proposal, committing changes");
                 commit(updated);
               }}
               onAddSignature={(sectionId, x, y) => {
