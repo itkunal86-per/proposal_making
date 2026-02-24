@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { apiConfig } from "@/lib/apiConfig";
+import { getStoredToken } from "@/lib/auth";
 import {
   Dialog,
   DialogContent,
@@ -437,8 +438,17 @@ export default function ProposalEditor() {
   const handleCreatePPT = useCallback(async () => {
     setIsCreatingPPT(true);
     try {
+      const token = getStoredToken();
+      if (!token) {
+        throw new Error("No authentication token available");
+      }
+
       const response = await fetch(`${apiConfig.endpoints.generatePPT}/${id}/generate-ppt`, {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
       });
 
       if (!response.ok) {
@@ -465,8 +475,17 @@ export default function ProposalEditor() {
   const handlePreviewPPT = useCallback(async () => {
     setIsPreviewingPPT(true);
     try {
+      const token = getStoredToken();
+      if (!token) {
+        throw new Error("No authentication token available");
+      }
+
       const response = await fetch(`${apiConfig.endpoints.previewPPT}/${id}`, {
         method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
       });
 
       if (!response.ok) {
