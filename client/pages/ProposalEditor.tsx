@@ -496,11 +496,18 @@ export default function ProposalEditor() {
       }
 
       const data = await response.json();
+      console.log("PPT Preview API Response:", data);
+      console.log("PPT JSON:", data.ppt_json);
+      console.log("Slides:", data.ppt_json?.slides);
 
       // Show PPT preview modal with the ppt_json data
-      if (data.ppt_json && data.ppt_json.slides) {
+      if (data.ppt_json && data.ppt_json.slides && data.ppt_json.slides.length > 0) {
+        console.log(`Showing PPT preview with ${data.ppt_json.slides.length} slides`);
+        console.log("Setting PPT preview data:", data.ppt_json);
         setPPTPreviewData(data.ppt_json);
-        setShowPPTPreviewModal(true);
+        setTimeout(() => {
+          setShowPPTPreviewModal(true);
+        }, 0);
       } else if (data.url || data.downloadUrl) {
         // Fallback: open PPT in new window/tab if URL is available
         window.open(data.url || data.downloadUrl, "_blank");

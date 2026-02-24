@@ -24,21 +24,32 @@ export const PPTPreviewModal: React.FC<PPTPreviewModalProps> = ({
   proposalTitle,
   onClose,
 }) => {
+  console.log("PPTPreviewModal component rendered with props:", { pptData, proposalTitle });
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const slides = pptData.slides || [];
   const currentSlide = slides[currentSlideIndex];
 
-  const handleNextSlide = () => {
-    if (currentSlideIndex < slides.length - 1) {
-      setCurrentSlideIndex(currentSlideIndex + 1);
-    }
-  };
+  React.useEffect(() => {
+    console.log("PPTPreviewModal opened with slides:", slides);
+    console.log("Total slides count:", slides.length);
+    console.log("pptData structure:", JSON.stringify(pptData, null, 2));
+  }, [slides, pptData]);
 
-  const handlePrevSlide = () => {
-    if (currentSlideIndex > 0) {
-      setCurrentSlideIndex(currentSlideIndex - 1);
-    }
-  };
+  const handleNextSlide = React.useCallback(() => {
+    setCurrentSlideIndex((prevIndex) => {
+      const nextIndex = Math.min(prevIndex + 1, slides.length - 1);
+      console.log("Next clicked. Moving from", prevIndex, "to", nextIndex, "Total:", slides.length);
+      return nextIndex;
+    });
+  }, [slides.length]);
+
+  const handlePrevSlide = React.useCallback(() => {
+    setCurrentSlideIndex((prevIndex) => {
+      const nextIndex = Math.max(prevIndex - 1, 0);
+      console.log("Prev clicked. Moving from", prevIndex, "to", nextIndex, "Total:", slides.length);
+      return nextIndex;
+    });
+  }, [slides.length]);
 
   const getSlideBackgroundColor = (type: string) => {
     switch (type) {
@@ -69,8 +80,38 @@ export const PPTPreviewModal: React.FC<PPTPreviewModalProps> = ({
     };
   }, []);
 
+  React.useEffect(() => {
+    // Handle keyboard navigation
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowRight") {
+        handleNextSlide();
+      } else if (e.key === "ArrowLeft") {
+        handlePrevSlide();
+      } else if (e.key === "Escape") {
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [currentSlideIndex, slides.length]);
+
   if (!currentSlide) {
-    return null;
+    console.warn("No current slide found. currentSlideIndex:", currentSlideIndex, "slides.length:", slides.length, "slides:", slides);
+    return (
+      <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0, 0, 0, 0.8)", zIndex: 9998 }}>
+        <div style={{ position: "fixed", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999 }}>
+          <div className="bg-white p-8 rounded-lg shadow-lg">
+            <p className="text-red-600 font-bold">Error: No slides found</p>
+            <p className="text-slate-600 mt-2">Slides count: {slides.length}</p>
+            <p className="text-slate-600 mt-2">Current index: {currentSlideIndex}</p>
+            <button onClick={onClose} className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
