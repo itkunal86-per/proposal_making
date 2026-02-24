@@ -34,6 +34,7 @@ import { updateSystemTemplate, getSystemTemplateDetails, deleteSystemTemplate, t
 import { type ClientRecord, listClients } from "@/services/clientsService";
 import { ProposalPreview } from "@/components/ProposalPreview";
 import { ProposalPreviewModal } from "@/components/ProposalPreviewModal";
+import { PPTPreviewModal } from "@/components/PPTPreviewModal";
 import { PropertiesPanel } from "@/components/PropertiesPanel";
 import { ProposalEditorSidebar, type PanelType } from "@/components/ProposalEditorSidebar";
 import { SectionsDialog } from "@/components/SectionsDialog";
@@ -84,6 +85,8 @@ export default function ProposalEditor() {
   const [signatureDetailsData, setSignatureDetailsData] = useState({ sectionId: "", fieldIndex: 0 });
   const [isCreatingPPT, setIsCreatingPPT] = useState(false);
   const [isPreviewingPPT, setIsPreviewingPPT] = useState(false);
+  const [showPPTPreviewModal, setShowPPTPreviewModal] = useState(false);
+  const [pptPreviewData, setPPTPreviewData] = useState<any>(null);
   const previewContainerRef = useRef<HTMLDivElement>(null);
   const saveTimer = useRef<number | null>(null);
 
@@ -494,8 +497,12 @@ export default function ProposalEditor() {
 
       const data = await response.json();
 
-      // Open PPT in new window/tab if URL is available
-      if (data.url || data.downloadUrl) {
+      // Show PPT preview modal with the ppt_json data
+      if (data.ppt_json && data.ppt_json.slides) {
+        setPPTPreviewData(data.ppt_json);
+        setShowPPTPreviewModal(true);
+      } else if (data.url || data.downloadUrl) {
+        // Fallback: open PPT in new window/tab if URL is available
         window.open(data.url || data.downloadUrl, "_blank");
       } else if (data.message) {
         toast({
@@ -1288,6 +1295,14 @@ export default function ProposalEditor() {
             setSignatureDetailsOpen(true);
             setShowPreviewModal(false);
           }}
+        />
+      )}
+
+      {showPPTPreviewModal && pptPreviewData && (
+        <PPTPreviewModal
+          pptData={pptPreviewData}
+          proposalTitle={p.title}
+          onClose={() => setShowPPTPreviewModal(false)}
         />
       )}
 
