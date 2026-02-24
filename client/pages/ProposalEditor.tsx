@@ -80,6 +80,8 @@ export default function ProposalEditor() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [signatureDetailsOpen, setSignatureDetailsOpen] = useState(false);
   const [signatureDetailsData, setSignatureDetailsData] = useState({ sectionId: "", fieldIndex: 0 });
+  const [isCreatingPPT, setIsCreatingPPT] = useState(false);
+  const [isPreviewingPPT, setIsPreviewingPPT] = useState(false);
   const previewContainerRef = useRef<HTMLDivElement>(null);
   const saveTimer = useRef<number | null>(null);
 
@@ -431,6 +433,75 @@ export default function ProposalEditor() {
     setSectionsDialogOpen(false);
   }, []);
 
+  const handleCreatePPT = useCallback(async () => {
+    setIsCreatingPPT(true);
+    try {
+      const response = await fetch(`http://propai-api.hirenq.com/proposal/${id}/generate-ppt`, {
+        method: "POST",
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to create PPT: ${response.statusText}`);
+      }
+
+      toast({
+        title: "Success",
+        description: "PPT generation started. Please check your downloads.",
+        variant: "default",
+      });
+    } catch (error) {
+      console.error("Error creating PPT:", error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to create PPT",
+        variant: "destructive",
+      });
+    } finally {
+      setIsCreatingPPT(false);
+    }
+  }, [id]);
+
+  const handlePreviewPPT = useCallback(async () => {
+    setIsPreviewingPPT(true);
+    try {
+      const response = await fetch(`http://propai-api.hirenq.com/api/proposals/details-ppt/${id}`, {
+        method: "GET",
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch PPT details: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+
+      // Open PPT in new window/tab if URL is available
+      if (data.url || data.downloadUrl) {
+        window.open(data.url || data.downloadUrl, "_blank");
+      } else if (data.message) {
+        toast({
+          title: "Info",
+          description: data.message,
+          variant: "default",
+        });
+      } else {
+        toast({
+          title: "Info",
+          description: "PPT preview data retrieved successfully",
+          variant: "default",
+        });
+      }
+    } catch (error) {
+      console.error("Error previewing PPT:", error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to preview PPT",
+        variant: "destructive",
+      });
+    } finally {
+      setIsPreviewingPPT(false);
+    }
+  }, [id]);
+
   if (!p) return null;
 
   const section = p.sections[current];
@@ -529,6 +600,26 @@ export default function ProposalEditor() {
               >
                 Preview Proposal
               </Button>
+              {!isSystemTemplateEdit && (
+                <>
+                  <Button
+                    onClick={handleCreatePPT}
+                    variant="outline"
+                    size="sm"
+                    disabled={isCreatingPPT}
+                  >
+                    {isCreatingPPT ? "Creating..." : "Create PPT"}
+                  </Button>
+                  <Button
+                    onClick={handlePreviewPPT}
+                    variant="outline"
+                    size="sm"
+                    disabled={isPreviewingPPT}
+                  >
+                    {isPreviewingPPT ? "Previewing..." : "Preview PPT"}
+                  </Button>
+                </>
+              )}
               {isSystemTemplateEdit && (
                 <Button
                   onClick={() => setShowDeleteConfirm(true)}
