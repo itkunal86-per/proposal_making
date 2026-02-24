@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { apiConfig } from "@/lib/apiConfig";
 import {
   Dialog,
   DialogContent,
@@ -436,7 +437,7 @@ export default function ProposalEditor() {
   const handleCreatePPT = useCallback(async () => {
     setIsCreatingPPT(true);
     try {
-      const response = await fetch(`http://propai-api.hirenq.com/proposal/${id}/generate-ppt`, {
+      const response = await fetch(`${apiConfig.endpoints.generatePPT}/${id}/generate-ppt`, {
         method: "POST",
       });
 
@@ -464,7 +465,7 @@ export default function ProposalEditor() {
   const handlePreviewPPT = useCallback(async () => {
     setIsPreviewingPPT(true);
     try {
-      const response = await fetch(`http://propai-api.hirenq.com/api/proposals/details-ppt/${id}`, {
+      const response = await fetch(`${apiConfig.endpoints.previewPPT}/${id}`, {
         method: "GET",
       });
 
