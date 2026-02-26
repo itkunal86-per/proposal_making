@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { apiConfig } from "@/lib/apiConfig";
+import { getStoredToken } from "@/lib/auth";
 import {
   Dialog,
   DialogContent,
@@ -32,6 +34,7 @@ import { updateSystemTemplate, getSystemTemplateDetails, deleteSystemTemplate, t
 import { type ClientRecord, listClients } from "@/services/clientsService";
 import { ProposalPreview } from "@/components/ProposalPreview";
 import { ProposalPreviewModal } from "@/components/ProposalPreviewModal";
+import { PPTPreviewModal } from "@/components/PPTPreviewModal";
 import { PropertiesPanel } from "@/components/PropertiesPanel";
 import { ProposalEditorSidebar, type PanelType } from "@/components/ProposalEditorSidebar";
 import { SectionsDialog } from "@/components/SectionsDialog";
@@ -80,6 +83,10 @@ export default function ProposalEditor() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [signatureDetailsOpen, setSignatureDetailsOpen] = useState(false);
   const [signatureDetailsData, setSignatureDetailsData] = useState({ sectionId: "", fieldIndex: 0 });
+  const [isCreatingPPT, setIsCreatingPPT] = useState(false);
+  const [isPreviewingPPT, setIsPreviewingPPT] = useState(false);
+  const [showPPTPreviewModal, setShowPPTPreviewModal] = useState(false);
+  const [pptPreviewData, setPPTPreviewData] = useState<any>(null);
   const previewContainerRef = useRef<HTMLDivElement>(null);
   const saveTimer = useRef<number | null>(null);
 
@@ -431,6 +438,104 @@ export default function ProposalEditor() {
     setSectionsDialogOpen(false);
   }, []);
 
+  const handleCreatePPT = useCallback(async () => {
+    setIsCreatingPPT(true);
+    try {
+      const token = getStoredToken();
+      if (!token) {
+        throw new Error("No authentication token available");
+      }
+
+      const response = await fetch(`${apiConfig.endpoints.generatePPT}/${id}/generate-ppt`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to create PPT: ${response.statusText}`);
+      }
+
+      toast({
+        title: "Success",
+        description: "PPT generation started. Please check your downloads.",
+        variant: "default",
+      });
+    } catch (error) {
+      console.error("Error creating PPT:", error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to create PPT",
+        variant: "destructive",
+      });
+    } finally {
+      setIsCreatingPPT(false);
+    }
+  }, [id]);
+
+  const handlePreviewPPT = useCallback(async () => {
+    setIsPreviewingPPT(true);
+    try {
+      const token = getStoredToken();
+      if (!token) {
+        throw new Error("No authentication token available");
+      }
+
+      const response = await fetch(`${apiConfig.endpoints.previewPPT}/${id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch PPT details: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log("PPT Preview API Response:", data);
+      console.log("PPT JSON:", data.ppt_json);
+      console.log("Slides:", data.ppt_json?.slides);
+
+      // Show PPT preview modal with the ppt_json data
+      if (data.ppt_json && data.ppt_json.slides && data.ppt_json.slides.length > 0) {
+        console.log(`Showing PPT preview with ${data.ppt_json.slides.length} slides`);
+        console.log("Setting PPT preview data:", data.ppt_json);
+        setPPTPreviewData(data.ppt_json);
+        setTimeout(() => {
+          setShowPPTPreviewModal(true);
+        }, 0);
+      } else if (data.url || data.downloadUrl) {
+        // Fallback: open PPT in new window/tab if URL is available
+        window.open(data.url || data.downloadUrl, "_blank");
+      } else if (data.message) {
+        toast({
+          title: "Info",
+          description: data.message,
+          variant: "default",
+        });
+      } else {
+        toast({
+          title: "Info",
+          description: "PPT preview data retrieved successfully",
+          variant: "default",
+        });
+      }
+    } catch (error) {
+      console.error("Error previewing PPT:", error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to preview PPT",
+        variant: "destructive",
+      });
+    } finally {
+      setIsPreviewingPPT(false);
+    }
+  }, [id]);
+
   if (!p) return null;
 
   const section = p.sections[current];
@@ -529,6 +634,26 @@ export default function ProposalEditor() {
               >
                 Preview Proposal
               </Button>
+              {!isSystemTemplateEdit && (
+                <>
+                  <Button
+                    onClick={handleCreatePPT}
+                    variant="outline"
+                    size="sm"
+                    disabled={isCreatingPPT}
+                  >
+                    {isCreatingPPT ? "Creating..." : "Create PPT"}
+                  </Button>
+                  <Button
+                    onClick={handlePreviewPPT}
+                    variant="outline"
+                    size="sm"
+                    disabled={isPreviewingPPT}
+                  >
+                    {isPreviewingPPT ? "Previewing..." : "Preview PPT"}
+                  </Button>
+                </>
+              )}
               {isSystemTemplateEdit && (
                 <Button
                   onClick={() => setShowDeleteConfirm(true)}
@@ -1177,6 +1302,14 @@ export default function ProposalEditor() {
             setSignatureDetailsOpen(true);
             setShowPreviewModal(false);
           }}
+        />
+      )}
+
+      {showPPTPreviewModal && pptPreviewData && (
+        <PPTPreviewModal
+          pptData={pptPreviewData}
+          proposalTitle={p.title}
+          onClose={() => setShowPPTPreviewModal(false)}
         />
       )}
 

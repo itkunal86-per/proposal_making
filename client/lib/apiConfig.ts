@@ -52,6 +52,10 @@ export const apiConfig = {
 
     // Analytics endpoints
     analytics: `${API_BASE_URL}/api/analytics`,
+
+    // PPT endpoints
+    generatePPT: `${API_BASE_URL}/api/proposal`,
+    previewPPT: `${API_BASE_URL}/api/proposals/details-ppt`,
   },
 };
 
