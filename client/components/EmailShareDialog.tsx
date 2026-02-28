@@ -1,11 +1,11 @@
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import { X, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { getStoredToken } from "@/lib/auth";
 import { apiConfig } from "@/lib/apiConfig";
-import { AuthContext } from "@/providers/AuthProvider";
 import {
   Dialog,
   DialogContent,
@@ -26,12 +26,12 @@ export const EmailShareDialog: React.FC<EmailShareDialogProps> = ({
   proposalTitle,
   shareLink,
 }) => {
-  const authContext = useContext(AuthContext);
+  const { user } = useAuth();
   const [recipients, setRecipients] = useState<string[]>([]);
   const [currentEmail, setCurrentEmail] = useState("");
   const [isSending, setIsSending] = useState(false);
-  const [senderName, setSenderName] = useState(authContext?.user?.name || "");
-  const [senderEmail, setSenderEmail] = useState(authContext?.user?.email || "");
+  const [senderName, setSenderName] = useState(user?.name || "");
+  const [senderEmail, setSenderEmail] = useState(user?.email || "");
   const [message, setMessage] = useState(`Please check the proposal: ${proposalTitle}`);
 
   const addRecipient = () => {
@@ -124,8 +124,8 @@ export const EmailShareDialog: React.FC<EmailShareDialogProps> = ({
       setRecipients([]);
       setCurrentEmail("");
       setMessage(`Please check the proposal: ${proposalTitle}`);
-      setSenderName(authContext?.user?.name || "");
-      setSenderEmail(authContext?.user?.email || "");
+      setSenderName(user?.name || "");
+      setSenderEmail(user?.email || "");
       onOpenChange(false);
     } catch (error) {
       console.error("Send email error:", error);
