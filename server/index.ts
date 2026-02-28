@@ -1,7 +1,7 @@
 import express, { Express } from "express";
 import cors from "cors";
 
-const EXTERNAL_API_URL = "http://143.198.44.221";
+const EXTERNAL_API_URL = "https://propai-api.hirenq.com";
 
 export function createServer(): Express {
   const app = express();
