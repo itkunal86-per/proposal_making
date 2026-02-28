@@ -31,7 +31,7 @@ interface AuthContextValue {
   signOut: () => void;
 }
 
-export const AuthContext = createContext<AuthContextValue | undefined>(undefined);
+const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthenticatedUser | null>(null);
@@ -110,10 +110,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-export function useAuthContext() {
+function useAuthContext() {
   const ctx = useContext(AuthContext);
   if (!ctx) {
     throw new Error("useAuthContext must be used within an AuthProvider");
   }
   return ctx;
 }
+
+export { useAuthContext };

@@ -44,6 +44,56 @@ import { RequireAuth, RequireRole } from "@/components/auth/RouteGuards";
 
 const queryClient = new QueryClient();
 
+const AppRoutes = () => (
+  <Layout>
+    <Routes>
+      <Route path="/" element={<Index />} />
+      <Route path="/get-started" element={<GetStarted />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/reset" element={<Reset />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/privacy" element={<Privacy />} />
+      <Route path="/terms" element={<TermsAndConditions />} />
+      <Route path="/contact" element={<Contact />} />
+      <Route path="/features" element={<Features />} />
+      <Route path="/how-it-works" element={<HowItWorks />} />
+      <Route path="/faq" element={<FAQ />} />
+      <Route path="/p/:token" element={<ProposalView />} />
+      <Route path="/proposal/:token" element={<ProposalPublicView />} />
+      <Route path="/preview/proposal/:token" element={<PublicProposal />} />
+      <Route path="/invite/:token" element={<AcceptInvite />} />
+
+      <Route element={<RequireAuth />}>
+        <Route element={<RequireRole roles={["admin"]} />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/admin/users" element={<AdminUsers />} />
+          <Route path="/admin/packages" element={<AdminPackages />} />
+          <Route path="/admin/templates" element={<AdminTemplates />} />
+          <Route path="/admin/templates/system" element={<AdminSystemTemplates />} />
+          <Route path="/admin/templates/clients" element={<AdminClientTemplates />} />
+          <Route path="/admin/settings" element={<AdminSettings />} />
+        </Route>
+
+        <Route element={<RequireRole roles={["subscriber", "user"]} />}>
+          <Route path="/my/proposals" element={<MyProposals />} />
+          <Route path="/my/templates" element={<MyTemplates />} />
+          <Route path="/my/clients" element={<MyClients />} />
+          <Route path="/my/users" element={<SubscriberUsers />} />
+          <Route path="/integrations" element={<Integrations />} />
+          <Route path="/my/settings" element={<SubscriberSettings />} />
+        </Route>
+
+        <Route path="/proposals/:id/edit" element={<ProposalEditor />} />
+        <Route path="/proposals/:id/settings" element={<ProposalSettings />} />
+      </Route>
+
+      {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  </Layout>
+);
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -51,53 +101,7 @@ const App = () => (
       <Sonner />
       <AuthProvider>
         <BrowserRouter>
-          <Layout>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/get-started" element={<GetStarted />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/reset" element={<Reset />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/privacy" element={<Privacy />} />
-              <Route path="/terms" element={<TermsAndConditions />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/features" element={<Features />} />
-              <Route path="/how-it-works" element={<HowItWorks />} />
-              <Route path="/faq" element={<FAQ />} />
-              <Route path="/p/:token" element={<ProposalView />} />
-              <Route path="/proposal/:token" element={<ProposalPublicView />} />
-              <Route path="/preview/proposal/:token" element={<PublicProposal />} />
-              <Route path="/invite/:token" element={<AcceptInvite />} />
-
-              <Route element={<RequireAuth />}>
-                <Route element={<RequireRole roles={["admin"]} />}>
-                  <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/admin/users" element={<AdminUsers />} />
-                  <Route path="/admin/packages" element={<AdminPackages />} />
-                  <Route path="/admin/templates" element={<AdminTemplates />} />
-                  <Route path="/admin/templates/system" element={<AdminSystemTemplates />} />
-                  <Route path="/admin/templates/clients" element={<AdminClientTemplates />} />
-                  <Route path="/admin/settings" element={<AdminSettings />} />
-                </Route>
-
-                <Route element={<RequireRole roles={["subscriber", "user"]} />}>
-                  <Route path="/my/proposals" element={<MyProposals />} />
-                  <Route path="/my/templates" element={<MyTemplates />} />
-                  <Route path="/my/clients" element={<MyClients />} />
-                  <Route path="/my/users" element={<SubscriberUsers />} />
-                  <Route path="/integrations" element={<Integrations />} />
-                  <Route path="/my/settings" element={<SubscriberSettings />} />
-                </Route>
-
-                <Route path="/proposals/:id/edit" element={<ProposalEditor />} />
-                <Route path="/proposals/:id/settings" element={<ProposalSettings />} />
-              </Route>
-
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Layout>
+          <AppRoutes />
         </BrowserRouter>
       </AuthProvider>
     </TooltipProvider>
