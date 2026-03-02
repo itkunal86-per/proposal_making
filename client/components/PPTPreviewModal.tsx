@@ -1,6 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
+import { getStoredToken } from "@/lib/auth";
+import apiConfig from "@/lib/apiConfig";
 
 interface Slide {
   type: "title" | "content" | "timeline" | "pricing";
@@ -11,6 +14,16 @@ interface Slide {
 
 interface PPTData {
   slides: Slide[];
+}
+
+interface PPTStyle {
+  id: number;
+  name: string;
+  primary_color: string;
+  background_color: string;
+  title_font: string;
+  body_font: string;
+  preview_image: string;
 }
 
 interface PPTPreviewModalProps {
@@ -25,7 +38,11 @@ export const PPTPreviewModal: React.FC<PPTPreviewModalProps> = ({
   onClose,
 }) => {
   console.log("PPTPreviewModal component rendered with props:", { pptData, proposalTitle });
+  const { status } = useAuth();
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+  const [pptStyles, setPPTStyles] = useState<PPTStyle[]>([]);
+  const [selectedStyleId, setSelectedStyleId] = useState<number | null>(null);
+  const [isLoadingStyles, setIsLoadingStyles] = useState(false);
   const slides = pptData.slides || [];
   const currentSlide = slides[currentSlideIndex];
 
@@ -34,6 +51,43 @@ export const PPTPreviewModal: React.FC<PPTPreviewModalProps> = ({
     console.log("Total slides count:", slides.length);
     console.log("pptData structure:", JSON.stringify(pptData, null, 2));
   }, [slides, pptData]);
+
+  // Fetch PPT Styles
+  useEffect(() => {
+    const fetchPPTStyles = async () => {
+      if (status !== "ready") return;
+
+      setIsLoadingStyles(true);
+      try {
+        const token = getStoredToken();
+        const response = await fetch(apiConfig.endpoints.pptStyles, {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch PPT styles");
+        }
+
+        const data = await response.json();
+        if (data.success && data.data) {
+          setPPTStyles(data.data);
+          if (data.data.length > 0) {
+            setSelectedStyleId(data.data[0].id);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching PPT styles:", error);
+      } finally {
+        setIsLoadingStyles(false);
+      }
+    };
+
+    fetchPPTStyles();
+  }, [status]);
 
   const handleNextSlide = React.useCallback(() => {
     setCurrentSlideIndex((prevIndex) => {
@@ -133,41 +187,94 @@ export const PPTPreviewModal: React.FC<PPTPreviewModalProps> = ({
           <p className="text-xs text-slate-400">Tip: Use Arrow keys (← →) to navigate between slides</p>
         </div>
 
-        {/* Main Content - Slide Display */}
-        <div className="flex-1 flex items-center justify-center bg-black p-8">
-          <div className="w-full max-w-4xl aspect-video rounded-lg overflow-hidden shadow-2xl">
-            <div
-              className={`h-full w-full ${getSlideBackgroundColor(currentSlide.type)} flex flex-col justify-center p-12`}
-            >
-              {/* Slide Title */}
-              <h2 className={`text-5xl font-bold mb-8 ${getTitleColor(currentSlide.type)}`}>
-                {currentSlide.title}
-              </h2>
+        {/* Main Content - Slide Display and Styles */}
+        <div className="flex-1 flex bg-black overflow-hidden">
+          {/* Left Side - Slide Display */}
+          <div className="flex-1 flex items-center justify-center p-8">
+            <div className="w-full max-w-4xl aspect-video rounded-lg overflow-hidden shadow-2xl">
+              <div
+                className={`h-full w-full ${getSlideBackgroundColor(currentSlide.type)} flex flex-col justify-center p-12`}
+              >
+                {/* Slide Title */}
+                <h2 className={`text-5xl font-bold mb-8 ${getTitleColor(currentSlide.type)}`}>
+                  {currentSlide.title}
+                </h2>
 
-              {/* Slide Bullets */}
-              {currentSlide.bullets && currentSlide.bullets.length > 0 && (
-                <ul className="space-y-4">
-                  {currentSlide.bullets.map((bullet, idx) => (
-                    <li
-                      key={idx}
-                      className={`text-2xl flex items-start ${getBulletColor(currentSlide.type)}`}
-                    >
-                      <span className="mr-4">•</span>
-                      <span>{bullet}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
+                {/* Slide Bullets */}
+                {currentSlide.bullets && currentSlide.bullets.length > 0 && (
+                  <ul className="space-y-4">
+                    {currentSlide.bullets.map((bullet, idx) => (
+                      <li
+                        key={idx}
+                        className={`text-2xl flex items-start ${getBulletColor(currentSlide.type)}`}
+                      >
+                        <span className="mr-4">•</span>
+                        <span>{bullet}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
 
-              {/* Slide Notes (if available) */}
-              {currentSlide.notes && (
-                <div className={`mt-8 pt-8 border-t ${currentSlide.type === "content" ? "border-slate-300" : "border-slate-400"}`}>
-                  <p className={`text-sm italic ${getBulletColor(currentSlide.type)}`}>
-                    Notes: {currentSlide.notes}
-                  </p>
-                </div>
-              )}
+                {/* Slide Notes (if available) */}
+                {currentSlide.notes && (
+                  <div className={`mt-8 pt-8 border-t ${currentSlide.type === "content" ? "border-slate-300" : "border-slate-400"}`}>
+                    <p className={`text-sm italic ${getBulletColor(currentSlide.type)}`}>
+                      Notes: {currentSlide.notes}
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
+          </div>
+
+          {/* Right Side - PPT Styles */}
+          <div className="w-64 bg-slate-900 border-l border-slate-700 p-4 overflow-y-auto">
+            <h3 className="text-sm font-semibold text-white mb-4">PPT Styles</h3>
+
+            {isLoadingStyles ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-6 w-6 border-2 border-blue-500 border-t-transparent"></div>
+              </div>
+            ) : pptStyles.length > 0 ? (
+              <div className="space-y-3">
+                {pptStyles.map((style) => (
+                  <button
+                    key={style.id}
+                    onClick={() => setSelectedStyleId(style.id)}
+                    className={`w-full p-3 rounded-lg border-2 transition-all ${
+                      selectedStyleId === style.id
+                        ? "border-blue-500 bg-slate-800"
+                        : "border-slate-600 bg-slate-800 hover:border-slate-500"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      {/* Color Preview */}
+                      <div className="flex gap-1">
+                        <div
+                          className="w-4 h-4 rounded-full border border-slate-500"
+                          style={{ backgroundColor: style.primary_color }}
+                          title="Primary Color"
+                        />
+                        <div
+                          className="w-4 h-4 rounded-full border border-slate-500"
+                          style={{ backgroundColor: style.background_color }}
+                          title="Background Color"
+                        />
+                      </div>
+                      {/* Style Name */}
+                      <div className="text-left flex-1">
+                        <p className="text-xs font-medium text-white truncate">{style.name}</p>
+                        <p className="text-xs text-slate-400 truncate">
+                          {style.title_font} / {style.body_font}
+                        </p>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-slate-400 text-center py-8">No styles available</p>
+            )}
           </div>
         </div>
 

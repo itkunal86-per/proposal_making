@@ -56,6 +56,7 @@ export const apiConfig = {
     // PPT endpoints
     generatePPT: `${API_BASE_URL}/api/proposal`,
     previewPPT: `${API_BASE_URL}/api/proposals/details-ppt`,
+    pptStyles: `${API_BASE_URL}/api/ppt/styles`,
   },
 };
 
