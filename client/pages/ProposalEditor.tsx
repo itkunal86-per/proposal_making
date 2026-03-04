@@ -500,12 +500,13 @@ export default function ProposalEditor() {
       console.log("PPT JSON:", data.ppt_json);
       console.log("Slides:", data.ppt_json?.slides);
 
-      // Show PPT preview modal with the ppt_json data and ppt_style
+      // Show PPT preview modal with the ppt_json data, ppt_style, and ppt_url
       if (data.ppt_json && data.ppt_json.slides && data.ppt_json.slides.length > 0) {
         console.log(`Showing PPT preview with ${data.ppt_json.slides.length} slides`);
         const previewData = {
           ...data.ppt_json,
           ppt_style: data.ppt_style || null,
+          ppt_url: data.ppt_url || null,
         };
         console.log("Setting PPT preview data:", previewData);
         setPPTPreviewData(previewData);
