@@ -12,8 +12,48 @@ interface Slide {
   bullets: string[];
 }
 
+interface StyleConfig {
+  fonts?: {
+    body?: {
+      size: number;
+      family: string;
+      weight: string;
+    };
+    heading?: {
+      size: number;
+      family: string;
+      weight: string;
+    };
+  };
+  colors?: {
+    body?: string;
+    accent?: string;
+    heading?: string;
+    background?: string;
+  };
+}
+
+interface PPTStyleData {
+  id: number;
+  name: string;
+  primary_color: string;
+  secondary_color?: string;
+  background_color: string;
+  title_font: string;
+  body_font: string;
+  title_font_size?: string | number;
+  body_font_size?: string | number;
+  title_font_color?: string;
+  body_font_color?: string;
+  layout_type?: string;
+  style_config?: StyleConfig;
+  preview_image: string;
+  is_active?: boolean;
+}
+
 interface PPTData {
   slides: Slide[];
+  ppt_style?: PPTStyleData | null;
 }
 
 interface PPTStyle {
@@ -43,7 +83,10 @@ export const PPTPreviewModal: React.FC<PPTPreviewModalProps> = ({
   const [pptStyles, setPPTStyles] = useState<PPTStyle[]>([]);
   const [selectedStyleId, setSelectedStyleId] = useState<number | null>(null);
   const [isLoadingStyles, setIsLoadingStyles] = useState(false);
-  const slides = pptData.slides || [];
+
+  // Extract ppt_style from pptData if available
+  const appliedStyle = pptData?.ppt_style;
+  const slides = pptData?.slides || [];
   const currentSlide = slides[currentSlideIndex];
 
   React.useEffect(() => {
@@ -106,6 +149,12 @@ export const PPTPreviewModal: React.FC<PPTPreviewModalProps> = ({
   }, [slides.length]);
 
   const getSlideBackgroundColor = (type: string) => {
+    // If ppt_style exists, use its background color for all slides
+    if (appliedStyle) {
+      return "";
+    }
+
+    // Default fallback colors
     switch (type) {
       case "title":
         return "bg-gradient-to-br from-blue-600 to-blue-800";
@@ -118,12 +167,49 @@ export const PPTPreviewModal: React.FC<PPTPreviewModalProps> = ({
     }
   };
 
+  const getBackgroundStyle = () => {
+    if (appliedStyle?.background_color) {
+      return {
+        backgroundColor: appliedStyle.background_color,
+      };
+    }
+    return {};
+  };
+
   const getTitleColor = (type: string) => {
+    if (appliedStyle?.title_font_color) {
+      return "";
+    }
     return type === "content" ? "text-slate-900" : "text-white";
   };
 
+  const getTitleStyle = () => {
+    if (appliedStyle) {
+      return {
+        color: appliedStyle.title_font_color || "#FFFFFF",
+        fontSize: `${appliedStyle.title_font_size || 42}px`,
+        fontFamily: appliedStyle.title_font || "inherit",
+      };
+    }
+    return {};
+  };
+
   const getBulletColor = (type: string) => {
+    if (appliedStyle?.body_font_color) {
+      return "";
+    }
     return type === "content" ? "text-slate-700" : "text-slate-100";
+  };
+
+  const getBulletStyle = () => {
+    if (appliedStyle) {
+      return {
+        color: appliedStyle.body_font_color || "#CCCCCC",
+        fontSize: `${appliedStyle.body_font_size || 22}px`,
+        fontFamily: appliedStyle.body_font || "inherit",
+      };
+    }
+    return {};
   };
 
   React.useEffect(() => {
@@ -194,9 +280,13 @@ export const PPTPreviewModal: React.FC<PPTPreviewModalProps> = ({
             <div className="w-full max-w-4xl aspect-video rounded-lg overflow-hidden shadow-2xl">
               <div
                 className={`h-full w-full ${getSlideBackgroundColor(currentSlide.type)} flex flex-col justify-center p-12`}
+                style={getBackgroundStyle()}
               >
                 {/* Slide Title */}
-                <h2 className={`text-5xl font-bold mb-8 ${getTitleColor(currentSlide.type)}`}>
+                <h2
+                  className={`font-bold mb-8 ${getTitleColor(currentSlide.type)}`}
+                  style={getTitleStyle()}
+                >
                   {currentSlide.title}
                 </h2>
 
@@ -206,7 +296,8 @@ export const PPTPreviewModal: React.FC<PPTPreviewModalProps> = ({
                     {currentSlide.bullets.map((bullet, idx) => (
                       <li
                         key={idx}
-                        className={`text-2xl flex items-start ${getBulletColor(currentSlide.type)}`}
+                        className={`flex items-start ${getBulletColor(currentSlide.type)}`}
+                        style={getBulletStyle()}
                       >
                         <span className="mr-4">•</span>
                         <span>{bullet}</span>
@@ -217,8 +308,15 @@ export const PPTPreviewModal: React.FC<PPTPreviewModalProps> = ({
 
                 {/* Slide Notes (if available) */}
                 {currentSlide.notes && (
-                  <div className={`mt-8 pt-8 border-t ${currentSlide.type === "content" ? "border-slate-300" : "border-slate-400"}`}>
-                    <p className={`text-sm italic ${getBulletColor(currentSlide.type)}`}>
+                  <div className={`mt-8 pt-8 border-t ${currentSlide.type === "content" ? "border-slate-300" : "border-slate-400"}`}
+                    style={appliedStyle ? { borderColor: appliedStyle.body_font_color || "#999" } : {}}>
+                    <p
+                      className={`text-sm italic ${getBulletColor(currentSlide.type)}`}
+                      style={appliedStyle ? {
+                        color: appliedStyle.body_font_color || "#CCCCCC",
+                        fontSize: "14px",
+                      } : {}}
+                    >
                       Notes: {currentSlide.notes}
                     </p>
                   </div>
