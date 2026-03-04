@@ -57,6 +57,7 @@ export const apiConfig = {
     generatePPT: `${API_BASE_URL}/api/proposal`,
     previewPPT: `${API_BASE_URL}/api/proposals/details-ppt`,
     pptStyles: `${API_BASE_URL}/api/ppt/styles`,
+    applyPPTStyle: `${API_BASE_URL}/api/proposal`, // Used with {proposal_id}/apply-style
   },
 };
 

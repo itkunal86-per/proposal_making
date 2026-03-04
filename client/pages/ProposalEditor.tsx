@@ -1313,7 +1313,12 @@ export default function ProposalEditor() {
         <PPTPreviewModal
           pptData={pptPreviewData}
           proposalTitle={p.title}
+          proposalId={id}
           onClose={() => setShowPPTPreviewModal(false)}
+          onStyleApplied={() => {
+            // Refresh PPT data after style is applied
+            handlePreviewPPT();
+          }}
         />
       )}
 

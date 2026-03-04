@@ -69,23 +69,28 @@ interface PPTStyle {
 interface PPTPreviewModalProps {
   pptData: PPTData;
   proposalTitle: string;
+  proposalId: string;
   onClose: () => void;
+  onStyleApplied?: () => void;
 }
 
 export const PPTPreviewModal: React.FC<PPTPreviewModalProps> = ({
   pptData,
   proposalTitle,
+  proposalId,
   onClose,
+  onStyleApplied,
 }) => {
-  console.log("PPTPreviewModal component rendered with props:", { pptData, proposalTitle });
+  console.log("PPTPreviewModal component rendered with props:", { pptData, proposalTitle, proposalId });
   const { status } = useAuth();
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [pptStyles, setPPTStyles] = useState<PPTStyle[]>([]);
   const [selectedStyleId, setSelectedStyleId] = useState<number | null>(null);
   const [isLoadingStyles, setIsLoadingStyles] = useState(false);
+  const [isApplyingStyle, setIsApplyingStyle] = useState(false);
+  const [appliedStyle, setAppliedStyle] = useState<PPTStyleData | null | undefined>(pptData?.ppt_style);
 
-  // Extract ppt_style from pptData if available
-  const appliedStyle = pptData?.ppt_style;
+  // Extract slides from pptData if available
   const slides = pptData?.slides || [];
   const currentSlide = slides[currentSlideIndex];
 
@@ -241,6 +246,64 @@ export const PPTPreviewModal: React.FC<PPTPreviewModalProps> = ({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [currentSlideIndex, slides.length]);
 
+  const handleApplyStyle = async (styleId: number) => {
+    // Don't call API if clicking the already selected style
+    if (styleId === appliedStyle?.id) {
+      return;
+    }
+
+    setIsApplyingStyle(true);
+    try {
+      const token = getStoredToken();
+      if (!token) {
+        throw new Error("No authentication token available");
+      }
+
+      const response = await fetch(`${apiConfig.endpoints.applyPPTStyle}/${proposalId}/apply-style`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify({ style_id: styleId }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to apply style");
+      }
+
+      const data = await response.json();
+      console.log("Style applied successfully:", data);
+
+      // Find the applied style object
+      const newStyle = pptStyles.find(s => s.id === styleId);
+
+      // Update the selected style and applied style
+      setSelectedStyleId(styleId);
+
+      // Since we don't have the full PPTStyleData from the styles list, we need to fetch it again
+      // For now, update with basic info and refresh the view
+      if (newStyle) {
+        // Create a PPTStyleData object from the PPTStyle
+        const updatedStyle: PPTStyleData = {
+          ...newStyle,
+          title_font_color: "#FFFFFF",
+          body_font_color: "#CCCCCC",
+        };
+        setAppliedStyle(updatedStyle);
+      }
+
+      // Call the optional callback to refresh the parent
+      if (onStyleApplied) {
+        onStyleApplied();
+      }
+    } catch (error) {
+      console.error("Error applying style:", error);
+    } finally {
+      setIsApplyingStyle(false);
+    }
+  };
+
   if (!currentSlide) {
     console.warn("No current slide found. currentSlideIndex:", currentSlideIndex, "slides.length:", slides.length, "slides:", slides);
     return (
@@ -339,16 +402,26 @@ export const PPTPreviewModal: React.FC<PPTPreviewModalProps> = ({
                 <div className="animate-spin rounded-full h-6 w-6 border-2 border-blue-500 border-t-transparent"></div>
               </div>
             ) : pptStyles.length > 0 ? (
-              <div className="space-y-3">
+              <div className="space-y-3 relative">
+                {/* Loading Overlay */}
+                {isApplyingStyle && (
+                  <div className="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center z-10">
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="animate-spin rounded-full h-6 w-6 border-2 border-blue-500 border-t-transparent"></div>
+                      <p className="text-xs text-white">Applying style...</p>
+                    </div>
+                  </div>
+                )}
                 {pptStyles.map((style) => (
                   <button
                     key={style.id}
-                    onClick={() => setSelectedStyleId(style.id)}
+                    onClick={() => handleApplyStyle(style.id)}
+                    disabled={isApplyingStyle}
                     className={`w-full p-3 rounded-lg border-2 transition-all ${
                       selectedStyleId === style.id
                         ? "border-blue-500 bg-slate-800"
                         : "border-slate-600 bg-slate-800 hover:border-slate-500"
-                    }`}
+                    } ${isApplyingStyle ? "opacity-50 cursor-not-allowed" : ""}`}
                   >
                     <div className="flex items-center gap-3">
                       {/* Color Preview */}
