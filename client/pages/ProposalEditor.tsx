@@ -500,11 +500,16 @@ export default function ProposalEditor() {
       console.log("PPT JSON:", data.ppt_json);
       console.log("Slides:", data.ppt_json?.slides);
 
-      // Show PPT preview modal with the ppt_json data
+      // Show PPT preview modal with the ppt_json data, ppt_style, and ppt_url
       if (data.ppt_json && data.ppt_json.slides && data.ppt_json.slides.length > 0) {
         console.log(`Showing PPT preview with ${data.ppt_json.slides.length} slides`);
-        console.log("Setting PPT preview data:", data.ppt_json);
-        setPPTPreviewData(data.ppt_json);
+        const previewData = {
+          ...data.ppt_json,
+          ppt_style: data.ppt_style || null,
+          ppt_url: data.ppt_url || null,
+        };
+        console.log("Setting PPT preview data:", previewData);
+        setPPTPreviewData(previewData);
         setTimeout(() => {
           setShowPPTPreviewModal(true);
         }, 0);
@@ -1309,7 +1314,12 @@ export default function ProposalEditor() {
         <PPTPreviewModal
           pptData={pptPreviewData}
           proposalTitle={p.title}
+          proposalId={id}
           onClose={() => setShowPPTPreviewModal(false)}
+          onStyleApplied={() => {
+            // Refresh PPT data after style is applied
+            handlePreviewPPT();
+          }}
         />
       )}
 
