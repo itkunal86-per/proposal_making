@@ -119,7 +119,12 @@ export const PPTPreviewModal: React.FC<PPTPreviewModalProps> = ({
         if (data.success && data.data) {
           setPPTStyles(data.data);
           if (data.data.length > 0) {
-            setSelectedStyleId(data.data[0].id);
+            // Select the current proposal's style if it exists, otherwise select the first style
+            if (appliedStyle?.id) {
+              setSelectedStyleId(appliedStyle.id);
+            } else {
+              setSelectedStyleId(data.data[0].id);
+            }
           }
         }
       } catch (error) {
@@ -130,7 +135,7 @@ export const PPTPreviewModal: React.FC<PPTPreviewModalProps> = ({
     };
 
     fetchPPTStyles();
-  }, [status]);
+  }, [status, appliedStyle?.id]);
 
   const handleNextSlide = React.useCallback(() => {
     setCurrentSlideIndex((prevIndex) => {
