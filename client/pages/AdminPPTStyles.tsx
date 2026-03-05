@@ -19,6 +19,7 @@ import {
   createPPTStyle,
   getPPTStyleById,
   updatePPTStyle,
+  deletePPTStyle,
   type PPTStyle,
   type CreatePPTStyleInput,
   type StyleConfig,
@@ -70,6 +71,11 @@ export default function AdminPPTStyles() {
   const [isEditing, setIsEditing] = useState(false);
   const [editError, setEditError] = useState("");
   const [editFormData, setEditFormData] = useState<FormData>(DEFAULT_FORM_DATA);
+
+  // Delete state
+  const [deleteConfirmStyleId, setDeleteConfirmStyleId] = useState<number | null>(null);
+  const [deleteConfirmStyleName, setDeleteConfirmStyleName] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     fetchStyles();
@@ -291,6 +297,42 @@ export default function AdminPPTStyles() {
     }
   }
 
+  function handleDeleteClick(style: PPTStyle) {
+    setDeleteConfirmStyleId(style.id);
+    setDeleteConfirmStyleName(style.name);
+  }
+
+  async function handleConfirmDelete() {
+    if (!deleteConfirmStyleId) {
+      return;
+    }
+
+    setIsDeleting(true);
+
+    try {
+      await deletePPTStyle(deleteConfirmStyleId);
+
+      toast({
+        title: "Success",
+        description: "PPT style deleted successfully",
+      });
+
+      setDeleteConfirmStyleId(null);
+      setDeleteConfirmStyleName("");
+      await fetchStyles();
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Failed to delete PPT style";
+      toast({
+        title: "Error",
+        description: message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  }
+
   return (
     <AppShell>
       <section className="container py-6">
@@ -425,7 +467,13 @@ export default function AdminPPTStyles() {
                     >
                       Edit
                     </Button>
-                    <Button size="sm" variant="outline" className="flex-1">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => handleDeleteClick(style)}
+                      disabled={isDeleting}
+                    >
                       Delete
                     </Button>
                   </div>
@@ -847,6 +895,42 @@ export default function AdminPPTStyles() {
                   </div>
                 </>
               )}
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog
+          open={deleteConfirmStyleId !== null}
+          onOpenChange={(open) => !open && setDeleteConfirmStyleId(null)}
+        >
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle>Delete PPT Style</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete "{deleteConfirmStyleName}"?
+                This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="flex gap-3 justify-end pt-4">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setDeleteConfirmStyleId(null);
+                  setDeleteConfirmStyleName("");
+                }}
+                disabled={isDeleting}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleConfirmDelete}
+                disabled={isDeleting}
+              >
+                {isDeleting ? "Deleting..." : "Delete Style"}
+              </Button>
             </div>
           </DialogContent>
         </Dialog>

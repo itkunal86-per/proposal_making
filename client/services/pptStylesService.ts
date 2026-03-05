@@ -202,3 +202,36 @@ export async function updatePPTStyle(
     throw error;
   }
 }
+
+export async function deletePPTStyle(styleId: number): Promise<void> {
+  try {
+    const token = getStoredToken();
+    if (!token) {
+      throw new Error("Authentication token not found");
+    }
+
+    const response = await fetch(
+      `https://propai-api.hirenq.com/api/ppt/styles/${styleId}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (!data.success) {
+      throw new Error(data.message || "Failed to delete PPT style");
+    }
+  } catch (error) {
+    console.error("Error deleting PPT style:", error);
+    throw error;
+  }
+}
