@@ -25,6 +25,7 @@ import AdminPackages from "./pages/AdminPackages";
 import AdminTemplates from "./pages/AdminTemplates";
 import AdminSystemTemplates from "./pages/AdminSystemTemplates";
 import AdminClientTemplates from "./pages/AdminClientTemplates";
+import AdminPPTStyles from "./pages/AdminPPTStyles";
 import AdminSettings from "./pages/AdminSettings";
 import AdminUsers from "./pages/AdminUsers";
 import MyProposals from "./pages/MyProposals";
@@ -72,6 +73,7 @@ const AppRoutes = () => (
           <Route path="/admin/templates" element={<AdminTemplates />} />
           <Route path="/admin/templates/system" element={<AdminSystemTemplates />} />
           <Route path="/admin/templates/clients" element={<AdminClientTemplates />} />
+          <Route path="/admin/ppt-styles" element={<AdminPPTStyles />} />
           <Route path="/admin/settings" element={<AdminSettings />} />
         </Route>
 
