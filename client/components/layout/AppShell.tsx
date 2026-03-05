@@ -29,6 +29,7 @@ import {
   Settings,
   Zap,
   LogOut,
+  Palette,
 } from "lucide-react";
 
 interface NavSubItem {
@@ -56,6 +57,7 @@ const navByRole: Record<UserRole, NavItem[]> = {
         { href: "/admin/templates/clients", label: "Clients Templates" },
       ],
     },
+    { href: "/admin/ppt-styles", label: "PPT Styles", icon: <Palette className="w-5 h-5" /> },
     { href: "/admin/settings", label: "Settings", icon: <Settings className="w-5 h-5" /> },
   ],
   subscriber: [
@@ -267,6 +269,7 @@ function formatSegmentLabel(segment: string, index: number) {
     invite: "Invite",
     p: "Proposal",
     t: "Template",
+    "ppt-styles": "PPT Styles",
   };
 
   const normalized = segment.toLowerCase();
