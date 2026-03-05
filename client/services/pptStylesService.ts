@@ -128,3 +128,77 @@ export async function createPPTStyle(input: CreatePPTStyleInput): Promise<PPTSty
     throw error;
   }
 }
+
+export async function getPPTStyleById(styleId: number): Promise<PPTStyle> {
+  try {
+    const token = getStoredToken();
+    if (!token) {
+      throw new Error("Authentication token not found");
+    }
+
+    const response = await fetch(
+      `https://propai-api.hirenq.com/api/ppt/styles/${styleId}`,
+      {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (data.success && data.data) {
+      return data.data;
+    }
+
+    throw new Error(data.message || "Failed to fetch PPT style");
+  } catch (error) {
+    console.error("Error fetching PPT style:", error);
+    throw error;
+  }
+}
+
+export async function updatePPTStyle(
+  styleId: number,
+  input: CreatePPTStyleInput
+): Promise<PPTStyle> {
+  try {
+    const token = getStoredToken();
+    if (!token) {
+      throw new Error("Authentication token not found");
+    }
+
+    const response = await fetch(
+      `https://propai-api.hirenq.com/api/ppt/styles/${styleId}`,
+      {
+        method: "PUT",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(input),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (data.success && data.data) {
+      return data.data;
+    }
+
+    throw new Error(data.message || "Failed to update PPT style");
+  } catch (error) {
+    console.error("Error updating PPT style:", error);
+    throw error;
+  }
+}
