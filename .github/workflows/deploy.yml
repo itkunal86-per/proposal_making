@@ -6,7 +6,7 @@
     password: ${{ secrets.DFTPP }}
     port: 22
     script: |
-      cd /var/www/pitchsuite/frontend
+      cd /var/www/pitchsuite
       git pull origin digi-dev-main
       pnpm install
       pnpm build
