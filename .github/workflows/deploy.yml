@@ -46,14 +46,13 @@ jobs:
         env:
           VITE_API_URL: https://propai.hirenq.com
 
-      - name: 🚀 Deploy to cPanel via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      - name: 🚀 Deploy to cPanel via SSH
+        uses: appleboy/ssh-action@v1.0.3
         with:
           server: ${{ secrets.DFTPH }}
           username: ${{ secrets.DFTPU }}
           password: ${{ secrets.DFTPP }}
           port: 22
-          protocol: sftp
           local-dir: ./dist/
           server-dir: /var/www/pitchsuite/
           log-level: verbose
