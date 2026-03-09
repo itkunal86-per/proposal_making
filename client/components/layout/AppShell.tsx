@@ -98,7 +98,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
               <div className="flex items-center gap-3 flex-1">
                 <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center flex-shrink-0 shadow-md" />
                 <div className="flex flex-col">
-                  <span className="text-sm font-bold text-white">Proposal AI</span>
+                  <span className="text-sm font-bold text-white">Pitchsuite</span>
                   <span className="text-xs text-slate-400">v1.0</span>
                 </div>
               </div>
@@ -290,7 +290,7 @@ function formatSegmentLabel(segment: string, index: number) {
 function ThinFooter() {
   return (
     <div className="flex h-10 items-center justify-between border-t px-4 text-xs text-muted-foreground">
-      <span>© {new Date().getFullYear()} Proposal AI</span>
+      <span>© {new Date().getFullYear()} Pitchsuite</span>
       <span>All systems normal</span>
     </div>
   );

@@ -18,7 +18,7 @@ export default function Header() {
         <a href="/" className="flex items-center gap-2">
           <div className="h-8 w-8 rounded-md bg-gradient-to-br from-primary to-cyan-500" />
           <span className="text-lg font-semibold tracking-tight">
-            Proposal AI
+            Pitchsuite
           </span>
         </a>
         <nav className="hidden items-center gap-6 md:flex">
