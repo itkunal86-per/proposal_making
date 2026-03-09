@@ -1,66 +1,12 @@
-name: Deploy to FTP
-
-on:
-  push:
-    branches:
-      - digi-dev-main
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-
-      - name: Install PNPM
-        uses: pnpm/action-setup@v2
-        with:
-          version: 10.14.0
-
-      - name: Get PNPM store directory
-        run: |
-          echo "PNPM_HOME=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-      - name: Setup PNPM cache
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.PNPM_HOME }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Type check
-        run: pnpm typecheck
-
-      - name: Build application
-        run: pnpm build
-        env:
-          VITE_API_URL: https://propai.hirenq.com
-
-      - name: 🚀 Deploy to cPanel via SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.DFTPH }}
-          username: ${{ secrets.DFTPU }}
-          password: ${{ secrets.DFTPP }}
-          port: 22
-          local-dir: ./dist/
-          server-dir: /var/www/pitchsuite/
-          log-level: verbose
-
-      - name: Deployment Success
-        if: success()
-        run: echo "✅ Deployment to dev.pitchsuite.io completed successfully"
-
-      - name: Deployment Failed
-        if: failure()
-        run: echo "❌ Deployment failed. Check FTP credentials and server connectivity"
+- name: 🚀 Deploy via SSH
+  uses: appleboy/ssh-action@v1.0.3
+  with:
+    host: ${{ secrets.DFTPH }}
+    username: ${{ secrets.DFTPU }}
+    password: ${{ secrets.DFTPP }}
+    port: 22
+    script: |
+      cd /var/www/pitchsuite/frontend
+      git pull origin digi-dev-main
+      pnpm install
+      pnpm build
