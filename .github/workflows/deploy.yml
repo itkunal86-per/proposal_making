@@ -51,9 +51,9 @@ jobs:
         with:
           server: ${{ secrets.DFTPH }}
           username: ${{ secrets.DFTPU }}
-          password: ${{ secrets.FTPP }}
-          port: 23
-          protocol: ftps
+          password: ${{ secrets.DFTPP }}
+          port: 22
+          protocol: ftp
           local-dir: ./dist/
           server-dir: /var/www/pitchsuite/
           log-level: verbose
