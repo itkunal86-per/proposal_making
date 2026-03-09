@@ -1,75 +1,3 @@
-
-rabbitmqctl add_user pitchsuite Pitch026Suite@
-rabbitmqctl set_user_tags pitchsuite administrator
-rabbitmqctl set_permissions -p / pitchsuite ".*" ".*" ".*"
-
-
-Pending#######
-ufw delete allow 5672
-ufw allow from SHARED_HOSTING_IP to any port 5672
-
-
-
-
-
-
-
-
-
-CREATE DATABASE pitchsuite_db26;
-CREATE USER 'pitchsuite_user'@'localhost' IDENTIFIED BY 'Pitch026Suite#';
-GRANT ALL PRIVILEGES ON pitchsuite_db26.* TO 'pitchsuite_user'@'localhost';
-FLUSH PRIVILEGES;
-EXIT;
-
-ALTER USER 'pitchsuite_user'@'localhost' IDENTIFIED BY 'Pitch026Suite@';
-FLUSH PRIVILEGES;
-EXIT;
-
-
-nano /etc/apache2/sites-available/pitchsuite.conf
-
-
-<VirtualHost *:80>
-    ServerName 143.198.44.221
-    ServerAdmin webmaster@localhost
-    DocumentRoot /var/www/pitchsuite/public
-
-    <Directory /var/www/pitchsuite/public>
-        AllowOverride All
-        Require all granted
-    </Directory>
-
-    ErrorLog ${APACHE_LOG_DIR}/laravel_error.log
-    CustomLog ${APACHE_LOG_DIR}/laravel_access.log combined
-</VirtualHost>
-
-a2dissite 000-default.conf
-a2ensite pitchsuite.conf
-systemctl restart apache2
-
-git clone https://github.com/itkunal86-per/proposal_api.git pitchsuite
-
-
-unzip ProposalAi.zip -d /var/www/pitchsuite
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 name: Deploy to FTP
 
 on:
@@ -125,8 +53,8 @@ jobs:
           username: ${{ secrets.DFTPU }}
           password: ${{ secrets.DFTPP }}
           port: 22
-          source: "dist/*"
-          target: "/var/www/pitchsuite"
+          source: ./dist/
+          server: /var/www/pitchsuite/
 
       - name: Deployment Success
         if: success()
