@@ -1,7 +1,7 @@
 import express, { Express } from "express";
 import cors from "cors";
 
-const EXTERNAL_API_URL = "https://propai-api.hirenq.com";
+const EXTERNAL_API_URL = "https://api.dev.pitchsuite.io";
 
 export function createServer(): Express {
   const app = express();
