@@ -49,7 +49,7 @@ jobs:
       - name: 🚀 Deploy to cPanel via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
-          server: ${{ secrets.DFTPH }}
+          host: ${{ secrets.DFTPH }}
           username: ${{ secrets.DFTPU }}
           password: ${{ secrets.DFTPP }}
           port: 22
