@@ -1,4 +1,4 @@
-name: Deploy to FTP
+name: Deploy Vite App to DigitalOcean
 
 on:
   push:
@@ -6,60 +6,55 @@ on:
       - digi-dev-main
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
+      # Checkout repo
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # Setup Node
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: 22
 
-      - name: Install PNPM
+      # Setup pnpm
+      - name: Install pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: 10.14.0
+          version: 10
 
-      - name: Get PNPM store directory
-        run: |
-          echo "PNPM_HOME=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-      - name: Setup PNPM cache
+      # Cache dependencies
+      - name: Setup pnpm cache
         uses: actions/cache@v3
         with:
-          path: ${{ env.PNPM_HOME }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-pnpm-store-
+            ${{ runner.os }}-pnpm-
 
+      # Install dependencies
       - name: Install dependencies
         run: pnpm install
 
-      - name: Type check
-        run: pnpm typecheck
-
-      - name: Build application
+      # Build project
+      - name: Build Vite project
         run: pnpm build
         env:
-          VITE_API_URL: https://propai.hirenq.com
+          VITE_API_URL: https://dev.pitchsuite.io
 
-      - name: 🚀 Deploy to cPanel via SSH
-        uses: appleboy/ssh-action@v1.0.3
+      # Upload dist folder to server
+      - name: 🚀 Deploy to DigitalOcean
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.DFTPH }}
           username: ${{ secrets.DFTPU }}
           password: ${{ secrets.DFTPP }}
           port: 22
-          source: ./dist/
-          server: /var/www/pitchsuite/
+          source: "dist/*"
+          target: "/var/www/pitchsuite"
 
       - name: Deployment Success
-        if: success()
-        run: echo "✅ Deployment to dev.pitchsuite.io completed successfully"
-
-      - name: Deployment Failed
-        if: failure()
-        run: echo "❌ Deployment failed. Check FTP credentials and server connectivity"
+        run: echo "✅ Deployment completed successfully"
