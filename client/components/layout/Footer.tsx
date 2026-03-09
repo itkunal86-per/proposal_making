@@ -6,7 +6,7 @@ export default function Footer() {
           <div>
             <div className="flex items-center gap-2">
               <div className="h-7 w-7 rounded-md bg-gradient-to-br from-primary to-cyan-500" />
-              <span className="text-base font-semibold">Proposal AI</span>
+              <span className="text-base font-semibold">Pitchsuite</span>
             </div>
             <p className="mt-3 max-w-sm text-sm text-muted-foreground">
               Create, manage, and send winning proposals. Enhanced with an AI
@@ -57,7 +57,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="mt-8 flex items-center justify-between border-t pt-6 text-xs text-muted-foreground">
-          <p>© {new Date().getFullYear()} Proposal AI. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Pitchsuite. All rights reserved.</p>
           <p>Made for modern sales teams.</p>
         </div>
       </div>

@@ -16,7 +16,7 @@ export default function Privacy() {
             <section>
               <h2 className="text-2xl font-semibold">1. Introduction</h2>
               <p className="mt-4 text-muted-foreground">
-                Proposal AI ("Company", "we", "our", or "us") operates the Proposal AI
+                Pitchsuite ("Company", "we", "our", or "us") operates the Pitchsuite
                 application. This page informs you of our policies regarding the collection,
                 use, and disclosure of personal data when you use our service and the choices
                 you have associated with that data.
@@ -60,7 +60,7 @@ export default function Privacy() {
             <section>
               <h2 className="text-2xl font-semibold">3. Use of Data</h2>
               <p className="mt-4 text-muted-foreground">
-                Proposal AI uses the collected data for various purposes:
+                Pitchsuite uses the collected data for various purposes:
               </p>
               <ul className="mt-3 list-inside list-disc space-y-2 text-muted-foreground">
                 <li>To provide and maintain our service</li>

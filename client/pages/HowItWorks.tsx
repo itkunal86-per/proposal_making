@@ -224,7 +224,7 @@ export default function HowItWorks() {
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="text-3xl font-bold">Ready to streamline your proposal process?</h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            Start creating better proposals faster with Proposal AI.
+            Start creating better proposals faster with Pitchsuite.
           </p>
           <a href={getStartedHref()}>
             <Button
