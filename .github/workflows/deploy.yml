@@ -3,7 +3,7 @@ name: Deploy to FTP
 on:
   push:
     branches:
-      - main
+      - digi-dev-main
 
 jobs:
   deploy:
@@ -49,18 +49,18 @@ jobs:
       - name: 🚀 Deploy to cPanel via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          server: ${{ secrets.FTPH }}
-          username: ${{ secrets.FTPU }}
+          server: ${{ secrets.DFTPH }}
+          username: ${{ secrets.DFTPU }}
           password: ${{ secrets.FTPP }}
           port: 21
           protocol: ftp
           local-dir: ./dist/
-          server-dir: /propai.hirenq.com/
+          server-dir: /var/www/pitchsuite/
           log-level: verbose
 
       - name: Deployment Success
         if: success()
-        run: echo "✅ Deployment to propai.hirenq.com completed successfully"
+        run: echo "✅ Deployment to dev.pitchsuite.io completed successfully"
 
       - name: Deployment Failed
         if: failure()
