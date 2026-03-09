@@ -8,8 +8,8 @@ const faqs = [
     category: "Getting Started",
     questions: [
       {
-        q: "What is Proposal AI?",
-        a: "Proposal AI is an AI-powered proposal management system that helps you create, customize, and send professional proposals faster. It uses Retrieval-Augmented Generation (RAG) technology to generate tailored content based on your knowledge base and past proposals.",
+        q: "What is Pitchsuite?",
+        a: "Pitchsuite is an AI-powered proposal management system that helps you create, customize, and send professional proposals faster. It uses Retrieval-Augmented Generation (RAG) technology to generate tailored content based on your knowledge base and past proposals.",
       },
       {
         q: "How do I get started?",
@@ -133,7 +133,7 @@ export default function FAQ() {
             Frequently Asked Questions
           </h1>
           <p className="mt-5 text-lg text-muted-foreground">
-            Find answers to common questions about Proposal AI. Can't find what you're looking for? Contact our support team.
+            Find answers to common questions about Pitchsuite. Can't find what you're looking for? Contact our support team.
           </p>
         </div>
       </section>

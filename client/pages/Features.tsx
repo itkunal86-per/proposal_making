@@ -169,7 +169,7 @@ export default function Features() {
       {/* Benefits Section */}
       <section className="container py-16 sm:py-24">
         <div className="mx-auto max-w-3xl text-center">
-          <h2 className="text-3xl font-bold">Why teams love Proposal AI</h2>
+          <h2 className="text-3xl font-bold">Why teams love Pitchsuite</h2>
           <p className="mt-4 text-lg text-muted-foreground">
             Experience the difference with our comprehensive feature set
           </p>

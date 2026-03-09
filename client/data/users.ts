@@ -16,7 +16,7 @@ export const AUTH_USERS: AuthUserRecord[] = [
     email: "admin@example.com",
     password: "admin123",
     role: "admin",
-    company: "Proposal AI",
+    company: "Pitchsuite",
   },
   {
     id: "subscriber-1",

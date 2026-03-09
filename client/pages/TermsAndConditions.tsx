@@ -26,7 +26,7 @@ export default function TermsAndConditions() {
               <h2 className="text-2xl font-semibold">2. Use License</h2>
               <p className="mt-4 text-muted-foreground">
                 Permission is granted to temporarily download one copy of the materials
-                (information or software) on Proposal AI's website for personal,
+                (information or software) on Pitchsuite's website for personal,
                 non-commercial transitory viewing only. This is the grant of a license, not
                 a transfer of title, and under this license you may not:
               </p>
@@ -53,8 +53,8 @@ export default function TermsAndConditions() {
             <section>
               <h2 className="text-2xl font-semibold">3. Disclaimer</h2>
               <p className="mt-4 text-muted-foreground">
-                The materials on Proposal AI's website are provided on an 'as is' basis.
-                Proposal AI makes no warranties, expressed or implied, and hereby disclaims
+                The materials on Pitchsuite's website are provided on an 'as is' basis.
+                Pitchsuite makes no warranties, expressed or implied, and hereby disclaims
                 and negates all other warranties including, without limitation, implied
                 warranties or conditions of merchantability, fitness for a particular
                 purpose, or non-infringement of intellectual property or other violation of
@@ -65,10 +65,10 @@ export default function TermsAndConditions() {
             <section>
               <h2 className="text-2xl font-semibold">4. Limitations</h2>
               <p className="mt-4 text-muted-foreground">
-                In no event shall Proposal AI or its suppliers be liable for any damages
+                In no event shall Pitchsuite or its suppliers be liable for any damages
                 (including, without limitation, damages for loss of data or profit, or due
                 to business interruption) arising out of the use or inability to use the
-                materials on Proposal AI's website, even if Proposal AI or an authorized
+                materials on Pitchsuite's website, even if Pitchsuite or an authorized
                 representative has been notified orally or in writing of the possibility of
                 such damage.
               </p>
@@ -77,10 +77,10 @@ export default function TermsAndConditions() {
             <section>
               <h2 className="text-2xl font-semibold">5. Accuracy of Materials</h2>
               <p className="mt-4 text-muted-foreground">
-                The materials appearing on Proposal AI's website could include technical,
-                typographical, or photographic errors. Proposal AI does not warrant that any
-                of the materials on its website are accurate, complete, or current. Proposal
-                AI may make changes to the materials contained on its website at any time
+                The materials appearing on Pitchsuite's website could include technical,
+                typographical, or photographic errors. Pitchsuite does not warrant that any
+                of the materials on its website are accurate, complete, or current. Pitchsuite
+                may make changes to the materials contained on its website at any time
                 without notice.
               </p>
             </section>
@@ -88,9 +88,9 @@ export default function TermsAndConditions() {
             <section>
               <h2 className="text-2xl font-semibold">6. Links</h2>
               <p className="mt-4 text-muted-foreground">
-                Proposal AI has not reviewed all of the sites linked to its website and is
+                Pitchsuite has not reviewed all of the sites linked to its website and is
                 not responsible for the contents of any such linked site. The inclusion of
-                any link does not imply endorsement by Proposal AI of the site. Use of any
+                any link does not imply endorsement by Pitchsuite of the site. Use of any
                 such linked website is at the user's own risk.
               </p>
             </section>
@@ -98,7 +98,7 @@ export default function TermsAndConditions() {
             <section>
               <h2 className="text-2xl font-semibold">7. Modifications</h2>
               <p className="mt-4 text-muted-foreground">
-                Proposal AI may revise these terms of service for its website at any time
+                Pitchsuite may revise these terms of service for its website at any time
                 without notice. By using this website, you are agreeing to be bound by the
                 then current version of these terms of service.
               </p>
@@ -128,7 +128,7 @@ export default function TermsAndConditions() {
               <h2 className="text-2xl font-semibold">10. User Content</h2>
               <p className="mt-4 text-muted-foreground">
                 You retain all rights to any content you submit, post, or display on or
-                through the service. You grant Proposal AI a worldwide, non-exclusive,
+                through the service. You grant Pitchsuite a worldwide, non-exclusive,
                 royalty-free license to use, copy, reproduce, process, adapt, modify,
                 publish, transmit, display, and distribute such content in any media or
                 medium and for any purposes.
