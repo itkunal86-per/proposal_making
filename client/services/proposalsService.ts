@@ -980,7 +980,7 @@ export async function createProposalApi(input: CreateProposalInput): Promise<Cre
   }
 
   const title = input.title?.trim();
-  const client_id = input.client_id?.trim();
+  const client_id = String(input.client_id)?.trim();
   if (!title || !client_id) {
     return {
       success: false,

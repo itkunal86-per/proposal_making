@@ -594,7 +594,7 @@ export default function MyProposals() {
                 </SelectTrigger>
                 <SelectContent>
                   {clients.map((client) => (
-                    <SelectItem key={client.id} value={client.id}>
+                    <SelectItem key={client.id} value={String(client.id)}>
                       {client.name} ({client.company || "No company"})
                     </SelectItem>
                   ))}
