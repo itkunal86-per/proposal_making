@@ -64,7 +64,13 @@ interface GenerateFromTemplateRequest {
 
 interface GenerateFromTemplateResponse {
   proposal_id: number;
-  version: number;
+  message: string;
+  version?: number;
+}
+
+interface ProposalStatusResponse {
+  status: "pending" | "processing" | "completed" | "failed";
+  error?: string;
 }
 
 export async function generateProposalFromPrompt(
@@ -338,4 +344,79 @@ export async function generateProposalFromTemplate(
     }
     throw new Error("Failed to generate proposal from template: Unknown error");
   }
+}
+
+export async function checkProposalStatus(
+  proposalId: number
+): Promise<ProposalStatusResponse> {
+  const token = getStoredToken();
+
+  if (!token) {
+    throw new Error("Authentication token not found. Please log in again.");
+  }
+
+  try {
+    const response = await fetch(`${apiConfig.endpoints.proposalStatus}/${proposalId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(
+        error.message || error.error || `Failed to check proposal status with status ${response.status}`
+      );
+    }
+
+    const data: ProposalStatusResponse = await response.json();
+    return data;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`Failed to check proposal status: ${error.message}`);
+    }
+    throw new Error("Failed to check proposal status: Unknown error");
+  }
+}
+
+export async function pollProposalStatus(
+  proposalId: number,
+  maxAttempts: number = 60,
+  delayMs: number = 2000,
+  onStatusUpdate?: (status: ProposalStatusResponse) => void
+): Promise<ProposalStatusResponse> {
+  let attempts = 0;
+
+  while (attempts < maxAttempts) {
+    try {
+      const statusResponse = await checkProposalStatus(proposalId);
+
+      if (onStatusUpdate) {
+        onStatusUpdate(statusResponse);
+      }
+
+      if (statusResponse.status === "completed") {
+        return statusResponse;
+      }
+
+      if (statusResponse.status === "failed") {
+        throw new Error(statusResponse.error || "Proposal generation failed");
+      }
+
+      // Wait before the next attempt
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+      attempts++;
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("Authentication")) {
+        throw error;
+      }
+      // Continue polling on other errors
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+      attempts++;
+    }
+  }
+
+  throw new Error("Proposal generation timed out after " + attempts + " attempts");
 }

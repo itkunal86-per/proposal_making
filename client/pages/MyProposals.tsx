@@ -30,7 +30,7 @@ import { ProposalPreviewModal } from "@/components/ProposalPreviewModal";
 import { TemplateSelectionModal } from "@/components/TemplateSelectionModal";
 import { ProposalTitleDialog } from "@/components/ProposalTitleDialog";
 import { convertSystemTemplateToProposal, type SystemTemplate, copyProposalFromTemplate, saveProposalAsTemplate } from "@/services/systemTemplatesService";
-import { generateProposalFromTemplate } from "@/services/aiGenerationService";
+import { generateProposalFromTemplate, pollProposalStatus } from "@/services/aiGenerationService";
 import { Wand2, MoreVertical, FileText } from "lucide-react";
 
 const statusStyles: Record<string, string> = {
@@ -235,16 +235,50 @@ export default function MyProposals() {
       });
 
       if (response.proposal_id) {
-        toast({
-          title: "Success",
-          description: "Proposal created successfully!",
-        });
+        // Check if the message indicates queued generation
+        if (response.message === "Proposal generation queued") {
+          toast({
+            title: "Generating Proposal",
+            description: "Your proposal is being generated. Please wait...",
+          });
 
-        // Navigate to editor with the new proposal ID
-        nav(`/proposals/${response.proposal_id}/edit?sessionId=${chatSessionId}`);
-        setNewProposalId(null);
-        setChatSessionId(null);
-        setSelectedTemplate(null);
+          // Start polling for the proposal status
+          try {
+            await pollProposalStatus(response.proposal_id, 60, 2000, (statusUpdate) => {
+              console.log("Proposal status:", statusUpdate.status);
+            });
+
+            toast({
+              title: "Success",
+              description: "Proposal created successfully!",
+            });
+
+            // Navigate to editor with the new proposal ID
+            nav(`/proposals/${response.proposal_id}/edit?sessionId=${chatSessionId}`);
+            setNewProposalId(null);
+            setChatSessionId(null);
+            setSelectedTemplate(null);
+          } catch (pollingError) {
+            console.error("Error polling proposal status:", pollingError);
+            toast({
+              title: "Status Check Failed",
+              description: pollingError instanceof Error ? pollingError.message : "Failed to check proposal status",
+              variant: "destructive",
+            });
+            throw pollingError;
+          }
+        } else {
+          toast({
+            title: "Success",
+            description: "Proposal created successfully!",
+          });
+
+          // Navigate to editor with the new proposal ID
+          nav(`/proposals/${response.proposal_id}/edit?sessionId=${chatSessionId}`);
+          setNewProposalId(null);
+          setChatSessionId(null);
+          setSelectedTemplate(null);
+        }
       } else {
         throw new Error("No proposal ID returned");
       }
