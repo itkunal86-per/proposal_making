@@ -66,7 +66,7 @@ export async function listPPTStyles(): Promise<PPTStyle[]> {
     }
 
     const response = await fetch(
-      "https://propai-api.hirenq.com/api/ppt/styles/all",
+      "https://api.dev.pitchsuite.io/api/ppt/styles/all",
       {
         method: "GET",
         headers: {
@@ -101,7 +101,7 @@ export async function createPPTStyle(input: CreatePPTStyleInput): Promise<PPTSty
     }
 
     const response = await fetch(
-      "https://propai-api.hirenq.com/api/ppt/styles",
+      "https://api.dev.pitchsuite.io/api/ppt/styles",
       {
         method: "POST",
         headers: {
@@ -137,7 +137,7 @@ export async function getPPTStyleById(styleId: number): Promise<PPTStyle> {
     }
 
     const response = await fetch(
-      `https://propai-api.hirenq.com/api/ppt/styles/${styleId}`,
+      `https://api.dev.pitchsuite.io/api/ppt/styles/${styleId}`,
       {
         method: "GET",
         headers: {
@@ -175,7 +175,7 @@ export async function updatePPTStyle(
     }
 
     const response = await fetch(
-      `https://propai-api.hirenq.com/api/ppt/styles/${styleId}`,
+      `https://api.dev.pitchsuite.io/api/ppt/styles/${styleId}`,
       {
         method: "PUT",
         headers: {
@@ -211,7 +211,7 @@ export async function deletePPTStyle(styleId: number): Promise<void> {
     }
 
     const response = await fetch(
-      `https://propai-api.hirenq.com/api/ppt/styles/${styleId}`,
+      `https://api.dev.pitchsuite.io/api/ppt/styles/${styleId}`,
       {
         method: "DELETE",
         headers: {
