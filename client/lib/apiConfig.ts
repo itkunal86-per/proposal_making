@@ -37,6 +37,9 @@ export const apiConfig = {
     // System templates endpoints
     systemTemplates: `${API_BASE_URL}/api/system-templates`,
     clientTemplates: `${API_BASE_URL}/api/client-templates`,
+    copyProposalFromTemplate: `${API_BASE_URL}/api/proposal/copy-from-template`,
+    createProposalFromTemplate: `${API_BASE_URL}/api/proposal/create-from-template`,
+    createTemplateFromProposal: `${API_BASE_URL}/api/templates/create-from-proposal`,
 
     // Package endpoints
     packages: `${API_BASE_URL}/api/packages`,
