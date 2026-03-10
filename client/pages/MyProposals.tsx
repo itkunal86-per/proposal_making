@@ -243,8 +243,9 @@ export default function MyProposals() {
           });
 
           // Start polling for the proposal status
+          // Poll for up to 30 minutes (600 attempts * 3 seconds)
           try {
-            await pollProposalStatus(response.proposal_id, 60, 2000, (statusUpdate) => {
+            await pollProposalStatus(response.proposal_id, 600, 3000, (statusUpdate) => {
               console.log("Proposal status:", statusUpdate.status);
             });
 
