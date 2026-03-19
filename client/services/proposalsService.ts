@@ -161,6 +161,11 @@ export interface Proposal {
   versions: ProposalVersionSnapshot[];
   titleStyles?: Record<string, any>;
   signatories?: SignatureRecipient[];
+  ppt_status?: "pending" | "processing" | "completed" | "failed";
+  ppt_json?: any;
+  ppt_style?: any;
+  ppt_url?: string;
+  ppt_path?: string;
 }
 
 const STORAGE_KEY = "app_proposals";
