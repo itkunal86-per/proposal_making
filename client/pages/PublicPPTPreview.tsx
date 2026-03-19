@@ -98,8 +98,10 @@ export default function PublicPPTPreview() {
 
     try {
       setLoading(true);
-      const url = `${apiConfig.endpoints.publicPPTPreview}/${token}`;
-      console.log("Fetching PPT data from:", url);
+
+      // Try the public proposal endpoint which should include PPT data
+      const url = `${apiConfig.endpoints.publicProposal}/${token}`;
+      console.log("Fetching proposal data from:", url);
 
       const response = await fetch(url);
 
@@ -111,18 +113,26 @@ export default function PublicPPTPreview() {
         return;
       }
 
-      const data: PublicPPTResponse = await response.json();
-      console.log("PPT data loaded:", data);
+      const data = await response.json();
+      console.log("Proposal data loaded:", data);
 
-      setPPTData(data.ppt_data);
-      setProposalTitle(data.proposal_title);
-      if (data.ppt_data?.ppt_style) {
-        setAppliedStyle(data.ppt_data.ppt_style);
+      // Extract PPT data from the proposal response
+      if (data.ppt_json) {
+        setPPTData(data.ppt_json);
+        setProposalTitle(data.title || "Presentation");
+        if (data.ppt_style) {
+          setAppliedStyle(data.ppt_style);
+        }
+      } else {
+        setError("This proposal does not have a PPT presentation available");
+        setLoading(false);
+        return;
       }
+
       setLoading(false);
     } catch (err) {
       console.error("Error fetching PPT data:", err);
-      setError("Failed to load PPT presentation");
+      setError("Failed to load PPT presentation. Please check the share link and try again.");
       setLoading(false);
     }
   };
