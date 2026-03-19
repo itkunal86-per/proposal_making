@@ -374,6 +374,33 @@ export default function MyProposals() {
     }
   }
 
+  async function onDownloadPPT(proposalId: string) {
+    try {
+      const proposal = rows.find((p) => p.id === proposalId);
+      if (!proposal) {
+        toast({ title: "Proposal not found", variant: "destructive" });
+        return;
+      }
+
+      if (!proposal.ppt_url) {
+        toast({ title: "Download link not available", description: "This proposal does not have a PPT file ready for download.", variant: "destructive" });
+        return;
+      }
+
+      // Download the PPT file
+      const link = document.createElement("a");
+      link.href = proposal.ppt_url;
+      link.download = `${proposal.title}.pptx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast({ title: "Download started", description: `${proposal.title}.pptx` });
+    } catch (error) {
+      toast({ title: "Error downloading PPT", variant: "destructive" });
+    }
+  }
+
   async function onSaveAsTemplate(proposalId: string) {
     try {
       const proposal = rows.find((p) => p.id === proposalId);
@@ -544,12 +571,22 @@ export default function MyProposals() {
                               Preview
                             </DropdownMenuItem>
                             {proposal.ppt_json && proposal.ppt_status === "completed" && (
-                              <DropdownMenuItem
-                                onClick={() => onPreviewPPT(proposal.id)}
-                                className="cursor-pointer"
-                              >
-                                View PPT
-                              </DropdownMenuItem>
+                              <>
+                                <DropdownMenuItem
+                                  onClick={() => onPreviewPPT(proposal.id)}
+                                  className="cursor-pointer"
+                                >
+                                  View PPT
+                                </DropdownMenuItem>
+                                {proposal.ppt_url && (
+                                  <DropdownMenuItem
+                                    onClick={() => onDownloadPPT(proposal.id)}
+                                    className="cursor-pointer"
+                                  >
+                                    Download PPT
+                                  </DropdownMenuItem>
+                                )}
+                              </>
                             )}
                             <DropdownMenuItem
                               onClick={() => nav(`/proposals/${proposal.id}/edit`)}
