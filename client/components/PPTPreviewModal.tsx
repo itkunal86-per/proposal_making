@@ -353,7 +353,7 @@ export const PPTPreviewModal: React.FC<PPTPreviewModalProps> = ({
     try {
       const result = await enableProposalSharing(proposalId);
       if (result.success && result.token) {
-        const generatedShareLink = `${window.location.origin}/preview/proposal/${result.token}`;
+        const generatedShareLink = `${window.location.origin}/preview/ppt/${result.token}`;
         setShareLink(generatedShareLink);
 
         // Try modern Clipboard API first
@@ -398,7 +398,7 @@ export const PPTPreviewModal: React.FC<PPTPreviewModalProps> = ({
     try {
       const result = await enableProposalSharing(proposalId);
       if (result.success && result.token) {
-        const generatedShareLink = `${window.location.origin}/preview/proposal/${result.token}`;
+        const generatedShareLink = `${window.location.origin}/preview/ppt/${result.token}`;
         setShareLink(generatedShareLink);
         setEmailDialogOpen(true);
       } else {
