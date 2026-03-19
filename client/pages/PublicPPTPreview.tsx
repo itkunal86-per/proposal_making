@@ -98,18 +98,22 @@ export default function PublicPPTPreview() {
 
     try {
       setLoading(true);
-      const response = await fetch(
-        `${apiConfig.baseUrl}/api/public/proposal/details-ppt/${token}`
-      );
+      const url = `${apiConfig.endpoints.publicPPTPreview}/${token}`;
+      console.log("Fetching PPT data from:", url);
+
+      const response = await fetch(url);
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
+        console.error("API Error:", response.status, errorData);
         setError(errorData.error || "Failed to load PPT presentation");
         setLoading(false);
         return;
       }
 
       const data: PublicPPTResponse = await response.json();
+      console.log("PPT data loaded:", data);
+
       setPPTData(data.ppt_data);
       setProposalTitle(data.proposal_title);
       if (data.ppt_data?.ppt_style) {
