@@ -99,9 +99,33 @@ export default function PublicPPTPreview() {
     try {
       setLoading(true);
 
-      // Try the public proposal endpoint which should include PPT data
+      // Try the details endpoint first which might have more complete data
+      const detailsUrl = `${apiConfig.baseUrl}/api/public/proposal/details/${token}`;
+      console.log("Fetching proposal details from:", detailsUrl);
+
+      const detailsResponse = await fetch(detailsUrl);
+
+      if (detailsResponse.ok) {
+        const data = await detailsResponse.json();
+        console.log("Full proposal details loaded:", data);
+
+        // Check for PPT data in various possible locations
+        const pptJson = data.ppt_json || data.ppt_data || data.slides;
+
+        if (pptJson) {
+          setPPTData(typeof pptJson === 'string' ? JSON.parse(pptJson) : pptJson);
+          setProposalTitle(data.title || data.proposal_title || "Presentation");
+          if (data.ppt_style) {
+            setAppliedStyle(data.ppt_style);
+          }
+          setLoading(false);
+          return;
+        }
+      }
+
+      // Fallback: Try the public proposal endpoint
       const url = `${apiConfig.endpoints.publicProposal}/${token}`;
-      console.log("Fetching proposal data from:", url);
+      console.log("Fetching proposal from public endpoint:", url);
 
       const response = await fetch(url);
 
@@ -114,19 +138,20 @@ export default function PublicPPTPreview() {
       }
 
       const data = await response.json();
-      console.log("Proposal data loaded:", data);
+      console.log("Proposal data loaded from public endpoint:", data);
 
       // Extract PPT data from the proposal response
-      if (data.ppt_json) {
-        setPPTData(data.ppt_json);
-        setProposalTitle(data.title || "Presentation");
+      const pptJson = data.ppt_json || data.ppt_data || data.slides;
+
+      if (pptJson) {
+        setPPTData(typeof pptJson === 'string' ? JSON.parse(pptJson) : pptJson);
+        setProposalTitle(data.title || data.proposal_title || "Presentation");
         if (data.ppt_style) {
           setAppliedStyle(data.ppt_style);
         }
       } else {
+        console.error("No PPT data found in response. Full response:", data);
         setError("This proposal does not have a PPT presentation available");
-        setLoading(false);
-        return;
       }
 
       setLoading(false);
