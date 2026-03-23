@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { apiConfig } from "@/lib/apiConfig";
@@ -60,14 +60,18 @@ interface PPTData {
 interface PublicPPTResponse {
   proposal_title: string;
   ppt_data: PPTData;
+  ppt_url?: string;
+  title?: string;
 }
 
 export default function PublicPPTPreview() {
   const { token } = useParams<{ token: string }>();
   const [pptData, setPPTData] = useState<PPTData | null>(null);
   const [proposalTitle, setProposalTitle] = useState("");
+  const [pptUrl, setPptUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [appliedStyle, setAppliedStyle] = useState<PPTStyleData | null>(null);
 
@@ -125,6 +129,10 @@ export default function PublicPPTPreview() {
         if (data.ppt_style) {
           setAppliedStyle(data.ppt_style);
         }
+        // Set the download URL
+        if (data.ppt_url) {
+          setPptUrl(data.ppt_url);
+        }
       } else {
         console.error("No PPT data found in response. Full response:", data);
         setError("This proposal does not have a PPT presentation available");
@@ -147,6 +155,39 @@ export default function PublicPPTPreview() {
   const handleNextSlide = () => {
     if (pptData && currentSlideIndex < pptData.slides.length - 1) {
       setCurrentSlideIndex(currentSlideIndex + 1);
+    }
+  };
+
+  const handleDownloadPPT = async () => {
+    if (!pptUrl) {
+      toast({ title: "Error", description: "Download link not available", variant: "destructive" });
+      return;
+    }
+
+    try {
+      setIsDownloading(true);
+      const response = await fetch(pptUrl);
+
+      if (!response.ok) {
+        throw new Error("Failed to download file");
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${proposalTitle}.pptx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast({ title: "Success", description: "PPT download started" });
+    } catch (error) {
+      console.error("Error downloading PPT:", error);
+      toast({ title: "Error", description: "Failed to download PPT", variant: "destructive" });
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -253,6 +294,21 @@ export default function PublicPPTPreview() {
       <div className="border-b border-slate-700 px-6 py-4 bg-slate-900">
         <div className="flex items-center justify-between mb-2">
           <h1 className="text-xl font-bold text-white">{proposalTitle} - PPT Preview</h1>
+          {pptUrl && (
+            <Button
+              onClick={handleDownloadPPT}
+              disabled={isDownloading}
+              variant="ghost"
+              size="sm"
+              className="h-8 px-3 hover:bg-slate-800 flex items-center gap-2"
+              title="Download PPT"
+            >
+              <Download className="w-4 h-4 text-white" />
+              <span className="text-xs text-white">
+                {isDownloading ? "Downloading..." : "Download"}
+              </span>
+            </Button>
+          )}
         </div>
         <p className="text-xs text-slate-400">Tip: Use Arrow keys (← →) to navigate between slides</p>
       </div>
