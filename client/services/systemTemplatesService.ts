@@ -440,7 +440,7 @@ export async function copyProposalFromTemplate(templateId: string, proposalId: s
   }
 
   try {
-    const response = await fetch("https://propai-api.hirenq.com/api/proposal/copy-from-template", {
+    const response = await fetch(apiConfig.endpoints.copyProposalFromTemplate, {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${token}`,
@@ -566,7 +566,7 @@ export async function createProposalFromTemplate(templateId: string, proposalTit
   }
 
   try {
-    const response = await fetch("https://propai-api.hirenq.com/api/proposal/create-from-template", {
+    const response = await fetch(apiConfig.endpoints.createProposalFromTemplate, {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${token}`,
@@ -634,7 +634,7 @@ export async function saveProposalAsTemplate(proposalData: any, templateTitle: s
   }
 
   try {
-    const response = await fetch("https://propai-api.hirenq.com/api/templates/create-from-proposal", {
+    const response = await fetch(apiConfig.endpoints.createTemplateFromProposal, {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${token}`,

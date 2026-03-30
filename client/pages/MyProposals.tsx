@@ -30,7 +30,8 @@ import { ProposalPreviewModal } from "@/components/ProposalPreviewModal";
 import { TemplateSelectionModal } from "@/components/TemplateSelectionModal";
 import { ProposalTitleDialog } from "@/components/ProposalTitleDialog";
 import { convertSystemTemplateToProposal, type SystemTemplate, copyProposalFromTemplate, saveProposalAsTemplate } from "@/services/systemTemplatesService";
-import { generateProposalFromTemplate } from "@/services/aiGenerationService";
+import { generateProposalFromTemplate, pollProposalStatus } from "@/services/aiGenerationService";
+import { PPTPreviewModal } from "@/components/PPTPreviewModal";
 import { Wand2, MoreVertical, FileText } from "lucide-react";
 
 const statusStyles: Record<string, string> = {
@@ -39,6 +40,13 @@ const statusStyles: Record<string, string> = {
   sent: "bg-blue-100 text-blue-700 border border-blue-200",
   accepted: "bg-green-100 text-green-700 border border-green-200",
   declined: "bg-red-100 text-red-700 border border-red-200",
+};
+
+const pptStatusStyles: Record<string, string> = {
+  pending: "bg-yellow-100 text-yellow-700 border border-yellow-200",
+  processing: "bg-blue-100 text-blue-700 border border-blue-200",
+  completed: "bg-green-100 text-green-700 border border-green-200",
+  failed: "bg-red-100 text-red-700 border border-red-200",
 };
 
 export default function MyProposals() {
@@ -70,6 +78,7 @@ export default function MyProposals() {
   const [templateName, setTemplateName] = useState("");
   const [proposalToSave, setProposalToSave] = useState<Proposal | null>(null);
   const [isSavingTemplate, setIsSavingTemplate] = useState(false);
+  const [pptPreviewProposal, setPPTPreviewProposal] = useState<Proposal | null>(null);
   const [formData, setFormData] = useState<CreateProposalInput>({
     title: "",
     client_id: "",
@@ -235,16 +244,51 @@ export default function MyProposals() {
       });
 
       if (response.proposal_id) {
-        toast({
-          title: "Success",
-          description: "Proposal created successfully!",
-        });
+        // Check if the message indicates queued generation
+        if (response.message === "Proposal generation queued") {
+          toast({
+            title: "Generating Proposal",
+            description: "Your proposal is being generated. Please wait...",
+          });
 
-        // Navigate to editor with the new proposal ID
-        nav(`/proposals/${response.proposal_id}/edit?sessionId=${chatSessionId}`);
-        setNewProposalId(null);
-        setChatSessionId(null);
-        setSelectedTemplate(null);
+          // Start polling for the proposal status
+          // Poll for up to 30 minutes (600 attempts * 3 seconds)
+          try {
+            await pollProposalStatus(response.proposal_id, 600, 3000, (statusUpdate) => {
+              console.log("Proposal status:", statusUpdate.status);
+            });
+
+            toast({
+              title: "Success",
+              description: "Proposal created successfully!",
+            });
+
+            // Navigate to editor with the new proposal ID
+            nav(`/proposals/${response.proposal_id}/edit?sessionId=${chatSessionId}`);
+            setNewProposalId(null);
+            setChatSessionId(null);
+            setSelectedTemplate(null);
+          } catch (pollingError) {
+            console.error("Error polling proposal status:", pollingError);
+            toast({
+              title: "Status Check Failed",
+              description: pollingError instanceof Error ? pollingError.message : "Failed to check proposal status",
+              variant: "destructive",
+            });
+            throw pollingError;
+          }
+        } else {
+          toast({
+            title: "Success",
+            description: "Proposal created successfully!",
+          });
+
+          // Navigate to editor with the new proposal ID
+          nav(`/proposals/${response.proposal_id}/edit?sessionId=${chatSessionId}`);
+          setNewProposalId(null);
+          setChatSessionId(null);
+          setSelectedTemplate(null);
+        }
       } else {
         throw new Error("No proposal ID returned");
       }
@@ -308,6 +352,52 @@ export default function MyProposals() {
       toast({ title: "Error loading proposal", variant: "destructive" });
     } finally {
       setIsLoadingPreview(false);
+    }
+  }
+
+  async function onPreviewPPT(proposalId: string) {
+    try {
+      const proposal = rows.find((p) => p.id === proposalId);
+      if (!proposal) {
+        toast({ title: "Proposal not found", variant: "destructive" });
+        return;
+      }
+
+      if (!proposal.ppt_json) {
+        toast({ title: "PPT not available", description: "This proposal does not have a PPT presentation yet.", variant: "destructive" });
+        return;
+      }
+
+      setPPTPreviewProposal(proposal);
+    } catch (error) {
+      toast({ title: "Error loading PPT", variant: "destructive" });
+    }
+  }
+
+  async function onDownloadPPT(proposalId: string) {
+    try {
+      const proposal = rows.find((p) => p.id === proposalId);
+      if (!proposal) {
+        toast({ title: "Proposal not found", variant: "destructive" });
+        return;
+      }
+
+      if (!proposal.ppt_url) {
+        toast({ title: "Download link not available", description: "This proposal does not have a PPT file ready for download.", variant: "destructive" });
+        return;
+      }
+
+      // Download the PPT file
+      const link = document.createElement("a");
+      link.href = proposal.ppt_url;
+      link.download = `${proposal.title}.pptx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast({ title: "Download started", description: `${proposal.title}.pptx` });
+    } catch (error) {
+      toast({ title: "Error downloading PPT", variant: "destructive" });
     }
   }
 
@@ -410,6 +500,7 @@ export default function MyProposals() {
                     <TableHead className="font-semibold text-foreground">Title</TableHead>
                     <TableHead className="font-semibold text-foreground">Client</TableHead>
                     <TableHead className="font-semibold text-foreground">Status</TableHead>
+                    <TableHead className="font-semibold text-foreground">PPT Status</TableHead>
                     <TableHead className="font-semibold text-foreground">Created By</TableHead>
                     <TableHead className="font-semibold text-foreground">Updated</TableHead>
                     <TableHead className="text-right font-semibold text-foreground">Actions</TableHead>
@@ -438,6 +529,17 @@ export default function MyProposals() {
                         >
                           {proposal.status.charAt(0).toUpperCase() + proposal.status.slice(1)}
                         </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {proposal.ppt_status ? (
+                          <Badge
+                            className={`${pptStatusStyles[proposal.ppt_status] || pptStatusStyles.pending}`}
+                          >
+                            {proposal.ppt_status.charAt(0).toUpperCase() + proposal.ppt_status.slice(1)}
+                          </Badge>
+                        ) : (
+                          <span className="text-muted-foreground text-sm">—</span>
+                        )}
                       </TableCell>
                       <TableCell className="text-muted-foreground">
                         {proposal.createdBy}
@@ -468,6 +570,24 @@ export default function MyProposals() {
                             >
                               Preview
                             </DropdownMenuItem>
+                            {proposal.ppt_json && proposal.ppt_status === "completed" && (
+                              <>
+                                <DropdownMenuItem
+                                  onClick={() => onPreviewPPT(proposal.id)}
+                                  className="cursor-pointer"
+                                >
+                                  View PPT
+                                </DropdownMenuItem>
+                                {proposal.ppt_url && (
+                                  <DropdownMenuItem
+                                    onClick={() => onDownloadPPT(proposal.id)}
+                                    className="cursor-pointer"
+                                  >
+                                    Download PPT
+                                  </DropdownMenuItem>
+                                )}
+                              </>
+                            )}
                             <DropdownMenuItem
                               onClick={() => nav(`/proposals/${proposal.id}/edit`)}
                               className="cursor-pointer"
@@ -594,7 +714,7 @@ export default function MyProposals() {
                 </SelectTrigger>
                 <SelectContent>
                   {clients.map((client) => (
-                    <SelectItem key={client.id} value={client.id}>
+                    <SelectItem key={client.id} value={String(client.id)}>
                       {client.name} ({client.company || "No company"})
                     </SelectItem>
                   ))}
@@ -736,6 +856,15 @@ export default function MyProposals() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {pptPreviewProposal && pptPreviewProposal.ppt_json && (
+        <PPTPreviewModal
+          pptData={pptPreviewProposal.ppt_json}
+          proposalTitle={pptPreviewProposal.title}
+          proposalId={pptPreviewProposal.id}
+          onClose={() => setPPTPreviewProposal(null)}
+        />
+      )}
     </AppShell>
   );
 }

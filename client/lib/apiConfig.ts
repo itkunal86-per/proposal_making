@@ -37,6 +37,9 @@ export const apiConfig = {
     // System templates endpoints
     systemTemplates: `${API_BASE_URL}/api/system-templates`,
     clientTemplates: `${API_BASE_URL}/api/client-templates`,
+    copyProposalFromTemplate: `${API_BASE_URL}/api/proposal/copy-from-template`,
+    createProposalFromTemplate: `${API_BASE_URL}/api/proposal/create-from-template`,
+    createTemplateFromProposal: `${API_BASE_URL}/api/templates/create-from-proposal`,
 
     // Package endpoints
     packages: `${API_BASE_URL}/api/packages`,
@@ -49,6 +52,7 @@ export const apiConfig = {
 
     // AI Generation endpoints
     aiGeneration: `${API_BASE_URL}/api/ai-generation`,
+    proposalStatus: `${API_BASE_URL}/api/proposal/status`,
 
     // Analytics endpoints
     analytics: `${API_BASE_URL}/api/analytics`,
@@ -56,6 +60,7 @@ export const apiConfig = {
     // PPT endpoints
     generatePPT: `${API_BASE_URL}/api/proposal`,
     previewPPT: `${API_BASE_URL}/api/proposals/details-ppt`,
+    publicPPTPreview: `${API_BASE_URL}/api/public/proposal/details-ppt`,
     pptStyles: `${API_BASE_URL}/api/ppt/styles`,
     applyPPTStyle: `${API_BASE_URL}/api/proposal`, // Used with {proposal_id}/apply-style
   },
