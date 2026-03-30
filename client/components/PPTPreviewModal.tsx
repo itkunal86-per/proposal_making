@@ -1,9 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { X, ChevronLeft, ChevronRight, Download } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Download, Share2, Copy, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { getStoredToken } from "@/lib/auth";
+import { toast } from "@/hooks/use-toast";
 import apiConfig from "@/lib/apiConfig";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import { enableProposalSharing } from "@/services/proposalsService";
+import { EmailShareDialog } from "@/components/EmailShareDialog";
 
 interface Slide {
   type: "title" | "content" | "timeline" | "pricing";
@@ -91,6 +101,9 @@ export const PPTPreviewModal: React.FC<PPTPreviewModalProps> = ({
   const [isApplyingStyle, setIsApplyingStyle] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [appliedStyle, setAppliedStyle] = useState<PPTStyleData | null | undefined>(pptData?.ppt_style);
+  const [isCopyingLink, setIsCopyingLink] = useState(false);
+  const [shareLink, setShareLink] = useState<string | null>(null);
+  const [emailDialogOpen, setEmailDialogOpen] = useState(false);
 
   // Extract slides from pptData if available
   const slides = pptData?.slides || [];
@@ -335,6 +348,76 @@ export const PPTPreviewModal: React.FC<PPTPreviewModalProps> = ({
     }
   };
 
+  const handleCopyShareLink = async () => {
+    setIsCopyingLink(true);
+    try {
+      const result = await enableProposalSharing(proposalId);
+      if (result.success && result.token) {
+        const generatedShareLink = `${window.location.origin}/preview/ppt/${result.token}`;
+        setShareLink(generatedShareLink);
+
+        // Try modern Clipboard API first
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          try {
+            await navigator.clipboard.writeText(generatedShareLink);
+            toast({ title: "Success", description: "Share link copied to clipboard" });
+            return;
+          } catch (err) {
+            // Fall through to fallback
+          }
+        }
+
+        // Fallback: create temporary input and copy
+        const tempInput = document.createElement('input');
+        tempInput.value = generatedShareLink;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand('copy');
+        document.body.removeChild(tempInput);
+        toast({ title: "Success", description: "Share link copied to clipboard" });
+      } else {
+        toast({
+          title: "Error",
+          description: result.error || "Failed to generate share link",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error("Copy share link error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to copy share link",
+        variant: "destructive"
+      });
+    } finally {
+      setIsCopyingLink(false);
+    }
+  };
+
+  const handleShareViaEmail = async () => {
+    try {
+      const result = await enableProposalSharing(proposalId);
+      if (result.success && result.token) {
+        const generatedShareLink = `${window.location.origin}/preview/ppt/${result.token}`;
+        setShareLink(generatedShareLink);
+        setEmailDialogOpen(true);
+      } else {
+        toast({
+          title: "Error",
+          description: result.error || "Failed to generate share link",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error("Share via email error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to generate share link",
+        variant: "destructive"
+      });
+    }
+  };
+
   if (!currentSlide) {
     console.warn("No current slide found. currentSlideIndex:", currentSlideIndex, "slides.length:", slides.length, "slides:", slides);
     return (
@@ -361,6 +444,76 @@ export const PPTPreviewModal: React.FC<PPTPreviewModalProps> = ({
           <div className="flex items-center justify-between mb-2">
             <h1 className="text-xl font-bold text-white">{proposalTitle} - PPT Preview</h1>
             <div className="flex items-center gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center gap-2 h-8 px-3 bg-slate-800 border-slate-600 hover:bg-slate-700 text-white"
+                  >
+                    <Share2 className="w-4 h-4" />
+                    Share
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-72 p-0">
+                  {/* Header Section */}
+                  <div className="bg-gradient-to-r from-blue-50 to-cyan-50 px-4 py-3 border-b border-blue-100">
+                    <div className="text-sm font-bold text-slate-900">Share settings</div>
+                    <div className="text-xs text-slate-600 mt-2 mb-3">
+                      Document Status
+                    </div>
+                    <div className="inline-flex items-center rounded-lg px-3 py-1.5 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200">
+                      <div className="w-2 h-2 rounded-full bg-green-500 mr-2"></div>
+                      <span className="text-xs font-semibold text-green-700">
+                        Published
+                      </span>
+                    </div>
+                    <div className="text-xs text-slate-600 mt-3 leading-relaxed">
+                      Anyone with the link can view and sign.
+                    </div>
+                    {shareLink && (
+                      <div className="mt-3 pt-3 border-t border-blue-200">
+                        <p className="text-xs text-slate-600 font-medium mb-2">Share Link:</p>
+                        <p className="text-xs bg-white px-2 py-1.5 rounded border border-slate-200 text-slate-700 break-all font-mono">
+                          {shareLink}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  <DropdownMenuSeparator className="m-0" />
+
+                  {/* Menu Items Section */}
+                  <div className="p-2">
+                    <DropdownMenuItem
+                      onClick={handleCopyShareLink}
+                      disabled={isCopyingLink}
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-md cursor-pointer hover:bg-blue-50 transition-colors"
+                    >
+                      <div className="p-1.5 bg-blue-100 rounded-md">
+                        <Copy className="w-4 h-4 text-blue-600" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="text-sm font-medium text-slate-900">Copy link</div>
+                        <div className="text-xs text-slate-500">Share via link</div>
+                      </div>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem
+                      onClick={handleShareViaEmail}
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-md cursor-pointer hover:bg-blue-50 transition-colors mt-1"
+                    >
+                      <div className="p-1.5 bg-purple-100 rounded-md">
+                        <Mail className="w-4 h-4 text-purple-600" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="text-sm font-medium text-slate-900">Share via email</div>
+                        <div className="text-xs text-slate-500">Send link by email</div>
+                      </div>
+                    </DropdownMenuItem>
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
               {pptData?.ppt_url && (
                 <Button
                   onClick={handleDownloadPPT}
@@ -553,6 +706,13 @@ export const PPTPreviewModal: React.FC<PPTPreviewModalProps> = ({
           </div>
         </div>
       </div>
+
+      <EmailShareDialog
+        open={emailDialogOpen}
+        onOpenChange={setEmailDialogOpen}
+        proposalTitle={proposalTitle}
+        shareLink={shareLink || ""}
+      />
     </div>
   );
 };

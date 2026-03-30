@@ -161,6 +161,11 @@ export interface Proposal {
   versions: ProposalVersionSnapshot[];
   titleStyles?: Record<string, any>;
   signatories?: SignatureRecipient[];
+  ppt_status?: "pending" | "processing" | "completed" | "failed";
+  ppt_json?: any;
+  ppt_style?: any;
+  ppt_url?: string;
+  ppt_path?: string;
 }
 
 const STORAGE_KEY = "app_proposals";
@@ -980,7 +985,7 @@ export async function createProposalApi(input: CreateProposalInput): Promise<Cre
   }
 
   const title = input.title?.trim();
-  const client_id = input.client_id?.trim();
+  const client_id = String(input.client_id)?.trim();
   if (!title || !client_id) {
     return {
       success: false,
