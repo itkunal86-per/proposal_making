@@ -32,7 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     api
-      .get<AuthUser>('/user')
+      .get<AuthUser>('/api/user')
       .then((res) => {
         console.log('SSO user fetched:', res.data)
         setUser(res.data)
