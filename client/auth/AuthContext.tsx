@@ -34,10 +34,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     api
       .get<AuthUser>('/user')
       .then((res) => {
+        console.log('SSO user fetched:', res.data)
         setUser(res.data)
         localStorage.setItem(SSO_STORAGE_KEY, JSON.stringify(res.data))
       })
-      .catch(() => {
+      .catch((err) => {
+        console.log('SSO fetch failed:', err?.response?.status, err?.message)
         setUser(null)
         localStorage.removeItem(SSO_STORAGE_KEY)
       })
