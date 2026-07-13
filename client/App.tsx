@@ -43,6 +43,7 @@ import HowItWorks from "./pages/HowItWorks";
 import FAQ from "./pages/FAQ";
 import { AuthProvider } from "@/providers/AuthProvider";
 import { RequireAuth, RequireRole } from "@/components/auth/RouteGuards";
+import { AuthProvider as SSOAuthProvider } from "@/auth/AuthContext";
 
 const queryClient = new QueryClient();
 
@@ -103,11 +104,13 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <AuthProvider>
-        <BrowserRouter>
-          <AppRoutes />
-        </BrowserRouter>
-      </AuthProvider>
+      <SSOAuthProvider>
+        <AuthProvider>
+          <BrowserRouter>
+            <AppRoutes />
+          </BrowserRouter>
+        </AuthProvider>
+      </SSOAuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
