@@ -116,9 +116,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const signOut = useCallback(() => {
+  const signOut = useCallback(async () => {
     clearAuth();
+    // Clear SSO session from localStorage
+    localStorage.removeItem('sso_auth_user');
     setUser(null);
+
+    // If there's an SSO session, call logout on API and redirect to main app
+    try {
+      // Try to call logout endpoint if we have an API available
+      const response = await fetch('/api/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+      if (response.ok || response.status === 401) {
+        // Session cleared or already expired
+        const mainAppUrl = import.meta.env.VITE_MAIN_APP_URL ?? 'https://pitchsuite.io';
+        window.location.href = mainAppUrl;
+      }
+    } catch {
+      // If API call fails, just clear locally and stay on app
+      // (user will redirect on next action)
+    }
   }, []);
 
   const value = useMemo<AuthContextValue>(() => ({ status, user, signIn, signUp, signOut }), [
