@@ -34,13 +34,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const logout = async () => {
-    try {
-      await api.post('/logout')
-    } finally {
-      window.location.href =
-        import.meta.env.VITE_MAIN_APP_URL ?? 'https://pitchsuite.io'
-    }
+  try {
+    await ensureCsrf()
+    await api.post('/logout')
+  } finally {
+    window.location.href =
+      import.meta.env.VITE_MAIN_APP_URL ?? 'https://pitchsuite.io'
   }
+}
 
   return (
     <AuthContext.Provider value={{ user, loading, logout }}>
