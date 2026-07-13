@@ -104,6 +104,22 @@ export const PPTPreviewModal: React.FC<PPTPreviewModalProps> = ({
   const [isCopyingLink, setIsCopyingLink] = useState(false);
   const [shareLink, setShareLink] = useState<string | null>(null);
   const [emailDialogOpen, setEmailDialogOpen] = useState(false);
+  const [showCustomStyle, setShowCustomStyle] = useState(false);
+  const [customStyle, setCustomStyle] = useState<PPTStyleData>({
+    id: 0,
+    name: "Custom Style",
+    primary_color: "#3B82F6",
+    secondary_color: "#1E40AF",
+    background_color: "#FFFFFF",
+    title_font: "Roboto",
+    body_font: "Lato",
+    title_font_size: 42,
+    body_font_size: 22,
+    title_font_color: "#000000",
+    body_font_color: "#333333",
+    layout_type: "standard",
+    preview_image: "",
+  });
 
   // Extract slides from pptData if available
   const slides = pptData?.slides || [];
@@ -317,6 +333,22 @@ export const PPTPreviewModal: React.FC<PPTPreviewModalProps> = ({
     } finally {
       setIsApplyingStyle(false);
     }
+  };
+
+  const handleApplyCustomStyle = () => {
+    setAppliedStyle(customStyle);
+    setSelectedStyleId(0); // Custom style has id 0
+    setShowCustomStyle(false);
+    if (onStyleApplied) {
+      onStyleApplied();
+    }
+  };
+
+  const handleCustomStyleChange = (field: keyof PPTStyleData, value: any) => {
+    setCustomStyle(prev => ({
+      ...prev,
+      [field]: value,
+    }));
   };
 
   const handleDownloadPPT = async () => {
@@ -595,62 +627,289 @@ export const PPTPreviewModal: React.FC<PPTPreviewModalProps> = ({
           </div>
 
           {/* Right Side - PPT Styles */}
-          <div className="w-64 bg-slate-900 border-l border-slate-700 p-4 overflow-y-auto">
+          <div className="w-80 bg-slate-900 border-l border-slate-700 p-4 overflow-y-auto flex flex-col">
             <h3 className="text-sm font-semibold text-white mb-4">PPT Styles</h3>
 
             {isLoadingStyles ? (
               <div className="flex items-center justify-center py-8">
                 <div className="animate-spin rounded-full h-6 w-6 border-2 border-blue-500 border-t-transparent"></div>
               </div>
-            ) : pptStyles.length > 0 ? (
-              <div className="space-y-3 relative">
-                {/* Loading Overlay */}
-                {isApplyingStyle && (
-                  <div className="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center z-10">
-                    <div className="flex flex-col items-center gap-2">
-                      <div className="animate-spin rounded-full h-6 w-6 border-2 border-blue-500 border-t-transparent"></div>
-                      <p className="text-xs text-white">Applying style...</p>
-                    </div>
+            ) : (
+              <div className="flex-1 space-y-4">
+                {/* Preset Styles */}
+                {pptStyles.length > 0 && (
+                  <div className="space-y-3 relative">
+                    {/* Loading Overlay */}
+                    {isApplyingStyle && (
+                      <div className="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center z-10">
+                        <div className="flex flex-col items-center gap-2">
+                          <div className="animate-spin rounded-full h-6 w-6 border-2 border-blue-500 border-t-transparent"></div>
+                          <p className="text-xs text-white">Applying style...</p>
+                        </div>
+                      </div>
+                    )}
+                    {pptStyles.map((style) => (
+                      <button
+                        key={style.id}
+                        onClick={() => handleApplyStyle(style.id)}
+                        disabled={isApplyingStyle}
+                        className={`w-full p-3 rounded-lg border-2 transition-all ${
+                          selectedStyleId === style.id
+                            ? "border-blue-500 bg-slate-800"
+                            : "border-slate-600 bg-slate-800 hover:border-slate-500"
+                        } ${isApplyingStyle ? "opacity-50 cursor-not-allowed" : ""}`}
+                      >
+                        <div className="flex items-center gap-3">
+                          {/* Color Preview */}
+                          <div className="flex gap-1">
+                            <div
+                              className="w-4 h-4 rounded-full border border-slate-500"
+                              style={{ backgroundColor: style.primary_color }}
+                              title="Primary Color"
+                            />
+                            <div
+                              className="w-4 h-4 rounded-full border border-slate-500"
+                              style={{ backgroundColor: style.background_color }}
+                              title="Background Color"
+                            />
+                          </div>
+                          {/* Style Name */}
+                          <div className="text-left flex-1">
+                            <p className="text-xs font-medium text-white truncate">{style.name}</p>
+                            <p className="text-xs text-slate-400 truncate">
+                              {style.title_font} / {style.body_font}
+                            </p>
+                          </div>
+                        </div>
+                      </button>
+                    ))}
                   </div>
                 )}
-                {pptStyles.map((style) => (
-                  <button
-                    key={style.id}
-                    onClick={() => handleApplyStyle(style.id)}
-                    disabled={isApplyingStyle}
-                    className={`w-full p-3 rounded-lg border-2 transition-all ${
-                      selectedStyleId === style.id
-                        ? "border-blue-500 bg-slate-800"
-                        : "border-slate-600 bg-slate-800 hover:border-slate-500"
-                    } ${isApplyingStyle ? "opacity-50 cursor-not-allowed" : ""}`}
-                  >
-                    <div className="flex items-center gap-3">
-                      {/* Color Preview */}
-                      <div className="flex gap-1">
-                        <div
-                          className="w-4 h-4 rounded-full border border-slate-500"
-                          style={{ backgroundColor: style.primary_color }}
-                          title="Primary Color"
-                        />
-                        <div
-                          className="w-4 h-4 rounded-full border border-slate-500"
-                          style={{ backgroundColor: style.background_color }}
-                          title="Background Color"
-                        />
+
+                {pptStyles.length === 0 && !showCustomStyle && (
+                  <p className="text-xs text-slate-400 text-center py-8">No styles available</p>
+                )}
+
+                {/* Custom Style Button/Form */}
+                <div className="border-t border-slate-700 pt-4">
+                  {!showCustomStyle ? (
+                    <button
+                      onClick={() => setShowCustomStyle(true)}
+                      className="w-full p-3 rounded-lg border-2 border-dashed border-slate-600 bg-slate-800 hover:border-slate-400 transition-all text-center"
+                    >
+                      <p className="text-xs font-medium text-slate-300">+ Create Custom Style</p>
+                    </button>
+                  ) : (
+                    <div className="bg-slate-800 rounded-lg p-4 border border-slate-700 space-y-3">
+                      <div className="flex items-center justify-between mb-3">
+                        <p className="text-xs font-medium text-white">Custom Style</p>
+                        <button
+                          onClick={() => setShowCustomStyle(false)}
+                          className="text-slate-400 hover:text-white text-lg leading-none"
+                        >
+                          ×
+                        </button>
                       </div>
+
                       {/* Style Name */}
-                      <div className="text-left flex-1">
-                        <p className="text-xs font-medium text-white truncate">{style.name}</p>
-                        <p className="text-xs text-slate-400 truncate">
-                          {style.title_font} / {style.body_font}
-                        </p>
+                      <div>
+                        <label className="block text-xs text-slate-300 font-medium mb-1">Name</label>
+                        <input
+                          type="text"
+                          value={customStyle.name}
+                          onChange={(e) => handleCustomStyleChange("name", e.target.value)}
+                          className="w-full px-2 py-1.5 bg-slate-700 border border-slate-600 rounded text-xs text-white placeholder-slate-400 focus:outline-none focus:border-blue-500"
+                          placeholder="My Custom Style"
+                        />
                       </div>
+
+                      {/* Colors Section */}
+                      <div>
+                        <p className="text-xs font-medium text-slate-300 mb-2">Colors</p>
+                        <div className="space-y-2">
+                          {/* Background Color */}
+                          <div className="flex items-center gap-2">
+                            <label className="block text-xs text-slate-400 w-24">Background</label>
+                            <div className="flex items-center gap-2 flex-1">
+                              <input
+                                type="color"
+                                value={customStyle.background_color}
+                                onChange={(e) => handleCustomStyleChange("background_color", e.target.value)}
+                                className="w-8 h-8 rounded border border-slate-600 cursor-pointer"
+                              />
+                              <input
+                                type="text"
+                                value={customStyle.background_color}
+                                onChange={(e) => handleCustomStyleChange("background_color", e.target.value)}
+                                className="flex-1 px-2 py-1 bg-slate-700 border border-slate-600 rounded text-xs text-white font-mono"
+                              />
+                            </div>
+                          </div>
+
+                          {/* Primary Color */}
+                          <div className="flex items-center gap-2">
+                            <label className="block text-xs text-slate-400 w-24">Primary</label>
+                            <div className="flex items-center gap-2 flex-1">
+                              <input
+                                type="color"
+                                value={customStyle.primary_color}
+                                onChange={(e) => handleCustomStyleChange("primary_color", e.target.value)}
+                                className="w-8 h-8 rounded border border-slate-600 cursor-pointer"
+                              />
+                              <input
+                                type="text"
+                                value={customStyle.primary_color}
+                                onChange={(e) => handleCustomStyleChange("primary_color", e.target.value)}
+                                className="flex-1 px-2 py-1 bg-slate-700 border border-slate-600 rounded text-xs text-white font-mono"
+                              />
+                            </div>
+                          </div>
+
+                          {/* Secondary Color */}
+                          <div className="flex items-center gap-2">
+                            <label className="block text-xs text-slate-400 w-24">Secondary</label>
+                            <div className="flex items-center gap-2 flex-1">
+                              <input
+                                type="color"
+                                value={customStyle.secondary_color || "#000000"}
+                                onChange={(e) => handleCustomStyleChange("secondary_color", e.target.value)}
+                                className="w-8 h-8 rounded border border-slate-600 cursor-pointer"
+                              />
+                              <input
+                                type="text"
+                                value={customStyle.secondary_color || ""}
+                                onChange={(e) => handleCustomStyleChange("secondary_color", e.target.value)}
+                                className="flex-1 px-2 py-1 bg-slate-700 border border-slate-600 rounded text-xs text-white font-mono"
+                              />
+                            </div>
+                          </div>
+
+                          {/* Title Font Color */}
+                          <div className="flex items-center gap-2">
+                            <label className="block text-xs text-slate-400 w-24">Title Color</label>
+                            <div className="flex items-center gap-2 flex-1">
+                              <input
+                                type="color"
+                                value={customStyle.title_font_color}
+                                onChange={(e) => handleCustomStyleChange("title_font_color", e.target.value)}
+                                className="w-8 h-8 rounded border border-slate-600 cursor-pointer"
+                              />
+                              <input
+                                type="text"
+                                value={customStyle.title_font_color}
+                                onChange={(e) => handleCustomStyleChange("title_font_color", e.target.value)}
+                                className="flex-1 px-2 py-1 bg-slate-700 border border-slate-600 rounded text-xs text-white font-mono"
+                              />
+                            </div>
+                          </div>
+
+                          {/* Body Font Color */}
+                          <div className="flex items-center gap-2">
+                            <label className="block text-xs text-slate-400 w-24">Body Color</label>
+                            <div className="flex items-center gap-2 flex-1">
+                              <input
+                                type="color"
+                                value={customStyle.body_font_color}
+                                onChange={(e) => handleCustomStyleChange("body_font_color", e.target.value)}
+                                className="w-8 h-8 rounded border border-slate-600 cursor-pointer"
+                              />
+                              <input
+                                type="text"
+                                value={customStyle.body_font_color}
+                                onChange={(e) => handleCustomStyleChange("body_font_color", e.target.value)}
+                                className="flex-1 px-2 py-1 bg-slate-700 border border-slate-600 rounded text-xs text-white font-mono"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Fonts Section */}
+                      <div>
+                        <p className="text-xs font-medium text-slate-300 mb-2">Fonts</p>
+                        <div className="space-y-2">
+                          {/* Title Font */}
+                          <div>
+                            <label className="block text-xs text-slate-400 mb-1">Title Font</label>
+                            <input
+                              type="text"
+                              value={customStyle.title_font}
+                              onChange={(e) => handleCustomStyleChange("title_font", e.target.value)}
+                              className="w-full px-2 py-1 bg-slate-700 border border-slate-600 rounded text-xs text-white placeholder-slate-400 focus:outline-none focus:border-blue-500"
+                              placeholder="e.g., Roboto, Arial"
+                            />
+                          </div>
+
+                          {/* Body Font */}
+                          <div>
+                            <label className="block text-xs text-slate-400 mb-1">Body Font</label>
+                            <input
+                              type="text"
+                              value={customStyle.body_font}
+                              onChange={(e) => handleCustomStyleChange("body_font", e.target.value)}
+                              className="w-full px-2 py-1 bg-slate-700 border border-slate-600 rounded text-xs text-white placeholder-slate-400 focus:outline-none focus:border-blue-500"
+                              placeholder="e.g., Lato, Georgia"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Font Sizes Section */}
+                      <div>
+                        <p className="text-xs font-medium text-slate-300 mb-2">Font Sizes</p>
+                        <div className="space-y-2">
+                          {/* Title Font Size */}
+                          <div className="flex items-center gap-2">
+                            <label className="block text-xs text-slate-400 w-24">Title Size</label>
+                            <input
+                              type="number"
+                              value={customStyle.title_font_size}
+                              onChange={(e) => handleCustomStyleChange("title_font_size", parseInt(e.target.value) || 42)}
+                              className="flex-1 px-2 py-1 bg-slate-700 border border-slate-600 rounded text-xs text-white"
+                            />
+                            <span className="text-xs text-slate-400">px</span>
+                          </div>
+
+                          {/* Body Font Size */}
+                          <div className="flex items-center gap-2">
+                            <label className="block text-xs text-slate-400 w-24">Body Size</label>
+                            <input
+                              type="number"
+                              value={customStyle.body_font_size}
+                              onChange={(e) => handleCustomStyleChange("body_font_size", parseInt(e.target.value) || 22)}
+                              className="flex-1 px-2 py-1 bg-slate-700 border border-slate-600 rounded text-xs text-white"
+                            />
+                            <span className="text-xs text-slate-400">px</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Layout Type */}
+                      <div>
+                        <label className="block text-xs text-slate-400 mb-1">Layout Type</label>
+                        <select
+                          value={customStyle.layout_type || "standard"}
+                          onChange={(e) => handleCustomStyleChange("layout_type", e.target.value)}
+                          className="w-full px-2 py-1 bg-slate-700 border border-slate-600 rounded text-xs text-white focus:outline-none focus:border-blue-500"
+                        >
+                          <option value="standard">Standard</option>
+                          <option value="premium">Premium</option>
+                          <option value="minimal">Minimal</option>
+                          <option value="bold">Bold</option>
+                        </select>
+                      </div>
+
+                      {/* Apply Button */}
+                      <button
+                        onClick={handleApplyCustomStyle}
+                        className="w-full mt-4 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-medium transition-colors"
+                      >
+                        Apply Custom Style
+                      </button>
                     </div>
-                  </button>
-                ))}
+                  )}
+                </div>
               </div>
-            ) : (
-              <p className="text-xs text-slate-400 text-center py-8">No styles available</p>
             )}
           </div>
         </div>
