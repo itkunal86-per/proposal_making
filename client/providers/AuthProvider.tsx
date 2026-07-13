@@ -40,27 +40,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // First check for SSO user in localStorage
     const ssoUserRaw = localStorage.getItem('sso_auth_user');
+    console.log('AuthProvider: checking SSO user in localStorage:', ssoUserRaw);
+
     if (ssoUserRaw) {
       try {
         const ssoUser = JSON.parse(ssoUserRaw);
+        console.log('AuthProvider: parsed SSO user:', ssoUser);
+
         // Convert SSO user format to AuthenticatedUser
         const convertedUser: AuthenticatedUser = {
           id: ssoUser.id.toString(),
           email: ssoUser.email,
           name: ssoUser.name,
-          role: ssoUser.org?.role || 'user', // Map SSO role or default to 'user'
+          role: (ssoUser.org?.role as any) || 'user', // Map SSO role or default to 'user'
           company: ssoUser.org?.name || undefined,
         };
+        console.log('AuthProvider: converted SSO user to:', convertedUser);
         setUser(convertedUser);
         setStatus("ready");
         return;
-      } catch {
+      } catch (err) {
+        console.log('AuthProvider: failed to parse SSO user:', err);
         // Fall through to check local auth
       }
     }
 
     // Fall back to local auth
     const stored = getStoredAuth();
+    console.log('AuthProvider: checking local auth:', stored?.user);
     if (stored?.user) {
       setUser(stored.user);
     }
