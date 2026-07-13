@@ -38,6 +38,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<"loading" | "ready">("loading");
 
   useEffect(() => {
+    // First check for SSO user in localStorage
+    const ssoUserRaw = localStorage.getItem('sso_auth_user');
+    if (ssoUserRaw) {
+      try {
+        const ssoUser = JSON.parse(ssoUserRaw);
+        // Convert SSO user format to AuthenticatedUser
+        const convertedUser: AuthenticatedUser = {
+          id: ssoUser.id.toString(),
+          email: ssoUser.email,
+          name: ssoUser.name,
+          role: ssoUser.org?.role || 'user', // Map SSO role or default to 'user'
+          company: ssoUser.org?.name || undefined,
+        };
+        setUser(convertedUser);
+        setStatus("ready");
+        return;
+      } catch {
+        // Fall through to check local auth
+      }
+    }
+
+    // Fall back to local auth
     const stored = getStoredAuth();
     if (stored?.user) {
       setUser(stored.user);
