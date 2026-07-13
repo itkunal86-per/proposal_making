@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 import { api } from '../lib/api'
 
+const SSO_STORAGE_KEY = 'sso_auth_user'
+
 export interface AuthUser {
   id: number
   name: string
@@ -22,14 +24,23 @@ const AuthContext = createContext<AuthState>({
 })
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(null)
+  const [user, setUser] = useState<AuthUser | null>(() => {
+    const stored = typeof window !== 'undefined' ? localStorage.getItem(SSO_STORAGE_KEY) : null
+    return stored ? JSON.parse(stored) : null
+  })
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     api
       .get<AuthUser>('/user')
-      .then((res) => setUser(res.data))
-      .catch(() => setUser(null))
+      .then((res) => {
+        setUser(res.data)
+        localStorage.setItem(SSO_STORAGE_KEY, JSON.stringify(res.data))
+      })
+      .catch(() => {
+        setUser(null)
+        localStorage.removeItem(SSO_STORAGE_KEY)
+      })
       .finally(() => setLoading(false))
   }, [])
 
@@ -37,6 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await api.post('/logout')
     } finally {
+      localStorage.removeItem(SSO_STORAGE_KEY)
       window.location.href =
         import.meta.env.VITE_MAIN_APP_URL ?? 'https://pitchsuite.io'
     }
