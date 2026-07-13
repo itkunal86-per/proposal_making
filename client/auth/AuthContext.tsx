@@ -27,21 +27,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     api
-      .get<AuthUser>('/api/user')
+      .get<AuthUser>('/user')
       .then((res) => setUser(res.data))
       .catch(() => setUser(null))
       .finally(() => setLoading(false))
   }, [])
 
   const logout = async () => {
-  try {
-    await ensureCsrf()
-    await api.post('/logout')
-  } finally {
-    window.location.href =
-      import.meta.env.VITE_MAIN_APP_URL ?? 'https://pitchsuite.io'
+    try {
+      await api.post('/logout')
+    } finally {
+      window.location.href =
+        import.meta.env.VITE_MAIN_APP_URL ?? 'https://pitchsuite.io'
+    }
   }
-}
 
   return (
     <AuthContext.Provider value={{ user, loading, logout }}>
