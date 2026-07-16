@@ -60,7 +60,11 @@ export function persistAuth(user: AuthenticatedUser, token: string | undefined, 
 
 export function getStoredToken(): string | null {
   if (!isBrowser()) return null;
-  return window.localStorage.getItem(TOKEN_KEY) ?? window.sessionStorage.getItem(TOKEN_KEY);
+  return (
+    window.localStorage.getItem(TOKEN_KEY) ??
+    window.sessionStorage.getItem(TOKEN_KEY) ??
+    window.localStorage.getItem("access_token")
+  );
 }
 
 export function clearAuth() {
@@ -69,6 +73,7 @@ export function clearAuth() {
   window.sessionStorage.removeItem(STORAGE_KEY);
   window.localStorage.removeItem(TOKEN_KEY);
   window.sessionStorage.removeItem(TOKEN_KEY);
+  window.localStorage.removeItem("access_token");
 }
 
 interface ApiLoginResponse {
