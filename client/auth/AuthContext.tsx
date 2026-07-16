@@ -31,8 +31,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    if (window.location.pathname === '/sso-login') {
+      setLoading(false)
+      return
+    }
+
     api
-      .get<AuthUser>('/api/user')
+      .get<AuthUser>('/user')
       .then((res) => {
         console.log('SSO user fetched:', res.data)
         setUser(res.data)
