@@ -28,8 +28,6 @@ export default function SsoLogin() {
         navigate("/my/proposals", { replace: true });
       })
       .catch(() => {
-        localStorage.removeItem("access_token");
-        localStorage.removeItem(SSO_STORAGE_KEY);
         setError("Unable to complete SSO sign-in.");
       });
   }, [navigate, params]);
