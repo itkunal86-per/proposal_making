@@ -38,40 +38,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<"loading" | "ready">("loading");
 
   useEffect(() => {
-    // First check for SSO user in localStorage
-    const ssoUserRaw = localStorage.getItem('sso_auth_user');
-    console.log('AuthProvider: checking SSO user in localStorage:', ssoUserRaw);
+    const applySsoUser = () => {
+      const ssoUserRaw = localStorage.getItem('sso_auth_user');
+      if (!ssoUserRaw) return false;
 
-    if (ssoUserRaw) {
       try {
         const ssoUser = JSON.parse(ssoUserRaw);
-        console.log('AuthProvider: parsed SSO user:', ssoUser);
-
-        // Convert SSO user format to AuthenticatedUser
-        const convertedUser: AuthenticatedUser = {
-          id: ssoUser.id.toString(),
+        setUser({
+          id: String(ssoUser.id),
           email: ssoUser.email,
           name: ssoUser.name,
-          role: (ssoUser.org?.role as any) || 'user', // Map SSO role or default to 'user'
+          role: ssoUser.org?.role || 'user',
           company: ssoUser.org?.name || undefined,
-        };
-        console.log('AuthProvider: converted SSO user to:', convertedUser);
-        setUser(convertedUser);
-        setStatus("ready");
-        return;
-      } catch (err) {
-        console.log('AuthProvider: failed to parse SSO user:', err);
-        // Fall through to check local auth
+        });
+        return true;
+      } catch {
+        return false;
       }
+    };
+
+    if (!applySsoUser()) {
+      const stored = getStoredAuth();
+      if (stored?.user) setUser(stored.user);
     }
 
-    // Fall back to local auth
-    const stored = getStoredAuth();
-    console.log('AuthProvider: checking local auth:', stored?.user);
-    if (stored?.user) {
-      setUser(stored.user);
-    }
     setStatus("ready");
+    window.addEventListener('sso-authenticated', applySsoUser);
+    return () => window.removeEventListener('sso-authenticated', applySsoUser);
   }, []);
 
   const signIn = useCallback<AuthContextValue["signIn"]>(async ({
