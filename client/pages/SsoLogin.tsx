@@ -21,7 +21,7 @@ export default function SsoLogin() {
     localStorage.setItem("access_token", token);
 
     api
-      .get<AuthUser>("/user")
+      .get<AuthUser>("/api/user")
       .then(({ data }) => {
         localStorage.setItem(SSO_STORAGE_KEY, JSON.stringify(data));
         window.dispatchEvent(new Event("sso-authenticated"));
