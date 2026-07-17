@@ -63,7 +63,8 @@ export function getStoredToken(): string | null {
   return (
     window.localStorage.getItem(TOKEN_KEY) ??
     window.sessionStorage.getItem(TOKEN_KEY) ??
-    window.localStorage.getItem("access_token")
+    window.localStorage.getItem("access_token") ??
+    window.localStorage.getItem("TOKEN_KEY")
   );
 }
 

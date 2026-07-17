@@ -18,7 +18,8 @@ export default function SsoLogin() {
       return;
     }
 
-    localStorage.setItem("TOKEN_KEY", token);
+    localStorage.setItem("access_token", token);
+    localStorage.setItem("proposal_ai_auth_token", token);
 
     api
       .get<AuthUser>("/api/user")
