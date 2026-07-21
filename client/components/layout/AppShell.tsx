@@ -95,12 +95,12 @@ export default function AppShell({ children }: { children: ReactNode }) {
         <Sidebar collapsible="offcanvas" className="border-r border-slate-800 bg-slate-900">
           <SidebarHeader className="border-b border-slate-800 bg-slate-900">
             <div className="flex items-center justify-between gap-3 px-3 py-3">
-              <div className="flex items-center gap-3 flex-1">
-                <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center flex-shrink-0 shadow-md" />
-                <div className="flex flex-col">
-                  <span className="text-sm font-bold text-white">Pitchsuite</span>
-                  <span className="text-xs text-slate-400">v1.0</span>
-                </div>
+              <div className="flex min-w-0 flex-1 items-center">
+                <img
+                  src="https://cdn.builder.io/api/v1/image/assets%2F89024f4abe0b4e7d9ae689ddeddf5b00%2F8410547142914cec90fe6624ee01330d?format=webp&width=800&height=1200"
+                  alt="PitchSuite"
+                  className="h-auto max-h-10 w-full object-contain object-left"
+                />
               </div>
             </div>
           </SidebarHeader>
