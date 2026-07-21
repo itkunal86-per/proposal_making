@@ -25,11 +25,11 @@ const STORAGE_KEY = "app_clients";
 const CLIENTS_ENDPOINT = apiConfig.endpoints.clients;
 
 interface ApiClientResponse {
-  id: string;
-  name: string;
+  id: string | number;
+  first_name: string | null;
+  last_name: string | null;
   email: string;
-  company: string;
-  status: string;
+  company_name: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -105,14 +105,14 @@ function normalizeClient(raw: z.infer<typeof clientSchema>): ClientRecord {
 function convertApiClientToRecord(client: ApiClientResponse): ClientRecord {
   const createdAtMs = new Date(client.created_at).getTime() || Date.now();
   const updatedAtMs = new Date(client.updated_at).getTime() || Date.now();
-  const status = (client.status.toLowerCase() === "active" ? "active" : "inactive") as ClientStatus;
+  const name = [client.first_name, client.last_name].filter(Boolean).join(" ") || client.email;
 
   return {
-    id: client.id,
-    name: client.name,
+    id: String(client.id),
+    name,
     email: client.email,
-    company: client.company || "",
-    status,
+    company: client.company_name || "",
+    status: "active",
     createdAt: createdAtMs,
     updatedAt: updatedAtMs,
   };
