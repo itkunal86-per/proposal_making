@@ -17,7 +17,7 @@ export default function Header() {
       <div className="container flex h-16 items-center justify-between">
         <a href="/" className="flex items-center">
           <img
-            src="https://cdn.builder.io/api/v1/image/assets%2F89024f4abe0b4e7d9ae689ddeddf5b00%2F8410547142914cec90fe6624ee01330d?format=webp&width=800&height=1200"
+            src="https://cdn.builder.io/api/v1/image/assets%2F89024f4abe0b4e7d9ae689ddeddf5b00%2F4ce7c09f338f45e4a29baa0b38372436?format=webp&width=800&height=1200"
             alt="PitchSuite"
             className="h-9 w-auto object-contain"
           />
