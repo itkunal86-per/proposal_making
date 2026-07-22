@@ -259,18 +259,17 @@ export async function updateClient(rec: ClientRecord): Promise<UpdateClientResul
     };
   }
 
-  const name = rec.name?.trim();
+  const firstName = rec.firstName?.trim();
+  const lastName = rec.lastName?.trim();
   const email = rec.email?.trim().toLowerCase();
-  if (!name || !email) {
+  if (!firstName || !lastName || !email) {
     return {
       success: false,
-      error: "Name and email are required",
+      error: "First name, last name, and email are required",
     };
   }
 
   try {
-    const statusLabel = rec.status === "active" ? "Active" : "Inactive";
-
     const res = await fetch(`${CLIENTS_ENDPOINT}/${rec.id}`, {
       method: "PUT",
       headers: {
@@ -278,10 +277,10 @@ export async function updateClient(rec: ClientRecord): Promise<UpdateClientResul
         "Authorization": `Bearer ${token}`,
       },
       body: JSON.stringify({
-        name,
+        first_name: firstName,
+        last_name: lastName,
         email,
-        company: rec.company?.trim() || "",
-        status: statusLabel,
+        company_name: rec.company?.trim() || "",
       }),
     });
 
@@ -303,14 +302,9 @@ export async function updateClient(rec: ClientRecord): Promise<UpdateClientResul
     }
 
     const data: ApiUpdateClientResponse = await res.json();
-    const clientStatus = (data.status.toLowerCase() === "active" ? "active" : "inactive") as ClientStatus;
-
     const updatedRec: ClientRecord = {
-      ...rec,
-      name: data.name,
-      email: data.email,
-      company: data.company || "",
-      status: clientStatus,
+      ...convertApiClientToRecord(data),
+      status: rec.status,
       updatedAt: Date.now(),
     };
 

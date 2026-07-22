@@ -515,19 +515,35 @@ function EditDialog({ open, record, onOpenChange, onSubmit }: { open: boolean; r
               {Array.isArray(errors.form) ? errors.form[0] : errors.form}
             </div>
           )}
-          <div className="grid gap-2">
-            <Label htmlFor="name">Name</Label>
-            <Input
-              id="name"
-              value={draft.name}
-              onChange={(e) => setDraft({ ...draft, name: e.target.value })}
-              aria-invalid={!!errors.name}
-            />
-            {errors.name && (
-              <p className="text-xs text-destructive">
-                {Array.isArray(errors.name) ? errors.name[0] : errors.name}
-              </p>
-            )}
+          <div className="grid gap-2 sm:grid-cols-2 sm:gap-3">
+            <div className="grid gap-2">
+              <Label htmlFor="edit-first-name">First name</Label>
+              <Input
+                id="edit-first-name"
+                value={draft.firstName}
+                onChange={(e) => setDraft({ ...draft, firstName: e.target.value, name: `${e.target.value} ${draft.lastName}`.trim() })}
+                aria-invalid={!!errors.first_name}
+              />
+              {errors.first_name && (
+                <p className="text-xs text-destructive">
+                  {Array.isArray(errors.first_name) ? errors.first_name[0] : errors.first_name}
+                </p>
+              )}
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="edit-last-name">Last name</Label>
+              <Input
+                id="edit-last-name"
+                value={draft.lastName}
+                onChange={(e) => setDraft({ ...draft, lastName: e.target.value, name: `${draft.firstName} ${e.target.value}`.trim() })}
+                aria-invalid={!!errors.last_name}
+              />
+              {errors.last_name && (
+                <p className="text-xs text-destructive">
+                  {Array.isArray(errors.last_name) ? errors.last_name[0] : errors.last_name}
+                </p>
+              )}
+            </div>
           </div>
           <div className="grid gap-2">
             <Label htmlFor="email">Email</Label>
