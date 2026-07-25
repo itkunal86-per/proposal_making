@@ -28,7 +28,7 @@ api.interceptors.response.use(
       err?.response?.status === 401 &&
       window.location.pathname !== '/sso-login'
     ) {
-      window.location.href = MAIN_APP_URL
+      //window.location.href = MAIN_APP_URL
     }
     return Promise.reject(err)
   },
