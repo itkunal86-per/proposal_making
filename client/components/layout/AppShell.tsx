@@ -81,7 +81,12 @@ export default function AppShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
 
   const navItems = useMemo(() => {
-    return user ? navByRole[user.role] : [];
+    if (!user) return [];
+    return navByRole[user.role].flatMap((item) =>
+      item.children
+        ? item.children.map((child) => ({ ...child, icon: item.icon }))
+        : [item],
+    );
   }, [user]);
 
   const handleSignOut = () => {
@@ -90,93 +95,39 @@ export default function AppShell({ children }: { children: ReactNode }) {
   };
 
   return (
-    <SidebarProvider>
+    <SidebarProvider style={{ "--sidebar-width": "72px" } as React.CSSProperties}>
       <div className="flex w-full min-h-screen">
-        <Sidebar collapsible="offcanvas" className="border-r border-slate-800 bg-slate-900">
-          <SidebarHeader className="border-b border-slate-800 bg-slate-900">
-            <div className="flex items-center justify-between gap-3 px-3 py-3">
-              <div className="flex min-w-0 flex-1 items-center">
-                <img
-                  src="https://cdn.builder.io/api/v1/image/assets%2F89024f4abe0b4e7d9ae689ddeddf5b00%2F8410547142914cec90fe6624ee01330d?format=webp&width=800&height=1200"
-                  alt="PitchSuite"
-                  className="h-auto max-h-10 w-full object-contain object-left"
-                />
-              </div>
+        <Sidebar collapsible="none" className="border-r border-slate-200 bg-white">
+          <SidebarHeader className="border-b border-slate-100 bg-white px-0 py-3">
+            <div className="flex items-center justify-center">
+              <img
+                src="https://cdn.builder.io/api/v1/image/assets%2F89024f4abe0b4e7d9ae689ddeddf5b00%2Faf46febe108646538f673dc6c961d8c1?format=webp&width=800&height=1200"
+                alt="PitchSuite"
+                className="h-8 w-8 object-contain"
+              />
             </div>
           </SidebarHeader>
-          <SidebarContent className="px-3 py-4 bg-slate-900">
-            <SidebarGroup className="pb-6">
-              <SidebarGroupLabel className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-2 mb-3">
-                Navigation
-              </SidebarGroupLabel>
+          <SidebarContent className="bg-white px-2 py-3">
+            <SidebarGroup className="pb-0">
+              <SidebarGroupLabel className="sr-only">Navigation</SidebarGroupLabel>
               <SidebarMenu className="gap-1">
                 {navItems.map((item) => {
-                  const active =
-                    item.href ? (
-                      location.pathname === item.href ||
-                      location.pathname.startsWith(`${item.href}/`)
-                    ) : (
-                      item.children?.some(
-                        (child) =>
-                          location.pathname === child.href ||
-                          location.pathname.startsWith(`${child.href}/`)
-                      ) ?? false
-                    );
-
-                  if (item.children) {
-                    return (
-                      <SidebarMenuItem key={item.label}>
-                        <SidebarMenuButton className={cn(
-                          "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 cursor-pointer group",
-                          "hover:bg-slate-800 text-slate-300 hover:text-white",
-                          active && "bg-primary/20 text-white font-medium shadow-sm border border-primary/30",
-                        )}>
-                          <span className={cn(
-                            "transition-colors duration-200",
-                            active ? "text-primary" : "text-slate-400 group-hover:text-white"
-                          )}>
-                            {item.icon}
-                          </span>
-                          <span className="text-sm font-medium">{item.label}</span>
-                        </SidebarMenuButton>
-                        <SidebarMenuSub>
-                          {item.children.map((child) => {
-                            const childActive =
-                              location.pathname === child.href ||
-                              location.pathname.startsWith(`${child.href}/`);
-                            return (
-                              <SidebarMenuSubItem key={child.href}>
-                                <SidebarMenuSubButton asChild isActive={childActive} className="text-white hover:text-slate-900">
-                                  <Link to={child.href}>{child.label}</Link>
-                                </SidebarMenuSubButton>
-                              </SidebarMenuSubItem>
-                            );
-                          })}
-                        </SidebarMenuSub>
-                      </SidebarMenuItem>
-                    );
-                  }
-
+                  const active = location.pathname === item.href || location.pathname.startsWith(`${item.href}/`);
                   return (
                     <SidebarMenuItem key={item.href}>
-                      <SidebarMenuButton asChild>
+                      <SidebarMenuButton asChild className="h-14 rounded-lg p-1">
                         <Link
                           to={item.href!}
-                          className={cn(
-                            "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 cursor-pointer group",
-                            "hover:bg-slate-800 text-slate-300 hover:text-white",
-                            active && "bg-primary/20 text-white font-medium shadow-sm border border-primary/30",
-                          )}
+                          title={item.label}
                           aria-current={active ? "page" : undefined}
+                          className={cn(
+                            "flex flex-col items-center justify-center gap-1 rounded-lg text-[10px] leading-tight text-slate-600 transition-colors",
+                            "hover:bg-slate-100 hover:text-slate-900",
+                            active && "bg-slate-100 font-semibold text-slate-900",
+                          )}
                         >
-                          <span className={cn(
-                            "transition-colors duration-200",
-                            active ? "text-primary" : "text-slate-400 group-hover:text-white"
-                          )}>
-                            {item.icon}
-                          </span>
-                          <span className="text-sm font-medium">{item.label}</span>
-                          {active && <div className="ml-auto h-1.5 w-1.5 rounded-full bg-primary" />}
+                          <span className={active ? "text-slate-900" : "text-slate-500"}>{item.icon}</span>
+                          <span className="max-w-full truncate text-center">{item.label}</span>
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -186,27 +137,17 @@ export default function AppShell({ children }: { children: ReactNode }) {
             </SidebarGroup>
           </SidebarContent>
           {user && (
-            <SidebarFooter className="border-t border-slate-800 bg-slate-900 px-3 py-3">
-              <div className="rounded-lg bg-slate-800/50 border border-slate-700 p-3 text-xs space-y-2">
-                <div className="font-semibold text-white">{user.name}</div>
-                {user.company && (
-                  <div className="text-xs text-slate-400">{user.company}</div>
-                )}
-                <div className="text-xs text-slate-400 truncate">{user.email}</div>
-                <div className="inline-block">
-                  <span className="rounded-full bg-primary/30 text-primary px-2 py-1 text-xs font-medium">
-                    {user.role === "admin" ? "Admin" : "Subscriber"}
-                  </span>
-                </div>
-                <Button
-                  size="sm"
-                  onClick={handleSignOut}
-                  className="w-full mt-2 gap-2 bg-slate-800 hover:bg-slate-700 text-white hover:text-white border border-slate-700"
-                >
-                  <LogOut className="w-4 h-4" />
-                  Sign out
-                </Button>
-              </div>
+            <SidebarFooter className="border-t border-slate-100 bg-white px-2 py-3">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleSignOut}
+                title="Sign out"
+                className="mx-auto h-9 w-9 rounded-lg bg-fuchsia-100 text-fuchsia-700 hover:bg-fuchsia-200"
+              >
+                <span className="text-sm font-semibold">{(user.name || user.email).charAt(0).toUpperCase()}</span>
+                <span className="sr-only">Sign out</span>
+              </Button>
             </SidebarFooter>
           )}
           <SidebarRail />
