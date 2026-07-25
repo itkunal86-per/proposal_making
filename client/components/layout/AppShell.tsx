@@ -95,7 +95,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
   };
 
   return (
-    <SidebarProvider style={{ "--sidebar-width": "72px" } as React.CSSProperties}>
+    <SidebarProvider style={{ "--sidebar-width": "104px" } as React.CSSProperties}>
       <div className="flex w-full min-h-screen">
         <Sidebar collapsible="none" className="border-r border-slate-200 bg-white">
           <SidebarHeader className="border-b border-slate-100 bg-white px-0 py-3">
@@ -115,19 +115,19 @@ export default function AppShell({ children }: { children: ReactNode }) {
                   const active = location.pathname === item.href || location.pathname.startsWith(`${item.href}/`);
                   return (
                     <SidebarMenuItem key={item.href}>
-                      <SidebarMenuButton asChild className="h-14 rounded-lg p-1">
+                      <SidebarMenuButton asChild className="h-14 w-full overflow-visible rounded-lg p-1">
                         <Link
                           to={item.href!}
                           title={item.label}
                           aria-current={active ? "page" : undefined}
                           className={cn(
-                            "flex flex-col items-center justify-center gap-1 rounded-lg text-[10px] leading-tight text-slate-600 transition-colors",
+                            "flex flex-col items-center justify-center gap-1 rounded-lg whitespace-normal text-[10px] leading-tight text-slate-600 transition-colors",
                             "hover:bg-slate-100 hover:text-slate-900",
                             active && "bg-slate-100 font-semibold text-slate-900",
                           )}
                         >
                           <span className={active ? "text-slate-900" : "text-slate-500"}>{item.icon}</span>
-                          <span className="max-w-full truncate text-center">{item.label}</span>
+                          <span className="max-w-full text-center">{item.label}</span>
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
