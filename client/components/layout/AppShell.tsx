@@ -53,7 +53,7 @@ const navByRole: Record<UserRole, NavItem[]> = {
       label: "Templates",
       icon: <FileText className="w-5 h-5" />,
       children: [
-        { href: "/admin/templates/system", label: "Templates" },
+        { href: "/admin/templates/system", label: "System Templates" },
         { href: "/admin/templates/clients", label: "Clients Templates" },
       ],
     },
