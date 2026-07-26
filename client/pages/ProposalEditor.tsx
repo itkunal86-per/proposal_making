@@ -343,9 +343,17 @@ export default function ProposalEditor() {
           setSaving(false);
         }
       } else {
-        // For regular proposals, use the existing update logic
-        void updateProposal(next, { keepVersion, note });
-        setSaving(false);
+        void updateProposal(next, { keepVersion, note })
+          .then(() => setSaving(false))
+          .catch((error) => {
+            console.error("Failed to save proposal changes:", error);
+            toast({
+              title: "Failed to save changes",
+              description: error instanceof Error ? error.message : "Please try again.",
+              variant: "destructive",
+            });
+            setSaving(false);
+          });
       }
     }, 400);
   }
