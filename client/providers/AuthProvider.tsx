@@ -48,7 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           id: String(ssoUser.id),
           email: ssoUser.email,
           name: ssoUser.name,
-          role: ssoUser.org?.role || 'user',
+          role: ssoUser.user_type || ssoUser.role || ssoUser.org?.role || 'user',
           company: ssoUser.org?.name || undefined,
         });
         return true;

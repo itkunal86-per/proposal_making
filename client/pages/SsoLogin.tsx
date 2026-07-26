@@ -26,7 +26,8 @@ export default function SsoLogin() {
       .then(({ data }) => {
         localStorage.setItem(SSO_STORAGE_KEY, JSON.stringify(data));
         window.dispatchEvent(new Event("sso-authenticated"));
-        navigate("/my/proposals", { replace: true });
+        const role = data.user_type || data.role || data.org?.role;
+        navigate(role === "admin" ? "/dashboard" : "/my/proposals", { replace: true });
       })
       .catch(() => {
         setError("Unable to complete SSO sign-in.");

@@ -7,6 +7,8 @@ export interface AuthUser {
   id: number
   name: string
   email: string
+  user_type?: string | null
+  role?: string | null
   avatarUrl: string | null
   org: { id: number | null; name: string | null; role: string | null; plan: string | null }
 }
