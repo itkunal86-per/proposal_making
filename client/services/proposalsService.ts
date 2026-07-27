@@ -863,9 +863,10 @@ export async function getProposalDetails(id: string): Promise<Proposal | undefin
     }
 
     const json = await res.json();
+    const proposalData = json?.data ?? json;
 
-    // Convert API response directly (handles all structure variations)
-    let normalized = convertApiProposalToProposal(json);
+    // Convert API response directly (handles wrapped and unwrapped responses)
+    let normalized = convertApiProposalToProposal(proposalData);
     const list = readStored() ?? [];
     const idx = list.findIndex((x) => String(x.id) === String(normalized.id));
     const localProposal = idx !== -1 ? list[idx] : null;
