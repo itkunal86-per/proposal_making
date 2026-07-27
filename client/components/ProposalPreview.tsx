@@ -1153,7 +1153,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                 })}
                 {(section as any).images && (section as any).images.map((image: any, iIndex: number) => (
                   <ImageEditor
-                    key={`image-${iIndex}`}
+                    key={`image-${section.id}-${image.id || iIndex}`}
                     id={`image-${section.id}-${iIndex}`}
                     url={image.url}
                     width={image.width}

@@ -78,8 +78,8 @@ export const ImageElement: React.FC<ImageElementProps> = ({
             display: "block",
             pointerEvents: "none",
           }}
-          onError={(e) => {
-            (e.target as HTMLImageElement).style.display = "none";
+          onError={() => {
+            // Keep the image element visible so a failed remote load does not remove the box.
           }}
         />
       ) : (
