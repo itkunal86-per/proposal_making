@@ -867,6 +867,27 @@ export async function getProposalDetails(id: string): Promise<Proposal | undefin
 
     // Convert API response directly (handles wrapped and unwrapped responses)
     let normalized = convertApiProposalToProposal(proposalData);
+    const hasImages = normalized.sections.some((section) => (section.images?.length ?? 0) > 0);
+
+    if (!hasImages) {
+      const fallbackResponse = await fetch(`${PROPOSALS_ENDPOINT}/${id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        cache: "no-store",
+      });
+
+      if (fallbackResponse.ok) {
+        const fallbackJson = await fallbackResponse.json();
+        const fallbackProposal = convertApiProposalToProposal(fallbackJson?.data ?? fallbackJson);
+        if (fallbackProposal.sections.some((section) => (section.images?.length ?? 0) > 0)) {
+          normalized = fallbackProposal;
+        }
+      }
+    }
+
     const list = readStored() ?? [];
     const idx = list.findIndex((x) => String(x.id) === String(normalized.id));
     const localProposal = idx !== -1 ? list[idx] : null;
