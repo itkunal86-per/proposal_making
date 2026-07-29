@@ -121,7 +121,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
                           title={item.label}
                           aria-current={active ? "page" : undefined}
                           className={cn(
-                            "flex flex-col items-center justify-center gap-1 rounded-lg whitespace-normal break-words text-[clamp(8px,0.65vw,12px)] leading-[1.1] text-slate-600 transition-colors",
+                            "flex flex-col items-center justify-center gap-1 rounded-lg whitespace-normal break-words text-[12px] leading-[1.1] text-slate-600 transition-colors",
                             "hover:bg-slate-100 hover:text-slate-900",
                             active && "bg-slate-100 font-semibold text-slate-900",
                           )}
