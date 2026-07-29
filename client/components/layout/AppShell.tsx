@@ -121,12 +121,12 @@ export default function AppShell({ children }: { children: ReactNode }) {
                           title={item.label}
                           aria-current={active ? "page" : undefined}
                           className={cn(
-                            "flex flex-col items-center justify-center gap-1 rounded-lg whitespace-normal break-words text-[12px] leading-[1.1] text-slate-600 transition-colors",
-                            "hover:bg-slate-100 hover:text-slate-900",
-                            active && "bg-slate-100 font-semibold text-slate-900",
+                            "flex flex-col items-center justify-center gap-1 rounded-lg whitespace-normal break-words text-[12px] leading-[1.1] text-[#992a90] transition-colors",
+                            "hover:bg-[#992a90]/10 hover:text-[#992a90]",
+                            active && "bg-[#992a90]/10 font-semibold text-[#992a90]",
                           )}
                         >
-                          <span className={active ? "text-slate-900" : "text-slate-500"}>{item.icon}</span>
+                          <span className="text-[#992a90]">{item.icon}</span>
                           <span className="max-w-full text-center">{item.label}</span>
                         </Link>
                       </SidebarMenuButton>
