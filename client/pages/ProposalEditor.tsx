@@ -241,7 +241,7 @@ export default function ProposalEditor() {
 
   useEffect(() => {
     // Skip variables fetch for system template edits
-    if (isSystemTemplateEdit) {
+    if (isSystemTemplateEdit || activePanel !== "variables") {
       setVariables([]);
       return;
     }
@@ -274,7 +274,7 @@ export default function ProposalEditor() {
         setIsLoadingVariables(false);
       }
     })();
-  }, [id, isSystemTemplateEdit]);
+  }, [id, isSystemTemplateEdit, activePanel]);
 
   // Reset activePanel to valid panel when switching to template edit mode
   useEffect(() => {

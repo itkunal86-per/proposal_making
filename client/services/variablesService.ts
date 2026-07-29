@@ -76,9 +76,24 @@ export async function fetchVariables(proposalId: string): Promise<{
       };
     }
 
-    const successData = responseData as FetchVariablesResponse;
+    const rawData = responseData as FetchVariablesResponse & {
+      data?: Variable[] | { variables?: Variable[] };
+    };
+    const rawVariables = Array.isArray(responseData)
+      ? responseData
+      : Array.isArray(rawData.variables)
+        ? rawData.variables
+        : Array.isArray(rawData.data)
+          ? rawData.data
+          : rawData.data?.variables || [];
+    const variables = rawVariables.map((variable: any) => ({
+      ...variable,
+      variable_name: variable.variable_name ?? variable.name ?? "",
+      variable_value: variable.variable_value ?? variable.value ?? "",
+    }));
+
     return {
-      data: successData.variables,
+      data: variables,
       error: null,
     };
   } catch (err) {
