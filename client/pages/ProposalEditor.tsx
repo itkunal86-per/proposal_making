@@ -269,8 +269,8 @@ export default function ProposalEditor() {
   }, [id, isSystemTemplateEdit]);
 
   useEffect(() => {
-    if (activePanel === "variables") void loadVariables();
-  }, [activePanel, loadVariables]);
+    void loadVariables();
+  }, [loadVariables]);
 
   // Reset activePanel to valid panel when switching to template edit mode
   useEffect(() => {
