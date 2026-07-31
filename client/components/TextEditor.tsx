@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { replaceVariables } from "@/lib/variableUtils";
 
 interface TextEditorProps {
   id: string;
@@ -46,6 +47,7 @@ interface TextEditorProps {
   sectionPaddingLeft?: number;
   sectionPaddingRight?: number;
   lineHeight?: string;
+  variables?: Array<{ id: string | number; name: string; value: string }>;
 }
 
 type ResizeHandle =
@@ -81,6 +83,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({
   sectionPaddingLeft = 12,
   sectionPaddingRight = 12,
   lineHeight = "1.5",
+  variables = [],
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState<ResizeHandle>(null);
@@ -156,8 +159,9 @@ export const TextEditor: React.FC<TextEditorProps> = ({
       const newValue = content || "";
 
       if (!isInitializedRef.current || !isEditorFocused) {
-        if (currentInnerHTML !== newValue) {
-          editorRef.current.innerHTML = newValue;
+        const displayValue = isEditing ? newValue : replaceVariables(newValue, variables);
+        if (currentInnerHTML !== displayValue) {
+          editorRef.current.innerHTML = displayValue;
         }
       }
 
@@ -165,7 +169,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({
         isInitializedRef.current = true;
       }
     }
-  }, [content]);
+  }, [content, isEditing, variables]);
 
   React.useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {

@@ -674,6 +674,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                               <TextEditor
                                 id={`text-${section.id}-${tIndex}`}
                                 content={text.content}
+                                variables={variables}
                                 top={text.top}
                                 left={text.left}
                                 width={text.width}

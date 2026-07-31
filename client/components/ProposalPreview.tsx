@@ -1120,6 +1120,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                       key={`text-${tIndex}`}
                       id={`text-${section.id}-${tIndex}`}
                       content={text.content}
+                      variables={variables}
                       top={text.top}
                       left={text.left}
                       width={text.width}
