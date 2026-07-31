@@ -239,42 +239,38 @@ export default function ProposalEditor() {
     })();
   }, [id, nav, isSystemTemplateEdit, searchParams.get("templateId")]);
 
-  useEffect(() => {
-    // Skip variables fetch for system template edits
-    if (isSystemTemplateEdit || activePanel !== "variables") {
+  const loadVariables = useCallback(async () => {
+    if (isSystemTemplateEdit) {
       setVariables([]);
       return;
     }
 
-    (async () => {
-      setIsLoadingVariables(true);
-      try {
-        const { data, error } = await fetchVariables(id);
-        if (error) {
-          console.error("Failed to fetch variables:", error);
-          setVariables([]);
-          return;
-        }
-        if (data) {
-          const mappedVariables = data.map((v) => ({
-            id: v.id,
-            name: v.variable_name,
-            value: v.variable_value,
-          }));
-          console.log("✅ Variables loaded from API:", mappedVariables.map(v => `${v.name}=${v.value}`));
-          setVariables(mappedVariables);
-          console.log("✅ setVariables called with", mappedVariables.length, "variables");
-        } else {
-          console.log("⚠️ fetchVariables returned no data");
-        }
-      } catch (error) {
+    setIsLoadingVariables(true);
+    try {
+      const { data, error } = await fetchVariables(id);
+      if (error) {
         console.error("Failed to fetch variables:", error);
         setVariables([]);
-      } finally {
-        setIsLoadingVariables(false);
+        return;
       }
-    })();
-  }, [id, isSystemTemplateEdit, activePanel]);
+
+      const mappedVariables = (data || []).map((v) => ({
+        id: v.id,
+        name: v.variable_name,
+        value: v.variable_value,
+      }));
+      setVariables(mappedVariables);
+    } catch (error) {
+      console.error("Failed to fetch variables:", error);
+      setVariables([]);
+    } finally {
+      setIsLoadingVariables(false);
+    }
+  }, [id, isSystemTemplateEdit]);
+
+  useEffect(() => {
+    if (activePanel === "variables") void loadVariables();
+  }, [activePanel, loadVariables]);
 
   // Reset activePanel to valid panel when switching to template edit mode
   useEffect(() => {
