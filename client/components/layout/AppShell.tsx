@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
+  Home,
   Users,
   Box,
   FileText,
@@ -41,11 +42,22 @@ interface NavItem {
   href?: string;
   label: string;
   icon?: React.ReactNode;
+  external?: boolean;
   children?: NavSubItem[];
 }
 
+const MAIN_APP_URL = import.meta.env.VITE_MAIN_APP_URL ?? "https://pitchsuite.io/";
+
+const homeNavItem: NavItem = {
+  href: MAIN_APP_URL,
+  label: "Home",
+  icon: <Home className="w-5 h-5" />,
+  external: true,
+};
+
 const navByRole: Record<UserRole, NavItem[]> = {
   admin: [
+    homeNavItem,
     { href: "/dashboard", label: "Dashboard", icon: <LayoutDashboard className="w-5 h-5" /> },
     { href: "/admin/users", label: "Users", icon: <Users className="w-5 h-5" /> },
     { href: "/admin/packages", label: "Packages", icon: <Box className="w-5 h-5" /> },
@@ -61,6 +73,7 @@ const navByRole: Record<UserRole, NavItem[]> = {
     { href: "/admin/settings", label: "Settings", icon: <Settings className="w-5 h-5" /> },
   ],
   subscriber: [
+    homeNavItem,
     { href: "/my/proposals", label: "Proposals", icon: <FileText className="w-5 h-5" /> },
     { href: "/my/templates", label: "Templates", icon: <FileText className="w-5 h-5" /> },
     { href: "/my/clients", label: "Clients", icon: <Users className="w-5 h-5" /> },
@@ -69,6 +82,7 @@ const navByRole: Record<UserRole, NavItem[]> = {
     { href: "/my/settings", label: "Settings", icon: <Settings className="w-5 h-5" /> },
   ],
   user: [
+    homeNavItem,
     { href: "/my/proposals", label: "Proposals", icon: <FileText className="w-5 h-5" /> },
     { href: "/my/templates", label: "Templates", icon: <FileText className="w-5 h-5" /> },
     { href: "/my/clients", label: "Clients", icon: <Users className="w-5 h-5" /> },
@@ -116,19 +130,30 @@ export default function AppShell({ children }: { children: ReactNode }) {
                   return (
                     <SidebarMenuItem key={item.href}>
                       <SidebarMenuButton asChild className="h-14 w-full overflow-visible rounded-lg p-1">
-                        <Link
-                          to={item.href!}
-                          title={item.label}
-                          aria-current={active ? "page" : undefined}
-                          className={cn(
-                            "flex flex-col items-center justify-center gap-1 rounded-lg whitespace-normal break-words text-xs leading-[1.1] text-[#373530] transition-colors",
-                            "hover:bg-[#373530]/10 hover:text-[#373530]",
-                            active && "bg-[#373530]/10 font-semibold text-[#373530]",
-                          )}
-                        >
-                          <span className="text-[#373530]">{item.icon}</span>
-                          <span className="max-w-full text-center">{item.label}</span>
-                        </Link>
+                        {item.external ? (
+                          <a
+                            href={item.href}
+                            title={item.label}
+                            className="flex flex-col items-center justify-center gap-1 rounded-lg whitespace-normal break-words text-xs leading-[1.1] text-[#373530] transition-colors hover:bg-[#373530]/10 hover:text-[#373530]"
+                          >
+                            <span className="text-[#373530]">{item.icon}</span>
+                            <span className="max-w-full text-center">{item.label}</span>
+                          </a>
+                        ) : (
+                          <Link
+                            to={item.href!}
+                            title={item.label}
+                            aria-current={active ? "page" : undefined}
+                            className={cn(
+                              "flex flex-col items-center justify-center gap-1 rounded-lg whitespace-normal break-words text-xs leading-[1.1] text-[#373530] transition-colors",
+                              "hover:bg-[#373530]/10 hover:text-[#373530]",
+                              active && "bg-[#373530]/10 font-semibold text-[#373530]",
+                            )}
+                          >
+                            <span className="text-[#373530]">{item.icon}</span>
+                            <span className="max-w-full text-center">{item.label}</span>
+                          </Link>
+                        )}
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   );
