@@ -4,7 +4,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -62,6 +61,8 @@ export default function MyProposals() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
   const [clients, setClients] = useState<ClientRecord[]>([]);
   const [isLoadingClients, setIsLoadingClients] = useState(false);
+  const [clientSearch, setClientSearch] = useState("");
+  const [isClientPickerOpen, setIsClientPickerOpen] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isGenerateDialogOpen, setIsGenerateDialogOpen] = useState(false);
@@ -155,6 +156,11 @@ export default function MyProposals() {
 
   const totalPages = Math.max(1, Math.ceil(mine.length / pageSize));
   const pageRows = mine.slice((page - 1) * pageSize, page * pageSize);
+  const filteredClients = clients.filter((client) =>
+    [client.name, client.email, client.company]
+      .filter(Boolean)
+      .some((value) => value!.toLowerCase().includes(clientSearch.toLowerCase().trim())),
+  );
 
   async function refresh() {
     setRows(await listProposals());
@@ -704,22 +710,58 @@ export default function MyProposals() {
               <Label className="text-sm font-medium">
                 Client <span className="text-red-500">*</span>
               </Label>
-              <Select
-                value={formData.client_id}
-                onValueChange={(value) => handleFormChange("client_id", value)}
-                disabled={isCreating || isLoadingClients}
-              >
-                <SelectTrigger className={fieldErrors.client_id ? "border-red-500" : ""}>
-                  <SelectValue placeholder="Select a client" />
-                </SelectTrigger>
-                <SelectContent>
-                  {clients.map((client) => (
-                    <SelectItem key={client.id} value={String(client.id)}>
-                      {client.name} ({client.company || "No company"})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="relative">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className={`w-full justify-between font-normal ${fieldErrors.client_id ? "border-red-500" : ""}`}
+                  onClick={() => setIsClientPickerOpen((open) => !open)}
+                  disabled={isCreating || isLoadingClients}
+                >
+                  <span className={formData.client_id ? "text-foreground" : "text-muted-foreground"}>
+                    {formData.client_id
+                      ? clients.find((client) => String(client.id) === formData.client_id)?.email
+                      : isLoadingClients
+                        ? "Loading clients..."
+                        : "Select a client"}
+                  </span>
+                  <span className="text-muted-foreground">⌄</span>
+                </Button>
+                {isClientPickerOpen && !isCreating && !isLoadingClients && (
+                  <div className="absolute z-50 mt-1 w-full rounded-md border bg-popover p-2 shadow-md">
+                    <Input
+                      autoFocus
+                      placeholder="Search by email..."
+                      value={clientSearch}
+                      onChange={(event) => setClientSearch(event.target.value)}
+                      className="mb-2"
+                    />
+                    <div className="max-h-48 overflow-y-auto">
+                      {filteredClients.length ? (
+                        filteredClients.map((client) => (
+                          <button
+                            type="button"
+                            key={client.id}
+                            className="flex w-full flex-col items-start rounded-sm px-3 py-2 text-left text-sm hover:bg-accent"
+                            onClick={() => {
+                              handleFormChange("client_id", String(client.id));
+                              setClientSearch("");
+                              setIsClientPickerOpen(false);
+                            }}
+                          >
+                            <span className="font-medium">{client.email}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {client.name}{client.company ? ` · ${client.company}` : ""}
+                            </span>
+                          </button>
+                        ))
+                      ) : (
+                        <p className="px-3 py-2 text-sm text-muted-foreground">No clients found.</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
               {fieldErrors.client_id && (
                 <p className="text-sm text-red-500 mt-1">{fieldErrors.client_id[0]}</p>
               )}

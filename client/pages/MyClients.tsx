@@ -31,7 +31,7 @@ export default function MyClients() {
     const q = search.trim().toLowerCase();
     const list = rows
       .filter((r) => (status === "all" ? true : r.status === status))
-      .filter((r) => (!q ? true : [r.name, r.email, r.company ?? ""].some((v) => v.toLowerCase().includes(q))))
+      .filter((r) => (!q ? true : [r.firstName, r.lastName, r.email, r.company ?? ""].some((v) => v.toLowerCase().includes(q))))
       .sort((a, b) => b.updatedAt - a.updatedAt);
     return list;
   }, [rows, search, status]);
@@ -116,16 +116,17 @@ export default function MyClients() {
     }
   }
 
-  async function onAdd(payload: { name: string; email: string; company?: string; status: ClientStatus; onError?: (errors: Record<string, string | string[]>) => void }) {
-    if (!payload.name.trim() || !payload.email.trim()) {
+  async function onAdd(payload: { firstName: string; lastName: string; email: string; company?: string; status: ClientStatus; onError?: (errors: Record<string, string | string[]>) => void }) {
+    if (!payload.firstName.trim() || !payload.lastName.trim() || !payload.email.trim()) {
       if (payload.onError) {
-        payload.onError({ form: "Name and email are required" });
+        payload.onError({ form: "First name, last name, and email are required" });
       }
-      toast({ title: "Name and email are required", variant: "destructive" });
+      toast({ title: "First name, last name, and email are required", variant: "destructive" });
       return;
     }
     const result = await createClient({
-      name: payload.name,
+      firstName: payload.firstName,
+      lastName: payload.lastName,
       email: payload.email,
       company: payload.company,
       status: payload.status,
@@ -188,7 +189,7 @@ export default function MyClients() {
               <p className="text-base text-muted-foreground mt-1">Manage your client directory and keep it up to date</p>
             </div>
             <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-              <Button
+              {/*<Button
                 onClick={() => setOpenAdd(true)}
                 className="w-full sm:w-auto gap-2 bg-gradient-to-r from-primary to-accent hover:shadow-lg transition-shadow"
               >
@@ -210,7 +211,7 @@ export default function MyClients() {
                 className="w-full sm:w-auto gap-2"
               >
                 {isSyncing ? "Syncing..." : "Sync From Hubspot"}
-              </Button>
+              </Button>*/}
             </div>
           </div>
         </div>
@@ -244,7 +245,8 @@ export default function MyClients() {
             <Table>
               <TableHeader>
                 <TableRow className="border-b border-border/50 hover:bg-transparent bg-muted/30">
-                  <TableHead className="font-semibold text-foreground">Name</TableHead>
+                  <TableHead className="font-semibold text-foreground">First Name</TableHead>
+                  <TableHead className="font-semibold text-foreground">Last Name</TableHead>
                   <TableHead className="font-semibold text-foreground">Email</TableHead>
                   <TableHead className="font-semibold text-foreground">Company</TableHead>
                   <TableHead className="font-semibold text-foreground">Status</TableHead>
@@ -259,7 +261,10 @@ export default function MyClients() {
                     className="border-b border-border/50 hover:bg-muted/50 transition-colors"
                   >
                     <TableCell className="font-medium text-foreground">
-                      {client.name}
+                      {client.firstName}
+                    </TableCell>
+                    <TableCell className="font-medium text-foreground">
+                      {client.lastName}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
                       <a href={`mailto:${client.email}`} className="hover:text-primary transition-colors">
@@ -355,8 +360,9 @@ export default function MyClients() {
   );
 }
 
-function AddDialog({ open, onOpenChange, onSubmit }: { open: boolean; onOpenChange: (v: boolean) => void; onSubmit: (p: { name: string; email: string; company?: string; status: ClientStatus }, onError: (errors: Record<string, string | string[]>) => void) => void }) {
-  const [name, setName] = useState("");
+function AddDialog({ open, onOpenChange, onSubmit }: { open: boolean; onOpenChange: (v: boolean) => void; onSubmit: (p: { firstName: string; lastName: string; email: string; company?: string; status: ClientStatus }, onError: (errors: Record<string, string | string[]>) => void) => void }) {
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [company, setCompany] = useState("");
   const [status, setStatus] = useState<ClientStatus>("active");
@@ -365,7 +371,8 @@ function AddDialog({ open, onOpenChange, onSubmit }: { open: boolean; onOpenChan
   useEffect(() => {
     if (!open) {
       setErrors({});
-      setName("");
+      setFirstName("");
+      setLastName("");
       setEmail("");
       setCompany("");
       setStatus("active");
@@ -374,7 +381,7 @@ function AddDialog({ open, onOpenChange, onSubmit }: { open: boolean; onOpenChan
 
   function submit() {
     setErrors({});
-    onSubmit({ name, email, company, status }, (fieldErrors) => {
+    onSubmit({ firstName, lastName, email, company, status }, (fieldErrors) => {
       setErrors(fieldErrors);
     });
   }
@@ -391,19 +398,35 @@ function AddDialog({ open, onOpenChange, onSubmit }: { open: boolean; onOpenChan
               {Array.isArray(errors.form) ? errors.form[0] : errors.form}
             </div>
           )}
-          <div className="grid gap-2">
-            <Label htmlFor="name">Name</Label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              aria-invalid={!!errors.name}
-            />
-            {errors.name && (
-              <p className="text-xs text-destructive">
-                {Array.isArray(errors.name) ? errors.name[0] : errors.name}
-              </p>
-            )}
+          <div className="grid gap-2 sm:grid-cols-2 sm:gap-3">
+            <div className="grid gap-2">
+              <Label htmlFor="first-name">First name</Label>
+              <Input
+                id="first-name"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                aria-invalid={!!errors.first_name}
+              />
+              {errors.first_name && (
+                <p className="text-xs text-destructive">
+                  {Array.isArray(errors.first_name) ? errors.first_name[0] : errors.first_name}
+                </p>
+              )}
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="last-name">Last name</Label>
+              <Input
+                id="last-name"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                aria-invalid={!!errors.last_name}
+              />
+              {errors.last_name && (
+                <p className="text-xs text-destructive">
+                  {Array.isArray(errors.last_name) ? errors.last_name[0] : errors.last_name}
+                </p>
+              )}
+            </div>
           </div>
           <div className="grid gap-2">
             <Label htmlFor="email">Email</Label>
@@ -492,19 +515,35 @@ function EditDialog({ open, record, onOpenChange, onSubmit }: { open: boolean; r
               {Array.isArray(errors.form) ? errors.form[0] : errors.form}
             </div>
           )}
-          <div className="grid gap-2">
-            <Label htmlFor="name">Name</Label>
-            <Input
-              id="name"
-              value={draft.name}
-              onChange={(e) => setDraft({ ...draft, name: e.target.value })}
-              aria-invalid={!!errors.name}
-            />
-            {errors.name && (
-              <p className="text-xs text-destructive">
-                {Array.isArray(errors.name) ? errors.name[0] : errors.name}
-              </p>
-            )}
+          <div className="grid gap-2 sm:grid-cols-2 sm:gap-3">
+            <div className="grid gap-2">
+              <Label htmlFor="edit-first-name">First name</Label>
+              <Input
+                id="edit-first-name"
+                value={draft.firstName}
+                onChange={(e) => setDraft({ ...draft, firstName: e.target.value, name: `${e.target.value} ${draft.lastName}`.trim() })}
+                aria-invalid={!!errors.first_name}
+              />
+              {errors.first_name && (
+                <p className="text-xs text-destructive">
+                  {Array.isArray(errors.first_name) ? errors.first_name[0] : errors.first_name}
+                </p>
+              )}
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="edit-last-name">Last name</Label>
+              <Input
+                id="edit-last-name"
+                value={draft.lastName}
+                onChange={(e) => setDraft({ ...draft, lastName: e.target.value, name: `${draft.firstName} ${e.target.value}`.trim() })}
+                aria-invalid={!!errors.last_name}
+              />
+              {errors.last_name && (
+                <p className="text-xs text-destructive">
+                  {Array.isArray(errors.last_name) ? errors.last_name[0] : errors.last_name}
+                </p>
+              )}
+            </div>
           </div>
           <div className="grid gap-2">
             <Label htmlFor="email">Email</Label>

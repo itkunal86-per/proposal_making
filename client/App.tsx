@@ -41,8 +41,10 @@ import Contact from "./pages/Contact";
 import Features from "./pages/Features";
 import HowItWorks from "./pages/HowItWorks";
 import FAQ from "./pages/FAQ";
+import SsoLogin from "./pages/SsoLogin";
 import { AuthProvider } from "@/providers/AuthProvider";
 import { RequireAuth, RequireRole } from "@/components/auth/RouteGuards";
+import { AuthProvider as SSOAuthProvider } from "@/auth/AuthContext";
 
 const queryClient = new QueryClient();
 
@@ -52,6 +54,7 @@ const AppRoutes = () => (
       <Route path="/" element={<Index />} />
       <Route path="/get-started" element={<GetStarted />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/sso-login" element={<SsoLogin />} />
       <Route path="/reset" element={<Reset />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/register" element={<Register />} />
@@ -103,11 +106,13 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <AuthProvider>
-        <BrowserRouter>
-          <AppRoutes />
-        </BrowserRouter>
-      </AuthProvider>
+      <SSOAuthProvider>
+        <AuthProvider>
+          <BrowserRouter>
+            <AppRoutes />
+          </BrowserRouter>
+        </AuthProvider>
+      </SSOAuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

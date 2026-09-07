@@ -15,11 +15,12 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
-        <a href="/" className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-md bg-gradient-to-br from-primary to-cyan-500" />
-          <span className="text-lg font-semibold tracking-tight">
-            Pitchsuite
-          </span>
+        <a href="/" className="flex items-center">
+          <img
+            src="https://cdn.builder.io/api/v1/image/assets%2F89024f4abe0b4e7d9ae689ddeddf5b00%2F4ce7c09f338f45e4a29baa0b38372436?format=webp&width=800&height=1200"
+            alt="PitchSuite"
+            className="h-9 w-auto object-contain"
+          />
         </a>
         <nav className="hidden items-center gap-6 md:flex">
           <a

@@ -1120,6 +1120,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                       key={`text-${tIndex}`}
                       id={`text-${section.id}-${tIndex}`}
                       content={text.content}
+                      variables={variables}
                       top={text.top}
                       left={text.left}
                       width={text.width}
@@ -1153,7 +1154,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                 })}
                 {(section as any).images && (section as any).images.map((image: any, iIndex: number) => (
                   <ImageEditor
-                    key={`image-${iIndex}`}
+                    key={`image-${section.id}-${image.id || iIndex}`}
                     id={`image-${section.id}-${iIndex}`}
                     url={image.url}
                     width={image.width}

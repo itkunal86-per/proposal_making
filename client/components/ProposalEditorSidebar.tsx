@@ -36,13 +36,13 @@ export const ProposalEditorSidebar: React.FC<ProposalEditorSidebarProps> = ({
     : allPanelButtons;
 
   return (
-    <div className="fixed left-0 top-0 bottom-0 w-16 bg-slate-900 flex flex-col items-center py-4 gap-4 border-r border-slate-700 z-40">
+    <div className="fixed left-0 top-0 bottom-0 w-16 bg-white flex flex-col items-center py-4 gap-4 border-r border-slate-200 z-40">
       <Button
         variant="ghost"
         size="icon"
         onClick={onOpenSections}
         title="Manage sections"
-        className="text-slate-300 hover:text-white hover:bg-slate-800"
+        className="text-[#373530] hover:text-[#373530] hover:bg-[#373530]/10"
       >
         <List className="w-6 h-6" />
       </Button>
@@ -52,12 +52,12 @@ export const ProposalEditorSidebar: React.FC<ProposalEditorSidebarProps> = ({
         size="icon"
         onClick={onOpenAI}
         title="AI Assistant"
-        className="text-slate-300 hover:text-white hover:bg-slate-800"
+        className="text-[#373530] hover:text-[#373530] hover:bg-[#373530]/10"
       >
         <Sparkles className="w-6 h-6" />
       </Button>
 
-      <div className="border-t border-slate-700 w-full" />
+      <div className="border-t border-slate-200 w-full" />
 
       <div className="flex flex-col items-center gap-2">
         {panelButtons.map(({ id, icon: Icon, title }) => (
@@ -69,8 +69,8 @@ export const ProposalEditorSidebar: React.FC<ProposalEditorSidebarProps> = ({
             title={title}
             className={`transition-colors ${
               activePanel === id
-                ? "text-white bg-slate-700 hover:bg-slate-600"
-                : "text-slate-300 hover:text-white hover:bg-slate-800"
+                ? "text-[#373530] bg-[#373530]/10 hover:bg-[#373530]/15"
+                : "text-[#373530] hover:text-[#373530] hover:bg-[#373530]/10"
             }`}
           >
             <Icon className="w-6 h-6" />
@@ -85,7 +85,7 @@ export const ProposalEditorSidebar: React.FC<ProposalEditorSidebarProps> = ({
           variant="ghost"
           size="icon"
           title="Settings"
-          className="text-slate-300 hover:text-white hover:bg-slate-800"
+          className="text-[#373530] hover:text-[#373530] hover:bg-[#373530]/10"
         >
           <Settings className="w-6 h-6" />
         </Button>
@@ -96,7 +96,7 @@ export const ProposalEditorSidebar: React.FC<ProposalEditorSidebarProps> = ({
           variant="ghost"
           size="icon"
           title="Back to list"
-          className="text-slate-300 hover:text-white hover:bg-slate-800"
+          className="text-[#373530] hover:text-[#373530] hover:bg-[#373530]/10"
         >
           <ArrowLeft className="w-6 h-6" />
         </Button>

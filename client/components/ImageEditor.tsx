@@ -51,14 +51,15 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleMouseDown = (e: React.MouseEvent, handle: ResizeHandle = null) => {
+    e.preventDefault();
     e.stopPropagation();
     onSelect();
 
     if (handle) {
-      // Resize mode
       setIsResizing(handle);
       setDragStart({ x: e.clientX, y: e.clientY });
       setInitialSize({ width, height });
+      setInitialPos({ top, left });
     } else {
       // Drag mode
       setIsDragging(true);
@@ -91,14 +92,14 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
         }
         if (isResizing.includes("w")) {
           newWidth = Math.max(30, initialSize.width - deltaX);
-          newLeft = Math.max(0, initialPos.left + deltaX);
+          newLeft = Math.max(0, initialPos.left + initialSize.width - newWidth);
         }
         if (isResizing.includes("s")) {
           newHeight = Math.max(30, initialSize.height + deltaY);
         }
         if (isResizing.includes("n")) {
           newHeight = Math.max(30, initialSize.height - deltaY);
-          newTop = Math.max(0, initialPos.top + deltaY);
+          newTop = Math.max(0, initialPos.top + initialSize.height - newHeight);
         }
 
         onUpdate({

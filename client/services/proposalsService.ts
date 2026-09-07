@@ -863,9 +863,31 @@ export async function getProposalDetails(id: string): Promise<Proposal | undefin
     }
 
     const json = await res.json();
+    const proposalData = json?.data ?? json;
 
-    // Convert API response directly (handles all structure variations)
-    let normalized = convertApiProposalToProposal(json);
+    // Convert API response directly (handles wrapped and unwrapped responses)
+    let normalized = convertApiProposalToProposal(proposalData);
+    const hasImages = normalized.sections.some((section) => (section.images?.length ?? 0) > 0);
+
+    if (!hasImages) {
+      const fallbackResponse = await fetch(`${PROPOSALS_ENDPOINT}/${id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        cache: "no-store",
+      });
+
+      if (fallbackResponse.ok) {
+        const fallbackJson = await fallbackResponse.json();
+        const fallbackProposal = convertApiProposalToProposal(fallbackJson?.data ?? fallbackJson);
+        if (fallbackProposal.sections.some((section) => (section.images?.length ?? 0) > 0)) {
+          normalized = fallbackProposal;
+        }
+      }
+    }
+
     const list = readStored() ?? [];
     const idx = list.findIndex((x) => String(x.id) === String(normalized.id));
     const localProposal = idx !== -1 ? list[idx] : null;
@@ -901,6 +923,9 @@ export async function getProposalDetails(id: string): Promise<Proposal | undefin
                 : localSection.columnStyles,
               // Use local styles if API didn't return them
               titleStyles: apiSection.titleStyles || localSection.titleStyles,
+              images: Array.isArray(apiSection.images) && apiSection.images.length > 0
+                ? apiSection.images
+                : (localSection.images || []),
               // For contentStyles, always prefer local styles to preserve backgrounds
               // Only use API if local is completely missing
               // Ensure we have contentStyles (even if empty, since the UI relies on it)

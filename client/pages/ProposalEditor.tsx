@@ -239,42 +239,38 @@ export default function ProposalEditor() {
     })();
   }, [id, nav, isSystemTemplateEdit, searchParams.get("templateId")]);
 
-  useEffect(() => {
-    // Skip variables fetch for system template edits
+  const loadVariables = useCallback(async () => {
     if (isSystemTemplateEdit) {
       setVariables([]);
       return;
     }
 
-    (async () => {
-      setIsLoadingVariables(true);
-      try {
-        const { data, error } = await fetchVariables(id);
-        if (error) {
-          console.error("Failed to fetch variables:", error);
-          setVariables([]);
-          return;
-        }
-        if (data) {
-          const mappedVariables = data.map((v) => ({
-            id: v.id,
-            name: v.variable_name,
-            value: v.variable_value,
-          }));
-          console.log("✅ Variables loaded from API:", mappedVariables.map(v => `${v.name}=${v.value}`));
-          setVariables(mappedVariables);
-          console.log("✅ setVariables called with", mappedVariables.length, "variables");
-        } else {
-          console.log("⚠️ fetchVariables returned no data");
-        }
-      } catch (error) {
+    setIsLoadingVariables(true);
+    try {
+      const { data, error } = await fetchVariables(id);
+      if (error) {
         console.error("Failed to fetch variables:", error);
         setVariables([]);
-      } finally {
-        setIsLoadingVariables(false);
+        return;
       }
-    })();
+
+      const mappedVariables = (data || []).map((v) => ({
+        id: v.id,
+        name: v.variable_name,
+        value: v.variable_value,
+      }));
+      setVariables(mappedVariables);
+    } catch (error) {
+      console.error("Failed to fetch variables:", error);
+      setVariables([]);
+    } finally {
+      setIsLoadingVariables(false);
+    }
   }, [id, isSystemTemplateEdit]);
+
+  useEffect(() => {
+    void loadVariables();
+  }, [loadVariables]);
 
   // Reset activePanel to valid panel when switching to template edit mode
   useEffect(() => {
@@ -343,9 +339,17 @@ export default function ProposalEditor() {
           setSaving(false);
         }
       } else {
-        // For regular proposals, use the existing update logic
-        void updateProposal(next, { keepVersion, note });
-        setSaving(false);
+        void updateProposal(next, { keepVersion, note })
+          .then(() => setSaving(false))
+          .catch((error) => {
+            console.error("Failed to save proposal changes:", error);
+            toast({
+              title: "Failed to save changes",
+              description: error instanceof Error ? error.message : "Please try again.",
+              variant: "destructive",
+            });
+            setSaving(false);
+          });
       }
     }, 400);
   }

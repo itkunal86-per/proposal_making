@@ -7,6 +7,8 @@ export type ClientStatus = "active" | "inactive";
 export interface ClientRecord {
   id: string;
   name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   company?: string;
   status: ClientStatus;
@@ -15,7 +17,8 @@ export interface ClientRecord {
 }
 
 export type CreateClientInput = {
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   company?: string;
   status?: ClientStatus;
@@ -25,31 +28,18 @@ const STORAGE_KEY = "app_clients";
 const CLIENTS_ENDPOINT = apiConfig.endpoints.clients;
 
 interface ApiClientResponse {
-  id: string;
-  name: string;
+  id: string | number;
+  first_name: string | null;
+  last_name: string | null;
   email: string;
-  company: string;
-  status: string;
+  company_name: string | null;
   created_at: string;
   updated_at: string;
 }
 
-interface ApiCreateClientResponse {
-  userId: string;
-  name: string;
-  email: string;
-  company: string;
-  status: string;
-  created_at: string;
-  updated_at: string;
-}
+interface ApiCreateClientResponse extends ApiClientResponse {}
 
-interface ApiUpdateClientResponse {
-  name: string;
-  email: string;
-  company: string;
-  status: string;
-}
+interface ApiUpdateClientResponse extends ApiClientResponse {}
 
 export interface CreateClientResult {
   success: boolean;
@@ -91,9 +81,12 @@ function uuid() {
 }
 
 function normalizeClient(raw: z.infer<typeof clientSchema>): ClientRecord {
+  const [firstName = "", ...lastNameParts] = raw.name!.split(" ");
   return {
     id: raw.id!,
     name: raw.name!,
+    firstName,
+    lastName: lastNameParts.join(" "),
     email: raw.email!,
     company: raw.company ?? "",
     status: raw.status!,
@@ -105,14 +98,16 @@ function normalizeClient(raw: z.infer<typeof clientSchema>): ClientRecord {
 function convertApiClientToRecord(client: ApiClientResponse): ClientRecord {
   const createdAtMs = new Date(client.created_at).getTime() || Date.now();
   const updatedAtMs = new Date(client.updated_at).getTime() || Date.now();
-  const status = (client.status.toLowerCase() === "active" ? "active" : "inactive") as ClientStatus;
+  const name = [client.first_name, client.last_name].filter(Boolean).join(" ") || client.email;
 
   return {
-    id: client.id,
-    name: client.name,
+    id: String(client.id),
+    name,
+    firstName: client.first_name || "",
+    lastName: client.last_name || "",
     email: client.email,
-    company: client.company || "",
-    status,
+    company: client.company_name || "",
+    status: "active",
     createdAt: createdAtMs,
     updatedAt: updatedAtMs,
   };
@@ -195,9 +190,10 @@ export async function createClient(input: CreateClientInput): Promise<CreateClie
     };
   }
 
-  const name = input.name?.trim();
+  const firstName = input.firstName?.trim();
+  const lastName = input.lastName?.trim();
   const email = input.email?.trim().toLowerCase();
-  if (!name || !email) {
+  if (!firstName || !lastName || !email) {
     return {
       success: false,
       error: "Name and email are required",
@@ -215,10 +211,10 @@ export async function createClient(input: CreateClientInput): Promise<CreateClie
         "Authorization": `Bearer ${token}`,
       },
       body: JSON.stringify({
-        name,
+        first_name: firstName,
+        last_name: lastName,
         email,
-        company: input.company?.trim() || "",
-        status: statusLabel,
+        company_name: input.company?.trim() || "",
       }),
     });
 
@@ -240,19 +236,7 @@ export async function createClient(input: CreateClientInput): Promise<CreateClie
     }
 
     const data: ApiCreateClientResponse = await res.json();
-    const createdAtMs = new Date(data.created_at).getTime() || Date.now();
-    const updatedAtMs = new Date(data.updated_at).getTime() || Date.now();
-    const clientStatus = (data.status.toLowerCase() === "active" ? "active" : "inactive") as ClientStatus;
-
-    const rec: ClientRecord = {
-      id: data.userId,
-      name: data.name,
-      email: data.email,
-      company: data.company || "",
-      status: clientStatus,
-      createdAt: createdAtMs,
-      updatedAt: updatedAtMs,
-    };
+    const rec = convertApiClientToRecord(data);
 
     return {
       success: true,
@@ -275,18 +259,17 @@ export async function updateClient(rec: ClientRecord): Promise<UpdateClientResul
     };
   }
 
-  const name = rec.name?.trim();
+  const firstName = rec.firstName?.trim();
+  const lastName = rec.lastName?.trim();
   const email = rec.email?.trim().toLowerCase();
-  if (!name || !email) {
+  if (!firstName || !lastName || !email) {
     return {
       success: false,
-      error: "Name and email are required",
+      error: "First name, last name, and email are required",
     };
   }
 
   try {
-    const statusLabel = rec.status === "active" ? "Active" : "Inactive";
-
     const res = await fetch(`${CLIENTS_ENDPOINT}/${rec.id}`, {
       method: "PUT",
       headers: {
@@ -294,10 +277,10 @@ export async function updateClient(rec: ClientRecord): Promise<UpdateClientResul
         "Authorization": `Bearer ${token}`,
       },
       body: JSON.stringify({
-        name,
+        first_name: firstName,
+        last_name: lastName,
         email,
-        company: rec.company?.trim() || "",
-        status: statusLabel,
+        company_name: rec.company?.trim() || "",
       }),
     });
 
@@ -319,14 +302,9 @@ export async function updateClient(rec: ClientRecord): Promise<UpdateClientResul
     }
 
     const data: ApiUpdateClientResponse = await res.json();
-    const clientStatus = (data.status.toLowerCase() === "active" ? "active" : "inactive") as ClientStatus;
-
     const updatedRec: ClientRecord = {
-      ...rec,
-      name: data.name,
-      email: data.email,
-      company: data.company || "",
-      status: clientStatus,
+      ...convertApiClientToRecord(data),
+      status: rec.status,
       updatedAt: Date.now(),
     };
 
