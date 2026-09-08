@@ -752,7 +752,7 @@ function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmai
   };
 }
 
-async function fetchFromApi(): Promise<Proposal[]> {
+async function fetchFromApi(dealId?: string): Promise<Proposal[]> {
   const token = getStoredToken();
   if (!token) {
     throw new Error("No authentication token available");
@@ -762,7 +762,10 @@ async function fetchFromApi(): Promise<Proposal[]> {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
-    const res = await fetch(PROPOSALS_ENDPOINT, {
+    const endpoint = dealId === undefined
+      ? PROPOSALS_ENDPOINT
+      : `${PROPOSALS_ENDPOINT}?${new URLSearchParams({ dealId }).toString()}`;
+    const res = await fetch(endpoint, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -791,9 +794,9 @@ async function fetchFromApi(): Promise<Proposal[]> {
   }
 }
 
-async function fetchSeed(): Promise<Proposal[]> {
+async function fetchSeed(dealId?: string): Promise<Proposal[]> {
   try {
-    return await fetchFromApi();
+    return await fetchFromApi(dealId);
   } catch {
     const res = await fetch("/data/proposals.json", { cache: "no-store" });
     if (!res.ok) throw new Error("Unable to load proposals");
@@ -804,16 +807,16 @@ async function fetchSeed(): Promise<Proposal[]> {
   }
 }
 
-async function getAll(): Promise<Proposal[]> {
+async function getAll(dealId?: string): Promise<Proposal[]> {
   try {
-    return await fetchFromApi();
+    return await fetchFromApi(dealId);
   } catch {
-    return readStored() ?? (await fetchSeed());
+    return readStored() ?? (await fetchSeed(dealId));
   }
 }
 
-export async function listProposals(): Promise<Proposal[]> {
-  const list = await getAll();
+export async function listProposals(dealId?: string): Promise<Proposal[]> {
+  const list = await getAll(dealId);
   return list.sort((a, b) => b.updatedAt - a.updatedAt);
 }
 
