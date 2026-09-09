@@ -52,7 +52,8 @@ export default function MyProposals() {
   const { user } = useAuth();
   const nav = useNavigate();
   const [searchParams] = useSearchParams();
-  const dealId = searchParams.has("dealId") ? searchParams.get("dealId") ?? "" : undefined;
+  const dealIdParam = searchParams.has("dealId") ? searchParams.get("dealId") ?? "" : undefined;
+  const dealId = dealIdParam ? Number(dealIdParam) || 0 : 0;
   const [rows, setRows] = useState<Proposal[]>([]);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -90,8 +91,8 @@ export default function MyProposals() {
   });
 
   useEffect(() => {
-    (async () => setRows(await listProposals(dealId)))();
-  }, [dealId]);
+    (async () => setRows(await listProposals(dealIdParam)))();
+  }, [dealIdParam]);
 
   async function loadClients() {
     try {
@@ -165,7 +166,7 @@ export default function MyProposals() {
   );
 
   async function refresh() {
-    setRows(await listProposals(dealId));
+    setRows(await listProposals(dealIdParam));
   }
 
   function handleFormChange(field: keyof CreateProposalInput, value: string) {
@@ -184,7 +185,7 @@ export default function MyProposals() {
     setFieldErrors({});
     setIsCreating(true);
 
-    const result = await createProposalApi(formData);
+    const result = await createProposalApi({ ...formData, dealId });
 
     if (!result.success) {
       setCreateError(result.error || "Failed to create proposal");
@@ -249,6 +250,7 @@ export default function MyProposals() {
         session_id: chatSessionId,
         template_id: templateId,
         title: title,
+        dealId,
       });
 
       if (response.proposal_id) {
@@ -834,6 +836,7 @@ export default function MyProposals() {
           open={isGenerateDialogOpen}
           onOpenChange={setIsGenerateDialogOpen}
           baseProposal={baseProposalForGeneration}
+          dealId={dealId}
           onProposalGenerated={handleProposalGenerated}
         />
       )}

@@ -33,6 +33,7 @@ interface GenerateProposalDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   baseProposal: Proposal;
+  dealId: string | number;
   onProposalGenerated: (proposal: Proposal, sessionId?: number) => void;
 }
 
@@ -40,6 +41,7 @@ export const GenerateProposalDialog: React.FC<GenerateProposalDialogProps> = ({
   open,
   onOpenChange,
   baseProposal,
+  dealId,
   onProposalGenerated,
 }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -235,6 +237,7 @@ export const GenerateProposalDialog: React.FC<GenerateProposalDialogProps> = ({
       // Call the chat init API
       const response = await initializeProposalChat({
         message: inputMessage,
+        dealId,
         input_type: inputType,
         url: urlToSend,
         email: emailToSend,

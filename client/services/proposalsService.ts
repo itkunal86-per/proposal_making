@@ -226,6 +226,7 @@ export interface CreateProposalInput {
   sharing_public?: boolean;
   sharing_token?: string;
   sharing_allow_comments?: boolean;
+  dealId?: string | number;
 }
 
 export interface CreateProposalResult {
@@ -1031,6 +1032,7 @@ export async function createProposalApi(input: CreateProposalInput): Promise<Cre
       sharing_public: input.sharing_public ? 1 : 0,
       sharing_token: input.sharing_token ?? "",
       sharing_allow_comments: input.sharing_allow_comments ? 1 : 0,
+      dealId: input.dealId ?? 0,
     };
 
     const res = await fetch(PROPOSALS_ENDPOINT, {
