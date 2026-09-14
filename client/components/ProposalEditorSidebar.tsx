@@ -24,9 +24,10 @@ export const ProposalEditorSidebar: React.FC<ProposalEditorSidebarProps> = ({
   dealId,
   isTemplateEdit = false,
 }) => {
-  const backToListUrl = dealId === undefined || dealId === null || dealId === ""
-    ? "/my/proposals"
-    : `/my/proposals?dealId=${encodeURIComponent(String(dealId))}`;
+  const mainAppUrl = (import.meta.env.VITE_MAIN_APP_URL ?? "https://pitchsuite.io/").replace(/\/+$/, "");
+  const backToDealUrl = dealId === undefined || dealId === null || dealId === ""
+    ? mainAppUrl
+    : `${mainAppUrl}/deals/${encodeURIComponent(String(dealId))}`;
   const allPanelButtons = [
     // { id: "document", icon: FileText, title: "Document" },
     { id: "build", icon: Layers, title: "Build" },
@@ -96,7 +97,7 @@ export const ProposalEditorSidebar: React.FC<ProposalEditorSidebarProps> = ({
         </Button>
       </Link>
 
-      <Link to={backToListUrl}>
+      <a href={backToDealUrl}>
         <Button
           variant="ghost"
           size="icon"
@@ -105,7 +106,7 @@ export const ProposalEditorSidebar: React.FC<ProposalEditorSidebarProps> = ({
         >
           <ArrowLeft className="w-6 h-6" />
         </Button>
-      </Link>
+      </a>
     </div>
   );
 };
