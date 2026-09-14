@@ -340,7 +340,13 @@ export default function ProposalEditor() {
         }
       } else {
         void updateProposal(next, { keepVersion, note })
-          .then(() => setSaving(false))
+          .then((result) => {
+            setSaving(false);
+            if (result.redirect && result.deal_id != null) {
+              const mainAppUrl = (import.meta.env.VITE_MAIN_APP_URL ?? "https://pitchsuite.io/").replace(/\/+$/, "");
+              window.location.href = `${mainAppUrl}/deals/${encodeURIComponent(String(result.deal_id))}#proposals`;
+            }
+          })
           .catch((error) => {
             console.error("Failed to save proposal changes:", error);
             toast({

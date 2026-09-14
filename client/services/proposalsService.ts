@@ -1160,8 +1160,11 @@ export async function updateProposal(p: Proposal, options?: { keepVersion?: bool
       throw new Error(errorData.error || `Failed to update proposal: ${res.statusText}`);
     }
 
-    const data: ApiProposalResponse = await res.json();
-    console.log("API response data:", data);
+    const response = await res.json();
+    const data: ApiProposalResponse = response?.data ?? response;
+    const redirect = response?.redirect === true;
+    const dealId = response?.deal_id ?? data.deal_id;
+    console.log("API response data:", response);
 
     let updatedProposal = convertApiProposalToProposal(data);
     console.log("Converted proposal sections:", updatedProposal.sections.map(s => s.title));
@@ -1180,6 +1183,7 @@ export async function updateProposal(p: Proposal, options?: { keepVersion?: bool
       persist(list);
     }
     console.log("Update completed successfully");
+    return { proposal: updatedProposal, redirect, deal_id: dealId };
   } catch (err) {
     console.error("Failed to update proposal:", err);
     throw err;
