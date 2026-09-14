@@ -26,8 +26,8 @@ export const ProposalEditorSidebar: React.FC<ProposalEditorSidebarProps> = ({
 }) => {
   const mainAppUrl = (import.meta.env.VITE_MAIN_APP_URL ?? "https://pitchsuite.io/").replace(/\/+$/, "");
   const backToDealUrl = dealId === undefined || dealId === null || dealId === ""
-    ? mainAppUrl
-    : `${mainAppUrl}/deals/${encodeURIComponent(String(dealId))}`;
+    ? `${mainAppUrl}#proposals`
+    : `${mainAppUrl}/deals/${encodeURIComponent(String(dealId))}#proposals`;
   const allPanelButtons = [
     // { id: "document", icon: FileText, title: "Document" },
     { id: "build", icon: Layers, title: "Build" },
