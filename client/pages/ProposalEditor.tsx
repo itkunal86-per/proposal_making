@@ -554,6 +554,7 @@ export default function ProposalEditor() {
     <div className="flex h-screen bg-slate-50">
       <ProposalEditorSidebar
         proposalId={p.id}
+        dealId={p.deal_id}
         onOpenSections={() => setSectionsDialogOpen(true)}
         onOpenAI={() => setAIDialogOpen(true)}
         onSelectPanel={setActivePanel}

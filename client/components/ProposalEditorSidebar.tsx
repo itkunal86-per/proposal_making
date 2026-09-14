@@ -11,6 +11,7 @@ interface ProposalEditorSidebarProps {
   onSelectPanel: (panel: PanelType) => void;
   activePanel: PanelType;
   proposalId: string;
+  dealId?: string | number;
   isTemplateEdit?: boolean;
 }
 
@@ -20,8 +21,12 @@ export const ProposalEditorSidebar: React.FC<ProposalEditorSidebarProps> = ({
   onSelectPanel,
   activePanel,
   proposalId,
+  dealId,
   isTemplateEdit = false,
 }) => {
+  const backToListUrl = dealId === undefined || dealId === null || dealId === ""
+    ? "/my/proposals"
+    : `/my/proposals?dealId=${encodeURIComponent(String(dealId))}`;
   const allPanelButtons = [
     // { id: "document", icon: FileText, title: "Document" },
     { id: "build", icon: Layers, title: "Build" },
@@ -91,7 +96,7 @@ export const ProposalEditorSidebar: React.FC<ProposalEditorSidebarProps> = ({
         </Button>
       </Link>
 
-      <Link to="/my/proposals">
+      <Link to={backToListUrl}>
         <Button
           variant="ghost"
           size="icon"
