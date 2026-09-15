@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { ProposalPreviewModal } from "@/components/ProposalPreviewModal";
 import { getProposalDetails, type Proposal } from "@/services/proposalsService";
 import { fetchVariables } from "@/services/variablesService";
 
 export default function ProposalPreviewPage() {
   const { id = "" } = useParams();
-  const navigate = useNavigate();
+  const mainAppUrl = (import.meta.env.VITE_MAIN_APP_URL ?? "https://pitchsuite.io/").replace(/\/+$/, "");
   const [proposal, setProposal] = useState<Proposal | null>(null);
   const [variables, setVariables] = useState<Array<{ id: string | number; name: string; value: string }>>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -76,7 +76,9 @@ export default function ProposalPreviewPage() {
       proposal={proposal}
       variables={variables}
       fullPage
-      onClose={() => navigate(`/proposals/${id}/edit`)}
+      backHref={proposal.deal_id == null
+        ? `${mainAppUrl}#proposals`
+        : `${mainAppUrl}/deals/${encodeURIComponent(String(proposal.deal_id))}#proposals`}
     />
   );
 }

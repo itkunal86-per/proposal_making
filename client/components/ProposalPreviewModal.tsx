@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { X, Share2, Copy, FileDown, Mail } from "lucide-react";
+import { ArrowLeft, X, Share2, Copy, FileDown, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { Proposal } from "@/services/proposalsService";
@@ -22,7 +22,8 @@ import { EmailShareDialog } from "@/components/EmailShareDialog";
 interface ProposalPreviewModalProps {
   proposal: Proposal;
   variables?: Array<{ id: string | number; name: string; value: string }>;
-  onClose: () => void;
+  onClose?: () => void;
+  backHref?: string;
   fullPage?: boolean;
   isTemplate?: boolean;
   onOpenSignatureDetails?: (sectionId: string, fieldIndex: number) => void;
@@ -32,6 +33,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
   proposal,
   variables = [],
   onClose,
+  backHref,
   fullPage = false,
   isTemplate = false,
   onOpenSignatureDetails,
@@ -440,14 +442,23 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
-            <Button
-              onClick={onClose}
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0"
-            >
-              <X className="w-5 h-5" />
-            </Button>
+            {fullPage && backHref ? (
+              <a href={backHref}>
+                <Button variant="outline" size="sm" className="gap-2">
+                  <ArrowLeft className="w-4 h-4" />
+                  Back
+                </Button>
+              </a>
+            ) : (
+              <Button
+                onClick={() => onClose?.()}
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0"
+              >
+                <X className="w-5 h-5" />
+              </Button>
+            )}
           </div>
         </div>
 
