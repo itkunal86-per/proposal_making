@@ -23,6 +23,7 @@ interface ProposalPreviewModalProps {
   proposal: Proposal;
   variables?: Array<{ id: string | number; name: string; value: string }>;
   onClose: () => void;
+  fullPage?: boolean;
   isTemplate?: boolean;
   onOpenSignatureDetails?: (sectionId: string, fieldIndex: number) => void;
 }
@@ -31,6 +32,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
   proposal,
   variables = [],
   onClose,
+  fullPage = false,
   isTemplate = false,
   onOpenSignatureDetails,
 }) => {
@@ -44,12 +46,13 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
   const sectionRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
   React.useEffect(() => {
-    // Disable body scroll when modal is open
+    if (fullPage) return;
+
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = "unset";
     };
-  }, []);
+  }, [fullPage]);
 
   React.useEffect(() => {
     const resizeObserver = new ResizeObserver(() => {
@@ -338,8 +341,16 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
   };
 
   return (
-    <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0, 0, 0, 0.5)", zIndex: 9998 }}>
-      <div style={{ position: "fixed", inset: 0, display: "flex", flexDirection: "column", backgroundColor: "white", zIndex: 9999, overflow: "visible" }}>
+    <div
+      style={fullPage
+        ? { minHeight: "100vh", backgroundColor: "white" }
+        : { position: "fixed", inset: 0, backgroundColor: "rgba(0, 0, 0, 0.5)", zIndex: 9998 }}
+    >
+      <div
+        style={fullPage
+          ? { minHeight: "100vh", display: "flex", flexDirection: "column", backgroundColor: "white" }
+          : { position: "fixed", inset: 0, display: "flex", flexDirection: "column", backgroundColor: "white", zIndex: 9999, overflow: "visible" }}
+      >
         {/* Header */}
         <div className="border-b border-slate-200 px-6 py-4 flex items-center justify-between overflow-visible">
           <h1 className="text-2xl font-bold">{proposal.title}</h1>
