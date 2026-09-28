@@ -8,9 +8,10 @@ export default function Layout({ children }: { children: ReactNode }) {
   const appShellPrefixes = ["/dashboard", "/admin", "/my", "/integrations"];
   const usesAppShell = appShellPrefixes.some((prefix) => pathname.startsWith(prefix));
   const isPublicProposalView = pathname.startsWith("/proposal/") || pathname.startsWith("/preview/proposal/");
-  const hideHeader = usesAppShell || isPublicProposalView;
+  const isSsoLogin = pathname === "/sso-login";
+  const hideHeader = usesAppShell || isPublicProposalView || isSsoLogin;
   const hideFooter =
-    usesAppShell || pathname.startsWith("/proposals") || pathname.startsWith("/p") || isPublicProposalView;
+    usesAppShell || pathname.startsWith("/proposals") || pathname.startsWith("/p") || isPublicProposalView || isSsoLogin;
   return (
     <div className="flex min-h-screen flex-col">
       {!hideHeader && <Header />}

@@ -33,7 +33,6 @@ import {
 import { updateSystemTemplate, getSystemTemplateDetails, deleteSystemTemplate, type SystemTemplate } from "@/services/systemTemplatesService";
 import { type ClientRecord, listClients } from "@/services/clientsService";
 import { ProposalPreview } from "@/components/ProposalPreview";
-import { ProposalPreviewModal } from "@/components/ProposalPreviewModal";
 import { PPTPreviewModal } from "@/components/PPTPreviewModal";
 import { PropertiesPanel } from "@/components/PropertiesPanel";
 import { ProposalEditorSidebar, type PanelType } from "@/components/ProposalEditorSidebar";
@@ -78,7 +77,6 @@ export default function ProposalEditor() {
   const [libraryMedia, setLibraryMedia] = useState<Array<{ id: string; url: string; type: "image" | "video"; name: string }>>([]);
   const [variables, setVariables] = useState<Array<{ id: string | number; name: string; value: string }>>([]);
   const [isLoadingVariables, setIsLoadingVariables] = useState(false);
-  const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [signatureDetailsOpen, setSignatureDetailsOpen] = useState(false);
@@ -340,7 +338,13 @@ export default function ProposalEditor() {
         }
       } else {
         void updateProposal(next, { keepVersion, note })
-          .then(() => setSaving(false))
+          .then((result) => {
+            setSaving(false);
+            if (result.redirect && result.deal_id != null) {
+              const mainAppUrl = (import.meta.env.VITE_MAIN_APP_URL ?? "https://pitchsuite.io/").replace(/\/+$/, "");
+              window.location.href = `${mainAppUrl}/deals/${encodeURIComponent(String(result.deal_id))}#proposals`;
+            }
+          })
           .catch((error) => {
             console.error("Failed to save proposal changes:", error);
             toast({
@@ -554,6 +558,7 @@ export default function ProposalEditor() {
     <div className="flex h-screen bg-slate-50">
       <ProposalEditorSidebar
         proposalId={p.id}
+        dealId={p.deal_id}
         onOpenSections={() => setSectionsDialogOpen(true)}
         onOpenAI={() => setAIDialogOpen(true)}
         onSelectPanel={setActivePanel}
@@ -635,7 +640,7 @@ export default function ProposalEditor() {
               )}
               <Button
                 onClick={() => {
-                  setShowPreviewModal(true);
+                  nav(`/proposals/${id}/preview`);
                   setSelectedElementId(null);
                 }}
                 variant="outline"
@@ -1300,19 +1305,6 @@ export default function ProposalEditor() {
           commit(updated);
         }}
       />
-
-      {showPreviewModal && (
-        <ProposalPreviewModal
-          proposal={p}
-          variables={variables}
-          onClose={() => setShowPreviewModal(false)}
-          onOpenSignatureDetails={(sectionId, fieldIndex) => {
-            setSignatureDetailsData({ sectionId, fieldIndex });
-            setSignatureDetailsOpen(true);
-            setShowPreviewModal(false);
-          }}
-        />
-      )}
 
       {showPPTPreviewModal && pptPreviewData && (
         <PPTPreviewModal

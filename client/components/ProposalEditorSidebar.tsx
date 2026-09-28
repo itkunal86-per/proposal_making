@@ -11,6 +11,7 @@ interface ProposalEditorSidebarProps {
   onSelectPanel: (panel: PanelType) => void;
   activePanel: PanelType;
   proposalId: string;
+  dealId?: string | number;
   isTemplateEdit?: boolean;
 }
 
@@ -20,8 +21,13 @@ export const ProposalEditorSidebar: React.FC<ProposalEditorSidebarProps> = ({
   onSelectPanel,
   activePanel,
   proposalId,
+  dealId,
   isTemplateEdit = false,
 }) => {
+  const mainAppUrl = (import.meta.env.VITE_MAIN_APP_URL ?? "https://pitchsuite.io/").replace(/\/+$/, "");
+  const backToDealUrl = dealId === undefined || dealId === null || dealId === ""
+    ? `${mainAppUrl}#proposals`
+    : `${mainAppUrl}/deals/${encodeURIComponent(String(dealId))}#proposals`;
   const allPanelButtons = [
     // { id: "document", icon: FileText, title: "Document" },
     { id: "build", icon: Layers, title: "Build" },
@@ -91,7 +97,7 @@ export const ProposalEditorSidebar: React.FC<ProposalEditorSidebarProps> = ({
         </Button>
       </Link>
 
-      <Link to="/my/proposals">
+      <a href={backToDealUrl}>
         <Button
           variant="ghost"
           size="icon"
@@ -100,7 +106,7 @@ export const ProposalEditorSidebar: React.FC<ProposalEditorSidebarProps> = ({
         >
           <ArrowLeft className="w-6 h-6" />
         </Button>
-      </Link>
+      </a>
     </div>
   );
 };

@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
 import {
   type Proposal,
@@ -51,6 +51,9 @@ const pptStatusStyles: Record<string, string> = {
 export default function MyProposals() {
   const { user } = useAuth();
   const nav = useNavigate();
+  const [searchParams] = useSearchParams();
+  const dealIdParam = searchParams.has("dealId") ? searchParams.get("dealId") ?? "" : undefined;
+  const dealId = dealIdParam ? Number(dealIdParam) || 0 : 0;
   const [rows, setRows] = useState<Proposal[]>([]);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -88,8 +91,8 @@ export default function MyProposals() {
   });
 
   useEffect(() => {
-    (async () => setRows(await listProposals()))();
-  }, []);
+    (async () => setRows(await listProposals(dealIdParam)))();
+  }, [dealIdParam]);
 
   async function loadClients() {
     try {
@@ -163,7 +166,7 @@ export default function MyProposals() {
   );
 
   async function refresh() {
-    setRows(await listProposals());
+    setRows(await listProposals(dealIdParam));
   }
 
   function handleFormChange(field: keyof CreateProposalInput, value: string) {
@@ -182,7 +185,7 @@ export default function MyProposals() {
     setFieldErrors({});
     setIsCreating(true);
 
-    const result = await createProposalApi(formData);
+    const result = await createProposalApi({ ...formData, dealId });
 
     if (!result.success) {
       setCreateError(result.error || "Failed to create proposal");
@@ -247,6 +250,7 @@ export default function MyProposals() {
         session_id: chatSessionId,
         template_id: templateId,
         title: title,
+        dealId,
       });
 
       if (response.proposal_id) {
@@ -832,6 +836,7 @@ export default function MyProposals() {
           open={isGenerateDialogOpen}
           onOpenChange={setIsGenerateDialogOpen}
           baseProposal={baseProposalForGeneration}
+          dealId={dealId}
           onProposalGenerated={handleProposalGenerated}
         />
       )}

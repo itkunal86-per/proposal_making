@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { X, Share2, Copy, FileDown, Mail } from "lucide-react";
+import { ArrowLeft, X, Share2, Copy, FileDown, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { Proposal } from "@/services/proposalsService";
@@ -22,7 +22,9 @@ import { EmailShareDialog } from "@/components/EmailShareDialog";
 interface ProposalPreviewModalProps {
   proposal: Proposal;
   variables?: Array<{ id: string | number; name: string; value: string }>;
-  onClose: () => void;
+  onClose?: () => void;
+  backHref?: string;
+  fullPage?: boolean;
   isTemplate?: boolean;
   onOpenSignatureDetails?: (sectionId: string, fieldIndex: number) => void;
 }
@@ -31,6 +33,8 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
   proposal,
   variables = [],
   onClose,
+  backHref,
+  fullPage = false,
   isTemplate = false,
   onOpenSignatureDetails,
 }) => {
@@ -44,12 +48,13 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
   const sectionRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
   React.useEffect(() => {
-    // Disable body scroll when modal is open
+    if (fullPage) return;
+
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = "unset";
     };
-  }, []);
+  }, [fullPage]);
 
   React.useEffect(() => {
     const resizeObserver = new ResizeObserver(() => {
@@ -338,8 +343,16 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
   };
 
   return (
-    <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0, 0, 0, 0.5)", zIndex: 9998 }}>
-      <div style={{ position: "fixed", inset: 0, display: "flex", flexDirection: "column", backgroundColor: "white", zIndex: 9999, overflow: "visible" }}>
+    <div
+      style={fullPage
+        ? { minHeight: "100vh", backgroundColor: "white" }
+        : { position: "fixed", inset: 0, backgroundColor: "rgba(0, 0, 0, 0.5)", zIndex: 9998 }}
+    >
+      <div
+        style={fullPage
+          ? { minHeight: "100vh", display: "flex", flexDirection: "column", backgroundColor: "white" }
+          : { position: "fixed", inset: 0, display: "flex", flexDirection: "column", backgroundColor: "white", zIndex: 9999, overflow: "visible" }}
+      >
         {/* Header */}
         <div className="border-b border-slate-200 px-6 py-4 flex items-center justify-between overflow-visible">
           <h1 className="text-2xl font-bold">{proposal.title}</h1>
@@ -429,14 +442,23 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
-            <Button
-              onClick={onClose}
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0"
-            >
-              <X className="w-5 h-5" />
-            </Button>
+            {fullPage && backHref ? (
+              <a href={backHref}>
+                <Button variant="outline" size="sm" className="gap-2">
+                  <ArrowLeft className="w-4 h-4" />
+                  Back
+                </Button>
+              </a>
+            ) : (
+              <Button
+                onClick={() => onClose?.()}
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0"
+              >
+                <X className="w-5 h-5" />
+              </Button>
+            )}
           </div>
         </div>
 

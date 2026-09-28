@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { api } from "@/lib/api";
 import type { AuthUser } from "@/auth/AuthContext";
+import { LoaderCircle } from "lucide-react";
 
 const SSO_STORAGE_KEY = "sso_auth_user";
 const DEFAULT_SSO_DESTINATION = "/my/proposals";
@@ -65,5 +66,14 @@ export default function SsoLogin() {
 
   if (error) return <div className="p-6 text-center text-destructive">{error}</div>;
 
-  return <div className="p-6 text-center">Signing you in...</div>;
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-background px-6">
+      <div className="flex flex-col items-center gap-4 text-center">
+        <LoaderCircle className="h-8 w-8 animate-spin text-primary" aria-hidden="true" />
+        <p className="text-sm font-medium text-foreground" role="status" aria-live="polite">
+          Signing you in..
+        </p>
+      </div>
+    </div>
+  );
 }

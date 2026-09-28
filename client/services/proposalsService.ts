@@ -146,6 +146,7 @@ export interface Proposal {
   title: string;
   client: string;
   client_id?: string;
+  deal_id?: string | number;
   status: ProposalStatus;
   createdBy: string;
   createdByEmail?: string;
@@ -176,6 +177,7 @@ interface ApiProposalResponse {
   id: string | number;
   title: string;
   client_id?: string | number;
+  deal_id?: string | number | null;
   status: ProposalStatus;
   created_at: string;
   created_by?: string | number;
@@ -226,6 +228,7 @@ export interface CreateProposalInput {
   sharing_public?: boolean;
   sharing_token?: string;
   sharing_allow_comments?: boolean;
+  dealId?: string | number;
 }
 
 export interface CreateProposalResult {
@@ -332,6 +335,7 @@ const proposalSchema = z.object({
   title: z.string(),
   client: z.string().optional(),
   client_id: z.union([z.string(), z.number()]).optional(),
+  deal_id: idSchema.optional(),
   status: z.union([z.literal("draft"), z.literal("published"), z.literal("sent"), z.literal("accepted"), z.literal("declined")]).optional(),
   createdBy: z.union([z.string(), z.number()]).optional(),
   createdAt: z.union([z.number(), z.string()]).optional(),
@@ -374,6 +378,7 @@ function normalizeProposal(raw: z.infer<typeof proposalSchema>): Proposal {
     title: raw.title!,
     client: raw.client || "",
     client_id: raw.client_id ? String(raw.client_id) : undefined,
+    deal_id: raw.deal_id !== undefined ? String(raw.deal_id) : undefined,
     status: raw.status || "draft",
     createdBy: String(raw.createdBy || "system"),
     createdAt: createdAtMs,
@@ -708,6 +713,7 @@ function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmai
 
   const clientName = typeof apiProposal.client === "string" ? apiProposal.client : (apiProposal.client?.name || "");
   const clientId = typeof apiProposal.client_id === "string" ? apiProposal.client_id : (apiProposal.client_id ? String(apiProposal.client_id) : undefined);
+  const dealId = apiProposal.deal_id != null ? String(apiProposal.deal_id) : undefined;
   const createdByName = apiProposal.create_by?.name || apiProposal.created_by || userEmail || "You";
   const createdByEmail = apiProposal.create_by?.email || userEmail || "you@example.com";
 
@@ -716,6 +722,7 @@ function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmai
     title: apiProposal.title,
     client: clientName,
     client_id: clientId,
+    deal_id: dealId,
     status: apiProposal.status,
     createdBy: String(createdByName),
     createdByEmail: String(createdByEmail),
@@ -752,7 +759,7 @@ function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmai
   };
 }
 
-async function fetchFromApi(): Promise<Proposal[]> {
+async function fetchFromApi(dealId?: string): Promise<Proposal[]> {
   const token = getStoredToken();
   if (!token) {
     throw new Error("No authentication token available");
@@ -762,7 +769,10 @@ async function fetchFromApi(): Promise<Proposal[]> {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
-    const res = await fetch(PROPOSALS_ENDPOINT, {
+    const endpoint = dealId === undefined
+      ? PROPOSALS_ENDPOINT
+      : `${PROPOSALS_ENDPOINT}?${new URLSearchParams({ dealId }).toString()}`;
+    const res = await fetch(endpoint, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -791,9 +801,9 @@ async function fetchFromApi(): Promise<Proposal[]> {
   }
 }
 
-async function fetchSeed(): Promise<Proposal[]> {
+async function fetchSeed(dealId?: string): Promise<Proposal[]> {
   try {
-    return await fetchFromApi();
+    return await fetchFromApi(dealId);
   } catch {
     const res = await fetch("/data/proposals.json", { cache: "no-store" });
     if (!res.ok) throw new Error("Unable to load proposals");
@@ -804,16 +814,16 @@ async function fetchSeed(): Promise<Proposal[]> {
   }
 }
 
-async function getAll(): Promise<Proposal[]> {
+async function getAll(dealId?: string): Promise<Proposal[]> {
   try {
-    return await fetchFromApi();
+    return await fetchFromApi(dealId);
   } catch {
-    return readStored() ?? (await fetchSeed());
+    return readStored() ?? (await fetchSeed(dealId));
   }
 }
 
-export async function listProposals(): Promise<Proposal[]> {
-  const list = await getAll();
+export async function listProposals(dealId?: string): Promise<Proposal[]> {
+  const list = await getAll(dealId);
   return list.sort((a, b) => b.updatedAt - a.updatedAt);
 }
 
@@ -1028,6 +1038,7 @@ export async function createProposalApi(input: CreateProposalInput): Promise<Cre
       sharing_public: input.sharing_public ? 1 : 0,
       sharing_token: input.sharing_token ?? "",
       sharing_allow_comments: input.sharing_allow_comments ? 1 : 0,
+      dealId: input.dealId ?? 0,
     };
 
     const res = await fetch(PROPOSALS_ENDPOINT, {
@@ -1149,8 +1160,11 @@ export async function updateProposal(p: Proposal, options?: { keepVersion?: bool
       throw new Error(errorData.error || `Failed to update proposal: ${res.statusText}`);
     }
 
-    const data: ApiProposalResponse = await res.json();
-    console.log("API response data:", data);
+    const response = await res.json();
+    const data: ApiProposalResponse = response?.data ?? response;
+    const redirect = response?.redirect === true;
+    const dealId = response?.deal_id ?? data.deal_id;
+    console.log("API response data:", response);
 
     let updatedProposal = convertApiProposalToProposal(data);
     console.log("Converted proposal sections:", updatedProposal.sections.map(s => s.title));
@@ -1169,6 +1183,7 @@ export async function updateProposal(p: Proposal, options?: { keepVersion?: bool
       persist(list);
     }
     console.log("Update completed successfully");
+    return { proposal: updatedProposal, redirect, deal_id: dealId };
   } catch (err) {
     console.error("Failed to update proposal:", err);
     throw err;

@@ -16,6 +16,7 @@ import ResetPassword from "./pages/ResetPassword";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import ProposalEditor from "./pages/ProposalEditor";
+import ProposalPreviewPage from "./pages/ProposalPreviewPage";
 import ProposalSettings from "./pages/ProposalSettings";
 import ProposalView from "./pages/ProposalView";
 import ProposalPublicView from "./pages/ProposalPublicView";
@@ -92,6 +93,7 @@ const AppRoutes = () => (
         </Route>
 
         <Route path="/proposals/:id/edit" element={<ProposalEditor />} />
+        <Route path="/proposals/:id/preview" element={<ProposalPreviewPage />} />
         <Route path="/proposals/:id/settings" element={<ProposalSettings />} />
       </Route>
 

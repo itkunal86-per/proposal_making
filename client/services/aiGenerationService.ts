@@ -25,6 +25,7 @@ interface ProposalAIResponse {
 
 interface ChatInitRequest {
   message: string;
+  dealId?: string | number;
   input_type: "website" | "document" | "text" | "email";
   url?: string;
   email?: string;
@@ -60,6 +61,7 @@ interface GenerateFromTemplateRequest {
   session_id: number;
   template_id: string | number;
   title: string;
+  dealId?: string | number;
 }
 
 interface GenerateFromTemplateResponse {
@@ -256,6 +258,7 @@ export async function initializeProposalChat(
     const formData = new FormData();
     formData.append("message", request.message);
     formData.append("input_type", request.input_type);
+    formData.append("dealId", String(request.dealId ?? 0));
 
     if (request.url) {
       formData.append("url", request.url);
@@ -321,6 +324,7 @@ export async function generateProposalFromTemplate(
         session_id: request.session_id,
         template_id: request.template_id,
         title: request.title,
+        dealId: request.dealId ?? 0,
       }),
     });
 
