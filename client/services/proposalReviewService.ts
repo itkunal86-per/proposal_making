@@ -41,10 +41,6 @@ export function approveProposal(proposalId: string, comment?: string) {
   return postAction(proposalId, "approve", { comment });
 }
 
-export function rejectProposal(proposalId: string, comment: string) {
-  return postAction(proposalId, "reject", { comment });
-}
-
 export function requestRework(proposalId: string, comment: string) {
   return postAction(proposalId, "request-rework", { comment });
 }

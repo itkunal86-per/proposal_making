@@ -28,10 +28,12 @@ import {
   type Proposal,
   type ProposalStatus,
   getProposalDetails,
+  proposalStatusLabel,
   updateProposal,
   persistProposal,
   valueTotal,
 } from "@/services/proposalsService";
+import { submitForReview } from "@/services/proposalReviewService";
 import { updateSystemTemplate, getSystemTemplateDetails, deleteSystemTemplate, type SystemTemplate } from "@/services/systemTemplatesService";
 import { type ClientRecord, listClients } from "@/services/clientsService";
 import { ProposalPreview } from "@/components/ProposalPreview";
@@ -56,6 +58,33 @@ interface DocumentSettings {
   currency?: string;
 }
 
+function isAbortError(error: unknown) {
+  return error instanceof Error && error.name === "AbortError";
+}
+
+function editableStatusChoices(status: string): Array<{ value: ProposalStatus; label: string }> | null {
+  if (status === "draft") {
+    return [
+      { value: "draft", label: "Draft" },
+      { value: "in_review", label: "In Review" },
+      { value: "published", label: "Published" },
+    ];
+  }
+  if (status === "rework_requested") {
+    return [
+      { value: "rework_requested", label: "Rework Requested" },
+      { value: "in_review", label: "In Review" },
+    ];
+  }
+  if (status === "published") {
+    return [
+      { value: "published", label: "Published" },
+      { value: "draft", label: "Draft" },
+    ];
+  }
+  return null;
+}
+
 export default function ProposalEditor() {
   const { id = "" } = useParams();
   const nav = useNavigate();
@@ -64,9 +93,10 @@ export default function ProposalEditor() {
   const isSystemTemplateEdit = !!searchParams.get("templateId");
   const [p, setP] = useState<Proposal | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [submittingReview, setSubmittingReview] = useState(false);
   const lockedStatuses = ["in_review", "approved", "rejected", "sent", "accepted", "declined"];
   const readOnly = !isSystemTemplateEdit && !!p && (
-    lockedStatuses.includes(p.status) || (user?.role === "user" && user.membershipRole === null)
+    submittingReview || lockedStatuses.includes(p.status) || (user?.role === "user" && user.membershipRole === null)
   );
   const [current, setCurrent] = useState(0);
   const [saving, setSaving] = useState(false);
@@ -95,6 +125,9 @@ export default function ProposalEditor() {
   const [pptPreviewData, setPPTPreviewData] = useState<any>(null);
   const previewContainerRef = useRef<HTMLDivElement>(null);
   const saveTimer = useRef<number | null>(null);
+  const saveGeneration = useRef(0);
+  const saveAbort = useRef<AbortController | null>(null);
+  const workflowLock = useRef(false);
 
 
 
@@ -286,17 +319,79 @@ export default function ProposalEditor() {
   }, [isSystemTemplateEdit, activePanel]);
 
 
+  function invalidatePendingSaves() {
+    saveGeneration.current += 1;
+    if (saveTimer.current) {
+      window.clearTimeout(saveTimer.current);
+      saveTimer.current = null;
+    }
+    saveAbort.current?.abort();
+    saveAbort.current = null;
+    setSaving(false);
+  }
+
+  function releaseWorkflowLock() {
+    workflowLock.current = false;
+    setSubmittingReview(false);
+  }
+
+  async function prepareForWorkflowAction() {
+    const snapshot = p;
+    const editable = !!snapshot && (snapshot.status === "draft" || snapshot.status === "rework_requested");
+    workflowLock.current = true;
+    setSubmittingReview(true);
+    invalidatePendingSaves();
+    if (!snapshot || !editable) return;
+    try {
+      await updateProposal(snapshot);
+    } catch (error) {
+      releaseWorkflowLock();
+      throw error;
+    }
+  }
+
+  async function submitCurrentProposal() {
+    if (!p || workflowLock.current) return;
+    if (p.status !== "draft" && p.status !== "rework_requested") return;
+    workflowLock.current = true;
+    setSubmittingReview(true);
+    try {
+      await prepareForWorkflowAction();
+      await submitForReview(String(p.id));
+      setP((current) => (current ? { ...current, status: "in_review" } : current));
+      toast({ title: "Submitted for review" });
+    } catch (error) {
+      if (!isAbortError(error)) {
+        toast({
+          title: "Could not submit for review",
+          description: error instanceof Error ? error.message : "Please try again.",
+          variant: "destructive",
+        });
+      }
+    } finally {
+      releaseWorkflowLock();
+    }
+  }
+
   function commit(next: Proposal, keepVersion = false, note?: string) {
-    if (readOnly) return;
+    if (readOnly || workflowLock.current) return;
+    const generation = saveGeneration.current;
     console.log("Proposal Edit Form Submitted:", next);
     setP(next);
     setSaving(true);
     if (saveTimer.current) window.clearTimeout(saveTimer.current);
+    saveAbort.current?.abort();
+    const controller = new AbortController();
+    saveAbort.current = controller;
 
     // Persist immediately to localStorage to prevent data loss on page reload
     void persistProposal(next);
 
     saveTimer.current = window.setTimeout(() => {
+      if (generation !== saveGeneration.current) {
+        setSaving(false);
+        return;
+      }
       if (isSystemTemplateEdit) {
         // For system templates, call the update template API
         const templateId = searchParams.get("templateId");
@@ -346,8 +441,9 @@ export default function ProposalEditor() {
           setSaving(false);
         }
       } else {
-        void updateProposal(next, { keepVersion, note })
+        void updateProposal(next, { keepVersion, note, signal: controller.signal })
           .then((result) => {
+            if (generation !== saveGeneration.current) return;
             setSaving(false);
             if (result.redirect && result.deal_id != null) {
               const mainAppUrl = (import.meta.env.VITE_MAIN_APP_URL ?? "https://pitchsuite.io/").replace(/\/+$/, "");
@@ -355,6 +451,7 @@ export default function ProposalEditor() {
             }
           })
           .catch((error) => {
+            if (generation !== saveGeneration.current || isAbortError(error)) return;
             console.error("Failed to save proposal changes:", error);
             toast({
               title: "Failed to save changes",
@@ -608,46 +705,52 @@ export default function ProposalEditor() {
                   </SelectContent>
                 </Select>
               )}
-              <Select
-                value={isSystemTemplateEdit ? (p.status === "draft" ? "Active" : "Inactive") : p.status}
-                disabled={readOnly || user?.membershipRole === "reviewer"}
-                onValueChange={(v) => {
-                  if (readOnly || user?.membershipRole === "reviewer") return;
-                  const protectedStatuses = ["in_review", "approved", "rejected", "rework_requested", "sent"];
-                  if (protectedStatuses.includes(v)) return;
-                  if (isSystemTemplateEdit) {
-                    // For system templates, map Active/Inactive to proposal status
+              {isSystemTemplateEdit ? (
+                <Select
+                  value={p.status === "draft" ? "Active" : "Inactive"}
+                  onValueChange={(v) => {
                     const newStatus = (v === "Active" ? "draft" : "sent") as ProposalStatus;
                     commit({ ...p, status: newStatus });
-                  } else {
-                    commit({ ...p, status: v as ProposalStatus });
-                  }
-                }}
-              >
-                <SelectTrigger className="w-40">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {isSystemTemplateEdit ? (
-                    <>
-                      <SelectItem value="Active">Active</SelectItem>
-                      <SelectItem value="Inactive">Inactive</SelectItem>
-                    </>
-                  ) : (
-                    <>
-                      <SelectItem value="draft">Draft</SelectItem>
-                      <SelectItem value="in_review">In review</SelectItem>
-                      <SelectItem value="rework_requested">Rework requested</SelectItem>
-                      <SelectItem value="approved">Approved</SelectItem>
-                      <SelectItem value="rejected">Rejected</SelectItem>
-                      <SelectItem value="published">Published</SelectItem>
-                      <SelectItem value="sent">Sent</SelectItem>
-                      <SelectItem value="accepted">Accepted</SelectItem>
-                      <SelectItem value="declined">Declined</SelectItem>
-                    </>
-                  )}
-                </SelectContent>
-              </Select>
+                  }}
+                >
+                  <SelectTrigger className="w-40">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Active">Active</SelectItem>
+                    <SelectItem value="Inactive">Inactive</SelectItem>
+                  </SelectContent>
+                </Select>
+              ) : editableStatusChoices(p.status) && !readOnly && user?.membershipRole !== "reviewer" ? (
+                <Select
+                  value={p.status}
+                  onValueChange={(v) => {
+                    if (v === p.status) return;
+                    if (v === "in_review") {
+                      void submitCurrentProposal();
+                      return;
+                    }
+                    if (v === "draft" || v === "published") {
+                      commit({ ...p, status: v as ProposalStatus });
+                    }
+                  }}
+                >
+                  <SelectTrigger className="w-40" aria-label="Proposal status">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {editableStatusChoices(p.status)!.map((choice) => (
+                      <SelectItem key={choice.value} value={choice.value}>
+                        {choice.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <div className="flex h-10 w-40 items-center rounded-md border border-slate-200 bg-slate-50 px-3 text-sm text-slate-700">
+                  {proposalStatusLabel(p.status)}
+                </div>
+              )}
             </div>
             <div className="flex items-center gap-3">
               {section && (
@@ -901,6 +1004,9 @@ export default function ProposalEditor() {
             shareLink={`${window.location.origin}/preview/proposal/${p.settings?.sharing?.token ?? ""}`}
             isReviewer={user?.membershipRole === "reviewer"}
             canSubmit={!(user?.role === "user" && user?.membershipRole === null) && (p.status === "draft" || p.status === "rework_requested")}
+            onBeforeAction={prepareForWorkflowAction}
+            onStatus={(status) => setP((current) => (current ? { ...current, status } : current))}
+            onSettled={releaseWorkflowLock}
             onChanged={() => setRefreshKey((key) => key + 1)}
           />
         )}

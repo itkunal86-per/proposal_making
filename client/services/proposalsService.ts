@@ -13,6 +13,22 @@ export type ProposalStatus =
   | "accepted"
   | "declined";
 
+const PROPOSAL_STATUS_LABELS: Record<string, string> = {
+  draft: "Draft",
+  in_review: "In Review",
+  rework_requested: "Rework Requested",
+  approved: "Approved",
+  published: "Published",
+  sent: "Sent",
+  rejected: "Rejected",
+  accepted: "Accepted",
+  declined: "Declined",
+};
+
+export function proposalStatusLabel(status: string): string {
+  return PROPOSAL_STATUS_LABELS[status] ?? status;
+}
+
 export interface ShapeElement {
   id: string;
   type: "square" | "circle" | "triangle";
@@ -1148,7 +1164,7 @@ export async function createProposal(partial?: Partial<Proposal>): Promise<Propo
   return p;
 }
 
-export async function updateProposal(p: Proposal, options?: { keepVersion?: boolean; note?: string }) {
+export async function updateProposal(p: Proposal, options?: { keepVersion?: boolean; note?: string; signal?: AbortSignal }) {
   const token = getStoredToken();
   if (!token) {
     throw new Error("No authentication token available");
@@ -1172,6 +1188,7 @@ export async function updateProposal(p: Proposal, options?: { keepVersion?: bool
         "Authorization": `Bearer ${token}`,
       },
       body: JSON.stringify(payload),
+      signal: options?.signal,
     });
 
     console.log("Update response status:", res.status, res.ok);
@@ -1206,6 +1223,7 @@ export async function updateProposal(p: Proposal, options?: { keepVersion?: bool
     console.log("Update completed successfully");
     return { proposal: updatedProposal, redirect, deal_id: dealId };
   } catch (err) {
+    if (err instanceof Error && err.name === "AbortError") throw err;
     console.error("Failed to update proposal:", err);
     throw err;
   }

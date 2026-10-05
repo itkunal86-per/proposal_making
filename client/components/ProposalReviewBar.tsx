@@ -6,12 +6,12 @@ import {
   addReviewComment,
   approveProposal,
   listReviewEvents,
-  rejectProposal,
   requestRework,
   signProposal,
   submitForReview,
   type ReviewEvent,
 } from "@/services/proposalReviewService";
+import { type ProposalStatus } from "@/services/proposalsService";
 import { EmailShareDialog } from "@/components/EmailShareDialog";
 
 interface ProposalReviewBarProps {
@@ -21,7 +21,29 @@ interface ProposalReviewBarProps {
   shareLink: string;
   isReviewer: boolean;
   canSubmit: boolean;
+  onBeforeAction?: () => Promise<void> | void;
+  onStatus?: (status: ProposalStatus) => void;
+  onSettled?: () => void;
   onChanged: () => void;
+}
+
+const PROPOSAL_STATUSES = new Set<ProposalStatus>([
+  "draft",
+  "in_review",
+  "rework_requested",
+  "approved",
+  "rejected",
+  "published",
+  "sent",
+  "accepted",
+  "declined",
+]);
+
+function statusFrom(result: unknown): ProposalStatus | null {
+  if (!result || typeof result !== "object" || !("status" in result)) return null;
+  const status = (result as { status?: unknown }).status;
+  if (typeof status !== "string" || !PROPOSAL_STATUSES.has(status as ProposalStatus)) return null;
+  return status as ProposalStatus;
 }
 
 export function ProposalReviewBar({
@@ -31,6 +53,9 @@ export function ProposalReviewBar({
   shareLink,
   isReviewer,
   canSubmit,
+  onBeforeAction,
+  onStatus,
+  onSettled,
   onChanged,
 }: ProposalReviewBarProps) {
   const [comment, setComment] = useState("");
@@ -46,7 +71,10 @@ export function ProposalReviewBar({
   async function run(action: () => Promise<unknown>, success: string) {
     setBusy(true);
     try {
-      await action();
+      await onBeforeAction?.();
+      const result = await action();
+      const nextStatus = statusFrom(result);
+      if (nextStatus) onStatus?.(nextStatus);
       toast({ title: success });
       setComment("");
       onChanged();
@@ -57,6 +85,7 @@ export function ProposalReviewBar({
       });
     } finally {
       setBusy(false);
+      onSettled?.();
     }
   }
 
@@ -72,18 +101,15 @@ export function ProposalReviewBar({
         )}
         {isReviewer && status === "in_review" && (
           <>
-            <Button size="sm" disabled={busy} onClick={() => run(() => approveProposal(proposalId, comment), "Proposal approved")}>
-              Approve
-            </Button>
             <Button size="sm" variant="outline" disabled={busy || !comment.trim()} onClick={() => run(() => requestRework(proposalId, comment), "Rework requested")}>
               Request Rework
             </Button>
-            <Button size="sm" variant="destructive" disabled={busy || !comment.trim()} onClick={() => run(() => rejectProposal(proposalId, comment), "Proposal rejected")}>
-              Reject
+            <Button size="sm" disabled={busy} onClick={() => run(() => approveProposal(proposalId, comment), "Proposal approved")}>
+              Approve
             </Button>
           </>
         )}
-        {isReviewer && (status === "in_review" || status === "approved" || status === "rework_requested") && (
+        {isReviewer && (status === "approved" || status === "rework_requested") && (
           <Button size="sm" variant="outline" disabled={busy || !comment.trim()} onClick={() => run(() => addReviewComment(proposalId, comment), "Comment added")}>
             Add Comment
           </Button>

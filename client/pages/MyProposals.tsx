@@ -22,6 +22,7 @@ import {
   updateProposal,
   persistProposal,
   getProposalDetails,
+  proposalStatusLabel,
 } from "@/services/proposalsService";
 import { type ClientRecord, listClients } from "@/services/clientsService";
 import { GenerateProposalDialog } from "@/components/GenerateProposalDialog";
@@ -546,7 +547,7 @@ export default function MyProposals() {
                         <Badge
                           className={`${statusStyles[proposal.status] || statusStyles.draft}`}
                         >
-                          {proposal.status.charAt(0).toUpperCase() + proposal.status.slice(1)}
+                          {proposalStatusLabel(proposal.status)}
                         </Badge>
                       </TableCell>
                       <TableCell>
