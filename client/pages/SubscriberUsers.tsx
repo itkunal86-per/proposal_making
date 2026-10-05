@@ -113,7 +113,16 @@ export default function SubscriberUsers() {
                     <TableRow key={u.id} className="hover:bg-muted/40">
                       <TableCell className="font-medium">{u.user.name}</TableCell>
                       <TableCell>{u.user.email}</TableCell>
-                      <TableCell>{u.role?.name ?? "No proposal role"}</TableCell>
+                      <TableCell>
+                        {u.role?.slug === "reviewer" ? (
+                          <span>
+                            Reviewer
+                            <span className="ml-2 text-xs text-muted-foreground">Managed in Pitchsuite</span>
+                          </span>
+                        ) : (
+                          u.role?.name ?? "No proposal role"
+                        )}
+                      </TableCell>
                       <TableCell>{u.status}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {new Date(u.created_at).toLocaleDateString()}

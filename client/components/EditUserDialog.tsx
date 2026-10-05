@@ -45,6 +45,8 @@ export default function EditUserDialog({
   const [roleId, setRoleId] = useState("");
   const [status, setStatus] = useState("Active");
   const [roles, setRoles] = useState<RoleOption[]>([]);
+  const [roleLocked, setRoleLocked] = useState(false);
+  const [roleLabel, setRoleLabel] = useState("");
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -63,7 +65,9 @@ export default function EditUserDialog({
       if (userRes.success && userRes.data) {
         setName(userRes.data.user.name);
         setEmail(userRes.data.user.email);
-        setRoleId(String(userRes.data.role.id));
+        setRoleId(userRes.data.role ? String(userRes.data.role.id) : "");
+        setRoleLocked(userRes.data.role?.slug === "reviewer");
+        setRoleLabel(userRes.data.role?.name ?? "No proposal role");
         setStatus(userRes.data.status);
       } else {
         toast({
@@ -169,18 +173,25 @@ export default function EditUserDialog({
 
             <div className="space-y-2">
               <Label htmlFor="edit-role">Role</Label>
-              <Select value={roleId} onValueChange={setRoleId} disabled={submitting}>
-                <SelectTrigger id="edit-role">
-                  <SelectValue placeholder="Select a role" />
-                </SelectTrigger>
-                <SelectContent>
-                  {roles.map((role) => (
-                    <SelectItem key={role.id} value={String(role.id)}>
-                      {role.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {roleLocked ? (
+                <>
+                  <Input id="edit-role" value={roleLabel} disabled className="bg-muted" />
+                  <p className="text-xs text-muted-foreground">Managed in Pitchsuite</p>
+                </>
+              ) : (
+                <Select value={roleId} onValueChange={setRoleId} disabled={submitting}>
+                  <SelectTrigger id="edit-role">
+                    <SelectValue placeholder="Select a role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {roles.map((role) => (
+                      <SelectItem key={role.id} value={String(role.id)}>
+                        {role.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
 
             <div className="space-y-2">
