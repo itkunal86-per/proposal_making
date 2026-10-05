@@ -1,11 +1,14 @@
 import {
   clearAuth,
   getStoredAuth,
+  getStoredToken,
   persistAuth,
   apiAuthenticate,
   apiRegister,
   type AuthenticatedUser,
+  type MembershipRole,
 } from "@/lib/auth";
+import { apiConfig } from "@/lib/apiConfig";
 import type { ReactNode } from "react";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
@@ -33,6 +36,19 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
+function membershipRoleFrom(value: unknown): MembershipRole | undefined {
+  if (value === null) return null;
+  if (value === "manager" || value === "sales" || value === "verifier" || value === "reviewer") {
+    return value;
+  }
+  return undefined;
+}
+
+function accountRole(value: unknown): AuthenticatedUser["role"] {
+  if (value === "admin" || value === "subscriber" || value === "user") return value;
+  return "user";
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthenticatedUser | null>(null);
   const [status, setStatus] = useState<"loading" | "ready">("loading");
@@ -48,7 +64,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           id: String(ssoUser.id),
           email: ssoUser.email,
           name: ssoUser.name,
-          role: ssoUser.user_type || ssoUser.role || ssoUser.org?.role || 'user',
+          role: accountRole(ssoUser.user_type),
+          membershipRole: membershipRoleFrom(ssoUser.membership_role),
           company: ssoUser.org?.name || undefined,
         });
         return true;
@@ -60,6 +77,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!applySsoUser()) {
       const stored = getStoredAuth();
       if (stored?.user) setUser(stored.user);
+    }
+
+    const token = getStoredToken();
+    if (token) {
+      fetch(`${apiConfig.baseUrl}/api/user`, {
+        headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+      })
+        .then((response) => (response.ok ? response.json() : null))
+        .then((profile) => {
+          if (!profile) return;
+          setUser((current) => ({
+            id: String(profile.id ?? current?.id ?? profile.email),
+            email: profile.email,
+            name: profile.name ?? current?.name,
+            role: accountRole(profile.user_type),
+            membershipRole: membershipRoleFrom(profile.membership_role),
+            company: current?.company,
+          }));
+        })
+        .catch(() => undefined);
     }
 
     setStatus("ready");

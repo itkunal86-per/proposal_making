@@ -2,10 +2,13 @@ import { AUTH_USERS, type AuthUserRecord, type UserRole } from "@/data/users";
 
 import { apiConfig } from "./apiConfig";
 
+export type MembershipRole = "manager" | "sales" | "verifier" | "reviewer" | null;
+
 export type AuthenticatedUser = {
   id: string;
   email: string;
   role: UserRole;
+  membershipRole?: MembershipRole;
   name?: string;
   company?: string;
 };

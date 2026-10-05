@@ -19,6 +19,7 @@ interface SignatureDetails {
   signedAt?: number;
   signatureDisplayText?: string;
   status?: "pending" | "signed" | "declined";
+  purpose?: "client" | "internal_reviewer";
 }
 
 interface SignatureDetailsModalProps {
@@ -50,6 +51,7 @@ export const SignatureDetailsModal: React.FC<SignatureDetailsModalProps> = ({
   const [email, setEmail] = useState(signatureDetails.email || "");
   const [position, setPosition] = useState(signatureDetails.position || "");
   const [signature, setSignature] = useState(signatureDetails.signature || "");
+  const [purpose, setPurpose] = useState<"client" | "internal_reviewer">(signatureDetails.purpose ?? "client");
   const isSignedAlready = signatureDetails.status === "signed" || isAlreadySigned;
 
   // Auto-generate signature when fullName changes
@@ -65,6 +67,7 @@ export const SignatureDetailsModal: React.FC<SignatureDetailsModalProps> = ({
       setEmail(signatureDetails.email || "");
       setPosition(signatureDetails.position || "");
       setSignature(signatureDetails.signature || generateSignature(signatureDetails.fullName || ""));
+      setPurpose(signatureDetails.purpose ?? "client");
     }
   }, [open, signatureDetails]);
 
@@ -79,8 +82,21 @@ export const SignatureDetailsModal: React.FC<SignatureDetailsModalProps> = ({
         signedAt: signatureDetails.signedAt,
         signatureDisplayText: signatureDetails.signatureDisplayText,
         status: "signed" as const,
+        purpose: signatureDetails.purpose ?? purpose,
       };
       onSave(saveData);
+      return;
+    }
+
+    if (purpose === "internal_reviewer") {
+      onSave({
+        purpose,
+        status: "pending" as const,
+        fullName: "",
+        email: "",
+        position: "",
+        signature: "",
+      });
       return;
     }
 
@@ -114,6 +130,7 @@ export const SignatureDetailsModal: React.FC<SignatureDetailsModalProps> = ({
       signedAt,
       signatureDisplayText,
       status: "signed" as const,
+      purpose,
     });
   };
 
@@ -139,6 +156,21 @@ export const SignatureDetailsModal: React.FC<SignatureDetailsModalProps> = ({
         )}
 
         <div className="space-y-4 py-4">
+          <div className="space-y-2">
+            <Label htmlFor="signature-purpose" className="text-sm font-semibold">
+              Signature purpose
+            </Label>
+            <select
+              id="signature-purpose"
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              value={purpose}
+              disabled={isSignedAlready}
+              onChange={(event) => setPurpose(event.target.value === "internal_reviewer" ? "internal_reviewer" : "client")}
+            >
+              <option value="client">Client</option>
+              <option value="internal_reviewer">Internal reviewer</option>
+            </select>
+          </div>
           {/* Full Name */}
           <div className="space-y-2">
             <Label htmlFor="full-name" className="text-sm font-semibold">

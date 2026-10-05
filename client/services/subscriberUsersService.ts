@@ -18,12 +18,12 @@ export interface SubscriberUserRecord {
   id: number;
   subscriber_id: string;
   user_id: string;
-  role_id: string;
+  role_id: string | number | null;
   status: "Active" | "Inactive";
   created_at: string;
   updated_at: string;
   user: UserData;
-  role: RoleData;
+  role: RoleData | null;
 }
 
 export interface RoleOption {
@@ -68,9 +68,9 @@ const ROLES_ENDPOINT = apiConfig.baseUrl + "/api/subscriber/roles";
 
 const userRecordSchema = z.object({
   id: z.number(),
-  subscriber_id: z.string(),
-  user_id: z.string(),
-  role_id: z.string(),
+  subscriber_id: z.union([z.string(), z.number()]),
+  user_id: z.union([z.string(), z.number()]),
+  role_id: z.union([z.string(), z.number(), z.null()]),
   status: z.enum(["Active", "Inactive"]),
   created_at: z.string(),
   updated_at: z.string(),
@@ -83,7 +83,7 @@ const userRecordSchema = z.object({
     id: z.number(),
     name: z.string(),
     slug: z.string(),
-  }),
+  }).nullable(),
 });
 
 const userListSchema = z.array(userRecordSchema);

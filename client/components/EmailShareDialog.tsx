@@ -18,6 +18,8 @@ interface EmailShareDialogProps {
   onOpenChange: (open: boolean) => void;
   proposalTitle: string;
   shareLink: string;
+  proposalId?: string | number;
+  onSent?: () => void;
 }
 
 export const EmailShareDialog: React.FC<EmailShareDialogProps> = ({
@@ -25,6 +27,8 @@ export const EmailShareDialog: React.FC<EmailShareDialogProps> = ({
   onOpenChange,
   proposalTitle,
   shareLink,
+  proposalId,
+  onSent,
 }) => {
   const { user } = useAuth();
   const [recipients, setRecipients] = useState<string[]>([]);
@@ -100,6 +104,7 @@ export const EmailShareDialog: React.FC<EmailShareDialogProps> = ({
         button_url: shareLink,
         sender_name: senderName,
         sender_email: senderEmail,
+        ...(proposalId ? { proposal_id: Number(proposalId) } : {}),
       };
 
       const response = await fetch(apiConfig.baseUrl + "/api/send-proposal-email", {
@@ -127,6 +132,7 @@ export const EmailShareDialog: React.FC<EmailShareDialogProps> = ({
       setSenderName(user?.name || "");
       setSenderEmail(user?.email || "");
       onOpenChange(false);
+      onSent?.();
     } catch (error) {
       console.error("Send email error:", error);
       toast({

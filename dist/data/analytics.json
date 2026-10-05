@@ -1,0 +1,37 @@
+{
+  "totals": {
+    "proposals": 24,
+    "accepted": 18,
+    "declined": 3,
+    "activeClients": 12,
+    "aiTokens": 45230,
+    "revenue": 45600
+  },
+  "series": [
+    { "date": "2024-01-01", "revenue": 1200 },
+    { "date": "2024-01-02", "revenue": 1400 },
+    { "date": "2024-01-03", "revenue": 1100 },
+    { "date": "2024-01-04", "revenue": 1600 },
+    { "date": "2024-01-05", "revenue": 1900 },
+    { "date": "2024-01-06", "revenue": 2100 },
+    { "date": "2024-01-07", "revenue": 1800 },
+    { "date": "2024-01-08", "revenue": 2300 },
+    { "date": "2024-01-09", "revenue": 2000 },
+    { "date": "2024-01-10", "revenue": 2200 },
+    { "date": "2024-01-11", "revenue": 2500 },
+    { "date": "2024-01-12", "revenue": 2400 },
+    { "date": "2024-01-13", "revenue": 2600 },
+    { "date": "2024-01-14", "revenue": 2800 },
+    { "date": "2024-01-15", "revenue": 2700 },
+    { "date": "2024-01-16", "revenue": 2900 },
+    { "date": "2024-01-17", "revenue": 3100 },
+    { "date": "2024-01-18", "revenue": 3000 },
+    { "date": "2024-01-19", "revenue": 3200 },
+    { "date": "2024-01-20", "revenue": 3400 },
+    { "date": "2024-01-21", "revenue": 3300 },
+    { "date": "2024-01-22", "revenue": 3500 },
+    { "date": "2024-01-23", "revenue": 3600 },
+    { "date": "2024-01-24", "revenue": 3800 },
+    { "date": "2024-01-25", "revenue": 4000 }
+  ]
+}

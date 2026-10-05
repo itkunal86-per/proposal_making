@@ -22,6 +22,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { ProposalReviewBar } from "@/components/ProposalReviewBar";
 import {
   type Proposal,
   type ProposalStatus,
@@ -57,9 +59,15 @@ interface DocumentSettings {
 export default function ProposalEditor() {
   const { id = "" } = useParams();
   const nav = useNavigate();
+  const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const isSystemTemplateEdit = !!searchParams.get("templateId");
   const [p, setP] = useState<Proposal | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const lockedStatuses = ["in_review", "approved", "rejected", "sent", "accepted", "declined"];
+  const readOnly = !isSystemTemplateEdit && !!p && (
+    lockedStatuses.includes(p.status) || (user?.role === "user" && user.membershipRole === null)
+  );
   const [current, setCurrent] = useState(0);
   const [saving, setSaving] = useState(false);
   const [clients, setClients] = useState<ClientRecord[]>([]);
@@ -235,7 +243,7 @@ export default function ProposalEditor() {
         nav("/my/proposals");
       }
     })();
-  }, [id, nav, isSystemTemplateEdit, searchParams.get("templateId")]);
+  }, [id, nav, isSystemTemplateEdit, searchParams, refreshKey]);
 
   const loadVariables = useCallback(async () => {
     if (isSystemTemplateEdit) {
@@ -279,6 +287,7 @@ export default function ProposalEditor() {
 
 
   function commit(next: Proposal, keepVersion = false, note?: string) {
+    if (readOnly) return;
     console.log("Proposal Edit Form Submitted:", next);
     setP(next);
     setSaving(true);
@@ -576,6 +585,7 @@ export default function ProposalEditor() {
                 onChange={(e) => commit({ ...p, title: e.target.value })}
                 className="flex-1 max-w-md"
                 placeholder="Proposal title"
+                disabled={readOnly}
               />
               {!isSystemTemplateEdit && (
                 <Select
@@ -584,7 +594,7 @@ export default function ProposalEditor() {
                     const selectedClient = clients.find((c) => c.name === value);
                     commit({ ...p, client: value, client_id: selectedClient?.id });
                   }}
-                  disabled={isLoadingClients}
+                  disabled={isLoadingClients || readOnly}
                 >
                   <SelectTrigger className="w-64">
                     <SelectValue placeholder="Select a client" />
@@ -600,7 +610,11 @@ export default function ProposalEditor() {
               )}
               <Select
                 value={isSystemTemplateEdit ? (p.status === "draft" ? "Active" : "Inactive") : p.status}
+                disabled={readOnly || user?.membershipRole === "reviewer"}
                 onValueChange={(v) => {
+                  if (readOnly || user?.membershipRole === "reviewer") return;
+                  const protectedStatuses = ["in_review", "approved", "rejected", "rework_requested", "sent"];
+                  if (protectedStatuses.includes(v)) return;
                   if (isSystemTemplateEdit) {
                     // For system templates, map Active/Inactive to proposal status
                     const newStatus = (v === "Active" ? "draft" : "sent") as ProposalStatus;
@@ -622,6 +636,10 @@ export default function ProposalEditor() {
                   ) : (
                     <>
                       <SelectItem value="draft">Draft</SelectItem>
+                      <SelectItem value="in_review">In review</SelectItem>
+                      <SelectItem value="rework_requested">Rework requested</SelectItem>
+                      <SelectItem value="approved">Approved</SelectItem>
+                      <SelectItem value="rejected">Rejected</SelectItem>
                       <SelectItem value="published">Published</SelectItem>
                       <SelectItem value="sent">Sent</SelectItem>
                       <SelectItem value="accepted">Accepted</SelectItem>
@@ -875,9 +893,20 @@ export default function ProposalEditor() {
         />
 
         {/* Main content area */}
+        {!isSystemTemplateEdit && (
+          <ProposalReviewBar
+            proposalId={String(p.id)}
+            status={p.status}
+            title={p.title}
+            shareLink={`${window.location.origin}/preview/proposal/${p.settings?.sharing?.token ?? ""}`}
+            isReviewer={user?.membershipRole === "reviewer"}
+            canSubmit={!(user?.role === "user" && user?.membershipRole === null) && (p.status === "draft" || p.status === "rework_requested")}
+            onChanged={() => setRefreshKey((key) => key + 1)}
+          />
+        )}
         <div className="flex-1 flex gap-4 overflow-hidden">
           {/* Editor Preview - scrollable with auto-expanding content */}
-          <div ref={previewContainerRef} className="flex-1 overflow-y-auto p-6">
+          <div ref={previewContainerRef} className={`flex-1 overflow-y-auto p-6 ${readOnly ? "pointer-events-none" : ""}`}>
             <ProposalPreview
               proposal={p}
               selectedElementId={selectedElementId}
@@ -1172,6 +1201,7 @@ export default function ProposalEditor() {
                   top: y,
                   left: x,
                   status: "pending" as const,
+                  purpose: "client" as const,
                   borderColor: "#d1d5db",
                   borderWidth: 2,
                   borderRadius: 4,
@@ -1203,7 +1233,7 @@ export default function ProposalEditor() {
           </div>
 
           {/* Properties Panel */}
-          <div className="w-96 flex-shrink-0 overflow-y-auto p-6 border-l border-slate-200 bg-white">
+          <div className={`w-96 flex-shrink-0 overflow-y-auto p-6 border-l border-slate-200 bg-white ${readOnly ? "pointer-events-none" : ""}`}>
             {activePanel === "properties" ? (
               <PropertiesPanel
                 proposal={p}

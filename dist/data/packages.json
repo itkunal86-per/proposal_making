@@ -1,0 +1,55 @@
+[
+  {
+    "id": "pkg-free",
+    "code": "free",
+    "name": "Free",
+    "description": "Get started with essential proposal tools for individuals and small teams.",
+    "price": 0,
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "features": [
+      "Up to 3 active proposals",
+      "Basic analytics",
+      "Community support"
+    ],
+    "isPopular": false,
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "pkg-pro",
+    "code": "pro",
+    "name": "Pro",
+    "description": "Advanced collaboration and automation for growing teams that move fast.",
+    "price": 39,
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "features": [
+      "Unlimited proposals",
+      "Advanced analytics & insights",
+      "Automated reminders",
+      "Priority chat support"
+    ],
+    "isPopular": true,
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "pkg-enterprise",
+    "code": "enterprise",
+    "name": "Enterprise",
+    "description": "Security, compliance and managed success for large operations.",
+    "price": 129,
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "features": [
+      "Custom workflows & approvals",
+      "Unlimited workspaces",
+      "Dedicated success manager",
+      "SSO & enterprise integrations"
+    ],
+    "isPopular": false,
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z"
+  }
+]

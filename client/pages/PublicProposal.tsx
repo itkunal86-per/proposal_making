@@ -105,6 +105,7 @@ export default function PublicProposal() {
             email: field.email,
             position: field.position,
             signature: field.signature,
+            ...(field.purpose ? { purpose: field.purpose } : {}),
           })) || []
         }))
       };
@@ -675,11 +676,13 @@ export default function PublicProposal() {
                               field={field}
                               sIndex={sIndex}
                               onClick={() => {
+                                const purpose = field.purpose ?? "client";
+                                if (purpose === "internal_reviewer") return;
                                 const sectionIndex = proposal.sections.findIndex(s => s.id === section.id);
                                 setSelectedSignature({ sectionIndex, fieldIndex: sIndex });
                                 setSignatureModalOpen(true);
                               }}
-                              interactive={true}
+                              interactive={(field.purpose ?? "client") !== "internal_reviewer"}
                             />
                           ))}
                       </>
@@ -825,11 +828,12 @@ export default function PublicProposal() {
                   email: fieldData.email,
                   position: fieldData.position,
                   signature: fieldData.signature,
+                  ...(fieldData.purpose ? { purpose: fieldData.purpose } : {}),
                 };
               });
 
               const response = await fetch(
-                "https://propai-api.hirenq.com/api/public/proposal/update/signature",
+                `${apiConfig.baseUrl}/api/public/proposal/update/signature`,
                 {
                   method: "POST",
                   headers: {

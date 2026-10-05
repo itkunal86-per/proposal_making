@@ -89,6 +89,11 @@ const navByRole: Record<UserRole, NavItem[]> = {
   ],
 };
 
+const proposalFocusedNav: NavItem[] = [
+  homeNavItem,
+  { href: "/my/proposals", label: "Proposals", icon: <FileText className="w-5 h-5" /> },
+];
+
 export default function AppShell({ children }: { children: ReactNode }) {
   const { user, signOut } = useAuth();
   const location = useLocation();
@@ -96,7 +101,9 @@ export default function AppShell({ children }: { children: ReactNode }) {
 
   const navItems = useMemo(() => {
     if (!user) return [];
-    return navByRole[user.role].flatMap((item) =>
+    const focused = user.role === "user" && (user.membershipRole === "reviewer" || user.membershipRole === null);
+    const items = focused ? proposalFocusedNav : navByRole[user.role] ?? [];
+    return items.flatMap((item) =>
       item.children
         ? item.children.map((child) => ({ ...child, icon: item.icon }))
         : [item],

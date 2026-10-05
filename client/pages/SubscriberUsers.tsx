@@ -42,7 +42,7 @@ export default function SubscriberUsers() {
     const q = query.toLowerCase().trim();
     if (!q) return rows;
     return rows.filter((u) =>
-      [u.user.name, u.user.email, u.role.name, u.status].some((v) =>
+      [u.user.name, u.user.email, u.role?.name ?? "No proposal role", u.status].some((v) =>
         (v ?? "").toLowerCase().includes(q)
       )
     );
@@ -113,7 +113,7 @@ export default function SubscriberUsers() {
                     <TableRow key={u.id} className="hover:bg-muted/40">
                       <TableCell className="font-medium">{u.user.name}</TableCell>
                       <TableCell>{u.user.email}</TableCell>
-                      <TableCell>{u.role.name}</TableCell>
+                      <TableCell>{u.role?.name ?? "No proposal role"}</TableCell>
                       <TableCell>{u.status}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {new Date(u.created_at).toLocaleDateString()}

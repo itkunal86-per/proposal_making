@@ -1,4 +1,4 @@
-export type ProposalStatus = "draft" | "sent" | "accepted" | "declined";
+export type ProposalStatus = "draft" | "in_review" | "rework_requested" | "approved" | "rejected" | "published" | "sent" | "accepted" | "declined";
 
 export interface SignatureRecipient {
   id: string;

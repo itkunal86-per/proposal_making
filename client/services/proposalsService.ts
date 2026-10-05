@@ -2,7 +2,16 @@ import { z } from "zod";
 import { getStoredToken, getStoredAuth } from "@/lib/auth";
 import { apiConfig } from "@/lib/apiConfig";
 
-export type ProposalStatus = "draft" | "published" | "sent" | "accepted" | "declined";
+export type ProposalStatus =
+  | "draft"
+  | "in_review"
+  | "rework_requested"
+  | "approved"
+  | "rejected"
+  | "published"
+  | "sent"
+  | "accepted"
+  | "declined";
 
 export interface ShapeElement {
   id: string;
@@ -103,6 +112,7 @@ export interface SignatureField {
   borderColor?: string;
   borderWidth?: number;
   borderRadius?: number;
+  purpose?: "client" | "internal_reviewer";
   fullName?: string;
   email?: string;
   position?: string;
@@ -336,7 +346,17 @@ const proposalSchema = z.object({
   client: z.string().optional(),
   client_id: z.union([z.string(), z.number()]).optional(),
   deal_id: idSchema.optional(),
-  status: z.union([z.literal("draft"), z.literal("published"), z.literal("sent"), z.literal("accepted"), z.literal("declined")]).optional(),
+  status: z.union([
+    z.literal("draft"),
+    z.literal("in_review"),
+    z.literal("rework_requested"),
+    z.literal("approved"),
+    z.literal("rejected"),
+    z.literal("published"),
+    z.literal("sent"),
+    z.literal("accepted"),
+    z.literal("declined"),
+  ]).optional(),
   createdBy: z.union([z.string(), z.number()]).optional(),
   createdAt: z.union([z.number(), z.string()]).optional(),
   updatedAt: z.union([z.number(), z.string()]).optional(),
@@ -699,6 +719,7 @@ function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmai
             email: field.email,
             position: field.position,
             signature: field.signature,
+            ...(field.purpose ? { purpose: field.purpose } : {}),
           })) : [],
           comments: Array.isArray(s.comments) ? s.comments : [],
           titleStyles: normalizeStyles(s.titleStyles),

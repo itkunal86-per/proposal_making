@@ -35,6 +35,10 @@ import { Wand2, MoreVertical, FileText } from "lucide-react";
 
 const statusStyles: Record<string, string> = {
   draft: "bg-slate-100 text-slate-700 border border-slate-200",
+  in_review: "bg-amber-100 text-amber-800 border border-amber-200",
+  rework_requested: "bg-orange-100 text-orange-800 border border-orange-200",
+  approved: "bg-emerald-100 text-emerald-800 border border-emerald-200",
+  rejected: "bg-red-100 text-red-700 border border-red-200",
   published: "bg-purple-100 text-purple-700 border border-purple-200",
   sent: "bg-blue-100 text-blue-700 border border-blue-200",
   accepted: "bg-green-100 text-green-700 border border-green-200",
@@ -54,6 +58,7 @@ export default function MyProposals() {
   const [searchParams] = useSearchParams();
   const dealIdParam = searchParams.has("dealId") ? searchParams.get("dealId") ?? "" : undefined;
   const dealId = dealIdParam ? Number(dealIdParam) || 0 : 0;
+  const canCreate = user?.role !== "user" || user?.membershipRole !== null;
   const [rows, setRows] = useState<Proposal[]>([]);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -468,6 +473,7 @@ export default function MyProposals() {
               <p className="text-base text-muted-foreground mt-1">Create and manage proposals you own</p>
             </div>
             <div className="flex flex-col sm:flex-row gap-2">
+              {canCreate && (
               <Button
                 variant="outline"
                 onClick={handleOpenGenerateDialog}
@@ -476,6 +482,8 @@ export default function MyProposals() {
                 <Wand2 className="h-4 w-4" />
                 AI Generate
               </Button>
+              )}
+              {canCreate && (
               <Button
                 onClick={handleOpenCreateDialog}
                 className="gap-2 bg-gradient-to-r from-primary to-accent hover:shadow-lg transition-shadow"
@@ -483,6 +491,7 @@ export default function MyProposals() {
                 <span>+</span>
                 New proposal
               </Button>
+              )}
             </div>
           </div>
         </div>
@@ -668,10 +677,12 @@ export default function MyProposals() {
                 <FileText className="h-8 w-8 text-primary/40" />
               </div>
               <p className="text-lg font-medium text-foreground">No proposals yet</p>
-              <p className="text-sm text-muted-foreground">Create your first proposal to get started</p>
+              <p className="text-sm text-muted-foreground">{canCreate ? "Create your first proposal to get started" : "Proposals you can open will appear here"}</p>
+              {canCreate && (
               <Button onClick={handleOpenCreateDialog} className="mt-4">
                 Create Proposal
               </Button>
+              )}
             </div>
           </div>
         )}
