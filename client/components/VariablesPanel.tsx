@@ -231,7 +231,7 @@ export const VariablesPanel: React.FC<VariablesPanelProps> = ({
       <div className="border-t pt-4">
         <h3 className="text-sm font-semibold mb-3">Used Variables</h3>
 
-        <div className="space-y-2 max-h-96 overflow-y-auto">
+        <div className="space-y-2">
           {variables.map((variable) => (
             <div key={variable.id} className="border rounded-lg">
               <div className="flex items-center justify-between p-3 hover:bg-slate-50 transition-colors">

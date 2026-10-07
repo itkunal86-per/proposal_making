@@ -95,7 +95,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     const sectionStyles = (section as any).contentStyles || {};
 
     return (
-      <Card className="p-4 space-y-4 overflow-y-auto max-h-[90vh]">
+      <Card className="p-4 space-y-4">
         <h3 className="text-sm font-semibold">Section Properties</h3>
 
         <Separator />
@@ -1177,7 +1177,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     };
 
     return (
-      <Card className="p-4 space-y-4 overflow-y-auto max-h-[90vh]">
+      <Card className="p-4 space-y-4">
         <div>
           <Label className="text-xs font-semibold">Section Content {columnIndex >= 0 ? `(Column ${columnIndex + 1})` : ""}</Label>
           <div className="mt-2">

@@ -144,7 +144,21 @@ export default function ProposalEditor() {
   const saveAbort = useRef<AbortController | null>(null);
   const workflowLock = useRef(false);
 
-
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key !== "PageUp" && event.key !== "PageDown") return;
+      const target = event.target instanceof HTMLElement ? event.target : null;
+      if (target?.closest("input, textarea, select, [contenteditable='true'], [role='dialog']")) return;
+      const owner = target?.closest<HTMLElement>("[data-scroll-owner]");
+      const scroller = owner ?? previewContainerRef.current;
+      if (!scroller) return;
+      event.preventDefault();
+      const distance = Math.max(scroller.clientHeight * 0.9, 120);
+      scroller.scrollBy({ top: event.key === "PageDown" ? distance : -distance });
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -703,18 +717,8 @@ export default function ProposalEditor() {
 
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50">
-      <ProposalEditorSidebar
-        proposalId={p.id}
-        dealId={p.deal_id}
-        onOpenSections={() => setSectionsDialogOpen(true)}
-        onOpenAI={() => setAIDialogOpen(true)}
-        onSelectPanel={setActivePanel}
-        activePanel={activePanel}
-        isTemplateEdit={isSystemTemplateEdit}
-      />
-
-      <div className="ml-16 flex h-full min-h-0 flex-1 flex-col overflow-hidden">
+    <div className="flex min-h-0 flex-1 flex-col bg-slate-50">
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
         {/* Header */}
         <div className="shrink-0 bg-white border-b border-slate-200 px-6 py-4">
           <div className="flex items-center justify-between gap-4">
@@ -1044,24 +1048,19 @@ export default function ProposalEditor() {
         />
         </div>
 
-        {/* Main content area */}
-        {!isSystemTemplateEdit && (
-          <ProposalReviewBar
-            proposalId={String(p.id)}
-            status={p.status}
-            title={p.title}
-            shareLink={`${window.location.origin}/preview/proposal/${p.settings?.sharing?.token ?? ""}`}
-            isReviewer={user?.membershipRole === "reviewer"}
-            canSubmit={!(user?.role === "user" && user?.membershipRole === null) && (p.status === "draft" || p.status === "rework_requested")}
-            onBeforeAction={prepareForWorkflowAction}
-            onStatus={(status) => setP((current) => (current ? { ...current, status } : current))}
-            onSettled={releaseWorkflowLock}
-            onChanged={() => setRefreshKey((key) => key + 1)}
+        <div className="flex min-h-0 flex-1 overflow-hidden">
+          <ProposalEditorSidebar
+            proposalId={p.id}
+            dealId={p.deal_id}
+            onOpenSections={() => setSectionsDialogOpen(true)}
+            onOpenAI={() => setAIDialogOpen(true)}
+            onSelectPanel={setActivePanel}
+            activePanel={activePanel}
+            isTemplateEdit={isSystemTemplateEdit}
           />
-        )}
-        <div className="flex min-h-0 flex-1 gap-4 overflow-hidden">
-          {/* Editor Preview - scrollable with auto-expanding content */}
-          <div ref={previewContainerRef} className={`min-h-0 flex-1 overflow-y-auto p-6 ${readOnly ? "pointer-events-none" : ""}`}>
+          {/* Proposal scroll container. Wheel, scrollbar, Page Up, and Page Down move this element. */}
+          <div ref={previewContainerRef} data-scroll-owner="proposal" className="min-h-0 min-w-0 flex-1 overflow-y-auto p-6">
+            <div className={readOnly ? "pointer-events-none" : undefined}>
             <ProposalPreview
               proposal={p}
               selectedElementId={selectedElementId}
@@ -1385,10 +1384,12 @@ export default function ProposalEditor() {
                 setSignatureDetailsOpen(true);
               }}
             />
+            </div>
           </div>
 
-          {/* Properties Panel */}
-          <div className={`min-h-0 w-96 flex-shrink-0 overflow-y-auto p-6 border-l border-slate-200 bg-white ${readOnly ? "pointer-events-none" : ""}`}>
+          {/* Right panel scroll container: text controls, then Comments. */}
+          <div data-scroll-owner="right-panel" className="min-h-0 w-96 shrink-0 overflow-y-auto border-l border-slate-200 bg-white">
+            <div className={`p-6 ${readOnly ? "pointer-events-none" : ""}`}>
             {activePanel === "properties" ? (
               <PropertiesPanel
                 proposal={p}
@@ -1456,6 +1457,21 @@ export default function ProposalEditor() {
                 }}
               />
             ) : null}
+            </div>
+            {!isSystemTemplateEdit && (
+              <ProposalReviewBar
+                proposalId={String(p.id)}
+                status={p.status}
+                title={p.title}
+                shareLink={`${window.location.origin}/preview/proposal/${p.settings?.sharing?.token ?? ""}`}
+                isReviewer={user?.membershipRole === "reviewer"}
+                canSubmit={!(user?.role === "user" && user?.membershipRole === null) && (p.status === "draft" || p.status === "rework_requested")}
+                onBeforeAction={prepareForWorkflowAction}
+                onStatus={(status) => setP((current) => (current ? { ...current, status } : current))}
+                onSettled={releaseWorkflowLock}
+                onChanged={() => setRefreshKey((key) => key + 1)}
+              />
+            )}
           </div>
         </div>
       </div>

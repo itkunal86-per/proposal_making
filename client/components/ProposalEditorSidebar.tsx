@@ -42,7 +42,7 @@ export const ProposalEditorSidebar: React.FC<ProposalEditorSidebarProps> = ({
     : allPanelButtons;
 
   return (
-    <div className="fixed left-0 top-0 bottom-0 w-16 bg-white flex flex-col items-center py-4 gap-4 border-r border-slate-200 z-40">
+    <div data-scroll-owner="left-controls" className="flex min-h-0 w-16 shrink-0 flex-col items-center gap-4 self-stretch overflow-y-auto border-r border-slate-200 bg-white py-4">
       <Button
         variant="ghost"
         size="icon"
@@ -84,7 +84,7 @@ export const ProposalEditorSidebar: React.FC<ProposalEditorSidebarProps> = ({
         ))}
       </div>
 
-      <div className="flex-1" />
+      <div className="mt-auto" />
 
       <Link to={`/proposals/${proposalId}/settings`}>
         <Button

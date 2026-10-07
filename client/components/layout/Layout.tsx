@@ -12,10 +12,11 @@ export default function Layout({ children }: { children: ReactNode }) {
   const hideHeader = usesAppShell || isPublicProposalView || isSsoLogin;
   const hideFooter =
     usesAppShell || pathname.startsWith("/proposals") || pathname.startsWith("/p") || isPublicProposalView || isSsoLogin;
+  const isProposalEditor = /^\/proposals\/[^/]+\/edit\/?$/.test(pathname);
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className={isProposalEditor ? "flex h-dvh flex-col overflow-hidden" : "flex min-h-screen flex-col"}>
       {!hideHeader && <Header />}
-      <main className="flex-1">{children}</main>
+      <main className={isProposalEditor ? "flex min-h-0 flex-1 flex-col overflow-hidden" : "flex-1"}>{children}</main>
       {!hideFooter && <Footer />}
     </div>
   );

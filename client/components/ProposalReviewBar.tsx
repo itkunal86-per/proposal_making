@@ -37,6 +37,12 @@ const PROPOSAL_STATUSES = new Set<ProposalStatus>([
   "declined",
 ]);
 
+function formatCommentTime(value: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleString();
+}
+
 function statusFrom(result: unknown): ProposalStatus | null {
   if (!result || typeof result !== "object" || !("status" in result)) return null;
   const status = (result as { status?: unknown }).status;
@@ -89,7 +95,8 @@ export function ProposalReviewBar({
   if (!isReviewer && !canSubmit) return null;
 
   return (
-    <div className="min-h-0 max-h-[40%] shrink-0 space-y-3 overflow-y-auto border-b border-slate-200 bg-slate-50 px-6 py-3">
+    <div className="space-y-3 border-t border-slate-200 px-6 py-4">
+      <h2 className="text-sm font-semibold text-slate-900">Comments</h2>
       <div className="flex flex-wrap items-center gap-2">
         {canSubmit && (status === "draft" || status === "rework_requested") && (
           <Button size="sm" disabled={busy} onClick={() => run(() => submitForReview(proposalId), "Submitted for review")}>
@@ -126,6 +133,7 @@ export function ProposalReviewBar({
             <li key={event.id}>
               <span className="font-medium">{event.action.replace(/_/g, " ")}</span>
               {event.actor?.name ? ` by ${event.actor.name}` : ""}
+              {event.created_at ? ` · ${formatCommentTime(event.created_at)}` : ""}
               {event.comment ? ` — ${event.comment}` : ""}
             </li>
           ))}
