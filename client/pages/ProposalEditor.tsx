@@ -82,6 +82,12 @@ function editableStatusChoices(status: string): Array<{ value: ProposalStatus; l
       { value: "draft", label: "Draft" },
     ];
   }
+  if (status === "approved") {
+    return [
+      { value: "approved", label: "Approved" },
+      { value: "published", label: "Published" },
+    ];
+  }
   return null;
 }
 
@@ -347,6 +353,32 @@ export default function ProposalEditor() {
     } catch (error) {
       releaseWorkflowLock();
       throw error;
+    }
+  }
+
+  async function publishApprovedProposal() {
+    if (!p || p.status !== "approved" || workflowLock.current) return;
+    if (user?.membershipRole === "reviewer") return;
+    workflowLock.current = true;
+    setSubmittingReview(true);
+    try {
+      const result = await updateProposal({ ...p, status: "published" });
+      setP((current) => (current ? { ...current, status: "published" } : current));
+      if (result.redirect && result.deal_id != null) {
+        const mainAppUrl = (import.meta.env.VITE_MAIN_APP_URL ?? "https://pitchsuite.io/").replace(/\/+$/, "");
+        window.location.href = `${mainAppUrl}/deals/${encodeURIComponent(String(result.deal_id))}#proposals`;
+      }
+      toast({ title: "Proposal published" });
+    } catch (error) {
+      if (!isAbortError(error)) {
+        toast({
+          title: "Could not publish proposal",
+          description: error instanceof Error ? error.message : "Please try again.",
+          variant: "destructive",
+        });
+      }
+    } finally {
+      releaseWorkflowLock();
     }
   }
 
@@ -721,16 +753,21 @@ export default function ProposalEditor() {
                     <SelectItem value="Inactive">Inactive</SelectItem>
                   </SelectContent>
                 </Select>
-              ) : editableStatusChoices(p.status) && !readOnly && user?.membershipRole !== "reviewer" ? (
+              ) : editableStatusChoices(p.status) && user?.membershipRole !== "reviewer" && !(user?.role === "user" && user.membershipRole === null) && (!readOnly || p.status === "approved") ? (
                 <Select
                   value={p.status}
+                  disabled={submittingReview}
                   onValueChange={(v) => {
                     if (v === p.status) return;
                     if (v === "in_review") {
                       void submitCurrentProposal();
                       return;
                     }
-                    if (v === "draft" || v === "published") {
+                    if (v === "published" && p.status === "approved") {
+                      void publishApprovedProposal();
+                      return;
+                    }
+                    if ((v === "draft" || v === "published") && !readOnly) {
                       commit({ ...p, status: v as ProposalStatus });
                     }
                   }}
