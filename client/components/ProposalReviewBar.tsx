@@ -7,12 +7,10 @@ import {
   approveProposal,
   listReviewEvents,
   requestRework,
-  signProposal,
   submitForReview,
   type ReviewEvent,
 } from "@/services/proposalReviewService";
 import { type ProposalStatus } from "@/services/proposalsService";
-import { EmailShareDialog } from "@/components/EmailShareDialog";
 
 interface ProposalReviewBarProps {
   proposalId: string;
@@ -61,7 +59,6 @@ export function ProposalReviewBar({
   const [comment, setComment] = useState("");
   const [events, setEvents] = useState<ReviewEvent[]>([]);
   const [busy, setBusy] = useState(false);
-  const [shareOpen, setShareOpen] = useState(false);
 
   useEffect(() => {
     if (!isReviewer && !canSubmit) return;
@@ -114,16 +111,6 @@ export function ProposalReviewBar({
             Add Comment
           </Button>
         )}
-        {isReviewer && status === "approved" && (
-          <>
-            <Button size="sm" variant="outline" disabled={busy} onClick={() => run(() => signProposal(proposalId), "Reviewer signature saved")}>
-              Sign
-            </Button>
-            <Button size="sm" disabled={busy} onClick={() => setShareOpen(true)}>
-              Send
-            </Button>
-          </>
-        )}
       </div>
       {(isReviewer || canSubmit) && (
         <Textarea
@@ -144,14 +131,6 @@ export function ProposalReviewBar({
           ))}
         </ul>
       )}
-      <EmailShareDialog
-        open={shareOpen}
-        onOpenChange={setShareOpen}
-        proposalTitle={title}
-        shareLink={shareLink}
-        proposalId={proposalId}
-        onSent={onChanged}
-      />
     </div>
   );
 }

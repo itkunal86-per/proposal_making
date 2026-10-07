@@ -91,6 +91,15 @@ function editableStatusChoices(status: string): Array<{ value: ProposalStatus; l
   return null;
 }
 
+function reviewerApprovedChoices(status: string): Array<{ value: ProposalStatus; label: string }> | null {
+  if (status !== "approved") return null;
+  return [
+    { value: "approved", label: "Approved" },
+    { value: "published", label: "Published" },
+    { value: "sent", label: "Sent" },
+  ];
+}
+
 export default function ProposalEditor() {
   const { id = "" } = useParams();
   const nav = useNavigate();
@@ -356,23 +365,24 @@ export default function ProposalEditor() {
     }
   }
 
-  async function publishApprovedProposal() {
+  async function setApprovedOutcome(nextStatus: "published" | "sent") {
     if (!p || p.status !== "approved" || workflowLock.current) return;
-    if (user?.membershipRole === "reviewer") return;
+    const isReviewer = user?.membershipRole === "reviewer";
+    if (nextStatus === "sent" && !isReviewer) return;
     workflowLock.current = true;
     setSubmittingReview(true);
     try {
-      const result = await updateProposal({ ...p, status: "published" });
-      setP((current) => (current ? { ...current, status: "published" } : current));
-      if (result.redirect && result.deal_id != null) {
+      const result = await updateProposal({ ...p, status: nextStatus });
+      setP((current) => (current ? { ...current, status: nextStatus } : current));
+      if (nextStatus === "published" && result.redirect && result.deal_id != null) {
         const mainAppUrl = (import.meta.env.VITE_MAIN_APP_URL ?? "https://pitchsuite.io/").replace(/\/+$/, "");
         window.location.href = `${mainAppUrl}/deals/${encodeURIComponent(String(result.deal_id))}#proposals`;
       }
-      toast({ title: "Proposal published" });
+      toast({ title: nextStatus === "published" ? "Proposal published" : "Proposal marked as sent" });
     } catch (error) {
       if (!isAbortError(error)) {
         toast({
-          title: "Could not publish proposal",
+          title: "Could not update proposal status",
           description: error instanceof Error ? error.message : "Please try again.",
           variant: "destructive",
         });
@@ -753,7 +763,7 @@ export default function ProposalEditor() {
                     <SelectItem value="Inactive">Inactive</SelectItem>
                   </SelectContent>
                 </Select>
-              ) : editableStatusChoices(p.status) && user?.membershipRole !== "reviewer" && !(user?.role === "user" && user.membershipRole === null) && (!readOnly || p.status === "approved") ? (
+              ) : (user?.membershipRole === "reviewer" ? reviewerApprovedChoices(p.status) : editableStatusChoices(p.status)) && (user?.membershipRole === "reviewer" || !(user?.role === "user" && user.membershipRole === null)) && (user?.membershipRole === "reviewer" || !readOnly || p.status === "approved") ? (
                 <Select
                   value={p.status}
                   disabled={submittingReview}
@@ -763,8 +773,8 @@ export default function ProposalEditor() {
                       void submitCurrentProposal();
                       return;
                     }
-                    if (v === "published" && p.status === "approved") {
-                      void publishApprovedProposal();
+                    if (p.status === "approved" && (v === "published" || v === "sent")) {
+                      void setApprovedOutcome(v);
                       return;
                     }
                     if ((v === "draft" || v === "published") && !readOnly) {
@@ -776,7 +786,7 @@ export default function ProposalEditor() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {editableStatusChoices(p.status)!.map((choice) => (
+                    {(user?.membershipRole === "reviewer" ? reviewerApprovedChoices(p.status) : editableStatusChoices(p.status))!.map((choice) => (
                       <SelectItem key={choice.value} value={choice.value}>
                         {choice.label}
                       </SelectItem>
