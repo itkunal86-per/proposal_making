@@ -89,7 +89,7 @@ export function ProposalReviewBar({
   if (!isReviewer && !canSubmit) return null;
 
   return (
-    <div className="border-b border-slate-200 bg-slate-50 px-6 py-3 space-y-3">
+    <div className="min-h-0 max-h-[40%] shrink-0 space-y-3 overflow-y-auto border-b border-slate-200 bg-slate-50 px-6 py-3">
       <div className="flex flex-wrap items-center gap-2">
         {canSubmit && (status === "draft" || status === "rework_requested") && (
           <Button size="sm" disabled={busy} onClick={() => run(() => submitForReview(proposalId), "Submitted for review")}>

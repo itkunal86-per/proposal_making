@@ -703,7 +703,7 @@ export default function ProposalEditor() {
 
 
   return (
-    <div className="flex h-screen bg-slate-50">
+    <div className="flex h-screen overflow-hidden bg-slate-50">
       <ProposalEditorSidebar
         proposalId={p.id}
         dealId={p.deal_id}
@@ -714,9 +714,9 @@ export default function ProposalEditor() {
         isTemplateEdit={isSystemTemplateEdit}
       />
 
-      <div className="flex-1 flex flex-col ml-16">
+      <div className="ml-16 flex h-full min-h-0 flex-1 flex-col overflow-hidden">
         {/* Header */}
-        <div className="bg-white border-b border-slate-200 px-6 py-4">
+        <div className="shrink-0 bg-white border-b border-slate-200 px-6 py-4">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3 flex-1">
               <Input
@@ -854,6 +854,7 @@ export default function ProposalEditor() {
         </div>
 
         {/* Text Formatting Toolbar */}
+        <div className="shrink-0">
         <TextFormattingToolbar
           sections={p.sections.map((s) => ({ id: s.id, title: s.title }))}
           onSectionSelect={handleSectionNavigate}
@@ -1041,6 +1042,7 @@ export default function ProposalEditor() {
             }
           }}
         />
+        </div>
 
         {/* Main content area */}
         {!isSystemTemplateEdit && (
@@ -1057,9 +1059,9 @@ export default function ProposalEditor() {
             onChanged={() => setRefreshKey((key) => key + 1)}
           />
         )}
-        <div className="flex-1 flex gap-4 overflow-hidden">
+        <div className="flex min-h-0 flex-1 gap-4 overflow-hidden">
           {/* Editor Preview - scrollable with auto-expanding content */}
-          <div ref={previewContainerRef} className={`flex-1 overflow-y-auto p-6 ${readOnly ? "pointer-events-none" : ""}`}>
+          <div ref={previewContainerRef} className={`min-h-0 flex-1 overflow-y-auto p-6 ${readOnly ? "pointer-events-none" : ""}`}>
             <ProposalPreview
               proposal={p}
               selectedElementId={selectedElementId}
@@ -1386,7 +1388,7 @@ export default function ProposalEditor() {
           </div>
 
           {/* Properties Panel */}
-          <div className={`w-96 flex-shrink-0 overflow-y-auto p-6 border-l border-slate-200 bg-white ${readOnly ? "pointer-events-none" : ""}`}>
+          <div className={`min-h-0 w-96 flex-shrink-0 overflow-y-auto p-6 border-l border-slate-200 bg-white ${readOnly ? "pointer-events-none" : ""}`}>
             {activePanel === "properties" ? (
               <PropertiesPanel
                 proposal={p}
