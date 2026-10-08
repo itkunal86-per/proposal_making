@@ -1372,12 +1372,12 @@ export default function ProposalEditor() {
                   ),
                 };
                 commit(updated);
-                // Select the newly added signature immediately so it can be dragged
                 const sectionIndex = p.sections.findIndex((s) => String(s.id) === String(sectionId));
                 const fieldIndex = (p.sections[sectionIndex]?.signatureFields || []).length;
                 const signatureId = `signature-${sectionId}-${fieldIndex}`;
                 setSelectedElementId(signatureId);
                 setSelectedElementType("signature");
+                setActivePanel("properties");
               }}
               onOpenSignatureDetails={(sectionId, fieldIndex) => {
                 setSignatureDetailsData({ sectionId, fieldIndex });

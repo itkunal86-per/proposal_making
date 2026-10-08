@@ -3486,6 +3486,148 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     );
   }
 
+  if (selectedElementType === "signature" && selectedElementId) {
+    const match = selectedElementId.match(/^signature-(.+)-(\d+)$/);
+    const sectionId = match?.[1];
+    const fieldIndex = match ? parseInt(match[2], 10) : -1;
+    const section = proposal.sections.find((s) => String(s.id) === String(sectionId));
+    const field = section?.signatureFields?.[fieldIndex];
+
+    if (!section || !field) {
+      return (
+        <Card className="p-4">
+          <div className="text-center text-muted-foreground">
+            <p className="text-sm">Signature not found</p>
+          </div>
+        </Card>
+      );
+    }
+
+    const handleUpdateSignature = (updates: Partial<typeof field>) => {
+      const updatedProposal = {
+        ...proposal,
+        sections: proposal.sections.map((s) =>
+          String(s.id) === String(section.id)
+            ? {
+                ...s,
+                signatureFields: (s.signatureFields || []).map((item, index) =>
+                  index === fieldIndex ? { ...item, ...updates } : item
+                ),
+              }
+            : s
+        ),
+      };
+      onUpdateProposal(updatedProposal);
+    };
+
+    return (
+      <Card className="p-4 space-y-4">
+        <h3 className="text-sm font-semibold">Signature</h3>
+        <Separator />
+        <div>
+          <Label className="text-xs font-semibold">Purpose</Label>
+          <select
+            value={field.purpose || "client"}
+            onChange={(e) =>
+              handleUpdateSignature({ purpose: e.target.value as "client" | "internal_reviewer" })
+            }
+            className="mt-2 w-full rounded-md border px-3 py-2 text-sm"
+          >
+            <option value="client">Client</option>
+            <option value="internal_reviewer">Internal reviewer</option>
+          </select>
+        </div>
+        <div>
+          <Label className="text-xs font-semibold">Full name</Label>
+          <Input
+            value={field.fullName || ""}
+            onChange={(e) => handleUpdateSignature({ fullName: e.target.value })}
+            className="mt-2"
+          />
+        </div>
+        <div>
+          <Label className="text-xs font-semibold">Email</Label>
+          <Input
+            value={field.email || ""}
+            onChange={(e) => handleUpdateSignature({ email: e.target.value })}
+            className="mt-2"
+          />
+        </div>
+        <div>
+          <Label className="text-xs font-semibold">Position</Label>
+          <Input
+            value={field.position || ""}
+            onChange={(e) => handleUpdateSignature({ position: e.target.value })}
+            className="mt-2"
+          />
+        </div>
+        <div>
+          <Label className="text-xs font-semibold">Width</Label>
+          <div className="mt-2 flex gap-2">
+            <Input
+              type="number"
+              min="80"
+              value={field.width}
+              onChange={(e) => handleUpdateSignature({ width: parseInt(e.target.value, 10) || 280 })}
+              className="flex-1"
+            />
+            <span className="self-center text-sm text-muted-foreground">px</span>
+          </div>
+        </div>
+        <div>
+          <Label className="text-xs font-semibold">Height</Label>
+          <div className="mt-2 flex gap-2">
+            <Input
+              type="number"
+              min="40"
+              value={field.height}
+              onChange={(e) => handleUpdateSignature({ height: parseInt(e.target.value, 10) || 120 })}
+              className="flex-1"
+            />
+            <span className="self-center text-sm text-muted-foreground">px</span>
+          </div>
+        </div>
+        <div>
+          <Label className="text-xs font-semibold">Border color</Label>
+          <div className="mt-2 flex gap-2">
+            <Input
+              type="color"
+              value={field.borderColor || "#d1d5db"}
+              onChange={(e) => handleUpdateSignature({ borderColor: e.target.value })}
+              className="h-10 w-16 cursor-pointer p-1"
+            />
+            <Input
+              value={field.borderColor || "#d1d5db"}
+              onChange={(e) => handleUpdateSignature({ borderColor: e.target.value })}
+              className="flex-1"
+            />
+          </div>
+        </div>
+        <Button
+          variant="destructive"
+          size="sm"
+          className="w-full"
+          onClick={() => {
+            const updatedProposal = {
+              ...proposal,
+              sections: proposal.sections.map((s) =>
+                String(s.id) === String(section.id)
+                  ? {
+                      ...s,
+                      signatureFields: (s.signatureFields || []).filter((_, index) => index !== fieldIndex),
+                    }
+                  : s
+              ),
+            };
+            onUpdateProposal(updatedProposal);
+          }}
+        >
+          Remove signature
+        </Button>
+      </Card>
+    );
+  }
+
   return (
     <Card className="p-4">
       <div className="text-center text-muted-foreground">
