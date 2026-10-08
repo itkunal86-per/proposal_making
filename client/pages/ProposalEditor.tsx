@@ -151,7 +151,7 @@ export default function ProposalEditor() {
       if (target?.closest("input, textarea, select, [contenteditable='true'], [role='dialog']")) return;
       const owner = target?.closest<HTMLElement>("[data-scroll-owner]");
       const scroller = owner ?? previewContainerRef.current;
-      if (!scroller) return;
+      if (!scroller || scroller.scrollHeight <= scroller.clientHeight) return;
       event.preventDefault();
       const distance = Math.max(scroller.clientHeight * 0.9, 120);
       scroller.scrollBy({ top: event.key === "PageDown" ? distance : -distance });
@@ -717,8 +717,8 @@ export default function ProposalEditor() {
 
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col bg-slate-50">
-      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+    <>
+    <div className="absolute inset-0 grid grid-rows-[auto_auto_minmax(0,1fr)] overflow-hidden bg-slate-50">
         {/* Header */}
         <div className="shrink-0 bg-white border-b border-slate-200 px-6 py-4">
           <div className="flex items-center justify-between gap-4">
@@ -1048,7 +1048,7 @@ export default function ProposalEditor() {
         />
         </div>
 
-        <div className="flex min-h-0 flex-1 overflow-hidden">
+        <div className="grid min-h-0 grid-cols-1 overflow-y-auto md:grid-cols-[4rem_minmax(0,1fr)_24rem] md:grid-rows-[minmax(0,1fr)] md:overflow-hidden">
           <ProposalEditorSidebar
             proposalId={p.id}
             dealId={p.deal_id}
@@ -1059,7 +1059,7 @@ export default function ProposalEditor() {
             isTemplateEdit={isSystemTemplateEdit}
           />
           {/* Proposal scroll container. Wheel, scrollbar, Page Up, and Page Down move this element. */}
-          <div ref={previewContainerRef} data-scroll-owner="proposal" className="min-h-0 min-w-0 flex-1 overflow-y-auto p-6">
+          <div ref={previewContainerRef} data-scroll-owner="proposal" className="min-h-0 min-w-0 overflow-y-auto p-6">
             <div className={readOnly ? "pointer-events-none" : undefined}>
             <ProposalPreview
               proposal={p}
@@ -1388,7 +1388,7 @@ export default function ProposalEditor() {
           </div>
 
           {/* Right panel scroll container: text controls, then Comments. */}
-          <div data-scroll-owner="right-panel" className="min-h-0 w-96 shrink-0 overflow-y-auto border-l border-slate-200 bg-white">
+          <div data-scroll-owner="right-panel" className="min-h-0 min-w-0 overflow-y-auto border-t border-slate-200 bg-white md:border-l md:border-t-0">
             <div className={`p-6 ${readOnly ? "pointer-events-none" : ""}`}>
             {activePanel === "properties" ? (
               <PropertiesPanel
@@ -1474,7 +1474,7 @@ export default function ProposalEditor() {
             )}
           </div>
         </div>
-      </div>
+    </div>
 
       {/* Dialogs */}
       <SectionsDialog
@@ -1587,6 +1587,6 @@ export default function ProposalEditor() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 }

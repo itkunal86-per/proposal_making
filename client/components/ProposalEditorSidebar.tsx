@@ -42,7 +42,7 @@ export const ProposalEditorSidebar: React.FC<ProposalEditorSidebarProps> = ({
     : allPanelButtons;
 
   return (
-    <div data-scroll-owner="left-controls" className="flex min-h-0 w-16 shrink-0 flex-col items-center gap-4 self-stretch overflow-y-auto border-r border-slate-200 bg-white py-4">
+    <div data-scroll-owner="left-controls" className="flex min-h-0 w-full flex-col items-center gap-4 overflow-y-auto border-b border-slate-200 bg-white py-4 md:border-b-0 md:border-r">
       <Button
         variant="ghost"
         size="icon"

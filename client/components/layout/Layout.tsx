@@ -14,9 +14,9 @@ export default function Layout({ children }: { children: ReactNode }) {
     usesAppShell || pathname.startsWith("/proposals") || pathname.startsWith("/p") || isPublicProposalView || isSsoLogin;
   const isProposalEditor = /^\/proposals\/[^/]+\/edit\/?$/.test(pathname);
   return (
-    <div className={isProposalEditor ? "flex h-dvh flex-col overflow-hidden" : "flex min-h-screen flex-col"}>
+    <div className={isProposalEditor ? "proposal-editor-shell grid h-dvh grid-rows-[auto_minmax(0,1fr)]" : "flex min-h-screen flex-col"}>
       {!hideHeader && <Header />}
-      <main className={isProposalEditor ? "flex min-h-0 flex-1 flex-col overflow-hidden" : "flex-1"}>{children}</main>
+      <main className={isProposalEditor ? "relative min-h-0" : "flex-1"}>{children}</main>
       {!hideFooter && <Footer />}
     </div>
   );
