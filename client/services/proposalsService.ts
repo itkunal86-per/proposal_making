@@ -128,7 +128,8 @@ export interface SignatureField {
   borderColor?: string;
   borderWidth?: number;
   borderRadius?: number;
-  purpose?: "client" | "internal_reviewer";
+  purpose?: "client" | "internal_reviewer" | "creator" | "reviewer";
+  signedByUserId?: number;
   fullName?: string;
   email?: string;
   position?: string;
@@ -735,6 +736,7 @@ function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmai
             email: field.email,
             position: field.position,
             signature: field.signature,
+            signedByUserId: field.signedByUserId || field.signed_by_user_id,
             ...(field.purpose ? { purpose: field.purpose } : {}),
           })) : [],
           comments: Array.isArray(s.comments) ? s.comments : [],

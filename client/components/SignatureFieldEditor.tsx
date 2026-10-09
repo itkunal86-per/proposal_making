@@ -142,6 +142,7 @@ export const SignatureFieldEditor: React.FC<SignatureFieldEditorProps> = ({
         borderRadius: field.borderRadius ? `${field.borderRadius}px` : "4px",
         cursor: isDragging ? "grabbing" : "grab",
         zIndex: isDragging || selected ? 1000 : 10,
+        pointerEvents: "auto",
         display: "flex",
         flexDirection: "column",
         boxShadow: selected ? "0 0 0 4px rgba(37, 99, 235, 0.1)" : "none",

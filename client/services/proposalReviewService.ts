@@ -49,8 +49,11 @@ export function addReviewComment(proposalId: string, comment: string) {
   return postAction(proposalId, "comments", { comment });
 }
 
-export function signProposal(proposalId: string, fieldId?: string) {
-  return postAction(proposalId, "sign", fieldId ? { field_id: fieldId } : {});
+export function signProposal(proposalId: string, fieldId?: string, signature?: string) {
+  return postAction(proposalId, "sign", {
+    ...(fieldId ? { field_id: fieldId } : {}),
+    ...(signature ? { signature } : {}),
+  });
 }
 
 export async function listReviewEvents(proposalId: string): Promise<ReviewEvent[]> {

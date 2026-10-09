@@ -1,5 +1,20 @@
 import React from "react";
 
+function signatureRoleLabel(purpose?: string): string {
+  if (purpose === "creator") return "Creator";
+  if (purpose === "reviewer") return "Reviewer";
+  if (purpose === "internal_reviewer") return "Internal Reviewer";
+  return "Client";
+}
+
+function formatSignedAt(value: unknown): string {
+  if (value == null || value === "") return "";
+  const numeric = typeof value === "number" ? value : Number(value);
+  const date = Number.isFinite(numeric) ? new Date(numeric > 1e12 ? numeric : numeric * 1000) : new Date(String(value));
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleString();
+}
+
 interface SignatureFieldViewProps {
   field: any;
   sIndex: number;
@@ -13,7 +28,9 @@ export const SignatureFieldView: React.FC<SignatureFieldViewProps> = ({
   onClick,
   interactive = true,
 }) => {
-  const isSigned = field.status === "signed" && field.signatureDisplayText;
+  const isSigned = field.status === "signed" && (field.signature || field.signatureDisplayText);
+  const roleLabel = signatureRoleLabel(field.purpose);
+  const signedAtLabel = formatSignedAt(field.signedAt ?? field.signed_at);
 
   return (
     <div
@@ -26,6 +43,8 @@ export const SignatureFieldView: React.FC<SignatureFieldViewProps> = ({
         borderRadius: field.borderRadius ? `${field.borderRadius}px` : "0px",
         display: "flex",
         flexDirection: "column",
+        pointerEvents: "auto",
+        zIndex: 20,
       }}
     >
       {/* Main signature field box */}
@@ -49,6 +68,9 @@ export const SignatureFieldView: React.FC<SignatureFieldViewProps> = ({
           }
         }}
       >
+        <div style={{ fontSize: "11px", fontWeight: 700, color: "#1f2937", marginBottom: "4px" }}>
+          {roleLabel} Signature
+        </div>
         {isSigned ? (
           <div style={{ textAlign: "center", width: "100%" }}>
             <div
@@ -63,21 +85,16 @@ export const SignatureFieldView: React.FC<SignatureFieldViewProps> = ({
             >
               {field.signature}
             </div>
-            {field.signatureDisplayText && (
-              <div
-                style={{
-                  fontSize: "10px",
-                  color: "#4b5563",
-                  whiteSpace: "pre-wrap",
-                  lineHeight: "1.3",
-                }}
-              >
-                {field.signatureDisplayText?.replace(/\\n/g, '\n')}
-              </div>
-            )}
+            {field.fullName ? <div style={{ fontSize: "11px", color: "#374151" }}>Name: {field.fullName}</div> : null}
+            <div style={{ fontSize: "11px", color: "#374151" }}>Role: {roleLabel}</div>
+            {signedAtLabel ? <div style={{ fontSize: "11px", color: "#374151" }}>Signed At: {signedAtLabel}</div> : null}
           </div>
         ) : (
-          <div style={{ flex: 1, borderBottom: "1px solid #cbd5e1" }} />
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
+            {field.fullName ? <div style={{ fontSize: "11px", color: "#374151" }}>Name: {field.fullName}</div> : null}
+            <div style={{ fontSize: "11px", color: "#374151" }}>Role: {roleLabel}</div>
+            <div style={{ marginTop: "6px", fontSize: "12px", fontWeight: 600, color: "#2563eb" }}>Click to Sign</div>
+          </div>
         )}
       </div>
 
@@ -115,7 +132,7 @@ export const SignatureFieldView: React.FC<SignatureFieldViewProps> = ({
         >
           {field.fullName
             ? `${field.fullName}${field.position ? ` - ${field.position}` : ""}`
-            : `Signature ${sIndex + 1}`}
+            : `${roleLabel} Signature`}
         </div>
       </div>
     </div>

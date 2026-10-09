@@ -3526,16 +3526,22 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
         <Separator />
         <div>
           <Label className="text-xs font-semibold">Purpose</Label>
-          <select
-            value={field.purpose || "client"}
-            onChange={(e) =>
-              handleUpdateSignature({ purpose: e.target.value as "client" | "internal_reviewer" })
-            }
-            className="mt-2 w-full rounded-md border px-3 py-2 text-sm"
-          >
-            <option value="client">Client</option>
-            <option value="internal_reviewer">Internal reviewer</option>
-          </select>
+          {field.purpose === "client" || field.purpose === "internal_reviewer" ? (
+            <p className="mt-2 text-sm text-slate-700">
+              {field.purpose === "internal_reviewer" ? "Internal Reviewer" : "Client"}
+            </p>
+          ) : (
+            <select
+              value={field.purpose === "reviewer" ? "reviewer" : "creator"}
+              onChange={(e) =>
+                handleUpdateSignature({ purpose: e.target.value === "reviewer" ? "reviewer" : "creator" })
+              }
+              className="mt-2 w-full rounded-md border px-3 py-2 text-sm"
+            >
+              <option value="creator">Creator</option>
+              <option value="reviewer">Reviewer</option>
+            </select>
+          )}
         </div>
         <div>
           <Label className="text-xs font-semibold">Full name</Label>

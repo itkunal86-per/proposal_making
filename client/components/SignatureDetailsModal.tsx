@@ -19,7 +19,7 @@ interface SignatureDetails {
   signedAt?: number;
   signatureDisplayText?: string;
   status?: "pending" | "signed" | "declined";
-  purpose?: "client" | "internal_reviewer";
+  purpose?: "client" | "internal_reviewer" | "creator" | "reviewer";
 }
 
 interface SignatureDetailsModalProps {
@@ -51,7 +51,7 @@ export const SignatureDetailsModal: React.FC<SignatureDetailsModalProps> = ({
   const [email, setEmail] = useState(signatureDetails.email || "");
   const [position, setPosition] = useState(signatureDetails.position || "");
   const [signature, setSignature] = useState(signatureDetails.signature || "");
-  const [purpose, setPurpose] = useState<"client" | "internal_reviewer">(signatureDetails.purpose ?? "client");
+  const [purpose, setPurpose] = useState<"client" | "internal_reviewer" | "creator" | "reviewer">(signatureDetails.purpose ?? "creator");
   const isSignedAlready = signatureDetails.status === "signed" || isAlreadySigned;
 
   // Auto-generate signature when fullName changes
@@ -160,16 +160,20 @@ export const SignatureDetailsModal: React.FC<SignatureDetailsModalProps> = ({
             <Label htmlFor="signature-purpose" className="text-sm font-semibold">
               Signature purpose
             </Label>
-            <select
-              id="signature-purpose"
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-              value={purpose}
-              disabled={isSignedAlready}
-              onChange={(event) => setPurpose(event.target.value === "internal_reviewer" ? "internal_reviewer" : "client")}
-            >
-              <option value="client">Client</option>
-              <option value="internal_reviewer">Internal reviewer</option>
-            </select>
+            {purpose === "client" || purpose === "internal_reviewer" ? (
+              <p className="text-sm text-slate-700">{purpose === "internal_reviewer" ? "Internal Reviewer" : "Client"}</p>
+            ) : (
+              <select
+                id="signature-purpose"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                value={purpose === "reviewer" ? "reviewer" : "creator"}
+                disabled
+                onChange={(event) => setPurpose(event.target.value === "reviewer" ? "reviewer" : "creator")}
+              >
+                <option value="creator">Creator</option>
+                <option value="reviewer">Reviewer</option>
+              </select>
+            )}
           </div>
           {/* Full Name */}
           <div className="space-y-2">

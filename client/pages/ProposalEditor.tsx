@@ -33,7 +33,7 @@ import {
   persistProposal,
   valueTotal,
 } from "@/services/proposalsService";
-import { submitForReview } from "@/services/proposalReviewService";
+import { signProposal, submitForReview } from "@/services/proposalReviewService";
 import { updateSystemTemplate, getSystemTemplateDetails, deleteSystemTemplate, type SystemTemplate } from "@/services/systemTemplatesService";
 import { type ClientRecord, listClients } from "@/services/clientsService";
 import { ProposalPreview } from "@/components/ProposalPreview";
@@ -379,6 +379,31 @@ export default function ProposalEditor() {
     }
   }
 
+  async function publishCurrentProposal() {
+    if (!p || workflowLock.current || readOnly) return;
+    workflowLock.current = true;
+    setSubmittingReview(true);
+    invalidatePendingSaves();
+    try {
+      const result = await updateProposal({ ...p, status: "published" });
+      setP((current) => (current ? { ...current, status: "published" } : current));
+      if (result.redirect && result.deal_id != null) {
+        const mainAppUrl = (import.meta.env.VITE_MAIN_APP_URL ?? "https://pitchsuite.io/").replace(/\/+$/, "");
+        window.location.href = `${mainAppUrl}/deals/${encodeURIComponent(String(result.deal_id))}#proposals`;
+      }
+      toast({ title: "Proposal published" });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Please try again.";
+      toast({
+        title: message.includes("Creator signature") ? "Cannot Publish" : "Could not update proposal status",
+        description: message,
+        variant: "destructive",
+      });
+    } finally {
+      releaseWorkflowLock();
+    }
+  }
+
   async function setApprovedOutcome(nextStatus: "published" | "sent") {
     if (!p || p.status !== "approved" || workflowLock.current) return;
     const isReviewer = user?.membershipRole === "reviewer";
@@ -395,9 +420,10 @@ export default function ProposalEditor() {
       toast({ title: nextStatus === "published" ? "Proposal published" : "Proposal marked as sent" });
     } catch (error) {
       if (!isAbortError(error)) {
+        const message = error instanceof Error ? error.message : "Please try again.";
         toast({
-          title: "Could not update proposal status",
-          description: error instanceof Error ? error.message : "Please try again.",
+          title: message.includes("Creator signature") ? "Cannot Publish" : "Could not update proposal status",
+          description: message,
           variant: "destructive",
         });
       }
@@ -781,7 +807,11 @@ export default function ProposalEditor() {
                       void setApprovedOutcome(v);
                       return;
                     }
-                    if ((v === "draft" || v === "published") && !readOnly) {
+                    if (v === "published" && !readOnly) {
+                      void publishCurrentProposal();
+                      return;
+                    }
+                    if (v === "draft" && !readOnly) {
                       commit({ ...p, status: v as ProposalStatus });
                     }
                   }}
@@ -1355,7 +1385,7 @@ export default function ProposalEditor() {
                   top: y,
                   left: x,
                   status: "pending" as const,
-                  purpose: "client" as const,
+                  purpose: "creator" as const,
                   borderColor: "#d1d5db",
                   borderWidth: 2,
                   borderRadius: 4,
@@ -1530,6 +1560,28 @@ export default function ProposalEditor() {
           const sectionIndex = p.sections.findIndex((s) => s.id === signatureDetailsData.sectionId);
           if (sectionIndex >= 0) {
             const currentField = p.sections[sectionIndex]?.signatureFields?.[signatureDetailsData.fieldIndex];
+            const purpose = currentField?.purpose;
+            if (currentField && (purpose === "creator" || purpose === "reviewer")) {
+              invalidatePendingSaves();
+              workflowLock.current = true;
+              void updateProposal(p)
+                .then(() => signProposal(String(p.id), String(currentField.id), details.signature))
+                .then(async () => {
+                  const fresh = await getProposalDetails(String(p.id));
+                  if (fresh) setP(fresh);
+                  setSignatureDetailsOpen(false);
+                })
+                .catch((error) => {
+                  toast({
+                    title: error instanceof Error ? error.message : "Could not save signature",
+                    variant: "destructive",
+                  });
+                })
+                .finally(() => {
+                  workflowLock.current = false;
+                });
+              return;
+            }
             const updatedField = {
               ...currentField,
               ...details,

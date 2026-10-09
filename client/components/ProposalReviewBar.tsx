@@ -82,8 +82,10 @@ export function ProposalReviewBar({
       setComment("");
       onChanged();
     } catch (error) {
+      const message = error instanceof Error ? error.message : "Review action failed";
       toast({
-        title: error instanceof Error ? error.message : "Review action failed",
+        title: message.includes("Reviewer signature") ? "Cannot Approve" : message,
+        description: message.includes("Reviewer signature") ? message : undefined,
         variant: "destructive",
       });
     } finally {

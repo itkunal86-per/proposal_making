@@ -677,12 +677,12 @@ export default function PublicProposal() {
                               sIndex={sIndex}
                               onClick={() => {
                                 const purpose = field.purpose ?? "client";
-                                if (purpose === "internal_reviewer") return;
+                                if (purpose === "internal_reviewer" || purpose === "creator" || purpose === "reviewer") return;
                                 const sectionIndex = proposal.sections.findIndex(s => s.id === section.id);
                                 setSelectedSignature({ sectionIndex, fieldIndex: sIndex });
                                 setSignatureModalOpen(true);
                               }}
-                              interactive={(field.purpose ?? "client") !== "internal_reviewer"}
+                              interactive={!field.purpose || field.purpose === "client"}
                             />
                           ))}
                       </>
