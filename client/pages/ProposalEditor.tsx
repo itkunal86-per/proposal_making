@@ -1564,7 +1564,9 @@ export default function ProposalEditor() {
             if (currentField && (purpose === "creator" || purpose === "reviewer")) {
               invalidatePendingSaves();
               workflowLock.current = true;
-              void updateProposal(p)
+              const contentEditable = p.status === "draft" || p.status === "rework_requested";
+              const persistField = contentEditable ? updateProposal(p) : Promise.resolve();
+              void persistField
                 .then(() => signProposal(String(p.id), String(currentField.id), details.signature))
                 .then(async () => {
                   const fresh = await getProposalDetails(String(p.id));
