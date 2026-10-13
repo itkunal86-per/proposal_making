@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { getStoredToken, getStoredAuth } from "@/lib/auth";
 import { apiConfig } from "@/lib/apiConfig";
+import { readOrganizationSource } from "@/lib/organizationMedia";
+import { proposalUpdateBody } from "@/lib/proposalSave";
 
 export type ProposalStatus =
   | "draft"
@@ -101,6 +103,14 @@ export interface ImageElement {
   borderRadius?: number;
   top: number;
   left: number;
+  source?: {
+    provider: "crm" | "crm_logo" | "proposal_snapshot";
+    fileId?: number;
+    dealId?: number;
+    organizationId?: number;
+    snapshotId?: number;
+    restore?: "required";
+  };
 }
 
 export interface SignatureRecipient {
@@ -149,6 +159,7 @@ export interface ProposalSection {
   texts?: TextElement[];
   images?: ImageElement[];
   signatureFields?: SignatureField[];
+  clientId?: string;
   comments?: { id: string; author: string; text: string; createdAt: number }[];
   titleStyles?: Record<string, any>;
   contentStyles?: Record<string, any>;
@@ -194,6 +205,7 @@ export interface Proposal {
   ppt_style?: any;
   ppt_url?: string;
   ppt_path?: string;
+  revision?: number;
 }
 
 const STORAGE_KEY = "app_proposals";
@@ -217,6 +229,7 @@ interface ApiProposalResponse {
   currency?: string;
   tax_rate?: string | number;
   updated_at?: string;
+  revision?: number;
   client?: {
     id: string;
     name: string;
@@ -515,6 +528,7 @@ function normalizeProposal(raw: z.infer<typeof proposalSchema>): Proposal {
           borderRadius: image.borderRadius,
           top: typeof image.top === "number" ? image.top : 0,
           left: typeof image.left === "number" ? image.left : 0,
+          ...(readOrganizationSource(image.source) ? { source: readOrganizationSource(image.source) } : {}),
         })),
         comments: (s.comments ?? []).map((c) => ({
           id: String(c.id!),
@@ -716,6 +730,7 @@ function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmai
             borderRadius: image.borderRadius,
             top: typeof image.top === "number" ? image.top : 0,
             left: typeof image.left === "number" ? image.left : 0,
+            ...(readOrganizationSource(image.source) ? { source: readOrganizationSource(image.source) } : {}),
           })) : [],
           signatureFields: Array.isArray(s.signatureFields) ? s.signatureFields.map((field) => ({
             id: String(field.id),
@@ -767,6 +782,7 @@ function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmai
     createdByEmail: String(createdByEmail),
     createdAt: createdAtMs,
     updatedAt: updatedAtMs,
+    revision: typeof apiProposal.revision === "number" ? apiProposal.revision : undefined,
     sections,
     pricing: {
       currency: (apiProposal.pricing as any)?.currency || apiProposal.currency || "USD",
@@ -1166,7 +1182,18 @@ export async function createProposal(partial?: Partial<Proposal>): Promise<Propo
   return p;
 }
 
-export async function updateProposal(p: Proposal, options?: { keepVersion?: boolean; note?: string; signal?: AbortSignal }) {
+export function applySectionIds<T extends { id?: string; clientId?: string }>(sections: T[], links: Array<{ clientId: string; id: number }> | undefined): T[] {
+  if (!links?.length) return sections;
+  const ids = new Map(links.map((link) => [link.clientId, String(link.id)]));
+  return sections.map((section) => {
+    if (!section.clientId || !ids.has(section.clientId)) return section;
+    const next = { ...section, id: ids.get(section.clientId) };
+    delete next.clientId;
+    return next;
+  });
+}
+
+export async function updateProposal(p: Proposal, options?: { keepVersion?: boolean; note?: string; signal?: AbortSignal; omitSections?: boolean }) {
   const token = getStoredToken();
   if (!token) {
     throw new Error("No authentication token available");
@@ -1174,7 +1201,7 @@ export async function updateProposal(p: Proposal, options?: { keepVersion?: bool
 
   try {
     const payload = {
-      ...p,
+      ...proposalUpdateBody(p, options?.omitSections),
       options: {
         keepVersion: options?.keepVersion ?? false,
         note: options?.note,
@@ -1197,7 +1224,9 @@ export async function updateProposal(p: Proposal, options?: { keepVersion?: bool
 
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
-      throw new Error(errorData.error || `Failed to update proposal: ${res.statusText}`);
+      const error = new Error(errorData.error || `Failed to update proposal: ${res.statusText}`) as Error & { status?: number };
+      error.status = res.status;
+      throw error;
     }
 
     const response = await res.json();
@@ -1207,10 +1236,15 @@ export async function updateProposal(p: Proposal, options?: { keepVersion?: bool
     console.log("API response data:", response);
 
     let updatedProposal = convertApiProposalToProposal(data);
-    console.log("Converted proposal sections:", updatedProposal.sections.map(s => s.title));
-
-    console.log("Using local sections from the update request");
-    updatedProposal = { ...updatedProposal, sections: p.sections };
+    const serverRevision = response?.proposal?.revision;
+    if (typeof serverRevision === "number") {
+      updatedProposal = { ...updatedProposal, revision: serverRevision };
+    }
+    const sectionIds = Array.isArray(response?.sectionIds) ? response.sectionIds : [];
+    updatedProposal = {
+      ...updatedProposal,
+      sections: options?.omitSections ? p.sections : applySectionIds(p.sections, sectionIds),
+    };
 
     const list = await getAll();
     const idx = list.findIndex((x) => x.id === p.id);
@@ -1223,7 +1257,7 @@ export async function updateProposal(p: Proposal, options?: { keepVersion?: bool
       persist(list);
     }
     console.log("Update completed successfully");
-    return { proposal: updatedProposal, redirect, deal_id: dealId };
+    return { proposal: updatedProposal, redirect, deal_id: dealId, sectionIds };
   } catch (err) {
     if (err instanceof Error && err.name === "AbortError") throw err;
     console.error("Failed to update proposal:", err);
@@ -1311,8 +1345,8 @@ export async function duplicateProposal(id: string): Promise<Proposal | undefine
 export async function toggleShare(p: Proposal, makePublic: boolean): Promise<Proposal> {
   const token = p.settings.sharing.token ?? uuid();
   const next: Proposal = { ...p, settings: { ...p.settings, sharing: { ...p.settings.sharing, public: makePublic, token } } };
-  await updateProposal(next);
-  return next;
+  const result = await updateProposal(next, { omitSections: true });
+  return result.proposal;
 }
 
 export async function addComment(p: Proposal, sectionId: string, author: string, text: string) {
@@ -1331,9 +1365,9 @@ export async function reorderSection(p: Proposal, from: number, to: number): Pro
   arr.splice(to, 0, item);
   const updated = { ...p, sections: arr, updatedAt: Date.now() };
   console.log("Reordering sections:", { from, to, sectionCount: updated.sections.length });
-  await updateProposal(updated);
+  const result = await updateProposal(updated);
   console.log("Reorder completed");
-  return updated;
+  return result.proposal;
 }
 
 export async function addSection(p: Proposal, title = "New Section", layout: "single" | "two-column" | "three-column" = "single"): Promise<Proposal> {
@@ -1361,16 +1395,16 @@ export async function addSection(p: Proposal, title = "New Section", layout: "si
     borderRadius: "8",
   };
 
-  const newSection = { id: uuid(), title, content: "", layout, columnContents, columnStyles, titleStyles, contentStyles, media: [], shapes: [], tables: [], texts: [], images: [], comments: [] };
+  const newSection = { clientId: uuid(), id: "", title, content: "", layout, columnContents, columnStyles, titleStyles, contentStyles, media: [], shapes: [], tables: [], texts: [], images: [], comments: [] };
   const updated = {
     ...p,
     sections: [...p.sections, newSection],
     updatedAt: Date.now(),
   };
   console.log("Adding section:", { title, newSectionId: newSection.id, layout, columnCount, totalSections: updated.sections.length, newSection });
-  await updateProposal(updated);
-  console.log("Add section completed", { sections: updated.sections.map(s => ({ id: s.id, title: s.title, layout: s.layout })) });
-  return updated;
+  const result = await updateProposal(updated);
+  console.log("Add section completed", { sections: result.proposal.sections.map(s => ({ id: s.id, title: s.title, layout: s.layout })) });
+  return result.proposal;
 }
 
 export async function removeSection(p: Proposal, id: string): Promise<Proposal> {
@@ -1380,9 +1414,9 @@ export async function removeSection(p: Proposal, id: string): Promise<Proposal> 
     updatedAt: Date.now(),
   };
   console.log("Removing section:", { sectionId: id, remainingSections: updated.sections.length });
-  await updateProposal(updated);
+  const result = await updateProposal(updated);
   console.log("Remove section completed");
-  return updated;
+  return result.proposal;
 }
 
 export function valueTotal(p: Proposal): number {
@@ -1433,7 +1467,7 @@ export async function enableProposalSharing(proposalId: string): Promise<{ succe
         "Content-Type": "application/json",
         "Authorization": `Bearer ${authToken}`,
       },
-      body: JSON.stringify(updatedProposal),
+      body: JSON.stringify((({ sections, ...metadata }) => metadata)(updatedProposal)),
     });
 
     if (!res.ok) {

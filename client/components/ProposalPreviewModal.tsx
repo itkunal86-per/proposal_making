@@ -18,6 +18,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { enableProposalSharing } from "@/services/proposalsService";
 import { EmailShareDialog } from "@/components/EmailShareDialog";
+import { shouldAbortPdfExport, sourceKey } from "@/lib/organizationMedia";
+import { useOrganizationImageUrls } from "@/hooks/useOrganizationImageUrls";
 
 interface ProposalPreviewModalProps {
   proposal: Proposal;
@@ -46,6 +48,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
   const [shareLink, setShareLink] = useState<string | null>(null);
   const [emailDialogOpen, setEmailDialogOpen] = useState(false);
   const sectionRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const organizationImages = useOrganizationImageUrls(proposal.id, proposal.sections);
 
   React.useEffect(() => {
     if (fullPage) return;
@@ -159,6 +162,12 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
         return;
       }
 
+      const prepared = await organizationImages.urlsForPdf();
+      if (shouldAbortPdfExport(prepared)) {
+        toast({ title: "PDF was not created", description: "An organization image failed to load." });
+        return;
+      }
+
       // Clone the element to avoid modifying the actual modal
       const clonedElement = element.cloneNode(true) as HTMLElement;
 
@@ -237,7 +246,31 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
       );
 
       await Promise.all(imageLoadPromises);
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      if (!prepared.usesOrganizationMedia) {
+        await new Promise((resolve) => setTimeout(resolve, 800));
+      }
+
+      if (prepared.usesOrganizationMedia) {
+        const nodes = Array.from(clonedElement.querySelectorAll("[data-organization-media]"));
+        for (const node of nodes) {
+          const key = node.getAttribute("data-organization-media") || "";
+          const src = prepared.urls[key];
+          if (!src) {
+            toast({ title: "PDF was not created", description: "An organization image failed to load." });
+            return;
+          }
+          const img = node instanceof HTMLImageElement ? node : (node.querySelector("img") || node.appendChild(document.createElement("img")));
+          const loaded = await new Promise<boolean>((resolve) => {
+            img.onload = () => resolve(img.naturalWidth > 0);
+            img.onerror = () => resolve(false);
+            img.src = src;
+          });
+          if (!loaded) {
+            toast({ title: "PDF was not created", description: "An organization image failed to load." });
+            return;
+          }
+        }
+      }
 
       // Export to PDF from cloned element
       const opt = {
@@ -247,7 +280,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
         html2canvas: {
           scale: 2,
           useCORS: true,
-          allowTaint: true,
+          allowTaint: !prepared.usesOrganizationMedia,
           logging: false,
           backgroundColor: '#ffffff',
         },
@@ -729,7 +762,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                           <div key={`image-${iIndex}`} style={{ pointerEvents: "auto" }}>
                             <ImageEditor
                               id={`image-${section.id}-${iIndex}`}
-                              url={image.url}
+                              url={organizationImages.displayUrl(image)}
                               width={image.width}
                               height={image.height}
                               opacity={image.opacity}
@@ -741,6 +774,8 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                               selected={false}
                               onSelect={() => {}}
                               onUpdate={() => {}}
+                              mediaKey={sourceKey(image) || undefined}
+                              onError={() => organizationImages.onImageError(image)}
                             />
                           </div>
                         ))}

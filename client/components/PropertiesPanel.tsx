@@ -506,7 +506,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
         }
 
         const imageUrl = result.data.media_record.url;
-        handleUpdateImage({ url: imageUrl });
+        handleUpdateImage({ url: imageUrl, source: null });
 
         toast({
           title: "Upload Successful",

@@ -41,11 +41,11 @@ export default function ProposalSettings() {
             <TabsContent value="general" className="mt-4 space-y-3">
               <div className="grid gap-2">
                 <Label htmlFor="title">Title</Label>
-                <Input id="title" value={p.title} onChange={(e) => void updateProposal({ ...p, title: e.target.value })} />
+                <Input id="title" value={p.title} onChange={(e) => void updateProposal({ ...p, title: e.target.value }, { omitSections: true })} />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="client">Client</Label>
-                <Input id="client" value={p.client} onChange={(e) => void updateProposal({ ...p, client: e.target.value })} />
+                <Input id="client" value={p.client} onChange={(e) => void updateProposal({ ...p, client: e.target.value }, { omitSections: true })} />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="due">Due date</Label>
@@ -56,7 +56,7 @@ export default function ProposalSettings() {
                   onChange={(e) => void updateProposal({
                     ...p,
                     settings: { ...p.settings, dueDate: e.target.value },
-                  })}
+                  }, { omitSections: true })}
                 />
               </div>
               <div className="grid gap-2">
@@ -68,7 +68,7 @@ export default function ProposalSettings() {
             <TabsContent value="pricing" className="mt-4 space-y-3">
               <div className="grid gap-2">
                 <Label>Currency</Label>
-                <Input value={p.pricing.currency} onChange={(e) => void updateProposal({ ...p, pricing: { ...p.pricing, currency: e.target.value } })} />
+                <Input value={p.pricing.currency} onChange={(e) => void updateProposal({ ...p, pricing: { ...p.pricing, currency: e.target.value } }, { omitSections: true })} />
               </div>
               <div className="grid gap-2">
                 <Label>Tax rate</Label>
@@ -79,7 +79,7 @@ export default function ProposalSettings() {
                   onChange={(e) => void updateProposal({
                     ...p,
                     pricing: { ...p.pricing, taxRate: Number(e.target.value) },
-                  })}
+                  }, { omitSections: true })}
                 />
               </div>
               <Separator />
@@ -89,7 +89,7 @@ export default function ProposalSettings() {
             <TabsContent value="approval" className="mt-4 space-y-3">
               <div className="grid gap-2">
                 <Label>Approval flow</Label>
-                <Input value={p.settings.approvalFlow || ""} onChange={(e) => void updateProposal({ ...p, settings: { ...p.settings, approvalFlow: e.target.value } })} />
+                <Input value={p.settings.approvalFlow || ""} onChange={(e) => void updateProposal({ ...p, settings: { ...p.settings, approvalFlow: e.target.value } }, { omitSections: true })} />
               </div>
             </TabsContent>
 

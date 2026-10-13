@@ -20,6 +20,8 @@ interface ImageEditorProps {
     top?: number;
     left?: number;
   }) => void;
+  mediaKey?: string;
+  onError?: () => void;
 }
 
 type ResizeHandle =
@@ -42,6 +44,8 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
   selected,
   onSelect,
   onUpdate,
+  mediaKey,
+  onError,
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState<ResizeHandle>(null);
@@ -141,6 +145,8 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
         left={left}
         selected={false}
         onSelect={onSelect}
+        mediaKey={mediaKey}
+        onError={onError}
       />
     );
   }
@@ -183,6 +189,8 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({
         left={0}
         selected={selected}
         onSelect={onSelect}
+        mediaKey={mediaKey}
+        onError={onError}
       />
 
       {/* Resize Handles */}

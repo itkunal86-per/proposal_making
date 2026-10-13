@@ -16,6 +16,8 @@ export interface ImageData {
 interface ImageElementProps extends ImageData {
   selected: boolean;
   onSelect: () => void;
+  mediaKey?: string;
+  onError?: () => void;
 }
 
 export const ImageElement: React.FC<ImageElementProps> = ({
@@ -31,6 +33,8 @@ export const ImageElement: React.FC<ImageElementProps> = ({
   left,
   selected,
   onSelect,
+  mediaKey,
+  onError,
 }) => {
   const opacityValue = parseInt(opacity) / 100;
 
@@ -65,11 +69,13 @@ export const ImageElement: React.FC<ImageElementProps> = ({
         overflow: "hidden",
         backgroundColor: url ? "transparent" : "#f3f4f6",
       }}
+      data-organization-media={mediaKey}
     >
       {url ? (
         <img
           src={url}
           alt="Element"
+          data-organization-media={mediaKey}
           style={{
             width: "100%",
             height: "100%",
@@ -78,12 +84,10 @@ export const ImageElement: React.FC<ImageElementProps> = ({
             display: "block",
             pointerEvents: "none",
           }}
-          onError={() => {
-            // Keep the image element visible so a failed remote load does not remove the box.
-          }}
+          onError={() => onError?.()}
         />
       ) : (
-        "Click to add image URL"
+        mediaKey ? "Image unavailable" : "Click to add image URL"
       )}
     </div>
   );

@@ -23,6 +23,8 @@ import {
 } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { useOrganizationImageUrls } from "@/hooks/useOrganizationImageUrls";
+import { autosaveAfterResponse } from "@/lib/proposalSave";
 import { ProposalReviewBar } from "@/components/ProposalReviewBar";
 import {
   type Proposal,
@@ -30,6 +32,7 @@ import {
   getProposalDetails,
   proposalStatusLabel,
   updateProposal,
+  applySectionIds,
   persistProposal,
   valueTotal,
 } from "@/services/proposalsService";
@@ -113,6 +116,7 @@ export default function ProposalEditor() {
   const readOnly = !isSystemTemplateEdit && !!p && (
     submittingReview || lockedStatuses.includes(p.status) || (user?.role === "user" && user.membershipRole === null)
   );
+  const organizationImages = useOrganizationImageUrls(p?.id, p?.sections);
   const [current, setCurrent] = useState(0);
   const [saving, setSaving] = useState(false);
   const [clients, setClients] = useState<ClientRecord[]>([]);
@@ -142,6 +146,8 @@ export default function ProposalEditor() {
   const saveTimer = useRef<number | null>(null);
   const saveGeneration = useRef(0);
   const saveAbort = useRef<AbortController | null>(null);
+  const saveInFlight = useRef(false);
+  const saveQueued = useRef<Proposal | null>(null);
   const workflowLock = useRef(false);
 
   useEffect(() => {
@@ -461,13 +467,10 @@ export default function ProposalEditor() {
     console.log("Proposal Edit Form Submitted:", next);
     setP(next);
     setSaving(true);
-    if (saveTimer.current) window.clearTimeout(saveTimer.current);
-    saveAbort.current?.abort();
-    const controller = new AbortController();
-    saveAbort.current = controller;
-
-    // Persist immediately to localStorage to prevent data loss on page reload
+    saveQueued.current = next;
     void persistProposal(next);
+    if (saveInFlight.current) return;
+    if (saveTimer.current) window.clearTimeout(saveTimer.current);
 
     saveTimer.current = window.setTimeout(() => {
       if (generation !== saveGeneration.current) {
@@ -523,24 +526,52 @@ export default function ProposalEditor() {
           setSaving(false);
         }
       } else {
-        void updateProposal(next, { keepVersion, note, signal: controller.signal })
+        const snapshot = saveQueued.current ?? next;
+        saveQueued.current = null;
+        saveInFlight.current = true;
+        let status = 200;
+        void updateProposal(snapshot, { keepVersion, note })
           .then((result) => {
             if (generation !== saveGeneration.current) return;
-            setSaving(false);
+            setP((current) => current ? { ...current, revision: result.proposal.revision, sections: applySectionIds(current.sections, result.sectionIds) } : current);
+            if (saveQueued.current) {
+              saveQueued.current = {
+                ...saveQueued.current,
+                revision: result.proposal.revision,
+                sections: applySectionIds(saveQueued.current.sections, result.sectionIds),
+              };
+            }
             if (result.redirect && result.deal_id != null) {
               const mainAppUrl = (import.meta.env.VITE_MAIN_APP_URL ?? "https://pitchsuite.io/").replace(/\/+$/, "");
               window.location.href = `${mainAppUrl}/deals/${encodeURIComponent(String(result.deal_id))}#proposals`;
             }
           })
           .catch((error) => {
+            status = (error as { status?: number }).status ?? 500;
             if (generation !== saveGeneration.current || isAbortError(error)) return;
+            if (status === 409) {
+              saveQueued.current = null;
+              toast({
+                title: "This proposal changed on the server",
+                description: "Reload before saving again. Your unsaved edits are still on screen.",
+                variant: "destructive",
+              });
+              return;
+            }
             console.error("Failed to save proposal changes:", error);
             toast({
               title: "Failed to save changes",
               description: error instanceof Error ? error.message : "Please try again.",
               variant: "destructive",
             });
+          })
+          .finally(() => {
+            saveInFlight.current = false;
             setSaving(false);
+            const decision = autosaveAfterResponse(status, saveQueued.current !== null);
+            if (decision.retry && generation === saveGeneration.current && saveQueued.current) {
+              commit(saveQueued.current);
+            }
           });
       }
     }, 400);
@@ -736,6 +767,45 @@ export default function ProposalEditor() {
       setIsPreviewingPPT(false);
     }
   }, [id]);
+
+  function newImageId() {
+    if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
+    return Math.random().toString(36).slice(2) + Date.now().toString(36);
+  }
+
+  function insertOrganizationImage(image: { url: string; source: { provider: "crm"; fileId: number; dealId: number; organizationId?: number } }) {
+    if (!p || readOnly || p.sections.length === 0) return;
+    const section = p.sections.find((item) =>
+      selectedElementId?.startsWith(`image-${item.id}-`)
+      || selectedElementId?.startsWith(`text-${item.id}-`)
+      || selectedElementId?.startsWith(`shape-${item.id}-`)
+      || selectedElementId?.startsWith(`table-${item.id}-`)
+    ) ?? p.sections[current] ?? p.sections[0];
+    const newImage = {
+      id: newImageId(),
+      url: "",
+      width: 200,
+      height: 150,
+      opacity: "100",
+      borderWidth: 0,
+      borderColor: "#000000",
+      borderRadius: 0,
+      left: 40,
+      top: 40,
+      source: image.source,
+    };
+    commit({
+      ...p,
+      sections: p.sections.map((item) =>
+        String(item.id) === String(section.id)
+          ? { ...item, images: [...(item.images || []), newImage] }
+          : item
+      ),
+    });
+    setSelectedElementId(`image-${section.id}-${(section.images || []).length}`);
+    setSelectedElementType("image");
+    setActivePanel("properties");
+  }
 
   if (!p) return null;
 
@@ -1093,6 +1163,8 @@ export default function ProposalEditor() {
             <div className={readOnly ? "pointer-events-none" : undefined}>
             <ProposalPreview
               proposal={p}
+              displayImageUrl={organizationImages.displayUrl}
+              onImageError={organizationImages.onImageError}
               selectedElementId={selectedElementId}
               onSelectElement={handleSelectElement}
               onAIElement={(id, type) => {
@@ -1283,7 +1355,7 @@ export default function ProposalEditor() {
                 const section = p.sections.find((s) => String(s.id) === String(sectionId));
                 if (section) {
                   const newImage = {
-                    id: Math.random().toString(36).substring(2, 9),
+                    id: newImageId(),
                     url: "",
                     width: 200,
                     height: 150,
@@ -1419,7 +1491,7 @@ export default function ProposalEditor() {
 
           {/* Right panel scroll container: text controls, then Comments. */}
           <div data-scroll-owner="right-panel" className="min-h-0 min-w-0 overflow-y-auto border-t border-slate-200 bg-white md:border-l md:border-t-0">
-            <div className={`p-6 ${readOnly ? "pointer-events-none" : ""}`}>
+            <div className={`p-6 ${readOnly && activePanel !== "uploads" ? "pointer-events-none" : ""}`}>
             {activePanel === "properties" ? (
               <PropertiesPanel
                 proposal={p}
@@ -1455,6 +1527,8 @@ export default function ProposalEditor() {
                 proposalId={p.id}
                 documentMedia={documentMedia}
                 libraryMedia={libraryMedia}
+                allowMutations={!readOnly}
+                onInsertOrganizationImage={insertOrganizationImage}
                 onMediaUploaded={handleMediaUploaded}
                 onMediaRemoved={handleMediaRemoved}
               />

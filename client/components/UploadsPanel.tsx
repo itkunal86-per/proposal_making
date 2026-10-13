@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Plus, Loader2, Trash2, Copy } from "lucide-react";
 import { uploadMediaToProposal, uploadMediaToLibrary, fetchProposalMedia, fetchLibraryMedia, deleteProposalMedia, deleteLibraryMedia } from "@/services/mediaService";
 import { toast } from "@/hooks/use-toast";
+import { OrganizationMediaTab } from "@/components/OrganizationMediaTab";
+import { organizationMediaInsertEnabled } from "@/lib/organizationMedia";
 
 interface UploadedMedia {
   id: string;
@@ -16,6 +18,8 @@ interface UploadsPanelProps {
   proposalId: string;
   documentMedia?: UploadedMedia[];
   libraryMedia?: UploadedMedia[];
+  allowMutations?: boolean;
+  onInsertOrganizationImage?: (image: { url: string; source: { provider: "crm"; fileId: number; dealId: number; organizationId?: number } }) => void;
   onMediaUploaded?: (media: UploadedMedia, destination: "document" | "library") => void;
   onMediaRemoved?: (mediaId: string, destination: "document" | "library") => void;
 }
@@ -24,10 +28,12 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
   proposalId,
   documentMedia = [],
   libraryMedia = [],
+  allowMutations = true,
+  onInsertOrganizationImage,
   onMediaUploaded,
   onMediaRemoved,
 }) => {
-  const [activeTab, setActiveTab] = useState<"document" | "library">("document");
+  const [activeTab, setActiveTab] = useState<"document" | "library" | "organization">("document");
   const [uploadingDocuments, setUploadingDocuments] = useState<Set<string>>(new Set());
   const [uploadingLibrary, setUploadingLibrary] = useState<Set<string>>(new Set());
   const [loadingMedia, setLoadingMedia] = useState(true);
@@ -125,6 +131,7 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
   }, []);
 
   const handleFileSelect = async (file: File, destination: "document" | "library") => {
+    if (!allowMutations) return;
     const fileId = `${Date.now()}-${file.name}`;
     const setUploading = destination === "document" ? setUploadingDocuments : setUploadingLibrary;
 
@@ -183,6 +190,7 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
   };
 
   const handleDeleteMedia = async (mediaId: string, destination: "document" | "library") => {
+    if (!allowMutations) return;
     const result = destination === "document"
       ? await deleteProposalMedia(mediaId)
       : await deleteLibraryMedia(mediaId);
@@ -270,12 +278,24 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
         >
           Your library
         </button>
+        {organizationMediaInsertEnabled() && (
+          <button
+            onClick={() => setActiveTab("organization")}
+            className={`pb-2 px-2 text-sm font-medium transition-colors ${
+              activeTab === "organization"
+                ? "text-slate-900 border-b-2 border-slate-900"
+                : "text-slate-500 hover:text-slate-700"
+            }`}
+          >
+            Organization
+          </button>
+        )}
       </div>
 
       <div className="space-y-3">
         {activeTab === "document" ? (
           <>
-            <label className="border-2 border-dashed border-slate-300 rounded-lg p-6 flex flex-col items-center justify-center min-h-[200px] cursor-pointer hover:border-slate-400 transition-colors bg-slate-50">
+            <label className={`border-2 border-dashed border-slate-300 rounded-lg p-6 flex flex-col items-center justify-center min-h-[200px] transition-colors bg-slate-50 ${allowMutations ? "cursor-pointer hover:border-slate-400" : "pointer-events-none opacity-60"}`}>
               {isUploadingDocument || loadingMedia ? (
                 <>
                   <Loader2 className="w-8 h-8 text-slate-400 mb-2 animate-spin" />
@@ -300,7 +320,7 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
                     handleFileSelect(file, "document");
                   }
                 }}
-                disabled={isUploadingDocument || loadingMedia}
+                disabled={isUploadingDocument || loadingMedia || !allowMutations}
                 className="hidden"
               />
             </label>
@@ -344,6 +364,7 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
                             onClick={() => handleCopyUrl(media.url)}
                             className="bg-slate-600 hover:bg-slate-700 text-white rounded p-1"
                             title="Copy URL"
+                            disabled={!allowMutations}
                           >
                             <Copy className="w-4 h-4" />
                           </button>
@@ -352,6 +373,7 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
                           onClick={() => handleDeleteMedia(media.id, "document")}
                           className="bg-red-500 hover:bg-red-600 text-white rounded p-1"
                           title="Delete media"
+                          disabled={!allowMutations}
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -365,9 +387,9 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
               </div>
             )}
           </>
-        ) : (
+        ) : activeTab === "library" ? (
           <>
-            <label className="border-2 border-dashed border-slate-300 rounded-lg p-6 flex flex-col items-center justify-center min-h-[200px] cursor-pointer hover:border-slate-400 transition-colors bg-slate-50">
+            <label className={`border-2 border-dashed border-slate-300 rounded-lg p-6 flex flex-col items-center justify-center min-h-[200px] transition-colors bg-slate-50 ${allowMutations ? "cursor-pointer hover:border-slate-400" : "pointer-events-none opacity-60"}`}>
               {isUploadingLibrary ? (
                 <>
                   <Loader2 className="w-8 h-8 text-slate-400 mb-2 animate-spin" />
@@ -390,7 +412,7 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
                     handleFileSelect(file, "library");
                   }
                 }}
-                disabled={isUploadingLibrary}
+                disabled={isUploadingLibrary || !allowMutations}
                 className="hidden"
               />
             </label>
@@ -427,6 +449,7 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
                             onClick={() => handleCopyUrl(media.url)}
                             className="bg-slate-600 hover:bg-slate-700 text-white rounded p-1"
                             title="Copy URL"
+                            disabled={!allowMutations}
                           >
                             <Copy className="w-4 h-4" />
                           </button>
@@ -435,6 +458,7 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
                           onClick={() => handleDeleteMedia(media.id, "library")}
                           className="bg-red-500 hover:bg-red-600 text-white rounded p-1"
                           title="Delete media"
+                          disabled={!allowMutations}
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -448,6 +472,12 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
               </div>
             )}
           </>
+        ) : (
+          <OrganizationMediaTab
+            proposalId={proposalId}
+            allowMutations={allowMutations}
+            onInsertImage={(image) => onInsertOrganizationImage?.(image)}
+          />
         )}
       </div>
     </Card>

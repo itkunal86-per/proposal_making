@@ -8,6 +8,7 @@ import { TableEditor } from "@/components/TableEditor";
 import { TextEditor } from "@/components/TextEditor";
 import { ImageEditor } from "@/components/ImageEditor";
 import { SignatureFieldEditor } from "@/components/SignatureFieldEditor";
+import { sourceKey } from "@/lib/organizationMedia";
 
 interface ElementProps {
   id: string;
@@ -301,6 +302,8 @@ interface ProposalPreviewProps {
   onAddSignatureField?: (sectionId: string, recipientId: string, x: number, y: number) => void;
   isAddingSignatureMode?: boolean;
   selectedSignatoryId?: string | null;
+  displayImageUrl?: (image: any) => string;
+  onImageError?: (image: any) => void;
 }
 
 export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
@@ -325,6 +328,8 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
   onAddSignatureField,
   isAddingSignatureMode = false,
   selectedSignatoryId = null,
+  displayImageUrl,
+  onImageError,
 }) => {
 
   const [dragOverSectionId, setDragOverSectionId] = React.useState<string | null>(null);
@@ -1156,7 +1161,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                   <ImageEditor
                     key={`image-${section.id}-${image.id || iIndex}`}
                     id={`image-${section.id}-${iIndex}`}
-                    url={image.url}
+                    url={displayImageUrl ? displayImageUrl(image) : image.url}
                     width={image.width}
                     height={image.height}
                     opacity={image.opacity}
@@ -1172,6 +1177,8 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                     onUpdate={(updates) =>
                       onUpdateImage?.(section.id, iIndex, updates)
                     }
+                    mediaKey={sourceKey(image) || undefined}
+                    onError={() => onImageError?.(image)}
                   />
                 ))}
                 {section.signatureFields && section.signatureFields.length > 0 && (
