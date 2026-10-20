@@ -24,7 +24,6 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useOrganizationImageUrls } from "@/hooks/useOrganizationImageUrls";
-import { autosaveAfterResponse } from "@/lib/proposalSave";
 import { ProposalReviewBar } from "@/components/ProposalReviewBar";
 import {
   type Proposal,
@@ -32,7 +31,6 @@ import {
   getProposalDetails,
   proposalStatusLabel,
   updateProposal,
-  applySectionIds,
   persistProposal,
   valueTotal,
 } from "@/services/proposalsService";
@@ -146,8 +144,6 @@ export default function ProposalEditor() {
   const saveTimer = useRef<number | null>(null);
   const saveGeneration = useRef(0);
   const saveAbort = useRef<AbortController | null>(null);
-  const saveInFlight = useRef(false);
-  const saveQueued = useRef<Proposal | null>(null);
   const workflowLock = useRef(false);
 
   useEffect(() => {
@@ -467,10 +463,13 @@ export default function ProposalEditor() {
     console.log("Proposal Edit Form Submitted:", next);
     setP(next);
     setSaving(true);
-    saveQueued.current = next;
-    void persistProposal(next);
-    if (saveInFlight.current) return;
     if (saveTimer.current) window.clearTimeout(saveTimer.current);
+    saveAbort.current?.abort();
+    const controller = new AbortController();
+    saveAbort.current = controller;
+
+    // Persist immediately to localStorage to prevent data loss on page reload
+    void persistProposal(next);
 
     saveTimer.current = window.setTimeout(() => {
       if (generation !== saveGeneration.current) {
@@ -526,52 +525,24 @@ export default function ProposalEditor() {
           setSaving(false);
         }
       } else {
-        const snapshot = saveQueued.current ?? next;
-        saveQueued.current = null;
-        saveInFlight.current = true;
-        let status = 200;
-        void updateProposal(snapshot, { keepVersion, note })
+        void updateProposal(next, { keepVersion, note, signal: controller.signal })
           .then((result) => {
             if (generation !== saveGeneration.current) return;
-            setP((current) => current ? { ...current, revision: result.proposal.revision, sections: applySectionIds(current.sections, result.sectionIds) } : current);
-            if (saveQueued.current) {
-              saveQueued.current = {
-                ...saveQueued.current,
-                revision: result.proposal.revision,
-                sections: applySectionIds(saveQueued.current.sections, result.sectionIds),
-              };
-            }
+            setSaving(false);
             if (result.redirect && result.deal_id != null) {
               const mainAppUrl = (import.meta.env.VITE_MAIN_APP_URL ?? "https://pitchsuite.io/").replace(/\/+$/, "");
               window.location.href = `${mainAppUrl}/deals/${encodeURIComponent(String(result.deal_id))}#proposals`;
             }
           })
           .catch((error) => {
-            status = (error as { status?: number }).status ?? 500;
             if (generation !== saveGeneration.current || isAbortError(error)) return;
-            if (status === 409) {
-              saveQueued.current = null;
-              toast({
-                title: "This proposal changed on the server",
-                description: "Reload before saving again. Your unsaved edits are still on screen.",
-                variant: "destructive",
-              });
-              return;
-            }
             console.error("Failed to save proposal changes:", error);
             toast({
               title: "Failed to save changes",
               description: error instanceof Error ? error.message : "Please try again.",
               variant: "destructive",
             });
-          })
-          .finally(() => {
-            saveInFlight.current = false;
             setSaving(false);
-            const decision = autosaveAfterResponse(status, saveQueued.current !== null);
-            if (decision.retry && generation === saveGeneration.current && saveQueued.current) {
-              commit(saveQueued.current);
-            }
           });
       }
     }, 400);
@@ -768,12 +739,7 @@ export default function ProposalEditor() {
     }
   }, [id]);
 
-  function newImageId() {
-    if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
-    return Math.random().toString(36).slice(2) + Date.now().toString(36);
-  }
-
-  function insertOrganizationImage(image: { url: string; source: { provider: "crm"; fileId: number; dealId: number; organizationId?: number } }) {
+  function insertOrganizationImage(image: { url: string; source: { provider: "crm" | "crm_logo"; fileId?: number; organizationId?: number } }) {
     if (!p || readOnly || p.sections.length === 0) return;
     const section = p.sections.find((item) =>
       selectedElementId?.startsWith(`image-${item.id}-`)
@@ -782,7 +748,7 @@ export default function ProposalEditor() {
       || selectedElementId?.startsWith(`table-${item.id}-`)
     ) ?? p.sections[current] ?? p.sections[0];
     const newImage = {
-      id: newImageId(),
+      id: Math.random().toString(36).substring(2, 9),
       url: "",
       width: 200,
       height: 150,
@@ -1355,7 +1321,7 @@ export default function ProposalEditor() {
                 const section = p.sections.find((s) => String(s.id) === String(sectionId));
                 if (section) {
                   const newImage = {
-                    id: newImageId(),
+                    id: Math.random().toString(36).substring(2, 9),
                     url: "",
                     width: 200,
                     height: 150,

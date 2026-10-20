@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { enableProposalSharing } from "@/services/proposalsService";
 import { EmailShareDialog } from "@/components/EmailShareDialog";
-import { shouldAbortPdfExport, sourceKey } from "@/lib/organizationMedia";
+import { sourceKey } from "@/lib/organizationMedia";
 import { useOrganizationImageUrls } from "@/hooks/useOrganizationImageUrls";
 
 interface ProposalPreviewModalProps {
@@ -163,7 +163,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
       }
 
       const prepared = await organizationImages.urlsForPdf();
-      if (shouldAbortPdfExport(prepared)) {
+      if (prepared.usesOrganizationMedia && prepared.missing) {
         toast({ title: "PDF was not created", description: "An organization image failed to load." });
         return;
       }

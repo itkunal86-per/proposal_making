@@ -1,10 +1,8 @@
 export interface OrganizationImageSource {
   provider: "crm" | "crm_logo" | "proposal_snapshot";
   fileId?: number;
-  dealId?: number;
   organizationId?: number;
   snapshotId?: number;
-  restore?: "required";
 }
 
 export interface OrganizationImage {
@@ -29,31 +27,33 @@ export function readOrganizationSource(source: unknown): OrganizationImageSource
 
 export function sourceKey(image: OrganizationImage | null | undefined): string | null {
   const source = image?.source;
-  if (!source || source.restore === "required") return null;
-  if (source.provider === "crm" && source.fileId && source.dealId) return `${source.dealId}:${source.fileId}`;
+  if (!source) return null;
+  if (source.provider === "crm" && source.fileId) return `crm:${source.fileId}`;
+  if (source.provider === "crm_logo") return "crm_logo";
   if (source.provider === "proposal_snapshot" && source.snapshotId) return `snapshot:${source.snapshotId}`;
   return null;
 }
 
 export function collectOrganizationMedia(sections: Array<{ images?: OrganizationImage[] }> | undefined) {
-  const references: Array<{ fileId: number; dealId: number }> = [];
+  const fileIds: number[] = [];
+  let includeLogo = false;
   const snapshots: Array<{ key: string; url: string }> = [];
 
   for (const section of sections ?? []) {
     for (const image of section.images ?? []) {
-      const source = image.source;
-      if (!source || source.restore === "required") continue;
       const key = sourceKey(image);
-      if (source.provider === "crm" && source.fileId && source.dealId && key && !references.some((item) => `${item.dealId}:${item.fileId}` === key)) {
-        references.push({ fileId: source.fileId, dealId: source.dealId });
+      if (!key || !image.source) continue;
+      if (image.source.provider === "crm" && image.source.fileId && !fileIds.includes(image.source.fileId)) {
+        fileIds.push(image.source.fileId);
       }
-      if (source.provider === "proposal_snapshot" && key) {
+      if (image.source.provider === "crm_logo") includeLogo = true;
+      if (image.source.provider === "proposal_snapshot") {
         snapshots.push({ key, url: image.url || "" });
       }
     }
   }
 
-  return { references, snapshots };
+  return { fileIds, includeLogo, snapshots };
 }
 
 export function sectionsForSave<T extends { images?: OrganizationImage[] }>(sections: T[]): T[] {
@@ -70,34 +70,34 @@ export function sectionsForSave<T extends { images?: OrganizationImage[] }>(sect
 
 export function exportUrls(
   sections: Array<{ images?: OrganizationImage[] }> | undefined,
-  resolved: { results?: Array<{ fileId: number; dealId: number; previewUrl?: string; status?: string }> },
+  resolved: { files?: Array<{ id: number; previewUrl?: string; status?: string }>; logo?: { previewUrl?: string; status?: string } | null },
 ): { urls: Record<string, string>; missing: boolean } {
   const urls: Record<string, string> = {};
   let missing = false;
-  const byPair = new Map((resolved.results ?? []).map((file) => [`${file.dealId}:${file.fileId}`, file]));
+  const byId = new Map((resolved.files ?? []).map((file) => [file.id, file]));
 
   for (const section of sections ?? []) {
     for (const image of section.images ?? []) {
       const key = sourceKey(image);
-      if (!key || !image.source || image.source.restore === "required") continue;
+      if (!key || !image.source) continue;
       if (image.source.provider === "proposal_snapshot") {
         if (!image.url) missing = true;
         else urls[key] = image.url;
         continue;
       }
-      if (image.source.provider === "crm" && image.source.fileId && image.source.dealId) {
-        const file = byPair.get(key);
+      if (image.source.provider === "crm" && image.source.fileId) {
+        const file = byId.get(image.source.fileId);
         if (!file?.previewUrl || file.status === "missing") missing = true;
         else urls[key] = file.previewUrl;
+      }
+      if (image.source.provider === "crm_logo") {
+        if (!resolved.logo?.previewUrl || resolved.logo.status === "missing") missing = true;
+        else urls[key] = resolved.logo.previewUrl;
       }
     }
   }
 
   return { urls, missing };
-}
-
-export function shouldAbortPdfExport(prepared: { usesOrganizationMedia: boolean; missing: boolean }): boolean {
-  return prepared.usesOrganizationMedia && prepared.missing;
 }
 
 export function shouldRefreshSignedUrl(expiresAt: string | number | undefined, now: number): boolean {

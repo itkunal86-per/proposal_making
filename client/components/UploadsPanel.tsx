@@ -19,7 +19,7 @@ interface UploadsPanelProps {
   documentMedia?: UploadedMedia[];
   libraryMedia?: UploadedMedia[];
   allowMutations?: boolean;
-  onInsertOrganizationImage?: (image: { url: string; source: { provider: "crm"; fileId: number; dealId: number; organizationId?: number } }) => void;
+  onInsertOrganizationImage?: (image: { url: string; source: { provider: "crm" | "crm_logo"; fileId?: number; organizationId?: number } }) => void;
   onMediaUploaded?: (media: UploadedMedia, destination: "document" | "library") => void;
   onMediaRemoved?: (mediaId: string, destination: "document" | "library") => void;
 }

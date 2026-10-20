@@ -3,7 +3,6 @@ import { apiConfig } from "@/lib/apiConfig";
 
 export interface OrganizationMediaItem {
   id: number;
-  dealId: number;
   name: string;
   mimeType: string;
   size: number;
@@ -13,25 +12,18 @@ export interface OrganizationMediaItem {
   expiresAt: string;
 }
 
-export interface DealMediaGroup {
-  dealId: number;
-  total: number;
-  data: OrganizationMediaItem[];
-}
-
 export interface OrganizationMediaList {
   page: number;
   perPage: number;
   total: number;
-  groups: DealMediaGroup[];
-}
-
-export interface DealMediaResolveResult {
-  fileId: number;
-  dealId: number;
-  previewUrl?: string;
-  expiresAt?: string;
-  status?: string;
+  organizationId?: number;
+  logo: {
+    organizationId: number;
+    name: string;
+    previewUrl: string | null;
+    expiresAt: string;
+  } | null;
+  data: OrganizationMediaItem[];
 }
 
 async function authorizedGet(url: string) {
@@ -42,35 +34,34 @@ async function authorizedGet(url: string) {
   return { ok: response.ok, status: response.status, body };
 }
 
-export async function fetchOrganizationMedia(proposalId: string, query: { q?: string; page?: number; type?: "image" | "document" }) {
+export async function fetchOrganizationMedia(proposalId: string, query: { q?: string; page?: number }) {
   const params = new URLSearchParams();
   if (query.q) params.set("q", query.q);
   if (query.page) params.set("page", String(query.page));
-  if (query.type) params.set("type", query.type);
   const suffix = params.toString() ? `?${params.toString()}` : "";
-  const result = await authorizedGet(`${apiConfig.endpoints.proposals}/${proposalId}/deal-media${suffix}`);
+  const result = await authorizedGet(`${apiConfig.endpoints.proposals}/${proposalId}/organization-media${suffix}`);
   return {
     success: result.ok,
     status: result.status,
     data: result.ok ? result.body as OrganizationMediaList : undefined,
-    error: result.ok ? undefined : (result.body.error || "Deal media could not be loaded"),
+    error: result.ok ? undefined : (result.body.error || "Organization media could not be loaded"),
   };
 }
 
-export async function resolveOrganizationMedia(proposalId: string, references: Array<{ fileId: number; dealId: number }>) {
+export async function resolveOrganizationMedia(proposalId: string, fileIds: number[], includeLogo: boolean) {
   const token = getStoredToken();
   if (!token) return { success: false, error: "No authentication token available" };
-  const response = await fetch(`${apiConfig.endpoints.proposals}/${proposalId}/deal-media/resolve`, {
+  const response = await fetch(`${apiConfig.endpoints.proposals}/${proposalId}/organization-media/resolve`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ references }),
+    body: JSON.stringify({ fileIds, includeLogo }),
   });
   const body = await response.json().catch(() => ({}));
   if (!response.ok) {
-    return { success: false, error: body.error || "Deal media could not be refreshed" };
+    return { success: false, error: body.error || "Organization media could not be refreshed" };
   }
-  return { success: true, data: body as { expiresIn?: number; results?: DealMediaResolveResult[] } };
+  return { success: true, data: body as { files?: Array<{ id: number; previewUrl?: string; expiresAt?: string; status?: string }>; logo?: { previewUrl?: string; expiresAt?: string; status?: string } | null } };
 }

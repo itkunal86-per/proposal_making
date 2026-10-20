@@ -7,29 +7,35 @@ interface SignedEntry {
   expiresAt: string;
 }
 
-export function useOrganizationImageUrls(proposalId: string | undefined, sections: Array<{ images?: Array<{ url?: string; source?: { provider: "crm" | "crm_logo" | "proposal_snapshot"; fileId?: number; dealId?: number; organizationId?: number; snapshotId?: number; restore?: "required" } }> }> | undefined) {
+export function useOrganizationImageUrls(proposalId: string | undefined, sections: Array<{ images?: Array<{ url?: string; source?: { provider: "crm" | "crm_logo" | "proposal_snapshot"; fileId?: number; organizationId?: number; snapshotId?: number } }> }> | undefined) {
   const [entries, setEntries] = useState<Record<string, SignedEntry>>({});
   const [failed, setFailed] = useState<Record<string, boolean>>({});
   const retried = useRef<Record<string, boolean>>({});
   const sectionsRef = useRef(sections);
   sectionsRef.current = sections;
   const request = collectOrganizationMedia(sections);
-  const fingerprint = `${proposalId}:${request.references.map((item) => `${item.dealId}:${item.fileId}`).join(",")}`;
+  const fingerprint = `${proposalId}:${request.fileIds.join(",")}:${request.includeLogo}`;
 
   const refresh = useCallback(async () => {
     const current = collectOrganizationMedia(sectionsRef.current);
     if (!organizationMediaResolveEnabled() || !proposalId) return false;
-    if (current.references.length === 0) return true;
-    const result = await resolveOrganizationMedia(proposalId, current.references);
+    if (current.fileIds.length === 0 && !current.includeLogo) return true;
+    const result = await resolveOrganizationMedia(proposalId, current.fileIds, current.includeLogo);
     if (!result.success || !result.data) return false;
     const next: Record<string, SignedEntry> = {};
     const nextFailed: Record<string, boolean> = {};
-    for (const file of result.data.results ?? []) {
-      const key = `${file.dealId}:${file.fileId}`;
+    for (const file of result.data.files ?? []) {
       if (file.previewUrl && file.status !== "missing") {
-        next[key] = { url: file.previewUrl, expiresAt: file.expiresAt || "" };
+        next[`crm:${file.id}`] = { url: file.previewUrl, expiresAt: file.expiresAt || "" };
       } else {
-        nextFailed[key] = true;
+        nextFailed[`crm:${file.id}`] = true;
+      }
+    }
+    if (current.includeLogo) {
+      if (result.data.logo?.previewUrl && result.data.logo.status !== "missing") {
+        next.crm_logo = { url: result.data.logo.previewUrl, expiresAt: result.data.logo.expiresAt || "" };
+      } else {
+        nextFailed.crm_logo = true;
       }
     }
     setEntries((existing) => ({ ...existing, ...next }));
@@ -50,16 +56,16 @@ export function useOrganizationImageUrls(proposalId: string | undefined, section
     return () => window.clearInterval(timer);
   }, [refresh]);
 
-  const displayUrl = useCallback((image: { url?: string; source?: { provider: "crm" | "crm_logo" | "proposal_snapshot"; fileId?: number; dealId?: number; snapshotId?: number; restore?: "required" } }) => {
+  const displayUrl = useCallback((image: { url?: string; source?: { provider: "crm" | "crm_logo" | "proposal_snapshot"; fileId?: number; snapshotId?: number } }) => {
     const key = sourceKey(image);
-    if (!key || image.source?.provider === "proposal_snapshot" || image.source?.restore === "required") return image.source?.restore === "required" ? "" : (image.url || "");
+    if (!key || image.source?.provider === "proposal_snapshot") return image.url || "";
     if (!organizationMediaResolveEnabled() || failed[key]) return "";
     return entries[key]?.url || "";
   }, [entries, failed]);
 
-  const onImageError = useCallback((image: { source?: { provider: "crm" | "crm_logo" | "proposal_snapshot"; fileId?: number; dealId?: number; snapshotId?: number; restore?: "required" } }) => {
+  const onImageError = useCallback((image: { source?: { provider: "crm" | "crm_logo" | "proposal_snapshot"; fileId?: number; snapshotId?: number } }) => {
     const key = sourceKey(image);
-    if (!key || image.source?.restore === "required") return;
+    if (!key) return;
     if (image.source?.provider !== "proposal_snapshot" && !retried.current[key]) {
       retried.current[key] = true;
       void refresh();
@@ -70,15 +76,19 @@ export function useOrganizationImageUrls(proposalId: string | undefined, section
 
   const urlsForPdf = useCallback(async () => {
     const collected = collectOrganizationMedia(sectionsRef.current);
-    const usesOrganizationMedia = collected.references.length > 0 || collected.snapshots.length > 0;
+    const usesOrganizationMedia = collected.fileIds.length > 0 || collected.includeLogo || collected.snapshots.length > 0;
     if (!usesOrganizationMedia) return { urls: {}, missing: false, usesOrganizationMedia: false };
-    if (collected.references.length > 0) {
+    let resolved = { files: [] as Array<{ id: number; previewUrl?: string; status?: string }>, logo: null as { previewUrl?: string; status?: string } | null };
+    if (collected.fileIds.length > 0 || collected.includeLogo) {
       if (!organizationMediaResolveEnabled() || !proposalId) return { urls: {}, missing: true, usesOrganizationMedia: true };
-      const result = await resolveOrganizationMedia(proposalId, collected.references);
+      const result = await resolveOrganizationMedia(proposalId, collected.fileIds, collected.includeLogo);
       if (!result.success || !result.data) return { urls: {}, missing: true, usesOrganizationMedia: true };
-      return { ...exportUrls(sectionsRef.current, result.data), usesOrganizationMedia: true };
+      resolved = {
+        files: result.data.files ?? [],
+        logo: result.data.logo ?? null,
+      };
     }
-    return { ...exportUrls(sectionsRef.current, { results: [] }), usesOrganizationMedia: true };
+    return { ...exportUrls(sectionsRef.current, resolved), usesOrganizationMedia: true };
   }, [proposalId]);
 
   return { displayUrl, onImageError, failed, urlsForPdf };
