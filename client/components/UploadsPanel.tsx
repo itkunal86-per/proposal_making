@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, Loader2, Trash2, Copy } from "lucide-react";
 import { uploadMediaToProposal, uploadMediaToLibrary, fetchProposalMedia, fetchLibraryMedia, deleteProposalMedia, deleteLibraryMedia } from "@/services/mediaService";
+import { fetchDealMedia, DealMediaItem } from "@/services/dealMediaService";
 import { toast } from "@/hooks/use-toast";
 import { OrganizationMediaTab } from "@/components/OrganizationMediaTab";
 import { organizationMediaInsertEnabled } from "@/lib/organizationMedia";
@@ -38,6 +39,11 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
   const [uploadingLibrary, setUploadingLibrary] = useState<Set<string>>(new Set());
   const [loadingMedia, setLoadingMedia] = useState(true);
   const [mediaLoadError, setMediaLoadError] = useState<string | null>(null);
+  const [dealMedia, setDealMedia] = useState<DealMediaItem[]>([]);
+  const [dealOrganizationId, setDealOrganizationId] = useState<number | null>(null);
+  const [dealMediaLoading, setDealMediaLoading] = useState(false);
+  const [dealMediaError, setDealMediaError] = useState<string | null>(null);
+  const [brokenDealIds, setBrokenDealIds] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     const loadProposalMedia = async () => {
@@ -129,6 +135,51 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
     loadLibraryMedia();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (activeTab !== "library") {
+      return;
+    }
+
+    let cancelled = false;
+    setDealMedia([]);
+    setDealOrganizationId(null);
+    setDealMediaError(null);
+    setBrokenDealIds(new Set());
+    setDealMediaLoading(true);
+
+    const loadDealMedia = async () => {
+      try {
+        const result = await fetchDealMedia(proposalId);
+        if (cancelled) return;
+        if (!result.success || !result.data) {
+          console.warn("Failed to load deal attachments:", result.error);
+          setDealMedia([]);
+          setDealOrganizationId(null);
+          setDealMediaError("Deal attachments could not be loaded.");
+          return;
+        }
+        setDealMedia(result.data.data);
+        setDealOrganizationId(result.data.organizationId);
+      } catch (err) {
+        console.error("Failed to load deal attachments:", err);
+        if (!cancelled) {
+          setDealMedia([]);
+          setDealOrganizationId(null);
+          setDealMediaError("Deal attachments could not be loaded.");
+        }
+      } finally {
+        if (!cancelled) {
+          setDealMediaLoading(false);
+        }
+      }
+    };
+
+    loadDealMedia();
+    return () => {
+      cancelled = true;
+    };
+  }, [activeTab, proposalId]);
 
   const handleFileSelect = async (file: File, destination: "document" | "library") => {
     if (!allowMutations) return;
@@ -469,6 +520,79 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
                     </div>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {(dealMediaLoading || dealMediaError || dealMedia.length > 0) && (
+              <div className="space-y-3">
+                <h3 className="text-sm font-medium text-slate-700">Deal attachments</h3>
+                {dealMediaLoading && (
+                  <div className="flex items-center justify-center py-4 text-sm text-slate-500">
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Loading deal attachments...
+                  </div>
+                )}
+                {!dealMediaLoading && dealMediaError && (
+                  <p className="text-sm text-slate-500 text-center py-2">{dealMediaError}</p>
+                )}
+                {!dealMediaLoading && dealMedia.length > 0 && (
+                  <div className="grid grid-cols-2 gap-3">
+                    {dealMedia.map((item) => {
+                      const previewUrl = item.thumbnailUrl || item.url;
+                      const showImage = item.type === "image" && previewUrl && !brokenDealIds.has(item.id);
+                      return (
+                        <div
+                          key={`deal-${item.id}`}
+                          className="border rounded-lg overflow-hidden bg-slate-100"
+                        >
+                          {showImage ? (
+                            <img
+                              src={previewUrl}
+                              alt={item.name}
+                              className="w-full h-24 object-cover"
+                              onError={() => {
+                                setBrokenDealIds((prev) => new Set(prev).add(item.id));
+                              }}
+                            />
+                          ) : item.type === "video" && item.url ? (
+                            <video
+                              src={item.url}
+                              className="w-full h-24 object-cover bg-black"
+                            />
+                          ) : item.type === "audio" && item.url ? (
+                            <div className="flex h-24 items-center bg-slate-200 px-2">
+                              <audio src={item.url} controls className="w-full" />
+                            </div>
+                          ) : (
+                            <div className="flex h-24 items-center justify-center bg-slate-200 px-2 text-xs uppercase text-slate-500">
+                              {item.mimeType?.split("/").pop() || item.type}
+                            </div>
+                          )}
+                          <p className="text-xs text-slate-600 px-2 py-1 truncate">{item.name}</p>
+                          {item.type === "image" && organizationMediaInsertEnabled() && (
+                            <div className="px-2 pb-2">
+                              <Button
+                                type="button"
+                                className="h-7 px-2 text-xs"
+                                disabled={!allowMutations || dealOrganizationId == null || !item.url}
+                                onClick={() => onInsertOrganizationImage?.({
+                                  url: "",
+                                  source: {
+                                    provider: "crm",
+                                    fileId: item.id,
+                                    organizationId: dealOrganizationId ?? undefined,
+                                  },
+                                })}
+                              >
+                                Insert
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             )}
           </>
