@@ -1,0 +1,386 @@
+/* Presentation-only styles for the Proposal Edit screen. */
+.proposal-editor,
+.proposal-editor-shell,
+.proposal-editor-dialog {
+  --editor-primary: #992a90;
+  --editor-primary-hover: #7d2276;
+  --editor-secondary: #045579;
+  --editor-secondary-hover: #034361;
+  --editor-accent: #6b4d02;
+  --editor-bg: #f7f8fa;
+  --editor-surface: #ffffff;
+  --editor-border: #e5e7eb;
+  --editor-text: #1f2937;
+  --editor-muted: #6b7280;
+}
+
+.proposal-editor-shell > header {
+  background: var(--editor-surface);
+  border-bottom-color: var(--editor-border);
+}
+
+.proposal-editor-shell > header .container {
+  height: 2.75rem;
+  max-width: none;
+  width: 100%;
+}
+
+.proposal-editor-shell > header img {
+  height: 1.75rem;
+}
+
+.proposal-editor-shell > header nav {
+  gap: 1rem;
+}
+
+.proposal-editor-shell > header nav a {
+  color: var(--editor-muted);
+}
+
+.proposal-editor-shell > header nav a:hover {
+  color: var(--editor-secondary);
+}
+
+.proposal-editor {
+  background: var(--editor-bg);
+  color: var(--editor-text);
+}
+
+.proposal-editor .editor-header,
+.proposal-editor .editor-toolbar,
+.proposal-editor .editor-panel,
+.proposal-editor .editor-nav {
+  background: var(--editor-surface);
+  border-color: var(--editor-border);
+}
+
+.proposal-editor .editor-header {
+  border-bottom: 1px solid var(--editor-border);
+}
+
+.proposal-editor .editor-section-label {
+  max-width: 9rem;
+  overflow: hidden;
+  color: var(--editor-muted);
+  font-size: 12px;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.proposal-editor .editor-section-label strong {
+  color: var(--editor-text);
+  font-weight: 600;
+}
+
+.proposal-editor .editor-save-state {
+  color: var(--editor-muted);
+  font-size: 12px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.proposal-editor .editor-header button,
+.proposal-editor .editor-toolbar button,
+.proposal-editor .editor-nav button,
+.proposal-editor .editor-review button,
+.proposal-editor .editor-side-panel button,
+.proposal-editor-dialog button {
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.proposal-editor .editor-header button:focus-visible,
+.proposal-editor .editor-toolbar button:focus-visible,
+.proposal-editor .editor-nav button:focus-visible,
+.proposal-editor .editor-review button:focus-visible,
+.proposal-editor .editor-side-panel button:focus-visible,
+.proposal-editor .editor-header input:focus-visible,
+.proposal-editor .editor-side-panel input:focus-visible,
+.proposal-editor .editor-review textarea:focus-visible,
+.proposal-editor-dialog button:focus-visible,
+.proposal-editor-dialog input:focus-visible,
+.proposal-editor-dialog textarea:focus-visible {
+  outline: 2px solid var(--editor-primary);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+.proposal-editor .editor-header button.editor-btn-primary,
+.proposal-editor .editor-review button.bg-primary,
+.proposal-editor .editor-side-panel button.bg-primary,
+.proposal-editor-dialog button.bg-primary {
+  height: 34px;
+  border-radius: 8px;
+  background-color: var(--editor-primary);
+  color: #fff;
+  border-color: var(--editor-primary);
+}
+
+.proposal-editor .editor-header button.editor-btn-primary:hover,
+.proposal-editor .editor-review button.bg-primary:hover,
+.proposal-editor .editor-side-panel button.bg-primary:hover,
+.proposal-editor-dialog button.bg-primary:hover {
+  background-color: var(--editor-primary-hover);
+  border-color: var(--editor-primary-hover);
+  color: #fff;
+}
+
+.proposal-editor .editor-header button.editor-btn-secondary,
+.proposal-editor .editor-review button.border.bg-background,
+.proposal-editor .editor-side-panel button.border.bg-background:not(.h-auto),
+.proposal-editor-dialog button.border.bg-background:not(.h-auto) {
+  height: 32px;
+  border-radius: 8px;
+  border-color: color-mix(in srgb, var(--editor-secondary) 28%, var(--editor-border));
+  background: #fff;
+  color: var(--editor-secondary);
+}
+
+.proposal-editor .editor-header button.editor-btn-secondary:hover,
+.proposal-editor .editor-review button.border.bg-background:hover,
+.proposal-editor .editor-side-panel button.border.bg-background:not(.h-auto):hover,
+.proposal-editor-dialog button.border.bg-background:not(.h-auto):hover {
+  border-color: var(--editor-secondary);
+  background: color-mix(in srgb, var(--editor-secondary) 8%, white);
+  color: var(--editor-secondary-hover);
+}
+
+.proposal-editor .editor-header button.editor-btn-accent {
+  height: 32px;
+  border-radius: 8px;
+  border-color: color-mix(in srgb, var(--editor-accent) 45%, var(--editor-border));
+  background: #fff;
+  color: var(--editor-accent);
+}
+
+.proposal-editor .editor-header button.editor-btn-accent:hover {
+  background: color-mix(in srgb, var(--editor-accent) 10%, white);
+  border-color: var(--editor-accent);
+  color: var(--editor-accent);
+}
+
+.proposal-editor button.bg-destructive,
+.proposal-editor-dialog button.bg-destructive,
+.proposal-editor-dialog button.bg-red-600 {
+  height: 32px;
+  border-radius: 8px;
+}
+
+.proposal-editor .editor-header button[role="combobox"],
+.proposal-editor .editor-header input,
+.proposal-editor .editor-toolbar button[role="combobox"],
+.proposal-editor .editor-side-panel button[role="combobox"],
+.proposal-editor .editor-side-panel input:not([type="color"]):not([type="checkbox"]):not([type="file"]):not([type="range"]),
+.proposal-editor-dialog button[role="combobox"] {
+  height: 2rem;
+  min-height: 2rem;
+  border-color: var(--editor-border);
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.proposal-editor .editor-header input:focus-visible,
+.proposal-editor .editor-header button[role="combobox"]:focus-visible,
+.proposal-editor .editor-side-panel input:focus-visible,
+.proposal-editor .editor-side-panel button[role="combobox"]:focus-visible {
+  border-color: var(--editor-primary);
+}
+
+.proposal-editor .editor-status {
+  height: 2rem;
+  border-color: var(--editor-border);
+  border-radius: 8px;
+  background: var(--editor-bg);
+  color: var(--editor-text);
+  font-size: 13px;
+}
+
+.proposal-editor .editor-toolbar {
+  gap: 2px;
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--editor-border);
+}
+
+.proposal-editor .editor-toolbar > button,
+.proposal-editor .editor-toolbar .relative > button,
+.proposal-editor .editor-toolbar button[role="combobox"] {
+  height: 32px;
+  min-height: 32px;
+  border-radius: 8px;
+}
+
+.proposal-editor .editor-toolbar button.w-9 {
+  width: 32px;
+  padding: 0;
+}
+
+.proposal-editor .editor-toolbar button:hover {
+  background: color-mix(in srgb, var(--editor-secondary) 8%, white);
+  color: var(--editor-secondary);
+}
+
+.proposal-editor .editor-toolbar button.bg-slate-200,
+.proposal-editor .editor-toolbar button.bg-slate-200:hover {
+  background: color-mix(in srgb, var(--editor-primary) 14%, white);
+  color: var(--editor-primary);
+}
+
+.proposal-editor .editor-toolbar .w-px {
+  background: var(--editor-border);
+}
+
+.proposal-editor .editor-nav {
+  gap: 0.375rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.proposal-editor .editor-nav button {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  color: var(--editor-muted);
+}
+
+.proposal-editor .editor-nav button:hover {
+  background: color-mix(in srgb, var(--editor-secondary) 10%, white);
+  color: var(--editor-secondary);
+}
+
+.proposal-editor .editor-nav button[data-active="true"] {
+  background: color-mix(in srgb, var(--editor-primary) 12%, white);
+  color: var(--editor-primary);
+  box-shadow: inset 2px 0 0 var(--editor-primary);
+}
+
+.proposal-editor .editor-nav > .flex {
+  gap: 0.375rem;
+}
+
+.proposal-editor .editor-canvas,
+.proposal-editor .editor-panel {
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db transparent;
+}
+
+.proposal-editor .editor-side-panel .p-4,
+.proposal-editor .editor-side-panel.p-4 {
+  padding: 0.75rem;
+}
+
+.proposal-editor .editor-side-panel .p-6 {
+  padding: 0.75rem;
+}
+
+.proposal-editor .editor-side-panel .space-y-4 > :not([hidden]) ~ :not([hidden]) {
+  margin-top: 0.75rem;
+}
+
+.proposal-editor .editor-side-panel .gap-3 {
+  gap: 0.5rem;
+}
+
+.proposal-editor .editor-side-panel h2.text-lg,
+.proposal-editor .editor-side-panel h2.text-base {
+  font-size: 0.9375rem;
+  line-height: 1.25rem;
+  font-weight: 600;
+  color: var(--editor-text);
+}
+
+.proposal-editor .editor-side-panel .min-h-\[200px\] {
+  min-height: 7.5rem;
+}
+
+.proposal-editor .editor-side-panel input[type="color"] {
+  width: 2.25rem;
+  height: 2rem;
+  padding: 2px;
+}
+
+.proposal-editor .editor-side-panel .editor-tab {
+  padding: 0.25rem 0.375rem 0.375rem;
+  color: var(--editor-muted);
+  font-size: 12px;
+  font-weight: 600;
+  border-bottom: 2px solid transparent;
+}
+
+.proposal-editor .editor-side-panel .editor-tab:hover {
+  color: var(--editor-secondary);
+}
+
+.proposal-editor .editor-side-panel .editor-tab.editor-tab-active {
+  color: var(--editor-primary);
+  border-bottom-color: var(--editor-primary);
+}
+
+.proposal-editor .editor-side-panel button.h-auto {
+  border-radius: 8px;
+  border-color: var(--editor-border);
+}
+
+.proposal-editor .editor-side-panel button.h-auto:hover {
+  border-color: var(--editor-secondary);
+  color: var(--editor-secondary);
+  background: color-mix(in srgb, var(--editor-secondary) 6%, white);
+}
+
+.proposal-editor .editor-review {
+  border-top: 1px solid var(--editor-border);
+  background: var(--editor-surface);
+}
+
+.proposal-editor .editor-review h2 {
+  color: var(--editor-text);
+  font-size: 12px;
+  letter-spacing: 0.01em;
+}
+
+.proposal-editor .editor-review textarea {
+  min-height: 4.5rem;
+  border-color: var(--editor-border);
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.proposal-editor-dialog {
+  border-color: var(--editor-border);
+}
+
+.proposal-editor-dialog .editor-section-active {
+  background: color-mix(in srgb, var(--editor-secondary) 10%, white);
+  border-color: var(--editor-secondary);
+}
+
+@media (max-width: 767px) {
+  .proposal-editor .editor-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  .proposal-editor .editor-nav > .flex {
+    flex-direction: row;
+  }
+
+  .proposal-editor .editor-nav-spacer {
+    display: none;
+  }
+
+  .proposal-editor .editor-nav-divider {
+    width: 1px;
+    height: 1.25rem;
+    border-top-width: 0;
+    border-left-width: 1px;
+  }
+
+  .proposal-editor .editor-nav button[data-active="true"] {
+    box-shadow: inset 0 -2px 0 var(--editor-primary);
+  }
+}

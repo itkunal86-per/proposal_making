@@ -174,7 +174,7 @@ export const SectionsDialog: React.FC<SectionsDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="proposal-editor-dialog sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Manage Sections</DialogTitle>
         </DialogHeader>
@@ -185,7 +185,7 @@ export const SectionsDialog: React.FC<SectionsDialogProps> = ({
               key={section.id}
               className={`p-3 rounded-lg border flex items-center justify-between gap-2 cursor-pointer transition-colors ${
                 index === currentSectionIndex
-                  ? "bg-blue-50 border-blue-300"
+                  ? "editor-section-active"
                   : "bg-slate-50 border-slate-200 hover:bg-slate-100"
               }`}
               onClick={() => {

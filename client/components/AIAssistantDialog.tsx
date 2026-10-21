@@ -399,7 +399,7 @@ export const AIAssistantDialog: React.FC<AIAssistantDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="proposal-editor-dialog sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>AI Assistant</DialogTitle>
         </DialogHeader>

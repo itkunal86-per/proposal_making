@@ -440,9 +440,9 @@ export const PPTPreviewModal: React.FC<PPTPreviewModalProps> = ({
     <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0, 0, 0, 0.8)", zIndex: 9998 }}>
       <div style={{ position: "fixed", inset: 0, display: "flex", flexDirection: "column", zIndex: 9999 }}>
         {/* Header */}
-        <div className="border-b border-slate-700 px-6 py-4 bg-slate-900">
-          <div className="flex items-center justify-between mb-2">
-            <h1 className="text-xl font-bold text-white">{proposalTitle} - PPT Preview</h1>
+        <div className="border-b border-slate-700 px-4 py-2 bg-slate-900">
+          <div className="flex items-center justify-between mb-1 gap-2">
+            <h1 className="min-w-0 truncate text-base font-semibold text-white">{proposalTitle} - PPT Preview</h1>
             <div className="flex items-center gap-2">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -545,7 +545,7 @@ export const PPTPreviewModal: React.FC<PPTPreviewModalProps> = ({
         {/* Main Content - Slide Display and Styles */}
         <div className="flex-1 flex bg-black overflow-hidden">
           {/* Left Side - Slide Display */}
-          <div className="flex-1 flex items-center justify-center p-8">
+          <div className="flex-1 flex items-center justify-center p-4">
             <div className="w-full max-w-4xl aspect-video rounded-lg overflow-hidden shadow-2xl">
               <div
                 className={`h-full w-full ${getSlideBackgroundColor(currentSlide.type)} flex flex-col justify-center p-12`}

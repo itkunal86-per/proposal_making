@@ -136,7 +136,7 @@ export const SignatureDetailsModal: React.FC<SignatureDetailsModalProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="proposal-editor-dialog sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Signature Details</DialogTitle>
           <DialogDescription>

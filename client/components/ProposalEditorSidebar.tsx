@@ -42,15 +42,15 @@ export const ProposalEditorSidebar: React.FC<ProposalEditorSidebarProps> = ({
     : allPanelButtons;
 
   return (
-    <div data-scroll-owner="left-controls" className="flex min-h-0 w-full flex-col items-center gap-4 overflow-y-auto border-b border-slate-200 bg-white py-4 md:border-b-0 md:border-r">
+    <div data-scroll-owner="left-controls" className="editor-nav flex min-h-0 w-full flex-col items-center gap-1.5 overflow-y-auto border-b py-2 md:border-b-0 md:border-r">
       <Button
         variant="ghost"
         size="icon"
         onClick={onOpenSections}
         title="Manage sections"
-        className="text-[#373530] hover:text-[#373530] hover:bg-[#373530]/10"
+        className="editor-nav-btn"
       >
-        <List className="w-6 h-6" />
+        <List className="w-4 h-4" />
       </Button>
 
       <Button
@@ -58,14 +58,14 @@ export const ProposalEditorSidebar: React.FC<ProposalEditorSidebarProps> = ({
         size="icon"
         onClick={onOpenAI}
         title="AI Assistant"
-        className="text-[#373530] hover:text-[#373530] hover:bg-[#373530]/10"
+        className="editor-nav-btn"
       >
-        <Sparkles className="w-6 h-6" />
+        <Sparkles className="w-4 h-4" />
       </Button>
 
-      <div className="border-t border-slate-200 w-full" />
+      <div className="editor-nav-divider border-t border-slate-200 w-full" />
 
-      <div className="flex flex-col items-center gap-2">
+      <div className="flex flex-col items-center">
         {panelButtons.map(({ id, icon: Icon, title }) => (
           <Button
             key={id}
@@ -73,27 +73,24 @@ export const ProposalEditorSidebar: React.FC<ProposalEditorSidebarProps> = ({
             size="icon"
             onClick={() => onSelectPanel(id as PanelType)}
             title={title}
-            className={`transition-colors ${
-              activePanel === id
-                ? "text-[#373530] bg-[#373530]/10 hover:bg-[#373530]/15"
-                : "text-[#373530] hover:text-[#373530] hover:bg-[#373530]/10"
-            }`}
+            data-active={activePanel === id ? "true" : "false"}
+            className="editor-nav-btn"
           >
-            <Icon className="w-6 h-6" />
+            <Icon className="w-4 h-4" />
           </Button>
         ))}
       </div>
 
-      <div className="mt-auto" />
+      <div className="editor-nav-spacer mt-auto" />
 
       <Link to={`/proposals/${proposalId}/settings`}>
         <Button
           variant="ghost"
           size="icon"
           title="Settings"
-          className="text-[#373530] hover:text-[#373530] hover:bg-[#373530]/10"
+          className="editor-nav-btn"
         >
-          <Settings className="w-6 h-6" />
+          <Settings className="w-4 h-4" />
         </Button>
       </Link>
 
@@ -102,9 +99,9 @@ export const ProposalEditorSidebar: React.FC<ProposalEditorSidebarProps> = ({
           variant="ghost"
           size="icon"
           title="Back to list"
-          className="text-[#373530] hover:text-[#373530] hover:bg-[#373530]/10"
+          className="editor-nav-btn"
         >
-          <ArrowLeft className="w-6 h-6" />
+          <ArrowLeft className="w-4 h-4" />
         </Button>
       </a>
     </div>

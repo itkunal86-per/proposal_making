@@ -308,35 +308,23 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
     <Card className="p-4 space-y-4">
       <h2 className="text-lg font-semibold">Uploads</h2>
 
-      <div className="flex gap-2 border-b">
+      <div className="flex gap-1 border-b">
         <button
           onClick={() => setActiveTab("document")}
-          className={`pb-2 px-2 text-sm font-medium transition-colors ${
-            activeTab === "document"
-              ? "text-slate-900 border-b-2 border-slate-900"
-              : "text-slate-500 hover:text-slate-700"
-          }`}
+          className={`editor-tab ${activeTab === "document" ? "editor-tab-active" : ""}`}
         >
           This document
         </button>
         <button
           onClick={() => setActiveTab("library")}
-          className={`pb-2 px-2 text-sm font-medium transition-colors ${
-            activeTab === "library"
-              ? "text-slate-900 border-b-2 border-slate-900"
-              : "text-slate-500 hover:text-slate-700"
-          }`}
+          className={`editor-tab ${activeTab === "library" ? "editor-tab-active" : ""}`}
         >
           Your library
         </button>
         {organizationMediaInsertEnabled() && (
           <button
             onClick={() => setActiveTab("organization")}
-            className={`pb-2 px-2 text-sm font-medium transition-colors ${
-              activeTab === "organization"
-                ? "text-slate-900 border-b-2 border-slate-900"
-                : "text-slate-500 hover:text-slate-700"
-            }`}
+            className={`editor-tab ${activeTab === "organization" ? "editor-tab-active" : ""}`}
           >
             Organization
           </button>

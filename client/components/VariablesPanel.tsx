@@ -310,7 +310,7 @@ export const VariablesPanel: React.FC<VariablesPanelProps> = ({
       </div>
 
       <AlertDialog open={!!deleteConfirm} onOpenChange={() => setDeleteConfirm(null)}>
-        <AlertDialogContent>
+        <AlertDialogContent className="proposal-editor-dialog">
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Variable</AlertDialogTitle>
             <AlertDialogDescription>

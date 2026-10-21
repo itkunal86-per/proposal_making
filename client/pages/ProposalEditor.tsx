@@ -51,6 +51,7 @@ import { SignatureDetailsModal } from "@/components/SignatureDetailsModal";
 import { VariablesPanel } from "@/components/VariablesPanel";
 import { TextFormattingToolbar } from "@/components/TextFormattingToolbar";
 import { fetchVariables, type Variable as ApiVariable } from "@/services/variablesService";
+import "@/styles/proposal-editor.css";
 
 interface DocumentSettings {
   company?: string;
@@ -780,15 +781,15 @@ export default function ProposalEditor() {
 
   return (
     <>
-    <div className="absolute inset-0 grid grid-rows-[auto_auto_minmax(0,1fr)] overflow-hidden bg-slate-50">
+    <div className="proposal-editor absolute inset-0 grid min-h-0 grid-rows-[auto_auto_minmax(0,1fr)] overflow-hidden">
         {/* Header */}
-        <div className="shrink-0 bg-white border-b border-slate-200 px-6 py-4">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3 flex-1">
+        <div className="editor-header shrink-0 px-3 py-1.5">
+          <div className="flex min-w-0 flex-wrap items-center justify-between gap-x-2 gap-y-1">
+            <div className="flex min-w-0 flex-1 items-center gap-2">
               <Input
                 value={p.title}
                 onChange={(e) => commit({ ...p, title: e.target.value })}
-                className="flex-1 max-w-md"
+                className="h-8 min-w-[8rem] max-w-xs flex-1"
                 placeholder="Proposal title"
                 disabled={readOnly}
               />
@@ -801,7 +802,7 @@ export default function ProposalEditor() {
                   }}
                   disabled={isLoadingClients || readOnly}
                 >
-                  <SelectTrigger className="w-64">
+                  <SelectTrigger className="h-8 w-40">
                     <SelectValue placeholder="Select a client" />
                   </SelectTrigger>
                   <SelectContent>
@@ -821,7 +822,7 @@ export default function ProposalEditor() {
                     commit({ ...p, status: newStatus });
                   }}
                 >
-                  <SelectTrigger className="w-40">
+                  <SelectTrigger className="h-8 w-44">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -852,7 +853,7 @@ export default function ProposalEditor() {
                     }
                   }}
                 >
-                  <SelectTrigger className="w-40" aria-label="Proposal status">
+                  <SelectTrigger className="h-8 w-44" aria-label="Proposal status">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -864,16 +865,15 @@ export default function ProposalEditor() {
                   </SelectContent>
                 </Select>
               ) : (
-                <div className="flex h-10 w-40 items-center rounded-md border border-slate-200 bg-slate-50 px-3 text-sm text-slate-700">
+                <div className="editor-status flex w-44 items-center border px-2.5">
                   {proposalStatusLabel(p.status)}
                 </div>
               )}
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex shrink-0 items-center gap-1.5">
               {section && (
-                <div className="text-sm">
-                  <span className="text-muted-foreground">Section:</span>
-                  <span className="ml-2 font-medium">{section.title}</span>
+                <div className="editor-section-label">
+                  Section: <strong>{section.title}</strong>
                 </div>
               )}
               <Button
@@ -883,6 +883,7 @@ export default function ProposalEditor() {
                 }}
                 variant="outline"
                 size="sm"
+                className="editor-btn-primary h-8 px-2.5"
               >
                 Preview Proposal
               </Button>
@@ -892,6 +893,7 @@ export default function ProposalEditor() {
                     onClick={handleCreatePPT}
                     variant="outline"
                     size="sm"
+                    className="editor-btn-accent h-8 px-2.5"
                     disabled={isCreatingPPT}
                   >
                     {isCreatingPPT ? "Creating..." : "Create PPT"}
@@ -900,6 +902,7 @@ export default function ProposalEditor() {
                     onClick={handlePreviewPPT}
                     variant="outline"
                     size="sm"
+                    className="editor-btn-secondary h-8 px-2.5"
                     disabled={isPreviewingPPT}
                   >
                     {isPreviewingPPT ? "Previewing..." : "Preview PPT"}
@@ -911,12 +914,13 @@ export default function ProposalEditor() {
                   onClick={() => setShowDeleteConfirm(true)}
                   variant="destructive"
                   size="sm"
+                  className="h-8 px-2.5"
                   disabled={isDeleting}
                 >
                   {isDeleting ? "Deleting..." : "Delete Template"}
                 </Button>
               )}
-              <div className="text-xs text-muted-foreground whitespace-nowrap">
+              <div className="editor-save-state">
                 {saving ? "Saving..." : "Saved"}
               </div>
             </div>
@@ -1114,7 +1118,7 @@ export default function ProposalEditor() {
         />
         </div>
 
-        <div className="grid min-h-0 grid-cols-1 overflow-y-auto md:grid-cols-[4rem_minmax(0,1fr)_24rem] md:grid-rows-[minmax(0,1fr)] md:overflow-hidden">
+        <div className="grid min-h-0 min-w-0 grid-cols-1 overflow-y-auto md:grid-cols-[3.25rem_minmax(0,1fr)_22rem] md:grid-rows-[minmax(0,1fr)] md:overflow-hidden">
           <ProposalEditorSidebar
             proposalId={p.id}
             dealId={p.deal_id}
@@ -1125,7 +1129,7 @@ export default function ProposalEditor() {
             isTemplateEdit={isSystemTemplateEdit}
           />
           {/* Proposal scroll container. Wheel, scrollbar, Page Up, and Page Down move this element. */}
-          <div ref={previewContainerRef} data-scroll-owner="proposal" className="min-h-0 min-w-0 overflow-y-auto p-6">
+          <div ref={previewContainerRef} data-scroll-owner="proposal" className="editor-canvas min-h-0 min-w-0 overflow-y-auto px-3 py-3">
             <div className={readOnly ? "pointer-events-none" : undefined}>
             <ProposalPreview
               proposal={p}
@@ -1456,8 +1460,8 @@ export default function ProposalEditor() {
           </div>
 
           {/* Right panel scroll container: text controls, then Comments. */}
-          <div data-scroll-owner="right-panel" className="min-h-0 min-w-0 overflow-y-auto border-t border-slate-200 bg-white md:border-l md:border-t-0">
-            <div className={`p-6 ${readOnly && activePanel !== "uploads" ? "pointer-events-none" : ""}`}>
+          <div data-scroll-owner="right-panel" className="editor-panel min-h-0 min-w-0 overflow-y-auto border-t md:border-l md:border-t-0">
+            <div className={`editor-side-panel p-3 ${readOnly && activePanel !== "uploads" ? "pointer-events-none" : ""}`}>
             {activePanel === "properties" ? (
               <PropertiesPanel
                 proposal={p}
@@ -1656,7 +1660,7 @@ export default function ProposalEditor() {
       />
 
       <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-        <DialogContent>
+        <DialogContent className="proposal-editor-dialog">
           <DialogHeader>
             <DialogTitle>Delete Template</DialogTitle>
             <DialogDescription>

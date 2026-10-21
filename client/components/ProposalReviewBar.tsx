@@ -97,8 +97,8 @@ export function ProposalReviewBar({
   if (!isReviewer && !canSubmit) return null;
 
   return (
-    <div className="space-y-3 border-t border-slate-200 px-6 py-4">
-      <h2 className="text-sm font-semibold text-slate-900">Comments</h2>
+    <div className="editor-review space-y-2 px-3 py-2.5">
+      <h2 className="text-xs font-semibold">Comments</h2>
       <div className="flex flex-wrap items-center gap-2">
         {canSubmit && (status === "draft" || status === "rework_requested") && (
           <Button size="sm" disabled={busy} onClick={() => run(() => submitForReview(proposalId), "Submitted for review")}>
@@ -126,7 +126,7 @@ export function ProposalReviewBar({
           value={comment}
           onChange={(event) => setComment(event.target.value)}
           placeholder="Review comment"
-          className="bg-white"
+          className="bg-white text-sm"
         />
       )}
       {events.length > 0 && (
