@@ -543,7 +543,7 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
                       return (
                         <div
                           key={`deal-${item.id}`}
-                          className="border rounded-lg overflow-hidden bg-slate-100"
+                          className="border rounded-lg overflow-hidden bg-slate-100 group relative"
                         >
                           {showImage ? (
                             <img
@@ -566,6 +566,19 @@ export const UploadsPanel: React.FC<UploadsPanelProps> = ({
                           ) : (
                             <div className="flex h-24 items-center justify-center bg-slate-200 px-2 text-xs uppercase text-slate-500">
                               {item.mimeType?.split("/").pop() || item.type}
+                            </div>
+                          )}
+                          {item.type === "image" && item.url && (
+                            <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button
+                                type="button"
+                                onClick={() => item.url && handleCopyUrl(item.url)}
+                                className="bg-slate-600 hover:bg-slate-700 text-white rounded p-1"
+                                title="Copy URL"
+                                disabled={!allowMutations}
+                              >
+                                <Copy className="w-4 h-4" />
+                              </button>
                             </div>
                           )}
                           <p className="text-xs text-slate-600 px-2 py-1 truncate">{item.name}</p>
