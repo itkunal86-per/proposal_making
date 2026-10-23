@@ -8,7 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
 import {
@@ -31,6 +31,7 @@ import { TemplateSelectionModal } from "@/components/TemplateSelectionModal";
 import { ProposalTitleDialog } from "@/components/ProposalTitleDialog";
 import { convertSystemTemplateToProposal, type SystemTemplate, copyProposalFromTemplate, saveProposalAsTemplate } from "@/services/systemTemplatesService";
 import { generateProposalFromTemplate, pollProposalStatus } from "@/services/aiGenerationService";
+import { manualTemplateNeedsCopy, shouldOpenProposalTitleDialog, type ProposalCreationFlow } from "@/lib/proposalCreationFlow";
 import { PPTPreviewModal } from "@/components/PPTPreviewModal";
 import { Wand2, MoreVertical, FileText } from "lucide-react";
 
@@ -81,6 +82,9 @@ export default function MyProposals() {
   const [newProposalId, setNewProposalId] = useState<string | null>(null);
   const [showTemplateSelection, setShowTemplateSelection] = useState(false);
   const [chatSessionId, setChatSessionId] = useState<number | null>(null);
+  const [creationFlow, setCreationFlow] = useState<ProposalCreationFlow>(null);
+  const applyingTemplateRef = useRef(false);
+  const [isApplyingTemplate, setIsApplyingTemplate] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<SystemTemplate | null>(null);
   const [showTitleDialog, setShowTitleDialog] = useState(false);
   const [isGeneratingProposal, setIsGeneratingProposal] = useState(false);
@@ -113,11 +117,18 @@ export default function MyProposals() {
   }
 
   const handleOpenCreateDialog = async () => {
+    setCreationFlow("manual");
+    setChatSessionId(null);
+    setShowTitleDialog(false);
+    setIsGenerateDialogOpen(false);
     await loadClients();
     setIsCreateDialogOpen(true);
   };
 
   const handleOpenGenerateDialog = async () => {
+    setCreationFlow("ai");
+    setShowTitleDialog(false);
+    setIsCreateDialogOpen(false);
     try {
       await loadClients();
       const newProposal = await createProposal({
@@ -215,35 +226,59 @@ export default function MyProposals() {
     await refresh();
   }
 
-  async function handleTemplateSelected(template: SystemTemplate | null) {
-    if (!newProposalId) return;
+  async function applyManualTemplate(template: SystemTemplate | null) {
+    if (!newProposalId || applyingTemplateRef.current) return;
+    applyingTemplateRef.current = true;
+    setIsApplyingTemplate(true);
+    const proposalId = newProposalId;
+    try {
+      if (manualTemplateNeedsCopy(template)) {
+        const copiedProposal = await copyProposalFromTemplate(String(template.id), proposalId);
+        if (!copiedProposal) {
+          throw new Error("Failed to copy proposal from template");
+        }
+      }
 
-    // Store the template and show title dialog
+      setNewProposalId(null);
+      setSelectedTemplate(null);
+      setCreationFlow(null);
+      setChatSessionId(null);
+      setShowTitleDialog(false);
+      nav(`/proposals/${proposalId}/edit`);
+    } catch (error) {
+      console.error("Error applying template:", error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to apply template",
+        variant: "destructive",
+      });
+      setShowTemplateSelection(true);
+    } finally {
+      applyingTemplateRef.current = false;
+      setIsApplyingTemplate(false);
+    }
+  }
+
+  async function handleTemplateSelected(template: SystemTemplate | null) {
+    if (!newProposalId || applyingTemplateRef.current) return;
+
     setSelectedTemplate(template);
     setShowTemplateSelection(false);
-    setShowTitleDialog(true);
+    if (shouldOpenProposalTitleDialog(creationFlow)) {
+      setShowTitleDialog(true);
+      return;
+    }
+    await applyManualTemplate(template);
   }
 
   async function handleProposalTitleSubmit(title: string) {
-    if (!newProposalId || !chatSessionId) {
-      // Fallback to old flow if no session ID (manual template selection)
-      try {
-        if (selectedTemplate) {
-          const copiedProposal = await copyProposalFromTemplate(String(selectedTemplate.id), newProposalId);
-          if (!copiedProposal) {
-            throw new Error("Failed to copy proposal from template");
-          }
-        }
-
-        const editorUrl = `/proposals/${newProposalId}/edit`;
-        nav(editorUrl);
-        setNewProposalId(null);
-        setSelectedTemplate(null);
-      } catch (error) {
-        console.error("Error applying template:", error);
-        throw error;
-      }
+    if (!shouldOpenProposalTitleDialog(creationFlow)) {
+      await applyManualTemplate(selectedTemplate);
       return;
+    }
+
+    if (!newProposalId || !chatSessionId) {
+      throw new Error("AI proposal session is missing");
     }
 
     // AI-generated flow with API call
@@ -283,6 +318,7 @@ export default function MyProposals() {
             nav(`/proposals/${response.proposal_id}/edit?sessionId=${chatSessionId}`);
             setNewProposalId(null);
             setChatSessionId(null);
+            setCreationFlow(null);
             setSelectedTemplate(null);
           } catch (pollingError) {
             console.error("Error polling proposal status:", pollingError);
@@ -303,6 +339,7 @@ export default function MyProposals() {
           nav(`/proposals/${response.proposal_id}/edit?sessionId=${chatSessionId}`);
           setNewProposalId(null);
           setChatSessionId(null);
+          setCreationFlow(null);
           setSelectedTemplate(null);
         }
       } else {
@@ -864,7 +901,7 @@ export default function MyProposals() {
         open={showTemplateSelection}
         onOpenChange={setShowTemplateSelection}
         onSelectTemplate={handleTemplateSelected}
-        isLoading={isCreating}
+        isLoading={isCreating || isApplyingTemplate}
       />
 
       <ProposalTitleDialog

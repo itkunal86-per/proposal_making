@@ -1,7 +1,15 @@
 import { z } from "zod";
 import { getStoredToken, getStoredAuth } from "@/lib/auth";
 import { apiConfig } from "@/lib/apiConfig";
-import { sectionsForSave, readOrganizationSource } from "@/lib/organizationMedia";
+import { sectionsForSave } from "@/lib/organizationMedia";
+import {
+  contentStylesForLoadedSection,
+  normalizeImageElement,
+  normalizeShapeElement,
+  normalizeSignatureField,
+  normalizeTableElement,
+  normalizeTextElement,
+} from "@/lib/proposalElements";
 
 export type ProposalStatus =
   | "draft"
@@ -457,75 +465,13 @@ function normalizeProposal(raw: z.infer<typeof proposalSchema>): Proposal {
           type: m.type!,
           url: m.url!,
         })),
-        shapes: (s.shapes ?? []).map((shape) => ({
-          id: String(shape.id!),
-          type: shape.type! as "square" | "circle" | "triangle",
-          width: shape.width!,
-          height: shape.height!,
-          backgroundColor: shape.backgroundColor!,
-          backgroundImage: shape.backgroundImage,
-          backgroundSize: shape.backgroundSize,
-          backgroundOpacity: shape.backgroundOpacity,
-          borderWidth: shape.borderWidth,
-          borderColor: shape.borderColor,
-          borderRadius: shape.borderRadius,
-          top: typeof shape.top === "number" ? shape.top : 0,
-          left: typeof shape.left === "number" ? shape.left : 0,
-        })),
-        tables: (s.tables ?? []).map((table) => ({
-          id: String(table.id!),
-          rows: table.rows!,
-          columns: table.columns!,
-          cells: (table.cells ?? []).map((row) =>
-            (row ?? []).map((cell) => ({
-              id: String(cell.id!),
-              content: cell.content!,
-            }))
-          ),
-          borderWidth: table.borderWidth!,
-          borderColor: table.borderColor!,
-          headerBackground: table.headerBackground,
-          cellBackground: table.cellBackground,
-          textColor: table.textColor,
-          padding: table.padding!,
-          width: table.width!,
-          height: table.height!,
-          top: typeof table.top === "number" ? table.top : 0,
-          left: typeof table.left === "number" ? table.left : 0,
-        })),
-        texts: (s.texts ?? []).map((text) => ({
-          id: String(text.id!),
-          content: text.content!,
-          fontSize: text.fontSize,
-          color: text.color,
-          fontWeight: text.fontWeight,
-          backgroundColor: text.backgroundColor,
-          backgroundOpacity: text.backgroundOpacity,
-          borderColor: text.borderColor,
-          borderWidth: text.borderWidth,
-          borderRadius: text.borderRadius,
-          paddingTop: text.paddingTop,
-          paddingRight: text.paddingRight,
-          paddingBottom: text.paddingBottom,
-          paddingLeft: text.paddingLeft,
-          width: text.width,
-          height: text.height,
-          top: typeof text.top === "number" ? text.top : 0,
-          left: typeof text.left === "number" ? text.left : 0,
-        })),
-        images: (s.images ?? []).map((image) => ({
-          id: String(image.id!),
-          url: image.url!,
-          width: image.width!,
-          height: image.height!,
-          opacity: image.opacity,
-          borderWidth: image.borderWidth,
-          borderColor: image.borderColor,
-          borderRadius: image.borderRadius,
-          top: typeof image.top === "number" ? image.top : 0,
-          left: typeof image.left === "number" ? image.left : 0,
-          ...(readOrganizationSource(image.source) ? { source: readOrganizationSource(image.source) } : {}),
-        })),
+        shapes: (s.shapes ?? []).map((shape) => normalizeShapeElement(shape)),
+        tables: (s.tables ?? []).map((table) => normalizeTableElement(table)),
+        texts: (s.texts ?? []).map((text) => normalizeTextElement(text)),
+        images: (s.images ?? []).map((image) => normalizeImageElement(image)),
+        signatureFields: Array.isArray((s as any).signatureFields)
+          ? (s as any).signatureFields.map((field: any) => normalizeSignatureField(field))
+          : [],
         comments: (s.comments ?? []).map((c) => ({
           id: String(c.id!),
           author: c.author!,
@@ -659,97 +605,11 @@ function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmai
           columnContents: normalizedColumnContents,
           columnStyles: normalizedColumnStyles,
           media: Array.isArray(s.media) ? s.media : [],
-          shapes: Array.isArray(s.shapes) ? s.shapes.map((shape) => ({
-            id: String(shape.id),
-            type: shape.type as "square" | "circle" | "triangle",
-            width: shape.width,
-            height: shape.height,
-            backgroundColor: shape.backgroundColor,
-            backgroundImage: shape.backgroundImage,
-            backgroundSize: shape.backgroundSize,
-            backgroundOpacity: shape.backgroundOpacity,
-            borderWidth: shape.borderWidth,
-            borderColor: shape.borderColor,
-            borderRadius: shape.borderRadius,
-            top: typeof shape.top === "number" ? shape.top : 0,
-            left: typeof shape.left === "number" ? shape.left : 0,
-          })) : [],
-          tables: Array.isArray(s.tables) ? s.tables.map((table) => ({
-            id: String(table.id),
-            rows: table.rows,
-            columns: table.columns,
-            cells: (table.cells ?? []).map((row) =>
-              (row ?? []).map((cell) => ({
-                id: String(cell.id),
-                content: cell.content,
-              }))
-            ),
-            borderWidth: table.borderWidth,
-            borderColor: table.borderColor,
-            headerBackground: table.headerBackground,
-            cellBackground: table.cellBackground,
-            textColor: table.textColor,
-            padding: table.padding,
-            width: table.width,
-            height: table.height,
-            top: typeof table.top === "number" ? table.top : 0,
-            left: typeof table.left === "number" ? table.left : 0,
-          })) : [],
-          texts: Array.isArray(s.texts) ? s.texts.map((text) => ({
-            id: String(text.id),
-            content: text.content,
-            fontSize: text.fontSize,
-            color: text.color,
-            fontWeight: text.fontWeight,
-            backgroundColor: text.backgroundColor,
-            backgroundOpacity: text.backgroundOpacity,
-            borderColor: text.borderColor,
-            borderWidth: text.borderWidth,
-            borderRadius: text.borderRadius,
-            paddingTop: text.paddingTop,
-            paddingRight: text.paddingRight,
-            paddingBottom: text.paddingBottom,
-            paddingLeft: text.paddingLeft,
-            width: text.width,
-            height: text.height,
-            top: typeof text.top === "number" ? text.top : 0,
-            left: typeof text.left === "number" ? text.left : 0,
-          })) : [],
-          images: Array.isArray(s.images) ? s.images.map((image) => ({
-            id: String(image.id),
-            url: image.url,
-            width: image.width,
-            height: image.height,
-            opacity: image.opacity,
-            borderWidth: image.borderWidth,
-            borderColor: image.borderColor,
-            borderRadius: image.borderRadius,
-            top: typeof image.top === "number" ? image.top : 0,
-            left: typeof image.left === "number" ? image.left : 0,
-            ...(readOrganizationSource(image.source) ? { source: readOrganizationSource(image.source) } : {}),
-          })) : [],
-          signatureFields: Array.isArray(s.signatureFields) ? s.signatureFields.map((field) => ({
-            id: String(field.id),
-            recipientId: String(field.recipientId || field.recipient_id || ""),
-            sectionId: String(field.sectionId || field.section_id || ""),
-            width: field.width,
-            height: field.height,
-            top: typeof field.top === "number" ? field.top : 0,
-            left: typeof field.left === "number" ? field.left : 0,
-            status: field.status,
-            signedAt: field.signedAt || field.signed_at,
-            signatureData: field.signatureData || field.signature_data,
-            signatureDisplayText: field.signatureDisplayText || field.signature_display_text,
-            borderColor: field.borderColor || field.border_color,
-            borderWidth: field.borderWidth || field.border_width,
-            borderRadius: field.borderRadius || field.border_radius,
-            fullName: field.fullName || field.full_name,
-            email: field.email,
-            position: field.position,
-            signature: field.signature,
-            signedByUserId: field.signedByUserId || field.signed_by_user_id,
-            ...(field.purpose ? { purpose: field.purpose } : {}),
-          })) : [],
+          shapes: Array.isArray(s.shapes) ? s.shapes.map((shape) => normalizeShapeElement(shape)) : [],
+          tables: Array.isArray(s.tables) ? s.tables.map((table) => normalizeTableElement(table)) : [],
+          texts: Array.isArray(s.texts) ? s.texts.map((text) => normalizeTextElement(text)) : [],
+          images: Array.isArray(s.images) ? s.images.map((image) => normalizeImageElement(image)) : [],
+          signatureFields: Array.isArray(s.signatureFields) ? s.signatureFields.map((field) => normalizeSignatureField(field)) : [],
           comments: Array.isArray(s.comments) ? s.comments : [],
           titleStyles: normalizeStyles(s.titleStyles),
           contentStyles: normalizeStyles(s.contentStyles),
@@ -990,7 +850,7 @@ export async function getProposalDetails(id: string): Promise<Proposal | undefin
               // For contentStyles, always prefer local styles to preserve backgrounds
               // Only use API if local is completely missing
               // Ensure we have contentStyles (even if empty, since the UI relies on it)
-              contentStyles: localSection.contentStyles || apiSection.contentStyles || {},
+              contentStyles: contentStylesForLoadedSection(apiSection.contentStyles, localSection.contentStyles, true) ?? {},
             };
 
             console.log("Merged section contentStyles:", {
@@ -1018,31 +878,9 @@ export async function getProposalDetails(id: string): Promise<Proposal | undefin
 
             return mergedSection;
           }
-          // Ensure API sections have contentStyles with defaults
-          // But preserve any background styling from the API
-          const defaultStyles = {
-            gapAfter: 10,
-            paddingTop: "12",
-            paddingRight: "12",
-            paddingBottom: "12",
-            paddingLeft: "12",
-            marginTop: "0",
-            marginRight: "0",
-            marginBottom: "0",
-            marginLeft: "0",
-            borderWidth: "1",
-            borderColor: "#e5e7eb",
-            borderRadius: "8",
-            backgroundColor: undefined,
-            backgroundImage: undefined,
-            backgroundSize: "cover",
-            backgroundOpacity: "100",
-          };
           return {
             ...apiSection,
-            contentStyles: apiSection.contentStyles
-              ? { ...defaultStyles, ...apiSection.contentStyles }
-              : defaultStyles,
+            contentStyles: contentStylesForLoadedSection(apiSection.contentStyles, undefined, false),
           };
         }),
       };
@@ -1185,10 +1023,12 @@ export async function updateProposal(p: Proposal, options?: { keepVersion?: bool
   }
 
   try {
+    const dueDate = p.settings?.dueDate;
     const payload = {
       ...p,
       sections: sectionsForSave(p.sections),
       ...(typeof p.revision === "number" ? { baseRevision: p.revision } : {}),
+      ...(dueDate ? { due_date: dueDate } : {}),
       options: {
         keepVersion: options?.keepVersion ?? false,
         note: options?.note,
