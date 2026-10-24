@@ -97,6 +97,7 @@ export interface TextElement {
   left: number;
   fullWidth?: boolean;
   lineHeight?: string;
+  aiRole?: "static" | "editable";
 }
 
 export interface ImageElement {

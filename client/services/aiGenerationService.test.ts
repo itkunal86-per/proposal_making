@@ -123,4 +123,32 @@ describe("phase 1A proposal generation", () => {
     expect(applyManualTemplate).toHaveBeenCalledOnce();
     expect(generate).not.toHaveBeenCalled();
   });
+
+  it("returns slot selection without polling for a proposal id", async () => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      expect(String(input)).toContain("/api/chat/proposal/generate-from-template");
+      return jsonResponse({
+        state: "needs_slot_selection",
+        slots: [{
+          section_index: 0,
+          text_index: 0,
+          element_id: "52n146j",
+          preview: "New Website. More Leads.",
+          suggestion: "protected",
+          slot_id: "0:0:52n146j",
+        }],
+      });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await generateProposalFromTemplate({
+      session_id: 1,
+      template_id: 3,
+      title: "Website",
+    });
+
+    expect(result.state).toBe("needs_slot_selection");
+    expect(result.proposal_id).toBeUndefined();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
 });

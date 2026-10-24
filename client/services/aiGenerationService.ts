@@ -57,17 +57,30 @@ interface ChatInitResponse {
   };
 }
 
+export interface LegacySlotPreview {
+  section_index: number;
+  text_index: number;
+  element_id: string;
+  preview: string;
+  suggestion: string;
+  slot_id: string;
+}
+
 interface GenerateFromTemplateRequest {
   session_id: number;
   template_id: string | number;
   title: string;
   dealId?: string | number;
+  editable_slot_ids?: string[];
 }
 
 interface GenerateFromTemplateResponse {
-  proposal_id: number;
-  message: string;
+  proposal_id?: number;
+  message?: string;
   version?: number;
+  state?: "needs_slot_selection" | "no_editable_slots";
+  slots?: LegacySlotPreview[];
+  error_code?: string;
 }
 
 interface ProposalStatusResponse {
@@ -401,6 +414,9 @@ export async function generateProposalFromTemplate(
             template_id: request.template_id,
             title: request.title,
             dealId: request.dealId ?? 0,
+            ...(request.editable_slot_ids !== undefined
+              ? { editable_slot_ids: request.editable_slot_ids }
+              : {}),
           }),
         },
         generationTimeouts.enqueueMs,
@@ -417,6 +433,12 @@ export async function generateProposalFromTemplate(
       }
 
       const data: GenerateFromTemplateResponse = await response.json();
+      if (data.state === "needs_slot_selection") {
+        return data;
+      }
+      if (data.state === "no_editable_slots") {
+        throw new Error("Failed to generate proposal from template: No text was selected for AI to rewrite");
+      }
       if (!data.proposal_id) {
         throw new Error("Failed to generate proposal from template: No proposal ID returned from API");
       }

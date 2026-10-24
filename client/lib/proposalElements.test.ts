@@ -53,6 +53,13 @@ describe("proposal element geometry", () => {
     expect(text.fullWidth).toBeUndefined();
     expect(text.width).toBe(200);
     expect(JSON.parse(JSON.stringify(text)).fullWidth).toBeUndefined();
+    expect(text.aiRole).toBeUndefined();
+  });
+
+  it("keeps aiRole only when it is static or editable", () => {
+    expect(normalizeTextElement({ id: "a", content: "", top: 0, left: 0, aiRole: "static" }).aiRole).toBe("static");
+    expect(normalizeTextElement({ id: "b", content: "", top: 0, left: 0, aiRole: "editable" }).aiRole).toBe("editable");
+    expect(normalizeTextElement({ id: "c", content: "", top: 0, left: 0, aiRole: "user_selected" }).aiRole).toBeUndefined();
   });
 
   it("keeps numeric image and shape dimensions and coerces numeric strings", () => {

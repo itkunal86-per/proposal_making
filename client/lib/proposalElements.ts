@@ -42,6 +42,7 @@ export function normalizeTextElement(text: any): TextElement {
   };
   if (typeof text?.fullWidth === "boolean") normalized.fullWidth = text.fullWidth;
   if (text?.lineHeight != null && text.lineHeight !== "") normalized.lineHeight = String(text.lineHeight);
+  if (text?.aiRole === "static" || text?.aiRole === "editable") normalized.aiRole = text.aiRole;
   return normalized;
 }
 

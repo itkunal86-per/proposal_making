@@ -29,8 +29,9 @@ import { GenerateProposalDialog } from "@/components/GenerateProposalDialog";
 import { ProposalPreviewModal } from "@/components/ProposalPreviewModal";
 import { TemplateSelectionModal } from "@/components/TemplateSelectionModal";
 import { ProposalTitleDialog } from "@/components/ProposalTitleDialog";
+import { LegacySlotReviewDialog } from "@/components/LegacySlotReviewDialog";
 import { convertSystemTemplateToProposal, type SystemTemplate, copyProposalFromTemplate, saveProposalAsTemplate } from "@/services/systemTemplatesService";
-import { generateProposalFromTemplate, GenerationOutcomeUnknownError, pollProposalStatus, runCreationTitleSubmit } from "@/services/aiGenerationService";
+import { generateProposalFromTemplate, GenerationOutcomeUnknownError, pollProposalStatus, runCreationTitleSubmit, type LegacySlotPreview } from "@/services/aiGenerationService";
 import { manualTemplateNeedsCopy, shouldOpenProposalTitleDialog, type ProposalCreationFlow } from "@/lib/proposalCreationFlow";
 import { PPTPreviewModal } from "@/components/PPTPreviewModal";
 import { Wand2, MoreVertical, FileText } from "lucide-react";
@@ -88,6 +89,9 @@ export default function MyProposals() {
   const [selectedTemplate, setSelectedTemplate] = useState<SystemTemplate | null>(null);
   const [showTitleDialog, setShowTitleDialog] = useState(false);
   const [isGeneratingProposal, setIsGeneratingProposal] = useState(false);
+  const [slotDialogOpen, setSlotDialogOpen] = useState(false);
+  const [legacySlots, setLegacySlots] = useState<LegacySlotPreview[]>([]);
+  const pendingGenerationTitle = useRef("");
   const [saveTemplateDialogOpen, setSaveTemplateDialogOpen] = useState(false);
   const [templateName, setTemplateName] = useState("");
   const [proposalToSave, setProposalToSave] = useState<Proposal | null>(null);
@@ -280,13 +284,14 @@ export default function MyProposals() {
     });
   }
 
-  async function generateQueuedProposal(title: string) {
+  async function generateQueuedProposal(title: string, editableSlotIds?: string[]) {
     if (!newProposalId || !chatSessionId) {
       throw new Error("AI proposal session is missing");
     }
 
     try {
       setIsGeneratingProposal(true);
+      pendingGenerationTitle.current = title;
 
       const templateId = selectedTemplate?.id || 0;
       const response = await generateProposalFromTemplate({
@@ -294,11 +299,20 @@ export default function MyProposals() {
         template_id: templateId,
         title: title,
         dealId,
+        ...(editableSlotIds !== undefined ? { editable_slot_ids: editableSlotIds } : {}),
       });
+
+      if (response.state === "needs_slot_selection") {
+        setLegacySlots(response.slots ?? []);
+        setSlotDialogOpen(true);
+        return;
+      }
 
       if (!response.proposal_id) {
         throw new Error("No proposal ID returned");
       }
+
+      setSlotDialogOpen(false);
 
       toast({
         title: "Generating Proposal",
@@ -894,6 +908,16 @@ export default function MyProposals() {
         onOpenChange={setShowTitleDialog}
         onSubmit={handleProposalTitleSubmit}
         isLoading={isGeneratingProposal}
+      />
+
+      <LegacySlotReviewDialog
+        open={slotDialogOpen}
+        slots={legacySlots}
+        isLoading={isGeneratingProposal}
+        onOpenChange={setSlotDialogOpen}
+        onConfirm={(slotIds) => {
+          void generateQueuedProposal(pendingGenerationTitle.current, slotIds).catch(() => undefined);
+        }}
       />
 
       <Dialog open={saveTemplateDialogOpen} onOpenChange={setSaveTemplateDialogOpen}>
