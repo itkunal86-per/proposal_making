@@ -212,7 +212,7 @@ export const GenerateProposalDialog: React.FC<GenerateProposalDialogProps> = ({
 
     try {
       // Determine input type based on attachments
-      let inputType: "website" | "document" | "text" | "email" = "text";
+      let inputType: "website" | "document" | "text" | "simple" | "email" = "simple";
       let urlToSend: string | undefined;
       let fileToSend: File | undefined;
       let emailToSend: string | undefined;

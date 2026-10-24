@@ -26,7 +26,7 @@ interface ProposalAIResponse {
 interface ChatInitRequest {
   message: string;
   dealId?: string | number;
-  input_type: "website" | "document" | "text" | "email";
+  input_type: "website" | "document" | "text" | "simple" | "email";
   url?: string;
   email?: string;
   file?: File | null;
@@ -73,6 +73,78 @@ interface GenerateFromTemplateResponse {
 interface ProposalStatusResponse {
   status: "pending" | "processing" | "completed" | "failed";
   error?: string;
+  error_code?: string;
+}
+
+export const generationTimeouts = {
+  enqueueMs: 30_000,
+  statusMs: 15_000,
+};
+const MAX_TRANSIENT_ATTEMPTS = 5;
+
+export class GenerationOutcomeUnknownError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "GenerationOutcomeUnknownError";
+  }
+}
+
+export class ProposalGenerationFailedError extends Error {
+  readonly errorCode?: string;
+
+  constructor(message: string, errorCode?: string) {
+    super(message);
+    this.name = "ProposalGenerationFailedError";
+    this.errorCode = errorCode;
+  }
+}
+
+class HttpRequestError extends Error {
+  readonly statusCode?: number;
+
+  constructor(message: string, statusCode?: number) {
+    super(message);
+    this.name = "HttpRequestError";
+    this.statusCode = statusCode;
+  }
+}
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function isAbortError(error: unknown): boolean {
+  return error instanceof Error && error.name === "AbortError";
+}
+
+function isTransientRequestError(error: unknown): boolean {
+  if (isAbortError(error) || error instanceof TypeError) return true;
+  if (error instanceof HttpRequestError) {
+    return error.statusCode === undefined || error.statusCode >= 500;
+  }
+  return error instanceof Error && /Failed to fetch|NetworkError|network/i.test(error.message);
+}
+
+async function fetchWithTimeout(url: string, init: RequestInit, timeoutMs: number): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+export async function runCreationTitleSubmit(input: {
+  useAiGeneration: boolean;
+  applyManualTemplate: () => Promise<void>;
+  generateFromTemplate: () => Promise<void>;
+}): Promise<void> {
+  if (!input.useAiGeneration) {
+    await input.applyManualTemplate();
+    return;
+  }
+  await input.generateFromTemplate();
 }
 
 export async function generateProposalFromPrompt(
@@ -313,41 +385,62 @@ export async function generateProposalFromTemplate(
     throw new Error("Authentication token not found. Please log in again.");
   }
 
-  try {
-    const response = await fetch(apiConfig.baseUrl + "/api/chat/proposal/generate-from-template", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        session_id: request.session_id,
-        template_id: request.template_id,
-        title: request.title,
-        dealId: request.dealId ?? 0,
-      }),
-    });
-
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      throw new Error(
-        error.message || error.error || `Failed to generate proposal with status ${response.status}`
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= MAX_TRANSIENT_ATTEMPTS; attempt++) {
+    try {
+      const response = await fetchWithTimeout(
+        apiConfig.baseUrl + "/api/chat/proposal/generate-from-template",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            session_id: request.session_id,
+            template_id: request.template_id,
+            title: request.title,
+            dealId: request.dealId ?? 0,
+          }),
+        },
+        generationTimeouts.enqueueMs,
       );
-    }
 
-    const data: GenerateFromTemplateResponse = await response.json();
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        const message = error.message || error.error || `Failed to generate proposal with status ${response.status}`;
+        if (response.status >= 500 && attempt < MAX_TRANSIENT_ATTEMPTS) {
+          lastError = new HttpRequestError(message, response.status);
+          continue;
+        }
+        throw new Error(`Failed to generate proposal from template: ${message}`);
+      }
 
-    if (!data.proposal_id) {
-      throw new Error("No proposal ID returned from API");
+      const data: GenerateFromTemplateResponse = await response.json();
+      if (!data.proposal_id) {
+        throw new Error("Failed to generate proposal from template: No proposal ID returned from API");
+      }
+      return data;
+    } catch (error) {
+      if (error instanceof GenerationOutcomeUnknownError) throw error;
+      if (isAbortError(error)) {
+        throw new GenerationOutcomeUnknownError(
+          "The request ended before PitchSuite could confirm whether generation started. It was not submitted again. Check My Proposals before trying again.",
+        );
+      }
+      if (error instanceof Error && (error.message.includes("Authentication") || error.message.startsWith("Failed to generate proposal from template:"))) {
+        throw error;
+      }
+      lastError = error;
+      if (!isTransientRequestError(error) || attempt === MAX_TRANSIENT_ATTEMPTS) {
+        const message = error instanceof Error ? error.message : "Unknown error";
+        throw new Error(`Failed to generate proposal from template: ${message}`);
+      }
     }
-
-    return data;
-  } catch (error) {
-    if (error instanceof Error) {
-      throw new Error(`Failed to generate proposal from template: ${error.message}`);
-    }
-    throw new Error("Failed to generate proposal from template: Unknown error");
   }
+
+  const message = lastError instanceof Error ? lastError.message : "Unknown error";
+  throw new Error(`Failed to generate proposal from template: ${message}`);
 }
 
 export async function checkProposalStatus(
@@ -360,28 +453,37 @@ export async function checkProposalStatus(
   }
 
   try {
-    const response = await fetch(`${apiConfig.endpoints.proposalStatus}/${proposalId}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`,
+    const response = await fetchWithTimeout(
+      `${apiConfig.endpoints.proposalStatus}/${proposalId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
       },
-    });
+      generationTimeouts.statusMs,
+    );
+
+    if (response.status === 401 || response.status === 403) {
+      throw new Error("Authentication failed while checking proposal status");
+    }
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
-      throw new Error(
-        error.message || error.error || `Failed to check proposal status with status ${response.status}`
+      throw new HttpRequestError(
+        error.message || error.error || `Failed to check proposal status with status ${response.status}`,
+        response.status,
       );
     }
 
-    const data: ProposalStatusResponse = await response.json();
-    return data;
+    return await response.json();
   } catch (error) {
-    if (error instanceof Error) {
-      throw new Error(`Failed to check proposal status: ${error.message}`);
+    if (isAbortError(error) || error instanceof HttpRequestError || (error instanceof Error && error.message.includes("Authentication"))) {
+      throw error;
     }
-    throw new Error("Failed to check proposal status: Unknown error");
+    if (error instanceof TypeError) throw error;
+    throw new Error(`Failed to check proposal status: ${error instanceof Error ? error.message : "Unknown error"}`);
   }
 }
 
@@ -392,34 +494,36 @@ export async function pollProposalStatus(
   onStatusUpdate?: (status: ProposalStatusResponse) => void
 ): Promise<ProposalStatusResponse> {
   let attempts = 0;
+  let transientFailures = 0;
 
   while (attempts < maxAttempts) {
+    let statusResponse: ProposalStatusResponse;
     try {
-      const statusResponse = await checkProposalStatus(proposalId);
-
-      if (onStatusUpdate) {
-        onStatusUpdate(statusResponse);
-      }
-
-      if (statusResponse.status === "completed") {
-        return statusResponse;
-      }
-
-      if (statusResponse.status === "failed") {
-        throw new Error(statusResponse.error || "Proposal generation failed");
-      }
-
-      // Wait before the next attempt
-      await new Promise((resolve) => setTimeout(resolve, delayMs));
-      attempts++;
+      statusResponse = await checkProposalStatus(proposalId);
     } catch (error) {
-      if (error instanceof Error && error.message.includes("Authentication")) {
-        throw error;
-      }
-      // Continue polling on other errors
-      await new Promise((resolve) => setTimeout(resolve, delayMs));
-      attempts++;
+      if (error instanceof ProposalGenerationFailedError) throw error;
+      if (error instanceof Error && error.message.includes("Authentication")) throw error;
+      if (!isTransientRequestError(error)) throw error;
+      transientFailures += 1;
+      if (transientFailures >= MAX_TRANSIENT_ATTEMPTS) throw error;
+      await delay(delayMs);
+      attempts += 1;
+      continue;
     }
+
+    if (onStatusUpdate) onStatusUpdate(statusResponse);
+
+    if (statusResponse.status === "completed") return statusResponse;
+
+    if (statusResponse.status === "failed") {
+      throw new ProposalGenerationFailedError(
+        statusResponse.error || (statusResponse.error_code ? `Proposal generation failed (${statusResponse.error_code})` : "Proposal generation failed"),
+        statusResponse.error_code,
+      );
+    }
+
+    await delay(delayMs);
+    attempts += 1;
   }
 
   throw new Error("Proposal generation timed out after " + attempts + " attempts");

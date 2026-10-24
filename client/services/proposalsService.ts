@@ -210,6 +210,7 @@ export interface Proposal {
   ppt_url?: string;
   ppt_path?: string;
   revision?: number;
+  aiStatus?: "pending" | "processing" | "completed" | "failed" | null;
 }
 
 const STORAGE_KEY = "app_proposals";
@@ -261,6 +262,7 @@ interface ApiProposalResponse {
   };
   sections?: any[];
   versions?: any[];
+  ai_status?: "pending" | "processing" | "completed" | "failed" | null;
 }
 
 export interface CreateProposalInput {
@@ -540,7 +542,16 @@ export async function persistProposal(p: Proposal) {
   }
 }
 
-function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmail?: string): Proposal {
+export function shouldInventPlaceholderSections(aiStatus: string | null | undefined): boolean {
+  return aiStatus !== "processing" && aiStatus !== "failed";
+}
+
+export function shouldAutosaveProposal(proposal: { aiStatus?: string | null; sections: unknown[] }): boolean {
+  const unfinished = proposal.aiStatus === "processing" || proposal.aiStatus === "failed";
+  return !(unfinished && proposal.sections.length === 0);
+}
+
+export function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmail?: string): Proposal {
   const createdAtMs = apiProposal.created_at ? new Date(apiProposal.created_at).getTime() : Date.now();
   const updatedAtMs = apiProposal.updated_at ? new Date(apiProposal.updated_at).getTime() : createdAtMs;
 
@@ -615,11 +626,13 @@ function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmai
           contentStyles: normalizeStyles(s.contentStyles),
         };
       })
-    : [
+    : (shouldInventPlaceholderSections(apiProposal.ai_status)
+      ? [
       { id: uuid(), title: "Overview", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], shapes: [], tables: [], texts: [], images: [], comments: [] },
       { id: uuid(), title: "Scope", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], shapes: [], tables: [], texts: [], images: [], comments: [] },
       { id: uuid(), title: "Timeline", content: "", layout: "single" as const, titleStyles: {}, contentStyles: { gapAfter: 24 }, media: [], shapes: [], tables: [], texts: [], images: [], comments: [] },
-    ] as ProposalSection[];
+    ]
+      : []) as ProposalSection[];
 
   const clientName = typeof apiProposal.client === "string" ? apiProposal.client : (apiProposal.client?.name || "");
   const clientId = typeof apiProposal.client_id === "string" ? apiProposal.client_id : (apiProposal.client_id ? String(apiProposal.client_id) : undefined);
@@ -639,6 +652,7 @@ function convertApiProposalToProposal(apiProposal: ApiProposalResponse, userEmai
     createdAt: createdAtMs,
     updatedAt: updatedAtMs,
     revision: typeof apiProposal.revision === "number" ? apiProposal.revision : undefined,
+    aiStatus: apiProposal.ai_status,
     sections,
     pricing: {
       currency: (apiProposal.pricing as any)?.currency || apiProposal.currency || "USD",

@@ -30,7 +30,7 @@ import { ProposalPreviewModal } from "@/components/ProposalPreviewModal";
 import { TemplateSelectionModal } from "@/components/TemplateSelectionModal";
 import { ProposalTitleDialog } from "@/components/ProposalTitleDialog";
 import { convertSystemTemplateToProposal, type SystemTemplate, copyProposalFromTemplate, saveProposalAsTemplate } from "@/services/systemTemplatesService";
-import { generateProposalFromTemplate, pollProposalStatus } from "@/services/aiGenerationService";
+import { generateProposalFromTemplate, GenerationOutcomeUnknownError, pollProposalStatus, runCreationTitleSubmit } from "@/services/aiGenerationService";
 import { manualTemplateNeedsCopy, shouldOpenProposalTitleDialog, type ProposalCreationFlow } from "@/lib/proposalCreationFlow";
 import { PPTPreviewModal } from "@/components/PPTPreviewModal";
 import { Wand2, MoreVertical, FileText } from "lucide-react";
@@ -127,6 +127,7 @@ export default function MyProposals() {
 
   const handleOpenGenerateDialog = async () => {
     setCreationFlow("ai");
+    setChatSessionId(null);
     setShowTitleDialog(false);
     setIsCreateDialogOpen(false);
     try {
@@ -272,21 +273,22 @@ export default function MyProposals() {
   }
 
   async function handleProposalTitleSubmit(title: string) {
-    if (!shouldOpenProposalTitleDialog(creationFlow)) {
-      await applyManualTemplate(selectedTemplate);
-      return;
-    }
+    await runCreationTitleSubmit({
+      useAiGeneration: shouldOpenProposalTitleDialog(creationFlow),
+      applyManualTemplate: () => applyManualTemplate(selectedTemplate),
+      generateFromTemplate: () => generateQueuedProposal(title),
+    });
+  }
 
+  async function generateQueuedProposal(title: string) {
     if (!newProposalId || !chatSessionId) {
       throw new Error("AI proposal session is missing");
     }
 
-    // AI-generated flow with API call
     try {
       setIsGeneratingProposal(true);
 
       const templateId = selectedTemplate?.id || 0;
-
       const response = await generateProposalFromTemplate({
         session_id: chatSessionId,
         template_id: templateId,
@@ -294,64 +296,47 @@ export default function MyProposals() {
         dealId,
       });
 
-      if (response.proposal_id) {
-        // Check if the message indicates queued generation
-        if (response.message === "Proposal generation queued") {
-          toast({
-            title: "Generating Proposal",
-            description: "Your proposal is being generated. Please wait...",
-          });
-
-          // Start polling for the proposal status
-          // Poll for up to 30 minutes (600 attempts * 3 seconds)
-          try {
-            await pollProposalStatus(response.proposal_id, 600, 3000, (statusUpdate) => {
-              console.log("Proposal status:", statusUpdate.status);
-            });
-
-            toast({
-              title: "Success",
-              description: "Proposal created successfully!",
-            });
-
-            // Navigate to editor with the new proposal ID
-            nav(`/proposals/${response.proposal_id}/edit?sessionId=${chatSessionId}`);
-            setNewProposalId(null);
-            setChatSessionId(null);
-            setCreationFlow(null);
-            setSelectedTemplate(null);
-          } catch (pollingError) {
-            console.error("Error polling proposal status:", pollingError);
-            toast({
-              title: "Status Check Failed",
-              description: pollingError instanceof Error ? pollingError.message : "Failed to check proposal status",
-              variant: "destructive",
-            });
-            throw pollingError;
-          }
-        } else {
-          toast({
-            title: "Success",
-            description: "Proposal created successfully!",
-          });
-
-          // Navigate to editor with the new proposal ID
-          nav(`/proposals/${response.proposal_id}/edit?sessionId=${chatSessionId}`);
-          setNewProposalId(null);
-          setChatSessionId(null);
-          setCreationFlow(null);
-          setSelectedTemplate(null);
-        }
-      } else {
+      if (!response.proposal_id) {
         throw new Error("No proposal ID returned");
       }
+
+      toast({
+        title: "Generating Proposal",
+        description: "Your proposal is being generated. Please wait...",
+      });
+
+      const finalStatus = await pollProposalStatus(response.proposal_id, 600, 3000, (statusUpdate) => {
+        console.log("Proposal status:", statusUpdate.status);
+      });
+
+      if (finalStatus.status !== "completed") {
+        throw new Error("Proposal generation failed");
+      }
+
+      toast({
+        title: "Success",
+        description: "Proposal created successfully!",
+      });
+
+      nav(`/proposals/${response.proposal_id}/edit?sessionId=${chatSessionId}`);
+      setNewProposalId(null);
+      setChatSessionId(null);
+      setCreationFlow(null);
+      setSelectedTemplate(null);
     } catch (error) {
       console.error("Error creating proposal from template:", error);
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to create proposal",
-        variant: "destructive",
-      });
+      if (error instanceof GenerationOutcomeUnknownError) {
+        toast({
+          title: "Generation not confirmed",
+          description: error.message,
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: error instanceof Error ? error.message : "Failed to create proposal",
+          variant: "destructive",
+        });
+      }
       throw error;
     } finally {
       setIsGeneratingProposal(false);

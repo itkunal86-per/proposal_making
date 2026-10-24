@@ -30,6 +30,7 @@ import {
   type ProposalStatus,
   getProposalDetails,
   proposalStatusLabel,
+  shouldAutosaveProposal,
   updateProposal,
   persistProposal,
   valueTotal,
@@ -460,6 +461,11 @@ export default function ProposalEditor() {
 
   function commit(next: Proposal, keepVersion = false, note?: string) {
     if (readOnly || workflowLock.current) return;
+    if (!shouldAutosaveProposal(next)) {
+      setP(next);
+      setSaving(false);
+      return;
+    }
     const generation = saveGeneration.current;
     console.log("Proposal Edit Form Submitted:", next);
     setP(next);
