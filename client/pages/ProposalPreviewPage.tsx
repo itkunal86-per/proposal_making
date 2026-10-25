@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { ProposalPreviewModal } from "@/components/ProposalPreviewModal";
 import { SignatureDetailsModal } from "@/components/SignatureDetailsModal";
 import { getProposalDetails, type Proposal } from "@/services/proposalsService";
@@ -10,6 +10,7 @@ import { toast } from "@/hooks/use-toast";
 
 export default function ProposalPreviewPage() {
   const { id = "" } = useParams();
+  const navigate = useNavigate();
   const mainAppUrl = (import.meta.env.VITE_MAIN_APP_URL ?? "https://pitchsuite.io/").replace(/\/+$/, "");
   const [proposal, setProposal] = useState<Proposal | null>(null);
   const [variables, setVariables] = useState<Array<{ id: string | number; name: string; value: string }>>([]);
@@ -114,6 +115,7 @@ export default function ProposalPreviewPage() {
         backHref={proposal.deal_id == null
           ? `${mainAppUrl}#proposals`
           : `${mainAppUrl}/deals/${encodeURIComponent(String(proposal.deal_id))}#proposals`}
+        onClose={() => navigate(`/proposals/${id}/edit`)}
         onOpenSignatureDetails={openSignature}
       />
       <SignatureDetailsModal

@@ -59,6 +59,7 @@ export const ImageElement: React.FC<ImageElementProps> = ({
         borderRadius: borderRadius ? `${borderRadius}px` : "4px",
         outline: selected ? "2px solid #3b82f6" : "none",
         outlineOffset: "2px",
+        zIndex: selected ? 1000 : 10,
         cursor: "pointer",
         display: "flex",
         alignItems: "center",

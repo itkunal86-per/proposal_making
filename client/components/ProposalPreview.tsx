@@ -1053,7 +1053,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
 
             {(section.shapes && section.shapes.length > 0) || (section.tables && section.tables.length > 0) || ((section as any).texts && (section as any).texts.length > 0) || ((section as any).images && (section as any).images.length > 0) || (section.signatureFields && section.signatureFields.length > 0) || isAddingSignatureMode ? (
               <div
-                style={{ position: "relative", minHeight: `${canvasHeights[section.id] || 100}px`, height: "auto", cursor: isAddingSignatureMode ? "crosshair" : "default" }}
+                style={{ position: "relative", zIndex: 2, minHeight: `${canvasHeights[section.id] || 100}px`, height: "auto", cursor: isAddingSignatureMode ? "crosshair" : "default" }}
                 onClick={(e) => {
                   if (isAddingSignatureMode && selectedSignatoryId && onAddSignatureField) {
                     const rect = e.currentTarget.getBoundingClientRect();

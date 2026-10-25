@@ -476,12 +476,24 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
               </DropdownMenu>
             )}
             {fullPage && backHref ? (
-              <a href={backHref}>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <ArrowLeft className="w-4 h-4" />
-                  Back
+              <>
+                <a href={backHref}>
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <ArrowLeft className="w-4 h-4" />
+                    Back
+                  </Button>
+                </a>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                  onClick={() => onClose?.()}
+                >
+                  <X className="w-4 h-4" />
+                  Close
                 </Button>
-              </a>
+              </>
             ) : (
               <Button
                 onClick={() => onClose?.()}
