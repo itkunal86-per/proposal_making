@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -252,8 +252,20 @@ export const AIAssistantDialog: React.FC<AIAssistantDialogProps> = ({
 }) => {
   const [prompt, setPrompt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [aiContent, setAiContent] = useState<string | null>(null);
   const [editableContent, setEditableContent] = useState("");
+  const generationLock = useRef(false);
+  const abortRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    if (open) return;
+    abortRef.current?.abort();
+    abortRef.current = null;
+    generationLock.current = false;
+    setIsLoading(false);
+    setErrorMessage(null);
+  }, [open]);
 
   // Extract section ID from elementId first, then fall back to sectionId
   let activeSection: typeof proposal.sections[0] | null = null;
@@ -314,9 +326,11 @@ export const AIAssistantDialog: React.FC<AIAssistantDialogProps> = ({
   };
 
   const handleAIWrite = async (
-    action: "generate" | "rewrite" | "summarize" | "translate",
+    _action: "generate" | "rewrite" | "summarize" | "translate",
     promptText: string
   ) => {
+    if (generationLock.current) return;
+
     if (!promptText.trim()) {
       toast({ title: "Please enter a prompt" });
       return;
@@ -327,18 +341,29 @@ export const AIAssistantDialog: React.FC<AIAssistantDialogProps> = ({
       return;
     }
 
+    const controller = new AbortController();
+    abortRef.current = controller;
+    generationLock.current = true;
     setIsLoading(true);
+    setErrorMessage(null);
     try {
-      const aiResponse = await generateAIContent(promptText);
+      const aiResponse = await generateAIContent(promptText, controller.signal);
+      if (controller.signal.aborted) return;
       setAiContent(aiResponse);
       setEditableContent(aiResponse);
       setPrompt("");
       toast({ title: "Content generated successfully" });
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Failed to generate content";
-      toast({ title: "Error", description: errorMessage });
+      if (error instanceof DOMException && error.name === "AbortError") return;
+      const message = error instanceof Error ? error.message : "Failed to generate content";
+      setErrorMessage(message);
+      toast({ title: "AI generation failed", description: message, variant: "destructive" });
     } finally {
-      setIsLoading(false);
+      if (abortRef.current === controller) {
+        abortRef.current = null;
+        generationLock.current = false;
+        setIsLoading(false);
+      }
     }
   };
 
@@ -480,10 +505,23 @@ export const AIAssistantDialog: React.FC<AIAssistantDialogProps> = ({
                   />
                 </div>
 
+                {errorMessage && (
+                  <p role="alert" className="text-sm text-destructive">
+                    {errorMessage}
+                  </p>
+                )}
+
+                {isLoading && (
+                  <p className="text-sm text-muted-foreground" aria-live="polite">
+                    Generating content…
+                  </p>
+                )}
+
                 <div className="grid grid-cols-2 gap-2">
                   <Button
                     onClick={() => handleAIWrite("generate", prompt)}
                     disabled={!isEnabled || isLoading}
+                    aria-busy={isLoading}
                   >
                     {isLoading ? "Generating..." : "Generate"}
                   </Button>

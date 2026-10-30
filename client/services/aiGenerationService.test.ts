@@ -5,7 +5,9 @@ vi.mock("@/lib/auth", () => ({
   getStoredToken: () => "token",
 }));
 
+import { apiConfig } from "@/lib/apiConfig";
 import {
+  generateAIContent,
   generateProposalFromTemplate,
   generationTimeouts,
   GenerationOutcomeUnknownError,
@@ -24,6 +26,7 @@ function jsonResponse(body: unknown, status = 200) {
 afterEach(() => {
   generationTimeouts.enqueueMs = 30_000;
   generationTimeouts.statusMs = 15_000;
+  generationTimeouts.assistantMs = 45_000;
   vi.unstubAllGlobals();
 });
 
@@ -150,5 +153,67 @@ describe("phase 1A proposal generation", () => {
     expect(result.state).toBe("needs_slot_selection");
     expect(result.proposal_id).toBeUndefined();
     expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("AI assistant generation", () => {
+  it("posts to the configured Laravel endpoint", async () => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      expect(String(input)).toBe(apiConfig.endpoints.aiGenerate);
+      expect(String(input)).not.toContain("propai-api.hirenq.com");
+      expect(init?.method).toBe("POST");
+      expect(JSON.parse(String(init?.body))).toEqual({ prompt: "Write a title" });
+      const headers = new Headers(init?.headers);
+      expect(headers.get("Authorization")).toBe("Bearer token");
+      return jsonResponse({ status: true, message: "AI response generated", data: "<p>Hello</p>" });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(generateAIContent("Write a title")).resolves.toBe("<p>Hello</p>");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows the server error and does not retry", async () => {
+    const fetchMock = vi.fn(async () => jsonResponse({
+      status: false,
+      message: "AI generation failed. Please try again.",
+    }, 502));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(generateAIContent("Write a title")).rejects.toThrow("AI generation failed. Please try again.");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("turns a hung request into a timeout error", async () => {
+    generationTimeouts.assistantMs = 20;
+    vi.stubGlobal("fetch", vi.fn((_url: string, init?: RequestInit) => {
+      return new Promise((_resolve, reject) => {
+        init?.signal?.addEventListener("abort", () => {
+          const error = new Error("The operation was aborted");
+          error.name = "AbortError";
+          reject(error);
+        });
+      });
+    }));
+
+    await expect(generateAIContent("Write a title")).rejects.toThrow("The AI request timed out. Please try again.");
+  });
+
+  it("does not report a timeout when the caller cancels the request", async () => {
+    const controller = new AbortController();
+    vi.stubGlobal("fetch", vi.fn((_url: string, init?: RequestInit) => {
+      return new Promise((_resolve, reject) => {
+        init?.signal?.addEventListener("abort", () => {
+          const error = new Error("The operation was aborted");
+          error.name = "AbortError";
+          reject(error);
+        });
+      });
+    }));
+
+    const pending = generateAIContent("Write a title", controller.signal);
+    controller.abort();
+
+    await expect(pending).rejects.toMatchObject({ name: "AbortError" });
   });
 });

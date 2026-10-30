@@ -23,6 +23,8 @@
 
     --primary: 252 88% 60%;
     --primary-foreground: 0 0% 100%;
+    --editor-primary: #992a90;
+    --editor-primary-hover: #7d2276;
 
     --secondary: 222 100% 96%;
     --secondary-foreground: 230 35% 18%;
@@ -174,4 +176,28 @@
   .badge-base {
     @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border transition-colors duration-200;
   }
+}
+
+.btn-theme-primary {
+  background-color: var(--editor-primary);
+  color: #ffffff;
+  border-color: var(--editor-primary);
+}
+
+.btn-theme-primary:hover,
+.btn-theme-primary:active {
+  background-color: var(--editor-primary-hover);
+  color: #ffffff;
+  border-color: var(--editor-primary-hover);
+}
+
+.btn-theme-primary:focus-visible {
+  outline: 2px solid var(--editor-primary);
+  outline-offset: 2px;
+}
+
+.btn-theme-primary:disabled {
+  background-color: var(--editor-primary);
+  color: #ffffff;
+  opacity: 0.5;
 }

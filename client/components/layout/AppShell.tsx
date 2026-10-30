@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Fragment, ReactNode, useMemo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { buildAppCrumbs } from "@/lib/appCrumbs";
 import { useAuth } from "@/hooks/useAuth";
 import type { UserRole } from "@/data/users";
 import { Button } from "@/components/ui/button";
@@ -196,68 +197,30 @@ export default function AppShell({ children }: { children: ReactNode }) {
 
 function ThinHeader() {
   const { pathname } = useLocation();
-  const segments = pathname.split("/").filter(Boolean);
-  const crumbs =
-    segments.length === 0
-      ? [{ label: "Dashboard", href: "/dashboard" }]
-      : segments.slice(0, 2).map((segment, index) => ({
-          label: formatSegmentLabel(segment, index),
-          href: `/${segments.slice(0, index + 1).join("/")}`,
-        }));
+  const crumbs = buildAppCrumbs(pathname, MAIN_APP_URL);
 
   return (
     <div className="sticky top-0 z-20 flex h-12 items-center justify-between border-b bg-background/80 px-4 text-sm backdrop-blur">
       <div className="flex items-center gap-2 text-muted-foreground">
         <span className="font-medium text-foreground">App</span>
         {crumbs.map((crumb, index) => (
-          <Fragment key={crumb.href}>
+          <Fragment key={`${crumb.href}-${index}`}>
             <span>{index === 0 ? "•" : "/"}</span>
-            <Link to={crumb.href} className="hover:text-foreground">
-              {crumb.label}
-            </Link>
+            {crumb.external ? (
+              <a href={crumb.href} className="hover:text-foreground">
+                {crumb.label}
+              </a>
+            ) : (
+              <Link to={crumb.href} className="hover:text-foreground">
+                {crumb.label}
+              </Link>
+            )}
           </Fragment>
         ))}
       </div>
       <div className="text-muted-foreground">v1.0</div>
     </div>
   );
-}
-
-function formatSegmentLabel(segment: string, index: number) {
-  const dictionary: Record<string, string> = {
-    dashboard: "Dashboard",
-    user: "Users",
-    users: "Users",
-    proposals: "Proposals",
-    clients: "Clients",
-    admin: "Admin",
-    packages: "Packages",
-    settings: "Settings",
-    templates: "Templates",
-    system: "System Templates",
-    integrations: "Integrations",
-    my: "My Workspace",
-    edit: "Edit",
-    view: "View",
-    invite: "Invite",
-    p: "Proposal",
-    t: "Template",
-    "ppt-styles": "PPT Styles",
-  };
-
-  const normalized = segment.toLowerCase();
-  if (dictionary[normalized]) {
-    return dictionary[normalized];
-  }
-
-  if (/^[a-z0-9-]{6,}$/.test(normalized)) {
-    return index === 0 ? "Details" : "Details";
-  }
-
-  return segment
-    .split("-")
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ");
 }
 
 function ThinFooter() {

@@ -1,5 +1,6 @@
 import AppShell from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
+import { aiGenerateButtonClassName, newProposalButtonClassName } from "@/lib/proposalListButtons";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
@@ -514,7 +515,7 @@ export default function MyProposals() {
               <Button
                 variant="outline"
                 onClick={handleOpenGenerateDialog}
-                className="gap-2 border-border hover:bg-muted/50"
+                className={aiGenerateButtonClassName}
               >
                 <Wand2 className="h-4 w-4" />
                 AI Generate
@@ -523,7 +524,7 @@ export default function MyProposals() {
               {canCreate && (
               <Button
                 onClick={handleOpenCreateDialog}
-                className="gap-2 bg-gradient-to-r from-primary to-accent hover:shadow-lg transition-shadow"
+                className={newProposalButtonClassName}
               >
                 <span>+</span>
                 New proposal

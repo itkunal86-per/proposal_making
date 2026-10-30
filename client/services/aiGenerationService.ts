@@ -92,6 +92,7 @@ interface ProposalStatusResponse {
 export const generationTimeouts = {
   enqueueMs: 30_000,
   statusMs: 15_000,
+  assistantMs: 45_000,
 };
 const MAX_TRANSIENT_ATTEMPTS = 5;
 
@@ -289,44 +290,65 @@ export async function generateProposalContent(
   return updatedProposal;
 }
 
-export async function generateAIContent(prompt: string): Promise<string> {
+export async function generateAIContent(prompt: string, signal?: AbortSignal): Promise<string> {
   const token = getStoredToken();
 
   if (!token) {
     throw new Error("Authentication token not found. Please log in again.");
   }
 
+  if (signal?.aborted) {
+    throw new DOMException("The AI request was cancelled.", "AbortError");
+  }
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), generationTimeouts.assistantMs);
+  const abortFromCaller = () => controller.abort();
+  signal?.addEventListener("abort", abortFromCaller);
+
   try {
-    const response = await fetch("https://propai-api.hirenq.com/api/ai/generate", {
+    const response = await fetch(apiConfig.endpoints.aiGenerate, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({
-        prompt,
-      }),
+      body: JSON.stringify({ prompt }),
+      signal: controller.signal,
     });
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
-      throw new Error(
-        error.message || error.error || `AI generation failed with status ${response.status}`
-      );
+      const fallback = response.status === 401
+        ? "Authentication failed. Please sign in again."
+        : `AI generation failed with status ${response.status}`;
+      throw new Error(error.message || error.error || fallback);
     }
 
     const data: ProposalAIResponse = await response.json();
 
-    if (!data.status) {
+    if (!data.status || typeof data.data !== "string" || data.data.trim() === "") {
       throw new Error(data.message || "AI generation failed");
     }
 
     return data.data;
   } catch (error) {
-    if (error instanceof Error) {
-      throw new Error(`Failed to generate AI content: ${error.message}`);
+    if (signal?.aborted) {
+      throw new DOMException("The AI request was cancelled.", "AbortError");
     }
-    throw new Error("Failed to generate AI content: Unknown error");
+    if (isAbortError(error)) {
+      throw new Error("The AI request timed out. Please try again.");
+    }
+    if (error instanceof TypeError) {
+      throw new Error("Could not reach the AI service. Check your connection and try again.");
+    }
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error("Failed to generate AI content.");
+  } finally {
+    clearTimeout(timer);
+    signal?.removeEventListener("abort", abortFromCaller);
   }
 }
 

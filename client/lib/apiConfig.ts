@@ -52,6 +52,7 @@ export const apiConfig = {
 
     // AI Generation endpoints
     aiGeneration: `${API_BASE_URL}/api/ai-generation`,
+    aiGenerate: `${API_BASE_URL}/api/ai/generate`,
     proposalStatus: `${API_BASE_URL}/api/proposal/status`,
 
     // Analytics endpoints
