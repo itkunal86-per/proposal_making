@@ -27,7 +27,6 @@ export default function AppShell({ children }: { children: ReactNode }) {
           pathname={location.pathname}
           homeHref={MAIN_APP_URL}
           userName={user.name || user.email}
-          userEmail={user.email}
           userId={user.id}
           company={user.company}
           onSignOut={handleSignOut}

@@ -254,8 +254,10 @@
   margin-top: 2px;
 }
 
-.pitch-switch-button.is-profile {
-  cursor: default;
+.pitch-switch-button.is-profile:hover .pitch-switch-online,
+.pitch-switch-button.is-profile:focus .pitch-switch-online,
+.pitch-switch-button.is-profile[data-highlighted] .pitch-switch-online {
+  border-color: #eaeae5;
 }
 
 .pitch-switch-button.is-profile .pitch-switch-picture {
@@ -328,6 +330,24 @@
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+
+.pitch-switch-check {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.pitch-sidebar-menu-nested {
+  width: 216px;
+  margin-bottom: -12px;
+}
+
+.pitch-switch-button > svg {
+  display: none;
 }
 
 .pitch-sidebar-menu[data-state="open"] {
