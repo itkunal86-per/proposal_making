@@ -41,6 +41,34 @@ export function formatSegmentLabel(segment: string, index: number): string {
     .join(" ");
 }
 
+const PAGE_TITLES: Array<{ prefix: string; title: string }> = [
+  { prefix: "/admin/templates/system", title: "System Templates" },
+  { prefix: "/admin/templates/clients", title: "Clients Templates" },
+  { prefix: "/admin/ppt-styles", title: "PPT Styles" },
+  { prefix: "/admin/packages", title: "Package catalog" },
+  { prefix: "/admin/settings", title: "Admin Settings" },
+  { prefix: "/admin/templates", title: "Templates" },
+  { prefix: "/admin/users", title: "Users" },
+  { prefix: "/my/proposals", title: "My Proposals" },
+  { prefix: "/my/templates", title: "My Templates" },
+  { prefix: "/my/clients", title: "Clients" },
+  { prefix: "/my/users", title: "Users" },
+  { prefix: "/my/settings", title: "My Settings" },
+  { prefix: "/integrations", title: "Integrations" },
+  { prefix: "/dashboard", title: "Admin Dashboard" },
+];
+
+export function appPageTitle(pathname: string): string {
+  if (/^\/proposals\/[^/]+\/settings\/?$/.test(pathname)) {
+    return "Proposal Settings";
+  }
+
+  const match = PAGE_TITLES.find(
+    (entry) => pathname === entry.prefix || pathname.startsWith(`${entry.prefix}/`),
+  );
+  return match?.title ?? "App";
+}
+
 export function buildAppCrumbs(pathname: string, homeHref: string): AppCrumb[] {
   const segments = pathname.split("/").filter(Boolean);
   if (segments.length === 0) {

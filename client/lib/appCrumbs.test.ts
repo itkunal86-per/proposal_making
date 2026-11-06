@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildAppCrumbs } from "./appCrumbs";
+import { appPageTitle, buildAppCrumbs } from "./appCrumbs";
 
 const HOME = "https://pitchsuite.io/";
 
@@ -30,6 +30,17 @@ describe("application breadcrumbs", () => {
       { label: "Proposals", href: "/proposals", external: false },
       { label: "Details", href: "/proposals/abc123def", external: false },
     ]);
+  });
+
+  it("uses the existing page title instead of a breadcrumb trail", () => {
+    expect(appPageTitle("/my/proposals")).toBe("My Proposals");
+    expect(appPageTitle("/my/templates")).toBe("My Templates");
+    expect(appPageTitle("/my/settings")).toBe("My Settings");
+    expect(appPageTitle("/admin/templates/system")).toBe("System Templates");
+    expect(appPageTitle("/admin/templates")).toBe("Templates");
+    expect(appPageTitle("/admin/packages")).toBe("Package catalog");
+    expect(appPageTitle("/dashboard")).toBe("Admin Dashboard");
+    expect(appPageTitle("/proposals/abc123def/settings")).toBe("Proposal Settings");
   });
 
   it("does not rename admin navigation to Home", () => {

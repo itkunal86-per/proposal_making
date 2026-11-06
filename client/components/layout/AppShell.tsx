@@ -1,6 +1,6 @@
-import { Fragment, ReactNode, useMemo } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { buildAppCrumbs } from "@/lib/appCrumbs";
+import { ReactNode, useMemo } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { appPageTitle } from "@/lib/appCrumbs";
 import { buildSidebarMenu } from "@/lib/sidebarNav";
 import { useAuth } from "@/hooks/useAuth";
 import AppSidebar from "./AppSidebar";
@@ -36,7 +36,6 @@ export default function AppShell({ children }: { children: ReactNode }) {
         <div className="pitch-shell-stage">
           <ThinHeader />
           <main className="pitch-app min-w-0 flex-1">{children}</main>
-          <ThinFooter />
         </div>
       </div>
     </div>
@@ -45,37 +44,12 @@ export default function AppShell({ children }: { children: ReactNode }) {
 
 function ThinHeader() {
   const { pathname } = useLocation();
-  const crumbs = buildAppCrumbs(pathname, MAIN_APP_URL);
 
   return (
-    <div className="pitch-shell-header sticky top-0 z-20 flex h-12 items-center justify-between border-b bg-background/80 px-4 text-sm backdrop-blur">
-      <div className="flex items-center gap-2 text-muted-foreground">
-        <span className="font-medium text-foreground">App</span>
-        {crumbs.map((crumb, index) => (
-          <Fragment key={`${crumb.href}-${index}`}>
-            <span>{index === 0 ? "•" : "/"}</span>
-            {crumb.external ? (
-              <a href={crumb.href} className="hover:text-foreground">
-                {crumb.label}
-              </a>
-            ) : (
-              <Link to={crumb.href} className="hover:text-foreground">
-                {crumb.label}
-              </Link>
-            )}
-          </Fragment>
-        ))}
+    <div className="pitch-shell-header">
+      <div className="pitch-shell-header-content">
+        <h1 className="pitch-shell-title">{appPageTitle(pathname)}</h1>
       </div>
-      <div className="text-muted-foreground">v1.0</div>
-    </div>
-  );
-}
-
-function ThinFooter() {
-  return (
-    <div className="pitch-shell-footer flex h-10 items-center justify-between border-t px-4 text-xs text-muted-foreground">
-      <span>© {new Date().getFullYear()} Pitchsuite</span>
-      <span>All systems normal</span>
     </div>
   );
 }
