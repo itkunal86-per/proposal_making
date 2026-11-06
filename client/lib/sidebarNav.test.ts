@@ -18,7 +18,6 @@ describe("sidebar menu order", () => {
     expect(labels({ role: "subscriber" })).toEqual([
       ["Home", "Inbox", "Calendar", "Library", "Reports"],
       ["Proposals", "Templates", "Deals", "Contacts", "Companies"],
-      ["Clients", "Users"],
     ]);
   });
 
@@ -26,11 +25,10 @@ describe("sidebar menu order", () => {
     expect(labels({ role: "user" })).toEqual(labels({ role: "user", membershipRole: "manager" }));
   });
 
-  it("shows clients to a workspace user and hides subscriber-only users", () => {
+  it("shows the same rail to a workspace user without a separate clients group", () => {
     expect(labels({ role: "user", membershipRole: "manager" })).toEqual([
       ["Home", "Inbox", "Calendar", "Library", "Reports"],
       ["Proposals", "Templates", "Deals", "Contacts", "Companies"],
-      ["Clients"],
     ]);
   });
 
@@ -45,7 +43,7 @@ describe("sidebar menu order", () => {
     expect(labels({ role: "admin" })).toEqual([
       ["Home", "Inbox", "Calendar", "Library", "Reports"],
       ["Deals", "Contacts", "Companies"],
-      ["Dashboard", "Users", "Packages", "System Templates", "Clients Templates", "PPT Styles"],
+      ["Dashboard", "Packages", "System Templates", "Clients Templates", "PPT Styles"],
     ]);
     expect(sidebarInternalHrefs(model)).not.toContain("/my/proposals");
     expect(sidebarInternalHrefs(model)).not.toContain("/my/templates");
@@ -79,6 +77,24 @@ describe("sidebar destinations", () => {
     expect(subscriber.groups.flat().some((item) => item.label === "Settings")).toBe(false);
     expect(sidebarInternalHrefs(subscriber).every(isKnownLocalSidebarRoute)).toBe(true);
     expect(sidebarInternalHrefs(admin).every(isKnownLocalSidebarRoute)).toBe(true);
+  });
+
+  it("hides Users and Clients from the sidebar while leaving their routes defined", () => {
+    const roles: SidebarUser[] = [
+      { role: "admin" },
+      { role: "subscriber" },
+      { role: "user", membershipRole: "manager" },
+      { role: "user", membershipRole: "reviewer" },
+    ];
+    for (const user of roles) {
+      const hrefs = buildSidebarMenu(user, HOME).groups.flat().map((item) => item.href);
+      expect(hrefs).not.toContain("/my/clients");
+      expect(hrefs).not.toContain("/my/users");
+      expect(hrefs).not.toContain("/admin/users");
+    }
+    expect(isKnownLocalSidebarRoute("/my/clients")).toBe(true);
+    expect(isKnownLocalSidebarRoute("/my/users")).toBe(true);
+    expect(isKnownLocalSidebarRoute("/admin/users")).toBe(true);
   });
 
   it("does not expose the commented-out integrations destination", () => {

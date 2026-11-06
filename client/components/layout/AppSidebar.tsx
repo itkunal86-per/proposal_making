@@ -133,6 +133,7 @@ export default function AppSidebar({
   pathname,
   homeHref,
   userName,
+  userEmail,
   userId,
   company,
   onSignOut,
@@ -141,6 +142,7 @@ export default function AppSidebar({
   pathname: string;
   homeHref: string;
   userName: string;
+  userEmail?: string;
   userId: string;
   company?: string;
   onSignOut: () => void;
@@ -185,6 +187,9 @@ export default function AppSidebar({
                 </span>
                 <span className="pitch-switch-copy">
                   <span className="pitch-switch-label">{userName}</span>
+                  {userEmail && userEmail !== userName && (
+                    <span className="pitch-switch-sublabel">{userEmail}</span>
+                  )}
                 </span>
               </div>
             </div>

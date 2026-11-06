@@ -4,6 +4,7 @@ import { buildAppCrumbs } from "@/lib/appCrumbs";
 import { buildSidebarMenu } from "@/lib/sidebarNav";
 import { useAuth } from "@/hooks/useAuth";
 import AppSidebar from "./AppSidebar";
+import "@/styles/pitch-app.css";
 
 const MAIN_APP_URL = import.meta.env.VITE_MAIN_APP_URL ?? "https://pitchsuite.io/";
 
@@ -26,15 +27,18 @@ export default function AppShell({ children }: { children: ReactNode }) {
           pathname={location.pathname}
           homeHref={MAIN_APP_URL}
           userName={user.name || user.email}
+          userEmail={user.email}
           userId={user.id}
           company={user.company}
           onSignOut={handleSignOut}
         />
       )}
       <div className="pitch-shell-main">
-        <ThinHeader />
-        <main className="min-w-0 flex-1">{children}</main>
-        <ThinFooter />
+        <div className="pitch-shell-stage">
+          <ThinHeader />
+          <main className="pitch-app min-w-0 flex-1">{children}</main>
+          <ThinFooter />
+        </div>
       </div>
     </div>
   );
@@ -45,7 +49,7 @@ function ThinHeader() {
   const crumbs = buildAppCrumbs(pathname, MAIN_APP_URL);
 
   return (
-    <div className="sticky top-0 z-20 flex h-12 items-center justify-between border-b bg-background/80 px-4 text-sm backdrop-blur">
+    <div className="pitch-shell-header sticky top-0 z-20 flex h-12 items-center justify-between border-b bg-background/80 px-4 text-sm backdrop-blur">
       <div className="flex items-center gap-2 text-muted-foreground">
         <span className="font-medium text-foreground">App</span>
         {crumbs.map((crumb, index) => (
@@ -70,7 +74,7 @@ function ThinHeader() {
 
 function ThinFooter() {
   return (
-    <div className="flex h-10 items-center justify-between border-t px-4 text-xs text-muted-foreground">
+    <div className="pitch-shell-footer flex h-10 items-center justify-between border-t px-4 text-xs text-muted-foreground">
       <span>© {new Date().getFullYear()} Pitchsuite</span>
       <span>All systems normal</span>
     </div>

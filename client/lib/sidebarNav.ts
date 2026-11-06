@@ -83,8 +83,6 @@ export function buildSidebarMenu(user: SidebarUser | null, mainAppUrl: string): 
   const seesWorkspace = user.role === "subscriber" || user.role === "user";
   const seesProposals = seesWorkspace;
   const seesTemplates = seesWorkspace && !focused;
-  const seesClients = seesWorkspace && !focused;
-  const seesSubscriberUsers = user.role === "subscriber";
 
   const groups: SidebarNavItem[][] = [];
 
@@ -121,18 +119,11 @@ export function buildSidebarMenu(user: SidebarUser | null, mainAppUrl: string): 
   if (user.role === "admin") {
     proposalOnly.push(
       item("dashboard", "Dashboard", "/dashboard", false, "dashboard"),
-      item("admin-users", "Users", "/admin/users", false, "users"),
       item("packages", "Packages", "/admin/packages", false, "packages"),
       item("system-templates", "System Templates", "/admin/templates/system", false, "templates"),
       item("client-templates", "Clients Templates", "/admin/templates/clients", false, "templates"),
       item("ppt-styles", "PPT Styles", "/admin/ppt-styles", false, "ppt"),
     );
-  }
-  if (seesClients) {
-    proposalOnly.push(item("clients", "Clients", "/my/clients", false, "clients"));
-  }
-  if (seesSubscriberUsers) {
-    proposalOnly.push(item("subscriber-users", "Users", "/my/users", false, "users"));
   }
   if (proposalOnly.length > 0) {
     groups.push(proposalOnly);
