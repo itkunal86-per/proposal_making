@@ -1,0 +1,300 @@
+.pitch-shell {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  background: #ffffff;
+}
+
+.pitch-shell-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #ffffff;
+}
+
+.pitch-sidebar {
+  flex: 0 0 74px;
+  width: 74px;
+  height: 100vh;
+  height: 100dvh;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  padding: 12px 0;
+  background: rgb(251, 251, 250);
+  color: #373530;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, sans-serif;
+}
+
+.pitch-sidebar button,
+.pitch-sidebar a,
+.pitch-sidebar-menu button,
+.pitch-sidebar-menu a {
+  transition: none;
+}
+
+.pitch-sidebar :focus-visible,
+.pitch-sidebar-menu :focus-visible {
+  outline: none;
+}
+
+.pitch-sidebar-header {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  flex-shrink: 0;
+}
+
+.pitch-sidebar-header a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.pitch-sidebar-header img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  display: block;
+}
+
+.pitch-sidebar-section {
+  display: contents;
+}
+
+.pitch-sidebar-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  scrollbar-width: thin;
+  scrollbar-color: #e0e0e0 transparent;
+}
+
+.pitch-sidebar-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.pitch-sidebar-scroll::-webkit-scrollbar-thumb {
+  background: #e0e0e0;
+  border-radius: 4px;
+}
+
+.pitch-nav-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.pitch-sidebar-divider {
+  width: 24px;
+  height: 1px;
+  flex-shrink: 0;
+  background-color: #e0e0e0;
+  margin: 12px auto;
+}
+
+.pitch-nav-button {
+  width: 56px;
+  border: none;
+  background: none;
+  padding: 8px 0;
+  color: #373530;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  font-family: inherit;
+}
+
+.pitch-nav-icon {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  position: relative;
+  margin: 0 auto;
+  transition: background 0.125s cubic-bezier(0.17, 0.67, 0.55, 1.09);
+}
+
+.pitch-nav-icon svg {
+  width: 18px;
+  height: 18px;
+  transition: transform 0.125s cubic-bezier(0.17, 0.67, 0.55, 1.09);
+}
+
+.pitch-nav-button.is-active .pitch-nav-icon,
+.pitch-nav-button:hover .pitch-nav-icon,
+.pitch-nav-button:focus .pitch-nav-icon {
+  background-color: rgb(232, 230, 221);
+}
+
+.pitch-nav-button:hover .pitch-nav-icon svg,
+.pitch-nav-button:focus .pitch-nav-icon svg {
+  transform: scale(1.1);
+}
+
+.pitch-nav-label {
+  max-width: 56px;
+  margin-top: 4px;
+  color: #373530;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 12px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.pitch-nav-button[data-wrap="true"] .pitch-nav-label {
+  white-space: normal;
+}
+
+.pitch-sidebar-footer {
+  margin-top: auto;
+  padding-bottom: 12px;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+}
+
+.pitch-sidebar-trigger {
+  margin-top: 16px;
+  border: 0;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+  color: #373530;
+}
+
+.pitch-sidebar-menu {
+  width: 216px;
+  overflow: visible;
+  border: 0;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 12px 0;
+  color: #373530;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, sans-serif;
+  box-shadow:
+    0 0 0 1px #0a090b0d,
+    0 6px 16px 0 #0a090b14;
+}
+
+.pitch-switch-group {
+  padding: 0 8px;
+}
+
+.pitch-switch-group + .pitch-switch-group {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #eaeae5;
+}
+
+.pitch-switch-button {
+  width: 100%;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  background-color: transparent;
+  border: 0;
+  border-radius: 4px;
+  overflow: hidden;
+  cursor: pointer;
+  color: #373530;
+  text-align: left;
+  text-decoration: none;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 16px;
+}
+
+.pitch-switch-button:hover,
+.pitch-switch-button:focus,
+.pitch-switch-button[data-highlighted] {
+  background-color: #eaeae5;
+  color: #373530;
+}
+
+.pitch-switch-button + .pitch-switch-button {
+  margin-top: 2px;
+}
+
+.pitch-switch-button.is-profile {
+  cursor: default;
+}
+
+.pitch-switch-button.is-profile .pitch-switch-picture {
+  border-radius: 50%;
+}
+
+.pitch-switch-button.is-profile .pitch-switch-label {
+  font-weight: 500;
+}
+
+.pitch-switch-picture {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #eaeae5;
+  border-radius: 4px;
+  margin-right: 4px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.pitch-switch-online {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: #4caf50;
+  border: 2px solid #ffffff;
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+}
+
+.pitch-switch-icon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.pitch-switch-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.pitch-switch-copy {
+  flex: 1;
+  min-height: 24px;
+  padding: 0 4px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.pitch-switch-label {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
