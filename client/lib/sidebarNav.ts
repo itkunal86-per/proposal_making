@@ -38,8 +38,9 @@ export type SidebarUser = {
 
 export type SidebarMenuModel = {
   groups: SidebarNavItem[][];
-  settingsHref?: string;
 };
+
+export const ACCOUNT_SETTINGS_URL = "https://pitchsuite.io/settings/profile";
 
 const LOCAL_ROUTES = new Set([
   "/dashboard",
@@ -129,11 +130,7 @@ export function buildSidebarMenu(user: SidebarUser | null, mainAppUrl: string): 
     groups.push(proposalOnly);
   }
 
-  let settingsHref: string | undefined;
-  if (user.role === "admin") settingsHref = "/admin/settings";
-  if (user.role === "subscriber") settingsHref = "/my/settings";
-
-  return { groups, settingsHref };
+  return { groups };
 }
 
 export function isSidebarItemActive(pathname: string, navItem: SidebarNavItem) {

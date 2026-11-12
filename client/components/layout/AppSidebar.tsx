@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuth as useSsoSession } from "@/auth/AuthContext";
 import {
+  ACCOUNT_SETTINGS_URL,
   isSidebarItemActive,
   type SidebarIconName,
   type SidebarMenuModel,
@@ -181,7 +182,6 @@ export default function AppSidebar({
   homeHref,
   userName,
   userId,
-  company,
   onSignOut,
 }: {
   menu: SidebarMenuModel;
@@ -192,14 +192,13 @@ export default function AppSidebar({
   company?: string;
   onSignOut: () => void;
 }) {
-  const workspaceName = company?.trim() || userName;
   const visibleGroups = menu.groups.filter((group) => group.length > 0);
   const sso = useSsoSession();
   const avatarUrl = sso.user?.avatarUrl;
-  const organizationName = sso.user?.org?.name?.trim() || workspaceName;
+  const organizationName = sso.user?.org?.name?.trim() || "";
   const organizationPlan = sso.user?.org?.plan?.trim() || "";
-  const organizationId = sso.user?.org?.id != null ? String(sso.user.org.id) : company || userId;
-  const settingsHref = menu.settingsHref;
+  const organizationId = sso.user?.org?.id != null ? String(sso.user.org.id) : userId;
+  const organizationMark = organizationName.charAt(0);
 
   return (
     <aside className="pitch-sidebar" aria-label="PitchSuite">
@@ -226,7 +225,7 @@ export default function AppSidebar({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button type="button" className="pitch-sidebar-trigger" aria-label="Account menu">
-              <Mark id={organizationId} name={organizationName.charAt(0)} size={36} radius={4} textSize={14} />
+              <Mark id={organizationId} name={organizationMark} size={36} radius={4} textSize={14} />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -254,7 +253,7 @@ export default function AppSidebar({
               <DropdownMenuSub>
                 <DropdownMenuSubTrigger className="pitch-switch-button">
                   <span className="pitch-switch-picture">
-                    <Mark id={organizationId} name={organizationName.charAt(0)} size={28} radius={4} textSize={14} />
+                    <Mark id={organizationId} name={organizationMark} size={28} radius={4} textSize={14} />
                   </span>
                   <span className="pitch-switch-copy">
                     <span className="pitch-switch-label">{organizationName}</span>
@@ -268,7 +267,7 @@ export default function AppSidebar({
                   <div className="pitch-switch-group">
                     <DropdownMenuItem className="pitch-switch-button">
                       <span className="pitch-switch-picture">
-                        <Mark id={organizationId} name={organizationName.charAt(0)} size={28} radius={4} textSize={14} />
+                        <Mark id={organizationId} name={organizationMark} size={28} radius={4} textSize={14} />
                       </span>
                       <span className="pitch-switch-copy">
                         <span className="pitch-switch-label">{organizationName}</span>
@@ -332,25 +331,14 @@ export default function AppSidebar({
                 </span>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                {settingsHref ? (
-                  <Link to={settingsHref} className="pitch-switch-button">
-                    <span className="pitch-switch-icon">
-                      <Settings size={16} />
-                    </span>
-                    <span className="pitch-switch-copy">
-                      <span className="pitch-switch-label">Settings</span>
-                    </span>
-                  </Link>
-                ) : (
-                  <a href={crmPath(homeHref, "/settings")} className="pitch-switch-button">
-                    <span className="pitch-switch-icon">
-                      <Settings size={16} />
-                    </span>
-                    <span className="pitch-switch-copy">
-                      <span className="pitch-switch-label">Settings</span>
-                    </span>
-                  </a>
-                )}
+                <a href={ACCOUNT_SETTINGS_URL} className="pitch-switch-button">
+                  <span className="pitch-switch-icon">
+                    <Settings size={16} />
+                  </span>
+                  <span className="pitch-switch-copy">
+                    <span className="pitch-switch-label">Settings</span>
+                  </span>
+                </a>
               </DropdownMenuItem>
             </div>
 

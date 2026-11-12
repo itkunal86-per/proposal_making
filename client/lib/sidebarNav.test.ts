@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  ACCOUNT_SETTINGS_URL,
   buildSidebarMenu,
   isKnownLocalSidebarRoute,
   isSidebarItemActive,
@@ -66,17 +67,21 @@ describe("sidebar destinations", () => {
     });
   });
 
-  it("moves settings into the footer without dropping the existing route", () => {
+  it("keeps settings out of the rail for every role", () => {
     const subscriber = buildSidebarMenu({ role: "subscriber" }, HOME);
     const admin = buildSidebarMenu({ role: "admin" }, HOME);
     const reviewer = buildSidebarMenu({ role: "user", membershipRole: "reviewer" }, HOME);
 
-    expect(subscriber.settingsHref).toBe("/my/settings");
-    expect(admin.settingsHref).toBe("/admin/settings");
-    expect(reviewer.settingsHref).toBeUndefined();
+    expect(ACCOUNT_SETTINGS_URL).toBe("https://pitchsuite.io/settings/profile");
     expect(subscriber.groups.flat().some((item) => item.label === "Settings")).toBe(false);
+    expect(admin.groups.flat().some((item) => item.label === "Settings")).toBe(false);
+    expect(reviewer.groups.flat().some((item) => item.label === "Settings")).toBe(false);
+    expect(sidebarInternalHrefs(subscriber)).not.toContain("/my/settings");
+    expect(sidebarInternalHrefs(admin)).not.toContain("/admin/settings");
     expect(sidebarInternalHrefs(subscriber).every(isKnownLocalSidebarRoute)).toBe(true);
     expect(sidebarInternalHrefs(admin).every(isKnownLocalSidebarRoute)).toBe(true);
+    expect(isKnownLocalSidebarRoute("/my/settings")).toBe(true);
+    expect(isKnownLocalSidebarRoute("/admin/settings")).toBe(true);
   });
 
   it("hides Users and Clients from the sidebar while leaving their routes defined", () => {

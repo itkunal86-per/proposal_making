@@ -25,32 +25,96 @@ const AuthContext = createContext<AuthState>({
   logout: async () => {},
 })
 
+function normalizeAuthUser(
+  incoming: Partial<AuthUser> | null | undefined,
+  previous: AuthUser | null,
+): AuthUser | null {
+  if (!incoming && !previous) return null
+
+  const merged = {
+    ...(previous ?? {}),
+    ...(incoming ?? {}),
+  } as AuthUser
+
+  const orgSource = incoming && Object.prototype.hasOwnProperty.call(incoming, 'org')
+    ? incoming.org
+    : merged.org
+
+  return {
+    ...merged,
+    avatarUrl: merged.avatarUrl ?? null,
+    org: {
+      id: orgSource?.id ?? null,
+      name: orgSource?.name ?? null,
+      role: orgSource?.role ?? null,
+      plan: orgSource?.plan ?? null,
+    },
+  }
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(() => {
     const stored = typeof window !== 'undefined' ? localStorage.getItem(SSO_STORAGE_KEY) : null
-    return stored ? JSON.parse(stored) : null
+    if (!stored) return null
+    try {
+      return normalizeAuthUser(JSON.parse(stored) as AuthUser, null)
+    } catch {
+      return null
+    }
   })
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    let cancelled = false
+
+    const applyPayload = (payload: Partial<AuthUser> | null) => {
+      setUser((current) => {
+        const next = normalizeAuthUser(payload, current)
+        if (next) localStorage.setItem(SSO_STORAGE_KEY, JSON.stringify(next))
+        return next
+      })
+    }
+
+    const applyStoredUser = () => {
+      const stored = localStorage.getItem(SSO_STORAGE_KEY)
+      if (!stored) return
+      try {
+        applyPayload(JSON.parse(stored) as AuthUser)
+      } catch {
+        localStorage.removeItem(SSO_STORAGE_KEY)
+      }
+    }
+
+    window.addEventListener('sso-authenticated', applyStoredUser)
+
     if (window.location.pathname === '/sso-login') {
       setLoading(false)
-      return
+      return () => {
+        cancelled = true
+        window.removeEventListener('sso-authenticated', applyStoredUser)
+      }
     }
 
     api
       .get<AuthUser>('/api/user')
       .then((res) => {
         console.log('SSO user fetched:', res.data)
-        setUser(res.data)
-        localStorage.setItem(SSO_STORAGE_KEY, JSON.stringify(res.data))
+        if (!cancelled) applyPayload(res.data)
       })
       .catch((err) => {
         console.log('SSO fetch failed:', err?.response?.status, err?.message)
+        if (cancelled) return
         setUser(null)
         localStorage.removeItem(SSO_STORAGE_KEY)
       })
-      .finally(() => setLoading(false))
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+      window.removeEventListener('sso-authenticated', applyStoredUser)
+    }
   }, [])
 
   const logout = async () => {
