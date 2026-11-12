@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import {
-  BookOpen,
+  // BookOpen,
   Box,
   BriefcaseBusiness,
   Building,
@@ -14,7 +14,7 @@ import {
   Inbox,
   LayoutDashboard,
   LayoutTemplate,
-  LifeBuoy,
+  // LifeBuoy,
   LogOut,
   Palette,
   Presentation,
@@ -132,14 +132,14 @@ function DiscordIcon() {
   );
 }
 
-function openSupport() {
-  const intercom = (window as Window & { Intercom?: (command: string) => void }).Intercom;
-  if (typeof intercom === "function") {
-    intercom("show");
-    return;
-  }
-  window.open("https://help.skarbe.com/", "_blank", "noopener,noreferrer");
-}
+// function openSupport() {
+//   const intercom = (window as Window & { Intercom?: (command: string) => void }).Intercom;
+//   if (typeof intercom === "function") {
+//     intercom("show");
+//     return;
+//   }
+//   window.open("https://help.skarbe.com/", "_blank", "noopener,noreferrer");
+// }
 
 function NavButton({ item, pathname }: { item: SidebarNavItem; pathname: string }) {
   const Icon = ICONS[item.icon];
@@ -307,7 +307,7 @@ export default function AppSidebar({
                   </span>
                 </a>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild>
+              {/* <DropdownMenuItem asChild>
                 <a
                   href="https://help.skarbe.com/"
                   target="_blank"
@@ -329,7 +329,7 @@ export default function AppSidebar({
                 <span className="pitch-switch-copy">
                   <span className="pitch-switch-label">Support</span>
                 </span>
-              </DropdownMenuItem>
+              </DropdownMenuItem> */}
               <DropdownMenuItem asChild>
                 <a href={ACCOUNT_SETTINGS_URL} className="pitch-switch-button">
                   <span className="pitch-switch-icon">
