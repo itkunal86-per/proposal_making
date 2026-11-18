@@ -1,39 +1,68 @@
 import { describe, expect, it } from "vitest";
-import { selectedProposalClientValue } from "./proposalClientSelection";
+import { matchingProposalClient, selectedProposalClientValue } from "./proposalClientSelection";
+
+const proposal45 = {
+  id: "45",
+  title: "Proposal RFP",
+  client: "",
+  client_id: 830,
+  deal_id: 8,
+  status: "draft",
+};
 
 const clients = [
-  { id: "12", name: "Ada Lovelace", company: "Analytical Engines" },
-  { id: 34, name: "Grace Hopper", company: "Navy" },
+  { id: 100, name: "Other Client" },
+  { id: "830", name: "Existing Client", company: "Pitchsuite" },
+  { id: 901, name: "Another Client" },
 ];
 
-describe("selectedProposalClientValue", () => {
-  it("selects the client associated by client_id after options have loaded", () => {
-    expect(selectedProposalClientValue(12, clients, "")).toBe("12");
-    expect(selectedProposalClientValue("34", clients, "")).toBe("34");
+describe("proposal 45 client_id binding", () => {
+  it("selects option 830 and uses that option's name, not the empty client string", () => {
+    const selected = matchingProposalClient(proposal45.client_id, clients);
+
+    expect(selectedProposalClientValue(proposal45.client_id, clients)).toBe("830");
+    expect(selected?.name).toBe("Existing Client");
+    expect(proposal45.client).toBe("");
   });
 
-  it("stays empty when the proposal has no associated client", () => {
-    expect(selectedProposalClientValue(undefined, clients, "")).toBeUndefined();
-    expect(selectedProposalClientValue(null, clients, "")).toBeUndefined();
-    expect(selectedProposalClientValue(0, clients, "")).toBeUndefined();
-    expect(selectedProposalClientValue("0", clients, "")).toBeUndefined();
+  it("matches numeric client_id 830 to a numeric option id", () => {
+    const options = [{ id: 830, name: "Existing Client" }, { id: 100, name: "Other Client" }];
+
+    expect(selectedProposalClientValue(830, options)).toBe("830");
+    expect(matchingProposalClient(830, options)?.name).toBe("Existing Client");
   });
 
-  it("does not select an arbitrary client when the id is not in the options", () => {
-    expect(selectedProposalClientValue(99, clients, "")).toBeUndefined();
+  it("selects a different client_id for a different proposal", () => {
+    expect(selectedProposalClientValue(901, clients)).toBe("901");
+    expect(matchingProposalClient(901, clients)?.name).toBe("Another Client");
   });
 
-  it("keeps each proposal's own client when proposals are opened consecutively", () => {
-    expect(selectedProposalClientValue("12", clients, "Wrong Name")).toBe("12");
-    expect(selectedProposalClientValue("34", clients, "Ada Lovelace")).toBe("34");
+  it("stays empty when client_id is null", () => {
+    expect(selectedProposalClientValue(null, clients)).toBeUndefined();
+    expect(matchingProposalClient(null, [{ id: 830, name: "" }])).toBeUndefined();
   });
 
-  it("waits for client options without dropping the associated id", () => {
-    expect(selectedProposalClientValue("12", [], "")).toBeUndefined();
-    expect(selectedProposalClientValue("12", clients, "")).toBe("12");
+  it("does not select another client when client_id has no matching option", () => {
+    expect(selectedProposalClientValue(830, [{ id: 100, name: "Other Client" }])).toBeUndefined();
+    expect(selectedProposalClientValue(830, [{ id: 1, name: "Existing Client" }])).toBeUndefined();
   });
 
-  it("still matches a client name when the proposal has no client id", () => {
-    expect(selectedProposalClientValue(undefined, clients, "Grace Hopper")).toBe("34");
+  it("selects 830 when client options load before proposal details", () => {
+    const optionsLoadedFirst = clients;
+    const proposalLoadedLater = proposal45;
+
+    expect(selectedProposalClientValue(proposalLoadedLater.client_id, optionsLoadedFirst)).toBe("830");
+  });
+
+  it("selects 830 when proposal details load before client options", () => {
+    expect(selectedProposalClientValue(proposal45.client_id, [])).toBeUndefined();
+    expect(selectedProposalClientValue(proposal45.client_id, clients)).toBe("830");
+  });
+
+  it("keeps the original id when other proposal fields change", () => {
+    const edited = { ...proposal45, title: "Updated title" };
+
+    expect(edited.client_id).toBe(830);
+    expect(selectedProposalClientValue(edited.client_id, clients)).toBe("830");
   });
 });

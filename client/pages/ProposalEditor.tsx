@@ -37,7 +37,7 @@ import {
 } from "@/services/proposalsService";
 import { signProposal, submitForReview } from "@/services/proposalReviewService";
 import { updateSystemTemplate, getSystemTemplateDetails, deleteSystemTemplate, type SystemTemplate } from "@/services/systemTemplatesService";
-import { selectedProposalClientValue } from "@/lib/proposalClientSelection";
+import { clientOptionValue, matchingProposalClient, selectedProposalClientValue } from "@/lib/proposalClientSelection";
 import { type ClientRecord, listClients } from "@/services/clientsService";
 import { ProposalPreview } from "@/components/ProposalPreview";
 import { PPTPreviewModal } from "@/components/PPTPreviewModal";
@@ -319,6 +319,15 @@ export default function ProposalEditor() {
       cancelled = true;
     };
   }, [id, isSystemTemplateEdit, refreshKey]);
+
+  useEffect(() => {
+    if (isSystemTemplateEdit || isLoadingClients || !p) return;
+    const clientId = clientOptionValue(p.client_id);
+    if (!clientId || matchingProposalClient(p.client_id, clients)) return;
+    console.warn(
+      `Proposal ${p.id} client_id ${clientId} does not match any loaded client option.`,
+    );
+  }, [p?.id, p?.client_id, isSystemTemplateEdit, isLoadingClients, clients]);
 
   const loadVariables = useCallback(async () => {
     if (isSystemTemplateEdit) {
@@ -810,7 +819,7 @@ export default function ProposalEditor() {
               />
               {!isSystemTemplateEdit && (
                 <Select
-                  value={selectedProposalClientValue(p.client_id, clients, p.client) ?? ""}
+                  value={selectedProposalClientValue(p.client_id, clients) ?? ""}
                   onValueChange={(value) => {
                     const selectedClient = clients.find((client) => String(client.id) === value);
                     if (!selectedClient) return;

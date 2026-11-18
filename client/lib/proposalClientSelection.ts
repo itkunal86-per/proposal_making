@@ -11,24 +11,25 @@ export function clientOptionValue(id: string | number | null | undefined): strin
   return value;
 }
 
+/** Client list entry whose id matches the proposal `client_id`, ignoring the `client` name string. */
+export function matchingProposalClient<T extends ProposalClientOption>(
+  clientId: string | number | null | undefined,
+  clients: T[],
+): T | undefined {
+  const normalizedId = clientOptionValue(clientId);
+  if (!normalizedId) return undefined;
+  return clients.find((client) => clientOptionValue(client.id) === normalizedId);
+}
+
 /**
- * Resolve the dropdown value for a proposal's associated client.
- * Matches `client_id` to an option id (string or number). Falls back to an
- * exact client name only when no id is present. Returns undefined until a
- * matching option exists, so either API response can arrive first.
+ * Dropdown value for a proposal's associated client.
+ * Matches `client_id` to an option id. Numeric and string ids compare as the same value.
+ * Returns undefined until a matching option exists, so either API response can arrive first.
  */
 export function selectedProposalClientValue(
   clientId: string | number | null | undefined,
   clients: ProposalClientOption[],
-  clientName?: string | null,
 ): string | undefined {
-  const normalizedId = clientOptionValue(clientId);
-  if (normalizedId && clients.some((client) => clientOptionValue(client.id) === normalizedId)) {
-    return normalizedId;
-  }
-
-  const name = typeof clientName === "string" ? clientName.trim() : "";
-  if (!name) return undefined;
-  const match = clients.find((client) => client.name === name);
+  const match = matchingProposalClient(clientId, clients);
   return match ? clientOptionValue(match.id) : undefined;
 }
