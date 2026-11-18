@@ -37,6 +37,7 @@ import {
 } from "@/services/proposalsService";
 import { signProposal, submitForReview } from "@/services/proposalReviewService";
 import { updateSystemTemplate, getSystemTemplateDetails, deleteSystemTemplate, type SystemTemplate } from "@/services/systemTemplatesService";
+import { selectedProposalClientValue } from "@/lib/proposalClientSelection";
 import { type ClientRecord, listClients } from "@/services/clientsService";
 import { ProposalPreview } from "@/components/ProposalPreview";
 import { PPTPreviewModal } from "@/components/PPTPreviewModal";
@@ -289,16 +290,6 @@ export default function ProposalEditor() {
         setTimeout(() => {
           console.log("State updated - checking p state");
         }, 100);
-
-        try {
-          setIsLoadingClients(true);
-          const clientsList = await listClients();
-          setClients(clientsList);
-        } catch (error) {
-          console.error("Failed to load clients:", error);
-        } finally {
-          setIsLoadingClients(false);
-        }
       } catch (error) {
         console.error("Failed to load proposal:", error);
         toast({
@@ -310,6 +301,24 @@ export default function ProposalEditor() {
       }
     })();
   }, [id, nav, isSystemTemplateEdit, searchParams, refreshKey]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        setIsLoadingClients(true);
+        const clientsList = await listClients();
+        if (!cancelled) setClients(clientsList);
+      } catch (error) {
+        console.error("Failed to load clients:", error);
+      } finally {
+        if (!cancelled) setIsLoadingClients(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [id, isSystemTemplateEdit, refreshKey]);
 
   const loadVariables = useCallback(async () => {
     if (isSystemTemplateEdit) {
@@ -801,10 +810,15 @@ export default function ProposalEditor() {
               />
               {!isSystemTemplateEdit && (
                 <Select
-                  value={p.client}
+                  value={selectedProposalClientValue(p.client_id, clients, p.client) ?? ""}
                   onValueChange={(value) => {
-                    const selectedClient = clients.find((c) => c.name === value);
-                    commit({ ...p, client: value, client_id: selectedClient?.id });
+                    const selectedClient = clients.find((client) => String(client.id) === value);
+                    if (!selectedClient) return;
+                    commit({
+                      ...p,
+                      client: selectedClient.name,
+                      client_id: String(selectedClient.id),
+                    });
                   }}
                   disabled={isLoadingClients || readOnly}
                 >
@@ -813,7 +827,7 @@ export default function ProposalEditor() {
                   </SelectTrigger>
                   <SelectContent>
                     {clients.map((client) => (
-                      <SelectItem key={client.id} value={client.name}>
+                      <SelectItem key={client.id} value={String(client.id)}>
                         {client.name} ({client.company || "No company"})
                       </SelectItem>
                     ))}
