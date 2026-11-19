@@ -1,7 +1,7 @@
 // src/lib/api.ts
 import axios from 'axios'
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL ?? 'https://api.dev.pitchsuite.io'
+const API_BASE = import.meta.env.VITE_API_BASE_URL ?? 'https://api.proposal.pitchsuite.io'
 const MAIN_APP_URL = import.meta.env.VITE_MAIN_APP_URL ?? 'https://pitchsuite.io'
 
 export const api = axios.create({

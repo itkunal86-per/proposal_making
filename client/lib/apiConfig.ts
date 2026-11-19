@@ -3,7 +3,7 @@
  * All API endpoints are built from the base URL defined in environment variables
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://api.dev.pitchsuite.io";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://api.proposal.pitchsuite.io";
 
 export const apiConfig = {
   baseUrl: API_BASE_URL,

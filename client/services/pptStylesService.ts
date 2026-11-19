@@ -58,6 +58,11 @@ export interface CreatePPTStyleInput {
   is_active: number;
 }
 
+function pptStylesUrl(suffix = ""): string {
+  const base = apiConfig.endpoints.pptStyles.replace(/\/$/, "");
+  return suffix ? `${base}/${suffix}` : base;
+}
+
 export async function listPPTStyles(): Promise<PPTStyle[]> {
   try {
     const token = getStoredToken();
@@ -66,7 +71,7 @@ export async function listPPTStyles(): Promise<PPTStyle[]> {
     }
 
     const response = await fetch(
-      "https://api.dev.pitchsuite.io/api/ppt/styles/all",
+      pptStylesUrl("all"),
       {
         method: "GET",
         headers: {
@@ -101,7 +106,7 @@ export async function createPPTStyle(input: CreatePPTStyleInput): Promise<PPTSty
     }
 
     const response = await fetch(
-      "https://api.dev.pitchsuite.io/api/ppt/styles",
+      pptStylesUrl(),
       {
         method: "POST",
         headers: {
@@ -137,7 +142,7 @@ export async function getPPTStyleById(styleId: number): Promise<PPTStyle> {
     }
 
     const response = await fetch(
-      `https://api.dev.pitchsuite.io/api/ppt/styles/${styleId}`,
+      pptStylesUrl(String(styleId)),
       {
         method: "GET",
         headers: {
@@ -175,7 +180,7 @@ export async function updatePPTStyle(
     }
 
     const response = await fetch(
-      `https://api.dev.pitchsuite.io/api/ppt/styles/${styleId}`,
+      pptStylesUrl(String(styleId)),
       {
         method: "PUT",
         headers: {
@@ -211,7 +216,7 @@ export async function deletePPTStyle(styleId: number): Promise<void> {
     }
 
     const response = await fetch(
-      `https://api.dev.pitchsuite.io/api/ppt/styles/${styleId}`,
+      pptStylesUrl(String(styleId)),
       {
         method: "DELETE",
         headers: {
